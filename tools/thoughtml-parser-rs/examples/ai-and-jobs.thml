@@ -1,0 +1,105 @@
+# How AI could destroy jobs — a debate you can read straight from the graph.
+#
+# Demonstrates: a full multi-agent argument told as a graph — scope, noticed,
+# suspects (with alias), considers, infers, doubts / accepts, a blocking
+# question (`until`), and the v0.1 additions: prose `body` on links and `note`
+# rationale on stances. Click any node: every focus, link, and stance explains
+# itself.
+
+scope ai-and-jobs
+
+# --- What we observe ---
+
+focus ai-capability-surge
+  AI now drafts, codes, and analyzes work that recently needed skilled people,
+  and it is improving faster than any prior wave of automation.
+  source uri:https://example.org/ai-capability-index
+  observed-at 2026-06-17
+
+analyst noticed ai-capability-surge
+
+# --- The central hypothesis ---
+
+focus ai-automation
+  Using AI to do whole tasks end to end, instead of hiring people to do them.
+
+focus job-displacement
+  A net loss of paid human roles as their tasks are automated away.
+
+analyst suspects ai-automation causes job-displacement as displacement-hypothesis
+  confidence 0.45..0.70
+  note The fear is not change itself, but its speed.
+
+# --- Evidence for the hypothesis ---
+
+focus firms-cutting-headcount
+  Firms report the same output with smaller teams after adopting AI.
+  kind observation
+  source "Public layoff trackers and earnings calls, 2025-2026"
+
+focus tasks-fully-automatable
+  Support, copywriting, and first-draft code now run end to end with light review.
+  kind observation
+
+link firms-cutting-headcount strongly supports displacement-hypothesis
+  Headcount falling while output holds is what displacement looks like early on.
+
+link tasks-fully-automatable supports displacement-hypothesis
+  If whole task categories vanish, the roles built around them go too.
+  weight 0.65
+
+# --- The optimist's reply ---
+
+focus technology-creates-jobs
+  Historically automation destroyed roles but created more new ones over time.
+  kind assumption
+
+economist considers technology-creates-jobs
+
+link technology-creates-jobs undercuts displacement-hypothesis
+  Every past wave eventually produced jobs nobody had imagined beforehand.
+  weight 0.5
+
+# --- Why this time may be different ---
+
+focus adaptation-too-slow
+  Reskilling and new industries take years; this wave arrives in months.
+
+analyst infers adaptation-too-slow from ai-capability-surge
+  confidence 0.60
+
+link adaptation-too-slow strongly undercuts technology-creates-jobs
+  "New jobs eventually" is little comfort if workers can't reach them in time.
+
+# --- The question it all hinges on ---
+
+question new-jobs-in-time
+  Will new jobs arrive fast enough, and within reach of displaced workers,
+  to offset the losses this decade?
+  about job-displacement, technology-creates-jobs
+  expects forecast
+  status open
+
+# --- Where each agent stands ---
+
+focus lived-experience
+  Frontline workers already watching their teams shrink and roles merge.
+  kind observation
+
+worker accepts displacement-hypothesis
+  because lived-experience
+  confidence 0.80
+  note Speaking from the floor, not from the forecast.
+
+economist doubts displacement-hypothesis
+  confidence 0.35
+  note Betting on precedent, and on jobs we can't yet name.
+
+# --- The decision we can't make yet ---
+
+focus reskilling-program
+  Fund large-scale reskilling and a safety net for displaced workers.
+
+policy-maker holds reskilling-program
+  until new-jobs-in-time answered
+  note Can't commit the budget until the timing question resolves.

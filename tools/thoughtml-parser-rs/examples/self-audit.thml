@@ -1,0 +1,26 @@
+# self-audit — an agent's reasoning that its own structure defeats.
+#
+# This document is diagnostically CLEAN: no errors, no warnings. The form is fine.
+# But the mirror (`--audit`, always on in the playground) flags that the agent
+# asserts high confidence in a conclusion its own recorded evidence defeats — it
+# wrote down the counter-observation, then shipped anyway. The tool's job is to
+# show you that disagreement, not to make the call for you.
+
+focus cache-is-safe
+  kind claim
+  The new cache layer is safe to ship today.
+
+focus load-test-passed
+  kind observation
+  Load test at 2x peak traffic passed with no errors.
+
+focus stale-reads
+  kind observation
+  Staging showed stale reads under cache eviction.
+
+link load-test-passed supports cache-is-safe
+link stale-reads opposes cache-is-safe
+
+ops-agent holds cache-is-safe
+  confidence 0.9
+  note Shipping — the load test passed.

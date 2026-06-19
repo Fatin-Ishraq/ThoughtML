@@ -1,0 +1,59 @@
+# Which evidence is actually holding the conclusion up? Open a claim to see its
+# evidence ranked by leverage — the confidence it would lose if that one link
+# were removed — or switch on the "Load" lens. Then enter What-if and mute a
+# node to watch the whole argument recompute (v0.2, Phase 6 — sensitivity).
+
+scope ship-decision
+
+# --- The hypothesis under test ---
+
+focus ready-to-ship
+  The release is safe to ship to all users on Friday.
+  kind hypothesis
+
+# --- Evidence for it, of very different load-bearing weight ---
+
+focus canary-healthy
+  A 5% canary has run for 48 hours with no error-rate or latency regression.
+  kind observation
+
+focus tests-green
+  The full suite — unit, integration, end-to-end — passes on the release branch.
+  kind observation
+
+focus changelog-reviewed
+  Every merged PR in the release carries a reviewer sign-off.
+  kind observation
+
+link canary-healthy strongly supports ready-to-ship
+  Real traffic at smaller scale with no regression is the strongest signal we have.
+  weight 0.85
+
+link tests-green supports ready-to-ship
+  Green tests are necessary, but they have passed before failed releases too.
+  weight 0.4
+
+link changelog-reviewed weakly supports ready-to-ship
+  Review catches intent bugs, but says little about runtime behaviour.
+
+# --- Evidence against ---
+
+focus rollback-untested
+  The automated rollback path hasn't been exercised since the last migration.
+  kind observation
+
+link rollback-untested undercuts ready-to-ship
+  If the ship goes wrong, we're not sure we can cleanly back it out.
+  weight 0.5
+
+# --- The decision that rides on it ---
+
+focus ship-friday
+  Ship the release to 100% of users on Friday.
+  kind decision
+
+link ready-to-ship supports ship-friday
+  The go/no-go call follows directly from whether the release is safe.
+
+release-manager holds ship-friday
+  note Leaning yes — but the rollback gap is the one thing that could flip it.

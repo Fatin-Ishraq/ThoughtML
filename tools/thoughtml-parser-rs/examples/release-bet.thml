@@ -1,0 +1,83 @@
+# The computational track, woven into one decision (v0.2, Phases 6–9). A choice
+# between shipping now and holding a week, where:
+#   • payoffs are computed by FORMULAS (§4.8) over authored quantities (§4.7),
+#   • one outcome's probability is borrowed from DERIVED CONFIDENCE (§10.3) —
+#     `hold-pays-off` has no stated probability, so its evidence-backed belief
+#     stands in,
+#   • the options are ranked by EXPECTED VALUE (§10.6), and
+#   • WHAT-IF (§10.5) reaches all the way through: mute a piece of evidence and
+#     the recommendation flips.
+#
+# As written, holding wins (212,250 vs 180,000 USD). Enter What-if and mute
+# `canary-clean`: the belief in `hold-pays-off` falls, its expected value drops
+# below shipping, and the recommendation flips to `ship-now`.
+
+scope release-bet
+
+focus release-decision
+  kind decision
+  Ship the new checkout flow now, or hold a week to harden it.
+
+# --- Option A: ship now (explicit probabilities) ---
+
+focus ship-now
+  kind option
+  Ship today and capture the launch window.
+link ship-now option-of release-decision
+
+focus base-revenue
+  Revenue the launch window is worth.
+  quantity 800000 USD
+
+focus ship-clean
+  Ships smoothly; we capture half the available revenue.
+  = base-revenue * 0.5
+
+focus ship-buggy
+  A bug slips through and we burn goodwill plus a hotfix.
+  quantity -150000 USD
+
+link ship-now leads-to ship-clean
+  probability 0.6
+link ship-now leads-to ship-buggy
+  probability 0.4
+
+# --- Option B: hold a week (probability from evidence) ---
+
+focus hold-week
+  kind option
+  Hold a week to harden the flow, then ship.
+link hold-week option-of release-decision
+
+focus harden-gain
+  Extra revenue a polished launch is expected to earn.
+  quantity 300000 USD
+
+focus delay-cost
+  What a week of delay costs us.
+  quantity 50000 USD
+
+focus hold-pays-off
+  The extra week pays for itself — a clean, polished launch.
+  = harden-gain - delay-cost
+
+focus hold-stale
+  The week is wasted: nothing improves and a rival moves first.
+  quantity -80000 USD
+
+# Evidence for `hold-pays-off`. Its `leads-to` edge below states no probability,
+# so its derived confidence (from this evidence) is used as the likelihood.
+focus canary-clean
+  A 5% canary of the hardened flow ran 48h with no regression.
+  kind observation
+
+focus load-test-passed
+  The hardened flow held p99 under budget at 3x peak load.
+  kind observation
+
+link canary-clean supports hold-pays-off
+link load-test-passed supports hold-pays-off
+
+link hold-week leads-to hold-pays-off
+link hold-week leads-to hold-stale
+  probability 0.1

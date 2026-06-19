@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ThoughtML Playground</title>
+  </head>
+  <body data-theme="dark">
+    <div class="loading-overlay" id="loading">
+      <div class="spinner"></div>
+      <span>Loading parser…</span>
+    </div>
+
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="6" cy="6.5" r="2.3" /><circle cx="18" cy="7.5" r="2.3" /><circle cx="11" cy="18" r="2.3" />
+            <path d="M8.2 7 15.8 7.4M7.4 8.4 10 15.8M16.7 9.6 12.2 16.2" />
+          </svg>
+        </span>
+        <span class="brand-name">ThoughtML</span>
+        <span class="brand-badge">playground</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="theme" title="Toggle light / dark"></button>
+      </div>
+    </header>
+
+    <main class="split">
+      <section class="pane editor-pane">
+        <div class="pane-head"><span class="pane-title">Source</span></div>
+        <div id="editor" class="editor"></div>
+        <div class="examples-tray" id="examples-tray">
+          <button class="tray-head" id="examples-toggle">
+            <span class="chevron"></span><span>Examples</span>
+          </button>
+          <div class="pills" id="examples"></div>
+        </div>
+      </section>
+
+      <div class="divider" id="divider" title="Drag to resize"></div>
+
+      <section class="pane graph-pane">
+        <div id="graph" class="graph-canvas"></div>
+
+        <div class="cluster cluster-tl">
+          <div class="segmented" id="view">
+            <button data-view="readable" class="active">Readable</button>
+            <button data-view="structural">Structural</button>
+          </div>
+          <div class="segmented" id="lens" title="Colour the graph by a lens; What-if mutes nodes to test the argument">
+            <button data-lens="type" class="active">Type</button>
+            <button data-lens="evidence">Evidence</button>
+            <button data-lens="argument">Argument</button>
+            <button data-lens="sensitivity">Load</button>
+            <button data-lens="decision">Decision</button>
+            <button id="whatif" class="seg-sep" title="What-if — mute a node to test how the argument holds up without it">What-if</button>
+          </div>
+          <div class="lens-key" id="lens-key" hidden></div>
+        </div>
+
+        <div class="cluster cluster-tr">
+          <button class="icon-btn" id="fit" title="Fit to view"></button>
+          <button class="icon-btn" id="relayout" title="Re-run layout"></button>
+          <button class="icon-btn" id="legend-toggle" title="Toggle legend"></button>
+          <button class="icon-btn" id="data-toggle" title="Canonical JSON / Surface AST"></button>
+        </div>
+
+        <div class="cluster cluster-br zoom-cluster">
+          <button class="icon-btn" id="zoom-in" title="Zoom in"></button>
+          <button class="zoom-pct" id="zoom-pct" title="Reset zoom">100%</button>
+          <button class="icon-btn" id="zoom-out" title="Zoom out"></button>
+        </div>
+
+        <div class="cluster timeline" id="timeline" hidden title="Replay the argument as of a point in time">
+          <span class="timeline-label">As&nbsp;of</span>
+          <input type="range" id="time-slider" class="time-slider" min="0" max="1000" value="1000" step="1" />
+          <span class="timeline-date" id="time-date">—</span>
+        </div>
+
+        <div class="cluster whatif-banner" id="whatif-banner" hidden title="What-if: muted nodes are dropped from the evidence and attack graphs">
+          <span class="whatif-mark">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6.5L4.8 18A2 2 0 0 0 6.5 21h11a2 2 0 0 0 1.7-3L14 9.5V3"/><line x1="7.5" y1="14" x2="16.5" y2="14"/></svg>
+          </span>
+          <span class="whatif-label">What-if</span>
+          <span class="whatif-count" id="whatif-count">0 muted</span>
+          <button class="whatif-reset" id="whatif-reset">Reset</button>
+        </div>
+
+        <div class="legend" id="legend" hidden></div>
+        <div class="empty-state" id="empty-state" hidden>Start typing ThoughtML to see the graph.</div>
+
+        <aside class="drawer" id="drawer">
+          <div class="drawer-head">
+            <div class="segmented" id="data-tabs">
+              <button data-data="json" class="active">Canonical</button>
+              <button data-data="ast">Surface AST</button>
+            </div>
+            <div class="drawer-head-actions">
+              <button class="icon-btn" id="copy-data" title="Copy"></button>
+              <button class="icon-btn" id="drawer-close" title="Close"></button>
+            </div>
+          </div>
+          <pre id="json" class="code data-pane active"></pre>
+          <pre id="ast" class="code data-pane"></pre>
+        </aside>
+
+        <div class="diagnostics-bar" id="diag-bar">
+          <button class="diag-head" id="diag-toggle">
+            <span class="diag-status ok" id="diag-status"><span class="dot"></span>No diagnostics</span>
+            <span class="chevron"></span>
+          </button>
+          <div class="diag-list" id="diagnostics"></div>
+        </div>
+      </section>
+
+      <section class="pane detail-pane collapsed" id="detail">
+        <div class="pane-head detail-head">
+          <span class="detail-badge" id="detail-badge"></span>
+          <span class="detail-id" id="detail-id"></span>
+          <button class="icon-btn detail-close" id="detail-close" title="Close (Esc)"></button>
+        </div>
+        <div class="detail-body" id="detail-body"></div>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" hidden></div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,69 @@
+# Quantities give reasoning real numbers (v0.2, Phase 7). Each focus can carry a
+# typed measure — time, data, money, throughput, ratio — classified by dimension
+# and normalized to a base unit where the units convert. Open a node to see it.
+# (Phase 8 will compute over these.)
+
+scope capacity-plan
+
+focus scale-up-decision
+  Add capacity ahead of the holiday traffic spike.
+  kind decision
+
+focus current-load
+  Sustained production traffic today.
+  kind observation
+  quantity 4500 req/s
+
+focus spike-forecast
+  Expected peak during the holiday sale.
+  kind observation
+  quantity 14000 req/s
+
+focus instance-throughput
+  What one instance sustains in load tests before latency degrades.
+  kind observation
+  quantity 1200 req/s
+
+focus latency-budget
+  The p99 latency SLO we must stay under.
+  kind goal
+  quantity 200 ms
+
+focus monthly-cost-per-instance
+  Fully-loaded monthly cost of one instance.
+  kind observation
+  quantity 180 USD
+
+focus storage-per-node
+  Disk each new instance brings with it.
+  kind observation
+  quantity 512 GB
+
+focus current-headroom
+  Spare capacity already sitting in the current fleet.
+  kind observation
+  quantity 30 %
+
+link current-load supports spike-forecast
+  The forecast is a multiple of today's baseline, so the baseline grounds it.
+
+link spike-forecast supports scale-up-decision
+  A 3x jump over today's load is more than current capacity can absorb.
+
+link instance-throughput supports scale-up-decision
+  Per-instance headroom tells us how many to add.
+
+link latency-budget supports scale-up-decision
+  Holding p99 under budget during the spike takes more instances, not fewer.
+
+link storage-per-node supports scale-up-decision
+  More nodes also bring storage we happen to need.
+
+link monthly-cost-per-instance opposes scale-up-decision
+  Every added instance is recurring spend we have to justify.
+
+link current-headroom undercuts scale-up-decision
+  Some of the spike fits in existing headroom, reducing what we must add.
+
+team holds scale-up-decision
+  note Over-provisioning is cheap to reverse; under-provisioning during the sale is not.

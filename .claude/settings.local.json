@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rustc --version)",
+      "Bash(cargo --version)",
+      "Bash(cargo new *)",
+      "Bash(cargo build *)",
+      "Bash(cargo test *)",
+      "Bash(cargo run *)",
+      "Bash(echo \"--- exit: $? ---\")",
+      "Bash(echo \"--- exit: $? \\(expect 1\\) ---\")",
+      "Bash(cargo clippy *)"
+    ]
+  }
+}

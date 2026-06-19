@@ -1,0 +1,14 @@
+# Rust build artifacts
+target/
+
+# Node
+node_modules/
+
+# Web build + generated wasm
+tools/thoughtml-web/dist/
+tools/thoughtml-web/src/wasm/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp

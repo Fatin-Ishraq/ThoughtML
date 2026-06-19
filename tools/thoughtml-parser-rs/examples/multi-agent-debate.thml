@@ -1,0 +1,40 @@
+# Multi-agent disagreement over a hypothesis — the links carry the argument.
+#
+# Demonstrates: scope, noticed, suspects (with alias), doubts / accepts,
+# supporting and undercutting evidence links with prose `body` (v0.1),
+# `because` justification, `note` rationale on stances (v0.1), and different
+# agents holding different confidence in the same claim.
+
+scope payments-latency
+
+team noticed latency-spike
+  p99 checkout latency doubled at 14:00 UTC.
+  observed-at 2026-06-14T14:05+00:00
+
+alice suspects cache-eviction causes latency-spike as cache-hypothesis
+  confidence 0.55
+  note The timing lines up with a cache-layer deploy.
+
+# Bob is skeptical of Alice's hypothesis.
+bob doubts cache-hypothesis
+  confidence 0.30
+  note Latency moved before the deploy reached every node.
+
+# Evidence for and against.
+focus cache-hit-rate-drop
+  Cache hit rate fell from 0.98 to 0.61 at 14:00.
+
+focus eviction-config-unchanged
+  The eviction policy hasn't changed in 30 days.
+
+link cache-hit-rate-drop strongly supports cache-hypothesis
+  A cliff in hit rate is exactly what aggressive eviction would cause.
+
+link eviction-config-unchanged weakly undercuts cache-hypothesis
+  If the policy never changed, eviction is an unlikely trigger on its own.
+
+# Carol comes around after weighing the evidence.
+carol accepts cache-hypothesis
+  because cache-hit-rate-drop
+  confidence 0.70
+  note The hit-rate cliff outweighs the unchanged config for me.
