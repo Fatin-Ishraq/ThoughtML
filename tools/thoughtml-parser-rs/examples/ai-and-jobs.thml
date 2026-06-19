@@ -41,8 +41,9 @@ focus tasks-fully-automatable
   Support, copywriting, and first-draft code now run end to end with light review.
   kind observation
 
-link firms-cutting-headcount strongly supports displacement-hypothesis
+link firms-cutting-headcount supports displacement-hypothesis
   Headcount falling while output holds is what displacement looks like early on.
+  weight 0.85
 
 link tasks-fully-automatable supports displacement-hypothesis
   If whole task categories vanish, the roles built around them go too.
@@ -68,8 +69,9 @@ focus adaptation-too-slow
 analyst infers adaptation-too-slow from ai-capability-surge
   confidence 0.60
 
-link adaptation-too-slow strongly undercuts technology-creates-jobs
+link adaptation-too-slow undercuts technology-creates-jobs
   "New jobs eventually" is little comfort if workers can't reach them in time.
+  weight 0.85
 
 # --- The question it all hinges on ---
 

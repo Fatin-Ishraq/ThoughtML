@@ -108,16 +108,6 @@ pub fn is_kind(s: &str) -> bool {
     KINDS.contains(&s)
 }
 
-/// The relation strength implied by a readable adverb (v0.2), e.g.
-/// `link a strongly supports b`. `None` if the token is not a strength adverb.
-pub fn adverb_weight(s: &str) -> Option<f64> {
-    match s {
-        "strongly" => Some(0.85),
-        "weakly" => Some(0.30),
-        _ => None,
-    }
-}
-
 pub fn is_relation(s: &str) -> bool {
     RELATIONS.contains(&s)
 }

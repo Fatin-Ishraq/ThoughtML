@@ -27,11 +27,13 @@ focus cache-hit-rate-drop
 focus eviction-config-unchanged
   The eviction policy hasn't changed in 30 days.
 
-link cache-hit-rate-drop strongly supports cache-hypothesis
+link cache-hit-rate-drop supports cache-hypothesis
   A cliff in hit rate is exactly what aggressive eviction would cause.
+  weight 0.85
 
-link eviction-config-unchanged weakly undercuts cache-hypothesis
+link eviction-config-unchanged undercuts cache-hypothesis
   If the policy never changed, eviction is an unlikely trigger on its own.
+  weight 0.30
 
 # Carol comes around after weighing the evidence.
 carol accepts cache-hypothesis

@@ -295,8 +295,7 @@ impl<'a> Desugarer<'a> {
                 from,
                 relation,
                 to,
-                weight,
-            } => self.core_link(rec, alias.as_deref(), from, relation, to, *weight),
+            } => self.core_link(rec, alias.as_deref(), from, relation, to),
             Header::Stance {
                 alias,
                 agent,
@@ -487,7 +486,6 @@ impl<'a> Desugarer<'a> {
         from: &str,
         relation: &str,
         to: &str,
-        header_weight: Option<f64>,
     ) {
         let id = match alias {
             Some(a) => {
@@ -496,10 +494,10 @@ impl<'a> Desugarer<'a> {
             }
             None => self.idgen.link_id(from, relation, to),
         };
-        // An explicit `weight` field overrides a `strongly`/`weakly` adverb; a
-        // `probability` (Phase 9) is the outcome likelihood on a `leads-to` edge.
+        // A `weight` field sets relation strength; a `probability` (Phase 9) is
+        // the outcome likelihood on a `leads-to` edge.
         let (field_weight, probability, fields) = self.split_link_scalars(&rec.block, rec.line);
-        let mut weight = field_weight.or(header_weight);
+        let mut weight = field_weight;
         if probability.is_some() && relation != "leads-to" {
             self.diags.warning(
                 rec.line,
@@ -510,7 +508,7 @@ impl<'a> Desugarer<'a> {
         if weight.is_some() && relation == "leads-to" {
             self.diags.warning(
                 rec.line,
-                "a `weight` / strength adverb on a `leads-to` link is ignored; use `probability` (§10.6)",
+                "a `weight` on a `leads-to` link is ignored; use `probability` (§10.6)",
             );
             weight = None;
         }

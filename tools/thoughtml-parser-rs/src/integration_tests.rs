@@ -654,16 +654,8 @@ link a causes b
 // --- Phase 2 (v0.2): graded relations / evidence weight --------------------
 
 #[test]
-fn adverb_sets_link_weight() {
-    let src = "focus a\nfocus b\nlink a strongly supports b";
-    let r = parse_str(src);
-    assert!(!r.diagnostics.has_errors(), "{:?}", r.diagnostics.items);
-    assert_eq!(link(&r.canonical.objects, "a-supports-b").unwrap().weight, Some(0.85));
-}
-
-#[test]
-fn weight_field_overrides_adverb() {
-    let src = "focus a\nfocus b\nlink a weakly supports b\n  weight 0.5";
+fn weight_field_sets_link_weight() {
+    let src = "focus a\nfocus b\nlink a supports b\n  weight 0.5";
     let r = parse_str(src);
     assert!(!r.diagnostics.has_errors(), "{:?}", r.diagnostics.items);
     let l = link(&r.canonical.objects, "a-supports-b").unwrap();
@@ -868,9 +860,9 @@ link b undercuts claim
 
 #[test]
 fn weight_scales_derived_confidence() {
-    let strong = parse_derived("focus a\nfocus c\nlink a strongly supports c");
+    let strong = parse_derived("focus a\nfocus c\nlink a supports c\n  weight 0.85");
     approx(derived_of(&strong.canonical.objects, "c").unwrap(), 0.846); // logistic(1.7)
-    let weak = parse_derived("focus a\nfocus c\nlink a weakly supports c");
+    let weak = parse_derived("focus a\nfocus c\nlink a supports c\n  weight 0.30");
     // logistic(2*0.30) = 0.646; weaker evidence → lower confidence.
     approx(derived_of(&weak.canonical.objects, "c").unwrap(), 0.646);
 }
@@ -923,8 +915,10 @@ fn derived_confidence_is_bounded_and_opt_in() {
 focus a
 focus b
 focus claim
-link a strongly supports claim
-link b strongly supports claim";
+link a supports claim
+  weight 0.85
+link b supports claim
+  weight 0.85";
     // Bounded in (0,1) no matter how much evidence piles up.
     let on = parse_derived(src);
     let d = derived_of(&on.canonical.objects, "claim").unwrap();
@@ -1081,11 +1075,14 @@ fn redundant_evidence_is_less_load_bearing() {
 focus s1
 focus s2
 focus shared
-link s1 strongly supports shared
-link s2 strongly supports shared
+link s1 supports shared
+  weight 0.85
+link s2 supports shared
+  weight 0.85
 focus s3
 focus sole
-link s3 strongly supports sole";
+link s3 supports sole
+  weight 0.85";
     let r = parse_sensitivity(src);
     let o = &r.canonical.objects;
     let redundant = leverage_of(o, "s1-supports-shared").unwrap();
@@ -1669,7 +1666,7 @@ link o leads-to result";
 
 #[test]
 fn weight_on_leads_to_warns_and_is_dropped() {
-    let r = parse_str("focus o\nfocus res\nlink o strongly leads-to res");
+    let r = parse_str("focus o\nfocus res\nlink o leads-to res\n  weight 0.5");
     assert!(r.diagnostics.items.iter().any(|d| d.message.contains("leads-to") && d.message.contains("ignored")));
     assert_eq!(link(&r.canonical.objects, "o-leads-to-res").unwrap().weight, None);
 }

@@ -39,7 +39,8 @@ scope college-choice
       A few years into a career, fit may matter more than prestige.
     link admit-harvard enables harvard
     link faculty-fit supports goal-research
-    link aid-offer strongly supports goal-aid
+    link aid-offer supports goal-aid
+      weight 0.85
     link prestige-signal supports goal-network
     link prestige-doubt undercuts prestige-signal
 
