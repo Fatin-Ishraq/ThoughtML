@@ -957,7 +957,9 @@ scope college-choice
 # But the mirror (the audit pass, on in the playground) flags that the agent
 # asserts high confidence in a conclusion its own recorded evidence defeats — it
 # wrote down the counter-observation, then shipped anyway. The tool's job is to
-# show you that disagreement, not to make the call for you.
+# show you that disagreement, not to make the call for you. The 0.9 below also
+# declares its basis — assumed — so the mirror surfaces not just how sure the
+# agent is, but on what footing.
 
 focus cache-is-safe
   kind claim
@@ -975,7 +977,7 @@ link load-test-passed supports cache-is-safe
 link stale-reads opposes cache-is-safe
 
 ops-agent holds cache-is-safe
-  confidence 0.9
+  confidence 0.9 assumed
   note Shipping — the load test passed.
 `,
 }

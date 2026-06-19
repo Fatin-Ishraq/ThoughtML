@@ -158,6 +158,11 @@ pub struct Quantity {
     pub normalized: Option<f64>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub base_unit: Option<String>,
+    /// How this number was arrived at (v0.1.0): `measured` / `estimated` /
+    /// `assumed`, declared inline (`quantity 30 GB measured`). Authored only —
+    /// a computed quantity has none.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub basis: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -192,6 +197,11 @@ pub struct Link {
     /// payoff carries in the option's expected-value sum (§10.6).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub probability: Option<f64>,
+    /// Provenance of this link's authored number (v0.1.0): `measured` /
+    /// `estimated` / `assumed`, declared inline after the `weight` or
+    /// `probability` value. None when the link carries no number or omits it.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub basis: Option<String>,
     /// Optional prose explaining why the relation holds (Tier-1). Only explicit
     /// `link` records carry a body; desugared links (suspects/infers/until) do
     /// not, since their rationale lives on the stance they accompany.
@@ -224,6 +234,10 @@ pub struct Stance {
     pub target: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub confidence: Option<Value>,
+    /// Provenance of the authored `confidence` (v0.1.0): `measured` /
+    /// `estimated` / `assumed`, declared inline (`confidence 0.9 estimated`).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub basis: Option<String>,
     #[serde(skip_serializing_if = "Fields::is_empty")]
     pub fields: Fields,
     /// The id of a later stance that revises this one (v0.2, Phase 3). Computed

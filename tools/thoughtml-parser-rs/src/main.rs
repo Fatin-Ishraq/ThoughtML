@@ -55,6 +55,11 @@ struct Cli {
     #[arg(long)]
     audit: bool,
 
+    /// Warn when an authored number (quantity / confidence / weight / probability)
+    /// declares no basis (measured/estimated/assumed). Opt-in; off by default.
+    #[arg(long)]
+    strict_provenance: bool,
+
     /// Turn on the whole computational stack at once: `--derived --status
     /// --sensitivity --formulas --decisions --audit` (what the playground shows).
     #[arg(long)]
@@ -86,6 +91,7 @@ fn main() -> ExitCode {
         formulas: cli.formulas || all,
         decision_ev: cli.decisions || all,
         audit: cli.audit || all,
+        strict_provenance: cli.strict_provenance,
     };
     // If the document imports others (§12.5), resolve them as a project from the
     // entry's directory; otherwise parse the single file.

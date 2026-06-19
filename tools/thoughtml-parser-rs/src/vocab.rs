@@ -112,6 +112,16 @@ pub fn is_relation(s: &str) -> bool {
     RELATIONS.contains(&s)
 }
 
+/// Provenance bases for an authored number (v0.1.0): how it was arrived at,
+/// declared inline after the value — e.g. `confidence 0.9 estimated`,
+/// `quantity 30 GB measured`. A number with no basis is silent about it; the
+/// opt-in `--strict-provenance` lint flags the omission.
+pub const BASES: &[&str] = &["measured", "estimated", "assumed"];
+
+pub fn is_basis(s: &str) -> bool {
+    BASES.contains(&s)
+}
+
 pub fn is_known_field(s: &str) -> bool {
     FIELDS.contains(&s)
 }

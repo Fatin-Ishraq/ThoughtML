@@ -571,6 +571,7 @@ fn compute_formulas(canon: &mut Canonical, overrides: &Overrides, diags: &mut Di
                     dimension: units::signature_dimension(&sig),
                     normalized: None,
                     base_unit: None,
+                    basis: None, // computed values have no authored provenance
                 };
                 results.push((p.idx, q));
             }

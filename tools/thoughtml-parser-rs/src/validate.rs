@@ -37,7 +37,7 @@ impl Kind {
     }
 }
 
-pub fn validate(canon: &Canonical, diags: &mut Diagnostics) {
+pub fn validate(canon: &Canonical, strict_provenance: bool, diags: &mut Diagnostics) {
     let index = build_index(canon);
 
     for obj in &canon.objects {
@@ -95,6 +95,56 @@ pub fn validate(canon: &Canonical, diags: &mut Diagnostics) {
     check_cycles(canon, diags);
     check_orphans(canon, diags);
     check_decision_graph(canon, diags);
+    if strict_provenance {
+        check_provenance(canon, diags);
+    }
+}
+
+/// Opt-in (`--strict-provenance`): warn when an authored number — a focus
+/// `quantity`, a stance `confidence`, or a link `weight`/`probability` —
+/// declares no basis (measured/estimated/assumed). Off by default so a document
+/// that does not opt in stays clean (v0.1.0).
+fn check_provenance(canon: &Canonical, diags: &mut Diagnostics) {
+    for o in &canon.objects {
+        match o {
+            Object::Focus(f) => {
+                if let Some(q) = &f.quantity {
+                    if q.basis.is_none() {
+                        diags.warning(
+                            0,
+                            format!(
+                                "quantity on `{}` declares no basis (add measured/estimated/assumed)",
+                                f.id
+                            ),
+                        );
+                    }
+                }
+            }
+            Object::Stance(s) => {
+                if s.confidence.is_some() && s.basis.is_none() {
+                    diags.warning(
+                        0,
+                        format!(
+                            "confidence on `{}` declares no basis (add measured/estimated/assumed)",
+                            s.id
+                        ),
+                    );
+                }
+            }
+            Object::Link(l) => {
+                if (l.weight.is_some() || l.probability.is_some()) && l.basis.is_none() {
+                    diags.warning(
+                        0,
+                        format!(
+                            "number on link `{}` declares no basis (add measured/estimated/assumed)",
+                            l.id
+                        ),
+                    );
+                }
+            }
+            _ => {}
+        }
+    }
 }
 
 /// Catch malformed decision subgraphs (Phase 5 review) — the class of error the
