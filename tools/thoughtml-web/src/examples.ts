@@ -981,3 +981,21 @@ ops-agent holds cache-is-safe
 }
 
 export const DEFAULT_EXAMPLE = 'ai-and-jobs'
+
+// Parked from the example tray to keep the playground on its spine (v0.1.0).
+// These stay in EXAMPLES — their .thml files ship and `shared-defs` is still
+// resolved as grand-tour's import — they are just not shown as their own pill:
+// the compute demos (whose Decision/Load/Evidence lenses were demoted) and the
+// advanced multi-document demos (profiles / imports / namespaces). Empty this
+// set to surface them all again.
+export const ADVANCED_EXAMPLES = new Set([
+  'sensitivity-demo',
+  'capacity-plan',
+  'cost-model',
+  'decision-ev',
+  'release-bet',
+  'nested-scope',
+  'profile-dialect',
+  'shared-defs',
+  'imports-demo',
+])

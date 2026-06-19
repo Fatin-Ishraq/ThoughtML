@@ -4,7 +4,7 @@ import { createEditor } from './editor'
 import { createGraph, legendItems, relationLegend, type ViewMode, type Theme } from './graph'
 import { renderDiagnostics } from './diagnostics'
 import { renderDetail, kindOf, labelOf, type WhatIfCtx } from './detail'
-import { EXAMPLES, DEFAULT_EXAMPLE } from './examples'
+import { EXAMPLES, DEFAULT_EXAMPLE, ADVANCED_EXAMPLES } from './examples'
 import { setIcon, glyph } from './icons'
 
 const LS = { src: 'thoughtml:src', theme: 'thoughtml:theme', view: 'thoughtml:view' }
@@ -52,6 +52,7 @@ async function boot(): Promise<void> {
   const examplesEl = el('#examples')
   const pills: HTMLButtonElement[] = []
   for (const name of Object.keys(EXAMPLES)) {
+    if (ADVANCED_EXAMPLES.has(name)) continue // parked from the tray (still imported/loadable)
     const b = document.createElement('button')
     b.className = 'pill'
     b.textContent = name
