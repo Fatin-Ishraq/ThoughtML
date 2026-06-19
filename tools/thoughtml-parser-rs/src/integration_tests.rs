@@ -664,6 +664,52 @@ fn weight_field_sets_link_weight() {
     assert!(l.fields.0.iter().all(|(k, _)| k != "weight"));
 }
 
+// --- Provenance: numbers declare their basis (v0.1.0) ----------------------
+
+#[test]
+fn inline_basis_on_confidence() {
+    let r = parse_str("focus claim\nalice holds claim\n  confidence 0.9 estimated");
+    assert!(!r.diagnostics.has_errors(), "{:?}", r.diagnostics.items);
+    let st = stance(&r.canonical.objects, "alice-holds-claim").unwrap();
+    assert_eq!(st.confidence, Some(Value::Number(0.9)));
+    assert_eq!(st.basis.as_deref(), Some("estimated"));
+}
+
+#[test]
+fn inline_basis_on_quantity() {
+    let r = parse_str("focus a\n  quantity 30 GB measured");
+    assert!(!r.diagnostics.has_errors(), "{:?}", r.diagnostics.items);
+    let q = focus(&r.canonical.objects, "a").unwrap().quantity.as_ref().unwrap();
+    assert_eq!((q.value, q.unit.as_str()), (30.0, "GB"));
+    assert_eq!(q.basis.as_deref(), Some("measured"));
+}
+
+#[test]
+fn inline_basis_on_weight() {
+    let r = parse_str("focus a\nfocus b\nlink a supports b\n  weight 0.85 assumed");
+    assert!(!r.diagnostics.has_errors(), "{:?}", r.diagnostics.items);
+    let l = link(&r.canonical.objects, "a-supports-b").unwrap();
+    assert_eq!(l.weight, Some(0.85));
+    assert_eq!(l.basis.as_deref(), Some("assumed"));
+}
+
+#[test]
+fn provenance_lint_is_opt_in() {
+    let src = "focus claim\nalice holds claim\n  confidence 0.9";
+    // Default: a number without a basis is silent — non-breaking.
+    assert!(!parse_str(src).diagnostics.has_warnings());
+    // Opt-in: it warns, naming the missing basis.
+    let strict = parse_str_with(src, Options { strict_provenance: true, ..Options::default() });
+    assert!(strict.diagnostics.has_warnings());
+    assert!(strict.diagnostics.items.iter().any(|d| d.message.contains("basis")));
+    // With a basis declared, the opt-in lint is satisfied.
+    let ok = parse_str_with(
+        "focus claim\nalice holds claim\n  confidence 0.9 estimated",
+        Options { strict_provenance: true, ..Options::default() },
+    );
+    assert!(!ok.diagnostics.has_warnings(), "{:?}", ok.diagnostics.items);
+}
+
 #[test]
 fn suspects_and_infers_carry_weight() {
     let r1 = parse_str("team suspects a causes b\n  weight 0.4");
@@ -1952,7 +1998,9 @@ const SHARED: &str = include_str!("../examples/shared-defs.thml");
 const IMPORTER: &str = include_str!("../examples/imports-demo.thml");
 const GRAND: &str = include_str!("../examples/grand-tour.thml");
 
-/// Every flag on — what the playground runs.
+/// Every computed view on — what the playground runs. The provenance lint stays
+/// opt-in (off), matching the playground, so bundled examples without a basis on
+/// every number remain strict-clean here.
 fn full_options() -> Options {
     Options {
         emit_acts: false,
@@ -1962,6 +2010,7 @@ fn full_options() -> Options {
         formulas: true,
         decision_ev: true,
         audit: true,
+        strict_provenance: false,
     }
 }
 

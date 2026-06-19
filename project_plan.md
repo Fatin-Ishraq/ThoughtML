@@ -1257,6 +1257,32 @@ Single-document parsing (`parse_str`) leaves `ns.` references unresolved.
 v1 limitations: references inside a `formula` expression are not namespace-
 rewritten, and agent names stay global (an imported `team` is the same agent).
 
+### 12.6 Number provenance (v0.1.0)
+
+An authored number may declare its **basis** — how it was arrived at — inline,
+right after the value: one of `measured`, `estimated`, or `assumed`.
+
+```thoughtml
+focus monthly-spend
+  quantity 42000 USD estimated
+ops holds ship-it
+  confidence 0.9 assumed
+link load-test supports ship-it
+  weight 0.85 measured
+```
+
+It applies to a focus `quantity`, a stance `confidence`, and a link `weight` or
+`probability`. The basis serializes alongside the number (`Quantity.basis`,
+`Stance.basis`, `Link.basis`) and the playground shows it next to the value, so a
+reader can tell a measurement from a guess. A computed quantity (`= expr`) never
+carries a basis — it is derived, not authored.
+
+Declaring a basis is **optional**. The opt-in `--strict-provenance` lint (off by
+default; not part of `--compute`) warns when an authored number omits one, for
+documents that want to hold themselves to it. This closes the gap the old
+`strongly`/`weakly` adverbs left: a number no longer passes as fact without
+saying on what footing.
+
 ## 13. Graph Representation
 
 ThoughtML is graph-native. Canonical objects can be projected to a property

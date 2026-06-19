@@ -67,6 +67,11 @@ pub struct Options {
     /// disagreeing with the author (§10.7). Off by default; on under
     /// `--audit`/`--compute` and in the playground.
     pub audit: bool,
+    /// Opt-in (`--strict-provenance`): warn when an authored number — a focus
+    /// `quantity`, a stance `confidence`, or a link `weight`/`probability` —
+    /// declares no basis (measured/estimated/assumed). Off by default so the
+    /// base pipeline and existing documents stay clean (v0.1.0).
+    pub strict_provenance: bool,
 }
 
 /// Parse a ThoughtML source string end-to-end with default options.
@@ -90,7 +95,7 @@ pub fn parse_str_with_overrides(
     let mut diagnostics = Diagnostics::new();
     let surface = parser::parse(source, &mut diagnostics);
     let mut canonical = desugar::desugar(&surface, opts.emit_acts, &mut diagnostics);
-    validate::validate(&canonical, &mut diagnostics);
+    validate::validate(&canonical, opts.strict_provenance, &mut diagnostics);
     derive::derive(
         &mut canonical,
         opts.derive_confidence,
@@ -135,7 +140,7 @@ pub fn parse_project(entry: &str, sources: &HashMap<String, String>, opts: Optio
         timeline: None,
         audit: None,
     };
-    validate::validate(&canonical, &mut diagnostics);
+    validate::validate(&canonical, opts.strict_provenance, &mut diagnostics);
     derive::derive(
         &mut canonical,
         opts.derive_confidence,

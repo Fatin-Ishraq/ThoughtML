@@ -36,6 +36,9 @@ fn playground_opts() -> thoughtml::Options {
         formulas: true,
         decision_ev: true,
         audit: true,
+        // Provenance lint stays opt-in — the playground shows the basis when
+        // present, but does not flag numbers that omit it.
+        strict_provenance: false,
     }
 }
 

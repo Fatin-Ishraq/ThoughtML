@@ -69,6 +69,32 @@ fn round3(x: f64) -> f64 {
     (x * 1000.0).round() / 1000.0
 }
 
+/// Split a trailing provenance basis keyword (measured/estimated/assumed) off a
+/// field's raw args, returning the remaining args and the basis if present.
+fn peel_basis(args: &[String]) -> (&[String], Option<String>) {
+    if let [rest @ .., last] = args {
+        if crate::vocab::is_basis(last) {
+            return (rest, Some(last.clone()));
+        }
+    }
+    (args, None)
+}
+
+/// A field's classified value with any trailing provenance basis split off. With
+/// a basis present the joined args classified as `Text` (multi-token), so the
+/// remaining token is re-classified to recover the real number/range/`?`.
+fn value_and_basis(f: &Field) -> (Value, Option<String>) {
+    let (rest, basis) = peel_basis(&f.args);
+    if basis.is_none() {
+        return (f.value.clone(), None);
+    }
+    let value = match rest {
+        [one] => crate::lex::classify_token(one),
+        _ => Value::Text(rest.join(" ")),
+    };
+    (value, basis)
+}
+
 pub fn desugar(file: &SurfaceFile, emit_acts: bool, diags: &mut Diagnostics) -> Canonical {
     // Fold any `profile` declarations into the allowed vocabulary, then lint the
     // whole surface tree against it at exact source lines (Phase 5) — so a
@@ -496,7 +522,7 @@ impl<'a> Desugarer<'a> {
         };
         // A `weight` field sets relation strength; a `probability` (Phase 9) is
         // the outcome likelihood on a `leads-to` edge.
-        let (field_weight, probability, fields) = self.split_link_scalars(&rec.block, rec.line);
+        let (field_weight, probability, basis, fields) = self.split_link_scalars(&rec.block, rec.line);
         let mut weight = field_weight;
         if probability.is_some() && relation != "leads-to" {
             self.diags.warning(
@@ -519,6 +545,7 @@ impl<'a> Desugarer<'a> {
             to: to.to_string(),
             weight,
             probability,
+            basis,
             body: rec.block.body.clone(),
             fields,
             superseded_by: None,
@@ -543,13 +570,14 @@ impl<'a> Desugarer<'a> {
             }
             None => self.idgen.stance_id(agent, posture, target),
         };
-        let (confidence, fields) = self.split_confidence(&rec.block, rec.line);
+        let (confidence, basis, fields) = self.split_confidence(&rec.block, rec.line);
         self.objects.push(Object::Stance(Stance {
             id,
             agent: agent.to_string(),
             posture: posture.to_string(),
             target: target.to_string(),
             confidence,
+            basis,
             fields,
             superseded_by: None,
         }));
@@ -581,6 +609,7 @@ impl<'a> Desugarer<'a> {
 
         let stance_id = self.idgen.stance_id(agent, posture, target);
         let mut confidence = None;
+        let mut conf_basis = None;
         let mut stance_fields = Fields::new();
 
         for f in &rec.block.fields {
@@ -590,7 +619,9 @@ impl<'a> Desugarer<'a> {
                         self.diags
                             .warning(f.line, "duplicate `confidence` field; using the last");
                     }
-                    confidence = self.confidence_value(f, rec.line);
+                    let (c, b) = self.confidence_value(f, rec.line);
+                    confidence = c;
+                    conf_basis = b;
                 }
                 "until" => self.expand_until(f, target),
                 _ => stance_fields.push(f.name.clone(), f.value.clone()),
@@ -613,6 +644,7 @@ impl<'a> Desugarer<'a> {
             posture: posture.to_string(),
             target: target.to_string(),
             confidence,
+            basis: conf_basis,
             fields: stance_fields,
             superseded_by: None,
         }));
@@ -645,6 +677,7 @@ impl<'a> Desugarer<'a> {
             to: to.to_string(),
             weight: link_weight,
             probability: None,
+            basis: None,
             body: None,
             fields: Fields::new(),
             superseded_by: None,
@@ -655,6 +688,7 @@ impl<'a> Desugarer<'a> {
 
         let stance_id = self.idgen.stance_id(agent, "suspects", &link_id);
         let mut confidence = None;
+        let mut conf_basis = None;
         let mut stance_fields = Fields::new();
         for f in &rec.block.fields {
             match f.name.as_str() {
@@ -663,7 +697,9 @@ impl<'a> Desugarer<'a> {
                         self.diags
                             .warning(f.line, "duplicate `confidence` field; using the last");
                     }
-                    confidence = self.confidence_value(f, rec.line);
+                    let (c, b) = self.confidence_value(f, rec.line);
+                    confidence = c;
+                    conf_basis = b;
                 }
                 "until" => self.expand_until(f, &link_id),
                 "weight" => {} // already applied to the link above
@@ -680,6 +716,7 @@ impl<'a> Desugarer<'a> {
             posture: "suspects".to_string(),
             target: link_id,
             confidence,
+            basis: conf_basis,
             fields: stance_fields,
             superseded_by: None,
         }));
@@ -707,6 +744,7 @@ impl<'a> Desugarer<'a> {
                 to: target.to_string(),
                 weight: link_weight,
                 probability: None,
+                basis: None,
                 body: None,
                 fields: Fields::new(),
                 superseded_by: None,
@@ -718,6 +756,7 @@ impl<'a> Desugarer<'a> {
 
         let stance_id = self.idgen.stance_id(agent, "infers", target);
         let mut confidence = None;
+        let mut conf_basis = None;
         let mut stance_fields = Fields::new();
         for f in &rec.block.fields {
             match f.name.as_str() {
@@ -726,7 +765,9 @@ impl<'a> Desugarer<'a> {
                         self.diags
                             .warning(f.line, "duplicate `confidence` field; using the last");
                     }
-                    confidence = self.confidence_value(f, rec.line);
+                    let (c, b) = self.confidence_value(f, rec.line);
+                    confidence = c;
+                    conf_basis = b;
                 }
                 "until" => self.expand_until(f, target),
                 "weight" => {} // already applied to the supports link(s) above
@@ -740,6 +781,7 @@ impl<'a> Desugarer<'a> {
             posture: "infers".to_string(),
             target: target.to_string(),
             confidence,
+            basis: conf_basis,
             fields: stance_fields,
             superseded_by: None,
         }));
@@ -766,6 +808,7 @@ impl<'a> Desugarer<'a> {
             to: blocked.to_string(),
             weight: None,
             probability: None,
+            basis: None,
             body: None,
             fields,
             superseded_by: None,
@@ -776,16 +819,16 @@ impl<'a> Desugarer<'a> {
     }
 
     /// Validate a `weight` field as a number in 0..1 (clamp + warn if outside).
-    fn weight_value(&mut self, f: &Field, line: usize) -> Option<f64> {
+    fn weight_value(&mut self, f: &Field, line: usize) -> (Option<f64>, Option<String>) {
         self.unit_interval(f, line, "weight")
     }
 
     /// Validate a 0..1 field (`weight`, `probability`): a number, clamped with a
     /// warning if outside the interval, or an error if not a number at all.
-    fn unit_interval(&mut self, f: &Field, line: usize, name: &str) -> Option<f64> {
-        match &f.value {
+    fn unit_interval(&mut self, f: &Field, line: usize, name: &str) -> (Option<f64>, Option<String>) {
+        let (value, basis) = value_and_basis(f);
+        let num = match value {
             Value::Number(n) => {
-                let n = *n;
                 if !(0.0..=1.0).contains(&n) {
                     self.diags
                         .warning(f.line.max(line), format!("{name} should be in 0..1; clamping"));
@@ -801,21 +844,27 @@ impl<'a> Desugarer<'a> {
                 );
                 None
             }
-        }
+        };
+        (num, basis)
     }
 
     /// Read the first `weight` field from a block, if present (for the links
     /// created by `suspects` / `infers`).
     fn read_weight(&mut self, block: &Block, line: usize) -> Option<f64> {
         let f = block.fields.iter().find(|f| f.name == "weight")?;
-        self.weight_value(f, line)
+        self.weight_value(f, line).0
     }
 
     /// Split the 0..1 link scalars — `weight` and `probability` (Phase 9) — out
     /// of a core `link` block, returning `(weight, probability, rest)`.
-    fn split_link_scalars(&mut self, block: &Block, line: usize) -> (Option<f64>, Option<f64>, Fields) {
+    fn split_link_scalars(
+        &mut self,
+        block: &Block,
+        line: usize,
+    ) -> (Option<f64>, Option<f64>, Option<String>, Fields) {
         let mut weight = None;
         let mut probability = None;
+        let mut basis = None;
         let mut fields = Fields::new();
         for f in &block.fields {
             match f.name.as_str() {
@@ -824,19 +873,27 @@ impl<'a> Desugarer<'a> {
                         self.diags
                             .warning(f.line, "duplicate `weight` field; using the last");
                     }
-                    weight = self.weight_value(f, line);
+                    let (w, b) = self.weight_value(f, line);
+                    weight = w;
+                    if b.is_some() {
+                        basis = b;
+                    }
                 }
                 "probability" => {
                     if probability.is_some() {
                         self.diags
                             .warning(f.line, "duplicate `probability` field; using the last");
                     }
-                    probability = self.unit_interval(f, line, "probability");
+                    let (p, b) = self.unit_interval(f, line, "probability");
+                    probability = p;
+                    if b.is_some() {
+                        basis = b;
+                    }
                 }
                 _ => fields.push(f.name.clone(), f.value.clone()),
             }
         }
-        (weight, probability, fields)
+        (weight, probability, basis, fields)
     }
 
     /// Create or merge a focus by id (dedup per §8.2/§14). `body` is first-wins.
@@ -993,7 +1050,8 @@ impl<'a> Desugarer<'a> {
     /// unit where convertible. Warns (never errors) on a malformed value.
     fn build_quantity(&mut self, block: &Block, line: usize) -> Option<Quantity> {
         let f = block.fields.iter().find(|f| f.name == "quantity")?;
-        match parse_quantity(&f.args) {
+        let (qargs, basis) = peel_basis(&f.args);
+        match parse_quantity(qargs) {
             Some((value, unit)) => {
                 let (dimension, factor, base) = units::classify_unit(&unit);
                 let normalized = factor.map(|fac| round3(value * fac));
@@ -1004,6 +1062,7 @@ impl<'a> Desugarer<'a> {
                     dimension,
                     normalized,
                     base_unit,
+                    basis,
                 })
             }
             None => {
@@ -1033,8 +1092,13 @@ impl<'a> Desugarer<'a> {
     }
 
     /// Split out `confidence` from a block's fields, validating it.
-    fn split_confidence(&mut self, block: &Block, line: usize) -> (Option<Value>, Fields) {
+    fn split_confidence(
+        &mut self,
+        block: &Block,
+        line: usize,
+    ) -> (Option<Value>, Option<String>, Fields) {
         let mut confidence = None;
+        let mut basis = None;
         let mut fields = Fields::new();
         for f in &block.fields {
             if f.name == "confidence" {
@@ -1042,19 +1106,22 @@ impl<'a> Desugarer<'a> {
                     self.diags
                         .warning(f.line, "duplicate `confidence` field; using the last");
                 }
-                confidence = self.confidence_value(f, line);
+                let (c, b) = self.confidence_value(f, line);
+                confidence = c;
+                basis = b;
             } else {
                 fields.push(f.name.clone(), f.value.clone());
             }
         }
-        (confidence, fields)
+        (confidence, basis, fields)
     }
 
     /// Validate and extract a confidence value (§10): scalar number, ordered
     /// range, or `?`.
-    fn confidence_value(&mut self, f: &Field, line: usize) -> Option<Value> {
-        match &f.value {
-            Value::Number(_) | Value::Unknown => Some(f.value.clone()),
+    fn confidence_value(&mut self, f: &Field, line: usize) -> (Option<Value>, Option<String>) {
+        let (value, basis) = value_and_basis(f);
+        let v = match &value {
+            Value::Number(_) | Value::Unknown => Some(value.clone()),
             Value::Range(lo, hi) => {
                 if lo > hi {
                     self.diags.error(
@@ -1062,7 +1129,7 @@ impl<'a> Desugarer<'a> {
                         "confidence range must be ordered low..high",
                     );
                 }
-                Some(f.value.clone())
+                Some(value.clone())
             }
             other => {
                 self.diags.error(
@@ -1071,6 +1138,7 @@ impl<'a> Desugarer<'a> {
                 );
                 None
             }
-        }
+        };
+        (v, basis)
     }
 }

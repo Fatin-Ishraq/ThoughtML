@@ -86,8 +86,9 @@ function quantityFact(q: Quantity, label?: string): HTMLElement {
   const dim = q.dimension.split(':')[0]
   // `1` is the dimensionless base (a ratio/fraction) — show the number bare.
   const baseLabel = q.base_unit && q.base_unit !== '1' ? ` ${q.base_unit}` : ''
-  meta.textContent =
-    q.normalized !== undefined ? `${dim} · ${formatNum(q.normalized)}${baseLabel}` : dim
+  const dimMeta = q.normalized !== undefined ? `${dim} · ${formatNum(q.normalized)}${baseLabel}` : dim
+  // Provenance (v0.1.0): how the number was arrived at, when declared.
+  meta.textContent = q.basis ? `${dimMeta} · ${q.basis}` : dimMeta
   wrap.append(main, meta)
   return wrap
 }
@@ -264,8 +265,9 @@ function fieldsList(fields: Fields | undefined): HTMLElement | null {
   return dl
 }
 
-// A labelled 0–1 bar, reused for stance `confidence` and link `weight`.
-function meterBar(value: Value | undefined, title = 'confidence', accent?: string): HTMLElement | null {
+// A labelled 0–1 bar, reused for stance `confidence` and link `weight`. `basis`
+// (v0.1.0) is the number's declared provenance — measured/estimated/assumed.
+function meterBar(value: Value | undefined, title = 'confidence', accent?: string, basis?: string): HTMLElement | null {
   if (!value) return null
   let lo = 0
   let hi = 0
@@ -279,7 +281,8 @@ function meterBar(value: Value | undefined, title = 'confidence', accent?: strin
   wrap.className = 'conf'
   const lab = document.createElement('div')
   lab.className = 'conf-label'
-  lab.innerHTML = `<span>${title}</span><span>${label}</span>`
+  const titleText = basis ? `${title} · ${basis}` : title
+  lab.innerHTML = `<span>${titleText}</span><span>${label}</span>`
   const track = document.createElement('div')
   track.className = 'conf-track'
   const fill = document.createElement('div')
@@ -392,12 +395,12 @@ export function renderDetail(
       row.append(makeChip(obj.from, obj.from), tag(obj.relation), makeChip(obj.to, obj.to))
       facts.appendChild(row)
       if (obj.weight !== undefined) {
-        const wb = meterBar({ kind: 'number', value: obj.weight }, 'strength', 'var(--c-link)')
+        const wb = meterBar({ kind: 'number', value: obj.weight }, 'strength', 'var(--c-link)', obj.basis)
         if (wb) facts.appendChild(wb)
       }
       // Outcome probability on a `leads-to` edge (Phase 9).
       if (obj.probability !== undefined) {
-        const pb = meterBar({ kind: 'number', value: obj.probability }, 'probability', 'var(--accent)')
+        const pb = meterBar({ kind: 'number', value: obj.probability }, 'probability', 'var(--accent)', obj.basis)
         if (pb) facts.appendChild(pb)
       }
     }
@@ -406,7 +409,7 @@ export function renderDetail(
       row.className = 'detail-relation'
       row.append(makeChip(obj.agent, `agent:${obj.agent}`), tag(obj.posture, obj.posture), makeChip(obj.target, obj.target))
       facts.appendChild(row)
-      const cb = meterBar(obj.confidence)
+      const cb = meterBar(obj.confidence, 'confidence', undefined, obj.basis)
       if (cb) facts.appendChild(cb)
     }
     if (obj.type === 'question') {

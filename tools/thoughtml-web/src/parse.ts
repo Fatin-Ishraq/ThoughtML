@@ -30,7 +30,7 @@ export type Value =
 export type Fields = Record<string, Value>
 
 /** A typed numeric measure on a focus (v0.2, Phase 7). */
-export interface Quantity { value: number; unit: string; dimension: string; normalized?: number; base_unit?: string }
+export interface Quantity { value: number; unit: string; dimension: string; normalized?: number; base_unit?: string; basis?: string }
 
 /** One outcome's contribution to an option's expected value (v0.2, Phase 9). */
 export interface EvTerm { outcome: string; probability: number; payoff: number; contribution: number }
@@ -54,7 +54,7 @@ export interface Question {
   fields?: Fields
   superseded_by?: string
 }
-export interface Link { type: 'link'; id: string; from: string; relation: string; to: string; weight?: number; probability?: number; body?: string; fields?: Fields; superseded_by?: string; derived_confidence?: number; leverage?: number; argument_status?: string }
+export interface Link { type: 'link'; id: string; from: string; relation: string; to: string; weight?: number; probability?: number; basis?: string; body?: string; fields?: Fields; superseded_by?: string; derived_confidence?: number; leverage?: number; argument_status?: string }
 export interface Stance {
   type: 'stance'
   id: string
@@ -62,6 +62,7 @@ export interface Stance {
   posture: string
   target: string
   confidence?: Value
+  basis?: string
   fields?: Fields
   superseded_by?: string
 }
