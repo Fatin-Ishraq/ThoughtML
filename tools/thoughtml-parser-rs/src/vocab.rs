@@ -42,7 +42,11 @@ pub const KINDS: &[&str] = &[
     "action",
 ];
 
-/// Core relations (§12.2).
+/// Core relations (§12.2). Attacks are expressed by `opposes` (rebut a node) and
+/// `undercuts` (defeat an inference); there is no separate `rejects` or
+/// `mitigates` — a hard rejection is just `opposes`, and defending X is just
+/// attacking X's attacker (`guard opposes risk`), handled uniformly by the
+/// grounded labelling (§10.4). Domain dialects can add their own via a `profile`.
 pub const RELATIONS: &[&str] = &[
     "supports",
     "opposes",
@@ -54,12 +58,6 @@ pub const RELATIONS: &[&str] = &[
     "depends-on",
     "blocks",
     "revises",
-    "rejects",
-    // `mitigates` (Phase 5 review): a defense — `action mitigates risk` weakens
-    // the risk's standing in the argument graph (it attacks the risk, §10.4), so
-    // mitigating a risk that opposes an option defends that option. Core, with
-    // real semantics — not a decorative profile relation.
-    "mitigates",
     // v0.2 (Phase 9, decision EV): an option leads-to an outcome (carrying a
     // `probability`), and is an option-of a decision.
     "leads-to",

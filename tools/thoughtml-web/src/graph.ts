@@ -78,7 +78,7 @@ export type RelCat = 'support' | 'attack' | 'causal' | 'enable' | 'depend' | 're
 export function relationCategory(rel: string): RelCat {
   switch (rel) {
     case 'supports': return 'support'
-    case 'undercuts': case 'opposes': case 'rejects': case 'prevents': case 'blocks': return 'attack'
+    case 'undercuts': case 'opposes': case 'prevents': case 'blocks': return 'attack'
     case 'causes': return 'causal'
     case 'enables': return 'enable'
     case 'depends-on': return 'depend'
@@ -94,7 +94,7 @@ interface RelStyle { color: keyof Palette; arrow: string; line: 'solid' | 'dashe
 
 export const REL_STYLE: Record<RelCat, RelStyle> = {
   support: { color: 'agent', arrow: 'triangle', line: 'solid', label: 'supports' },
-  attack: { color: 'missing', arrow: 'tee', line: 'solid', label: 'undercuts · opposes · rejects' },
+  attack: { color: 'missing', arrow: 'tee', line: 'solid', label: 'undercuts · opposes' },
   causal: { color: 'link', arrow: 'triangle', line: 'solid', label: 'causes' },
   enable: { color: 'agent', arrow: 'vee', line: 'solid', label: 'enables' },
   depend: { color: 'scope', arrow: 'triangle', line: 'dashed', label: 'depends-on' },

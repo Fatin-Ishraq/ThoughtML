@@ -23,7 +23,7 @@ const POSTURES = new Set([
 ])
 const RELATIONS = new Set([
   'supports', 'opposes', 'undercuts', 'answers', 'causes', 'enables',
-  'prevents', 'depends-on', 'blocks', 'revises', 'rejects',
+  'prevents', 'depends-on', 'blocks', 'revises',
 ])
 const FIELDS = new Set([
   'note', 'kind', 'about', 'weight', 'confidence', 'because', 'answers', 'expects',
