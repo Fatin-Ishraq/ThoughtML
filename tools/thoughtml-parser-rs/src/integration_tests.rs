@@ -1880,9 +1880,9 @@ fn nested_scope_example_is_strict_clean() {
 
 #[test]
 fn unknown_relation_warns_without_profile() {
-    // The relation lint is newly active in Phase 5: an off-vocabulary relation
-    // warns when no profile declares it. (`correlates` is genuinely non-core —
-    // `mitigates` was promoted to a core defense relation in the Phase 5 review.)
+    // The relation lint is active: an off-vocabulary relation warns when no
+    // profile declares it. (`correlates` is genuinely non-core — like a domain
+    // dialect's own relations, it needs a `profile` to be accepted.)
     let r = parse_str("focus a\nfocus b\nlink a correlates b");
     assert!(
         r.diagnostics
@@ -2054,7 +2054,7 @@ fn grand_tour_computes_under_full_options() {
 }
 
 // --- Phase 5 review: action kind, decision-graph lint, the argument→EV bridge,
-//     mitigates as defense, and the undercut/rebut distinction ----------------
+//     defense via attack-the-attacker, and the undercut/rebut distinction ------
 
 #[test]
 fn action_is_a_valid_kind() {
@@ -2118,16 +2118,17 @@ link opt-b option-of d";
 }
 
 #[test]
-fn mitigates_defends_an_option_against_a_risk() {
-    // guard mitigates risk, risk opposes option: the mitigation attacks the risk,
-    // so the risk is defeated and the option it attacked is reinstated.
+fn attacking_a_risk_defends_the_option_it_threatens() {
+    // risk opposes option; a guard opposes the risk. The guard attacks the risk,
+    // so the risk is defeated and the option it attacked is reinstated — defense
+    // is just "attack the attacker", with no relation of its own.
     let src = "\
 focus risk
 focus option
 focus guard
   kind action
 link risk opposes option
-link guard mitigates risk";
+link guard opposes risk";
     let r = parse_status(src);
     let o = &r.canonical.objects;
     assert_eq!(status_of(o, "guard"), Some("in"));

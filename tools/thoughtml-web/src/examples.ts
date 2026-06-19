@@ -681,10 +681,14 @@ scope incident-993
 
   'profile-dialect': `# A profile (Phase 5) declares a domain dialect — custom kinds, relations,
 # fields, and postures — so strict validation accepts them with no warnings.
-# Remove the profile and every custom term below would trip an "unknown …" lint.
+# Here a risk-analysis dialect. Defending against a risk needs no special
+# relation: a mitigation just "opposes" the risk (a core attack relation), and
+# the grounded labelling reinstates whatever the risk threatened. risk,
+# mitigation, aggravates, likelihood, and flags are this dialect's own — remove
+# the profile and each would trip an "unknown …" lint.
 profile risk-analysis
   kinds risk, mitigation
-  relations mitigates
+  relations aggravates
   fields likelihood
   postures flags
 
@@ -694,13 +698,19 @@ focus port-strike
   kind risk
   likelihood 0.4
 
+focus just-in-time
+  kind risk
+  likelihood 0.5
+
 focus dual-sourcing
   kind mitigation
 
-link dual-sourcing mitigates port-strike
+link dual-sourcing opposes port-strike
+link just-in-time aggravates port-strike
 
 stance ops flags port-strike
-  confidence 0.7
+  confidence 0.3
+  note Low residual risk once dual-sourcing opposes the strike.
 `,
 
   'shared-defs': `# Shared definitions other documents import (Phase 5). Strict-clean on its own:
@@ -762,7 +772,7 @@ scope capacity-program
     link traffic-now supports growth-trend
     link load-test strongly supports growth-trend
     link seasonal-doubt undercuts growth-trend
-    link load-test rejects seasonal-doubt
+    link load-test opposes seasonal-doubt
 
   scope estimate
     focus runway-early
@@ -833,7 +843,7 @@ scope capacity-program
       kind action
       Roll over a canary slice first, then ramp.
     link migration-risk opposes migrate
-    link canary-cutover mitigates migration-risk
+    link canary-cutover opposes migration-risk
 `,
 
   'why-harvard': `# why-harvard — the reasoning behind committing to Harvard.
@@ -930,7 +940,7 @@ scope college-choice
       kind action
       Visit at reading week and over the summer.
     link far-from-home opposes harvard
-    link visit-plan mitigates far-from-home
+    link visit-plan opposes far-from-home
 `,
 
   'self-audit': `# self-audit — an agent's reasoning that its own structure defeats.

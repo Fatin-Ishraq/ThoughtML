@@ -917,12 +917,12 @@ enum Label {
     Out,
 }
 
-/// Relations that constitute an attack on their target. `mitigates` is a defense
-/// (Phase 5 review): `action mitigates risk` attacks the risk, so mitigating a
-/// risk that attacks an option restores that option — handled uniformly by the
-/// grounded labelling, since "defend X" is just "attack X's attacker".
+/// Relations that constitute an attack on their target: `opposes` rebuts a node,
+/// `undercuts` defeats an inference. Defense needs no relation of its own —
+/// defending X is just attacking X's attacker (`guard opposes risk`), which the
+/// grounded labelling reinstates uniformly.
 fn is_attack(relation: &str) -> bool {
-    matches!(relation, "undercuts" | "opposes" | "rejects" | "mitigates")
+    matches!(relation, "undercuts" | "opposes")
 }
 
 /// Label every claim that takes part in the attack graph with its grounded

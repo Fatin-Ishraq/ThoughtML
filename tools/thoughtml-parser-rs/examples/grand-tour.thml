@@ -31,7 +31,7 @@ scope capacity-program
     link traffic-now supports growth-trend
     link load-test strongly supports growth-trend
     link seasonal-doubt undercuts growth-trend
-    link load-test rejects seasonal-doubt
+    link load-test opposes seasonal-doubt
 
   scope estimate
     focus runway-early
@@ -102,4 +102,4 @@ scope capacity-program
       kind action
       Roll over a canary slice first, then ramp.
     link migration-risk opposes migrate
-    link canary-cutover mitigates migration-risk
+    link canary-cutover opposes migration-risk
