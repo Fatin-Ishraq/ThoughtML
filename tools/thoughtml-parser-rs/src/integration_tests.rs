@@ -1233,7 +1233,7 @@ fn quantity_merges_onto_posture_introduced_focus() {
     );
 }
 
-// --- Phase 8 (v0.2): formulas (executable documents) -----------------------
+// --- Phase 8 (v0.2): formulas (opt-in computed quantities) -----------------
 
 fn parse_formulas(src: &str) -> crate::ParseResult {
     parse_str_with(

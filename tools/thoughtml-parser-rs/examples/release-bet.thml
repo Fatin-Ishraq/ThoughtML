@@ -1,4 +1,4 @@
-# The computational track, woven into one decision (v0.2, Phases 6–9). A choice
+# The opt-in compute layer, woven into one decision (v0.2). A choice
 # between shipping now and holding a week, where:
 #   • payoffs are computed by FORMULAS (§4.8) over authored quantities (§4.7),
 #   • one outcome's probability is borrowed from DERIVED CONFIDENCE (§10.3) —

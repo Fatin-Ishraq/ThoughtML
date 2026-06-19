@@ -1,4 +1,4 @@
-# Decision EV closes the computational track (v0.2, Phase 9). An option leads-to
+# Decision EV is the last of the opt-in compute features (v0.2). An option leads-to
 # outcomes, each with a probability and a payoff (a quantity — even a computed
 # one). ThoughtML weights payoff by probability and sums: the option's expected
 # value. A decision then orders its options by EV — it does not name a winner.

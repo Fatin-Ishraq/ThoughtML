@@ -448,11 +448,12 @@ team holds scale-up-decision
   note Over-provisioning is cheap to reverse; under-provisioning during the sale is not.
 `,
 
-  'cost-model': `# Formulas make the document executable (v0.2, Phase 8). A focus can state
-# \`= <expr>\` instead of a fixed number, and ThoughtML evaluates it over other
-# foci's quantities with full unit-checking: a USD/instance times an instance is
-# USD, the byte conversions in USD/GB × GB cancel, and a ratio of two costs comes
-# out dimensionless. Computed values stay separate from the authored ones.
+  'cost-model': `# Formulas let a focus compute its number from others (v0.2, opt-in). A focus can
+# state \`= <expr>\` instead of a fixed number, and ThoughtML evaluates it over
+# other foci's quantities with full unit-checking: a USD/instance times an
+# instance is USD, the byte conversions in USD/GB × GB cancel, and a ratio of two
+# costs comes out dimensionless. Computed values stay separate from the authored
+# ones — a second reading, not a program the document runs.
 
 scope cost-model
 
@@ -493,7 +494,7 @@ focus gross-margin
   = (revenue - monthly-total) / revenue
 `,
 
-  'decision-ev': `# Decision EV closes the computational track (v0.2, Phase 9). An option leads-to
+  'decision-ev': `# Decision EV is the last of the opt-in compute features (v0.2). An option leads-to
 # outcomes, each with a probability and a payoff (a quantity — even a computed
 # one). ThoughtML weights payoff by probability and sums: the option's expected
 # value. A decision then orders its options by EV — it does not name a winner.
@@ -559,7 +560,7 @@ link staged-rollout leads-to slow-start
   probability 0.3
 `,
 
-  'release-bet': `# The whole computational track woven into one decision (v0.2, Phases 6-9):
+  'release-bet': `# The whole opt-in compute layer woven into one decision (v0.2):
 # payoffs computed by FORMULAS (Phase 8) over quantities (Phase 7); one outcome's
 # probability borrowed from DERIVED CONFIDENCE (Phase 4) when its edge omits one;
 # options ordered by EXPECTED VALUE (Phase 9); and WHAT-IF (Phase 6) reaching all

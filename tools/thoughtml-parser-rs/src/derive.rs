@@ -607,7 +607,7 @@ struct EvAcc {
     broken: bool,
 }
 
-/// Compute decision expected values (§10.6, Phase 9) — the computational track's
+/// Compute decision expected values (§10.6, Phase 9) — the opt-in compute layer's
 /// capstone, composing quantities (§4.7), formulas (§4.8), and derived confidence
 /// (§10.3). An option focus carries `leads-to` edges to outcome foci; each edge's
 /// `probability` (or, failing that, the outcome's derived confidence) weights that
