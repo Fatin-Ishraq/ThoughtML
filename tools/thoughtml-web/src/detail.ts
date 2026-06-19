@@ -106,9 +106,10 @@ function formulaFact(expr: string): HTMLElement {
   return wrap
 }
 
-/** The expected-value ranking on a decision focus (Phase 9): its options, highest
- *  EV first, with the recommended one tagged and a bar scaled across the field.
- *  Each row navigates to the option. */
+/** The expected-value ordering on a decision focus (§10.6): its options, highest
+ *  EV first, each with a bar scaled across the field. This is the engine's second
+ *  reading of the author's numbers — it shows the EVs and orders them, it crowns
+ *  no winner. Each row navigates to the option. */
 function decisionRanking(dec: DecisionEV, onNav: (id: string) => void): HTMLElement {
   const list = document.createElement('div')
   list.className = 'ev-rows'
@@ -116,9 +117,8 @@ function decisionRanking(dec: DecisionEV, onNav: (id: string) => void): HTMLElem
   const min = Math.min(...vals)
   const span = Math.max(...vals) - min || 1 // avoid /0 when all equal
   for (const e of dec.ranked) {
-    const isBest = e.option === dec.best
     const row = document.createElement('button')
-    row.className = `ev-row${isBest ? ' best' : ''}`
+    row.className = 'ev-row'
     row.title = e.option
     row.addEventListener('click', () => onNav(e.option))
 
@@ -127,12 +127,6 @@ function decisionRanking(dec: DecisionEV, onNav: (id: string) => void): HTMLElem
     const name = document.createElement('span')
     name.className = 'ev-name'
     name.textContent = e.option
-    if (isBest) {
-      const tag = document.createElement('span')
-      tag.className = 'ev-key'
-      tag.textContent = 'recommended'
-      name.appendChild(tag)
-    }
     const val = document.createElement('span')
     val.className = 'ev-val'
     val.textContent = `${formatNum(e.value)}${e.unit ? ` ${e.unit}` : ''}`
@@ -141,20 +135,13 @@ function decisionRanking(dec: DecisionEV, onNav: (id: string) => void): HTMLElem
     const track = document.createElement('div')
     track.className = 'ev-track'
     const fill = document.createElement('div')
-    fill.className = `ev-fill${isBest ? ' best' : ''}`
-    // Normalize across the option field so the best fills the bar, the worst barely.
+    fill.className = 'ev-fill'
+    // Normalize across the option field so the highest EV fills the bar, the lowest barely.
     fill.style.width = `${Math.max(6, ((e.value - min) / span) * 100)}%`
     track.appendChild(fill)
 
     row.append(top, track)
     list.appendChild(row)
-  }
-  // How decisively the winner beats the runner-up.
-  if (dec.margin !== undefined) {
-    const foot = document.createElement('div')
-    foot.className = 'ev-margin'
-    foot.textContent = `recommended by ${formatNum(dec.margin)} ${dec.ranked[0]?.unit ?? ''}`.trim()
-    list.appendChild(foot)
   }
   return list
 }
@@ -461,8 +448,9 @@ export function renderDetail(
   bodyEl.appendChild(facts)
 
   // ---- decision ranking (Phase 9) ----
-  // On a decision, show its options ranked by expected value, the recommended
-  // one tagged. The graph's Decision lens rings the same winner.
+  // On a decision, show its options ordered by expected value. This is the
+  // engine's second reading of the author's numbers — it orders them, it
+  // crowns no winner; the graph's Decision lens marks the same options.
   if (obj && obj.type === 'focus' && obj.decision) {
     bodyEl.appendChild(section('Options by expected value'))
     bodyEl.appendChild(decisionRanking(obj.decision, onNav))

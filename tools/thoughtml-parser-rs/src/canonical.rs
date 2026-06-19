@@ -93,8 +93,8 @@ pub struct Focus {
     /// and derived — strictly separate from authored quantities.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub expected_value: Option<ExpectedValue>,
-    /// Expected-value analysis on a *decision* focus (v0.2, Phase 9, §10.6): its
-    /// options ranked by expected value, best first. Opt-in and derived.
+    /// Expected-value analysis on a *decision* focus (v0.2, §10.6): its options
+    /// ordered by expected value, highest first. Opt-in and derived.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub decision: Option<DecisionEV>,
 }
@@ -133,16 +133,14 @@ pub struct OptionEV {
     pub downside: f64,
 }
 
-/// The expected-value analysis of a decision (v0.2, Phase 9, §10.6): its options
-/// ranked by expected value (best first), the id of the highest-EV option — the
-/// recommended choice — and the `margin` by which it beats the runner-up. Derived
-/// from `leads-to` / `option-of` edges; the engine ranks, it does not decide.
+/// The expected-value analysis of a decision (v0.2, §10.6): its options ordered
+/// by expected value, highest first. Derived from `leads-to` / `option-of` edges
+/// as a *second reading* of the author's numbers — it ranks, it never crowns a
+/// winner or quantifies a recommendation. There is no `best` and no `margin`:
+/// the mirror reports the EVs and leaves the choice to the reader.
 #[derive(Debug, Clone, Serialize)]
 pub struct DecisionEV {
     pub ranked: Vec<OptionEV>,
-    pub best: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub margin: Option<f64>,
 }
 
 /// A typed numeric measure on a focus (v0.2, Phase 7, §4.7). `value` + `unit` are

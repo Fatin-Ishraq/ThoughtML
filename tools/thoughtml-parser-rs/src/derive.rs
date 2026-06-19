@@ -757,7 +757,7 @@ fn compute_decisions(canon: &mut Canonical, overrides: &Overrides, diags: &mut D
     }
 
     // Group options under their decisions via `option-of` edges, in declaration
-    // order, then rank each decision's options by expected value (best first).
+    // order, then order each decision's options by expected value (highest first).
     let mut options_of: BTreeMap<String, Vec<String>> = BTreeMap::new();
     let mut decision_order: Vec<String> = Vec::new();
     for o in &canon.objects {
@@ -807,10 +807,9 @@ fn compute_decisions(canon: &mut Canonical, overrides: &Overrides, diags: &mut D
                 downside: round3(d / factor),
             })
             .collect();
-        let best = ranked[0].option.clone();
-        // How decisively the winner beats the runner-up (in display units).
-        let margin = (ranked.len() >= 2).then(|| round3(ranked[0].value - ranked[1].value));
-        decisions.insert(dec.clone(), DecisionEV { ranked, best, margin });
+        // The mirror reports the EVs ordered high-to-low; it does not crown a
+        // winner or quantify a margin — the choice stays with the reader.
+        decisions.insert(dec.clone(), DecisionEV { ranked });
     }
 
     // Write the derived facts back: EV on each option, the ranking on each decision.

@@ -491,9 +491,9 @@ focus gross-margin
   'decision-ev': `# Decision EV closes the computational track (v0.2, Phase 9). An option leads-to
 # outcomes, each with a probability and a payoff (a quantity — even a computed
 # one). ThoughtML weights payoff by probability and sums: the option's expected
-# value. A decision then ranks its options and names the highest-EV choice.
-# Open "go-to-market" for the ranking, or switch on the "Decision" lens to
-# spotlight the recommended option.
+# value. A decision then orders its options by EV — it does not name a winner.
+# Open "go-to-market" for the ordering, or switch on the "Decision" lens to
+# mark the options it weighs.
 
 scope launch-decision
 
@@ -557,10 +557,10 @@ link staged-rollout leads-to slow-start
   'release-bet': `# The whole computational track woven into one decision (v0.2, Phases 6-9):
 # payoffs computed by FORMULAS (Phase 8) over quantities (Phase 7); one outcome's
 # probability borrowed from DERIVED CONFIDENCE (Phase 4) when its edge omits one;
-# options ranked by EXPECTED VALUE (Phase 9); and WHAT-IF (Phase 6) reaching all
-# the way through. As written, holding wins (212,250 vs 180,000 USD). Enter
+# options ordered by EXPECTED VALUE (Phase 9); and WHAT-IF (Phase 6) reaching all
+# the way through. As written, holding ranks first (212,250 vs 180,000 USD). Enter
 # What-if and mute "canary-clean": belief in the polished launch falls, its
-# expected value drops below shipping, and the recommendation flips to ship-now.
+# expected value drops below shipping, and the EV ordering flips — ship-now to the top.
 
 scope release-bet
 

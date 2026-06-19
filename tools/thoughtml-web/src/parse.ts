@@ -39,9 +39,9 @@ export interface EvTerm { outcome: string; probability: number; payoff: number; 
 export interface ExpectedValue { value: number; unit: string; dimension: string; probability_mass: number; downside: number; terms: EvTerm[] }
 /** One option's expected value, ranked within a decision (v0.2, Phase 9). */
 export interface OptionEV { option: string; value: number; unit: string; downside: number }
-/** A decision's options ranked by expected value, best first, plus the winner's
- *  margin over the runner-up (v0.2, Phase 9). */
-export interface DecisionEV { ranked: OptionEV[]; best: string; margin?: number }
+/** A decision's options ordered by expected value, highest first (v0.2, §10.6).
+ *  A second reading of the author's numbers — it orders, it crowns no winner. */
+export interface DecisionEV { ranked: OptionEV[] }
 
 export interface Focus { type: 'focus'; id: string; kind?: string; quantity?: Quantity; formula?: string; computed_quantity?: Quantity; body?: string; fields?: Fields; superseded_by?: string; derived_confidence?: number; argument_status?: string; expected_value?: ExpectedValue; decision?: DecisionEV }
 export interface Question {

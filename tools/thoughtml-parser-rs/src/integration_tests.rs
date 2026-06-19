@@ -1452,7 +1452,7 @@ link bet leads-to lose
 }
 
 #[test]
-fn decision_ranks_options_best_first() {
+fn decision_ranks_options_highest_ev_first() {
     let src = "\
 focus d
   kind decision
@@ -1472,7 +1472,7 @@ link b leads-to ob
   probability 1.0";
     let r = parse_decisions(src);
     let dec = decision_of(&r.canonical.objects, "d").unwrap();
-    assert_eq!(dec.best, "b");
+    // The mirror orders by EV but crowns no winner: there is no `best` field.
     let order: Vec<&str> = dec.ranked.iter().map(|e| e.option.as_str()).collect();
     assert_eq!(order, vec!["b", "a"]); // 300 before 100
     assert_eq!(dec.ranked[0].value, 300.0);
@@ -1594,9 +1594,10 @@ fn decision_ev_example_evaluates_clean() {
     // staged-rollout: 0.7·500000 + 0.3·120000 = 386000.
     assert_eq!(expected_value_of(o, "staged-rollout").unwrap().value, 386000.0);
     let dec = decision_of(o, "go-to-market").unwrap();
-    assert_eq!(dec.best, "staged-rollout"); // the safer option wins on EV
-    // The winner's margin over the runner-up (386000 − 240000).
-    assert_eq!(dec.margin, Some(146000.0));
+    // The safer option has the higher EV, so it ranks first — but the mirror
+    // reports the order, it does not declare a winner or a margin.
+    let order: Vec<&str> = dec.ranked.iter().map(|e| e.option.as_str()).collect();
+    assert_eq!(order, vec!["staged-rollout", "launch-now"]);
 }
 
 // --- Phase 9 polish (v0.2): what-if recompute, kinds, breakdown, units ------
@@ -1723,11 +1724,11 @@ fn release_bet_capstone_weaves_the_stack_and_flips() {
     assert_eq!(computed_of(o, "hold-pays-off").unwrap().value, 250000.0);
     approx(derived_of(o, "hold-pays-off").unwrap(), 0.881); // becomes the probability
     let dec = decision_of(o, "release-decision").unwrap();
-    assert_eq!(dec.best, "hold-week"); // 212250 vs 180000 as written
+    assert_eq!(dec.ranked[0].option, "hold-week"); // 212250 vs 180000 as written
     // Mute one piece of evidence: belief in hold-pays-off falls, its EV drops
-    // below shipping, and the recommendation flips — what-if reaching the EV layer.
+    // below shipping, and the EV ordering flips — what-if reaching the EV layer.
     let muted = parse_compute_overrides(src, &[], &["canary-clean"]);
-    assert_eq!(decision_of(&muted.canonical.objects, "release-decision").unwrap().best, "ship-now");
+    assert_eq!(decision_of(&muted.canonical.objects, "release-decision").unwrap().ranked[0].option, "ship-now");
 }
 
 // --- Conformance (formal track): bundled examples stay strict-clean ---------
@@ -2042,14 +2043,14 @@ fn project_examples_are_strict_clean() {
 #[test]
 fn grand_tour_computes_under_full_options() {
     // The showcase must also stay clean with the whole computational stack on,
-    // and its decision EV must pick the migrate option (chained formula payoff).
+    // and its decision EV must rank the migrate option first (chained formula payoff).
     let map: std::collections::HashMap<String, String> =
         [("shared-defs".to_string(), SHARED.to_string())].into_iter().collect();
     let r = parse_project(GRAND, &map, full_options());
     assert!(!r.diagnostics.has_errors(), "errors: {:?}", r.diagnostics.items);
     assert!(!r.diagnostics.has_warnings(), "warnings: {:?}", r.diagnostics.items);
     let decision = focus(&r.canonical.objects, "capacity-decision").expect("decision focus");
-    assert_eq!(decision.decision.as_ref().expect("decision EV").best, "migrate");
+    assert_eq!(decision.decision.as_ref().expect("decision EV").ranked[0].option, "migrate");
 }
 
 // --- Phase 5 review: action kind, decision-graph lint, the argument→EV bridge,
@@ -2149,14 +2150,14 @@ fn undercutting_an_inference_weakens_it() {
 
 #[test]
 fn why_harvard_computes_and_ranks_both_options() {
-    // The showcase decision must stay clean under the full stack, pick harvard,
-    // and — the fix for the original self-loop bug — rank *both* options rather
-    // than silently dropping the unwired one.
+    // The showcase decision must stay clean under the full stack, rank harvard
+    // first, and — the fix for the original self-loop bug — rank *both* options
+    // rather than silently dropping the unwired one.
     let r = parse_str_with(include_str!("../examples/why-harvard.thml"), full_options());
     assert!(!r.diagnostics.has_errors(), "errors: {:?}", r.diagnostics.items);
     assert!(!r.diagnostics.has_warnings(), "warnings: {:?}", r.diagnostics.items);
     let d = decision_of(&r.canonical.objects, "where-to-go").expect("decision EV");
-    assert_eq!(d.best, "harvard");
+    assert_eq!(d.ranked[0].option, "harvard");
     assert_eq!(d.ranked.len(), 2);
     assert_eq!(expected_value_of(&r.canonical.objects, "harvard").unwrap().value, 465000.0);
     assert_eq!(expected_value_of(&r.canonical.objects, "state-honors").unwrap().value, 325000.0);

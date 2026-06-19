@@ -101,8 +101,8 @@ async function boot(): Promise<void> {
         + '<div class="lens-key-row"><span class="lens-bar thick"></span>holds it up</div>'
     } else if (lens === 'decision') {
       lensKey.innerHTML = '<div class="lens-key-title">Decision EV</div>'
-        + '<div class="lens-key-row"><span class="sw" style="background:var(--ok)"></span>recommended option</div>'
-        + '<div class="lens-key-row"><span class="sw" style="background:var(--text-dim)"></span>other option</div>'
+        + '<div class="lens-key-row"><span class="sw" style="background:var(--accent)"></span>decision</div>'
+        + '<div class="lens-key-row"><span class="sw" style="background:var(--text-dim)"></span>option weighed</div>'
     }
     lensKey.hidden = lens === 'type'
   }
