@@ -2,7 +2,8 @@
 //!
 //! A focus may state `= <expr>` instead of (or beside) an authored `quantity`;
 //! the expression is evaluated over other foci's quantities into a *computed*
-//! quantity — the point at which a ThoughtML document becomes executable.
+//! quantity — an opt-in second reading, kept separate from the authored numbers
+//! rather than a program the document runs.
 //!
 //! The evaluator carries a dimensional [`Signature`](crate::units::Signature)
 //! through every operation: `+`/`-` require matching dimensions, `*`/`/` derive

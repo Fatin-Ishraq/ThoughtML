@@ -266,8 +266,9 @@ detail panel.
 
 ### 4.8 Formulas (v0.2)
 
-A focus may compute its value instead of stating it, with a `= <expr>` line —
-the point at which a document becomes **executable**:
+A focus may compute its value instead of stating it, with a `= <expr>` line — an
+opt-in second reading of its numbers (CLI `--formulas`), kept separate from the
+authored values rather than a program the document runs:
 
 ```thoughtml
 focus monthly-compute
@@ -1451,7 +1452,7 @@ Beyond the original v0 draft, the reference implementation adds:
   foci's quantities, with full dimensional analysis — `+`/`-` require matching
   dimensions, `*`/`/` derive new ones (`USD/instance × instance = USD`). Evaluated
   in dependency order with cycle detection into a separate `computed_quantity`,
-  opt-in (§4.8; CLI `--formulas`). The document becomes executable. Playground
+  opt-in (§4.8; CLI `--formulas`) — a second reading, not a program to run. Playground
   shows the expression and computed result; node labels show the computed value.
 - **Decision EV**: an option focus's `leads-to` outcomes — each a `probability`
   and a payoff quantity — are summed into an `expected_value`; a decision focus,

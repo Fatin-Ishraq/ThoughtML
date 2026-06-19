@@ -1,8 +1,9 @@
-# Formulas make the document executable (v0.2, Phase 8). A focus can state
-# `= <expr>` instead of a fixed number, and ThoughtML evaluates it over other
-# foci's quantities with full unit-checking: a USD/instance times an instance is
-# USD, the byte conversions in USD/GB × GB cancel, and a ratio of two costs comes
-# out dimensionless. Computed values stay separate from the authored ones.
+# Formulas let a focus compute its number from others (v0.2, opt-in). A focus can
+# state `= <expr>` instead of a fixed number, and ThoughtML evaluates it over
+# other foci's quantities with full unit-checking: a USD/instance times an
+# instance is USD, the byte conversions in USD/GB × GB cancel, and a ratio of two
+# costs comes out dimensionless. Computed values stay separate from the authored
+# ones — a second reading, not a program the document runs.
 
 scope cost-model
 
