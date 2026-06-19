@@ -4,13 +4,13 @@
 #   • one outcome's probability is borrowed from DERIVED CONFIDENCE (§10.3) —
 #     `hold-pays-off` has no stated probability, so its evidence-backed belief
 #     stands in,
-#   • the options are ranked by EXPECTED VALUE (§10.6), and
+#   • the options are ordered by EXPECTED VALUE (§10.6), and
 #   • WHAT-IF (§10.5) reaches all the way through: mute a piece of evidence and
-#     the recommendation flips.
+#     the EV ordering flips.
 #
-# As written, holding wins (212,250 vs 180,000 USD). Enter What-if and mute
+# As written, holding ranks first (212,250 vs 180,000 USD). Enter What-if and mute
 # `canary-clean`: the belief in `hold-pays-off` falls, its expected value drops
-# below shipping, and the recommendation flips to `ship-now`.
+# below shipping, and the EV ordering flips — `ship-now` to the top.
 
 scope release-bet
 

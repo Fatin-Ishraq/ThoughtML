@@ -159,13 +159,11 @@ function buildElements(canon: Canonical, mode: ViewMode): ElementDefinition[] {
   const leverData = (o: CanonObject): Record<string, unknown> =>
     'leverage' in o && o.leverage !== undefined ? { lev: o.leverage, levAbs: Math.abs(o.leverage) } : {}
 
-  // Decision EV (Phase 9): which foci are decisions, which options are ranked,
-  // and which option each decision recommends — for the Decision overlay.
-  const bestOptions = new Set<string>()
+  // Decision EV (§10.6): which foci are decisions and which options they weigh —
+  // for the Decision overlay. The engine orders the options by EV; it crowns none.
   const rankedOptions = new Set<string>()
   for (const o of objects) {
     if (o.type === 'focus' && o.decision) {
-      bestOptions.add(o.decision.best)
       o.decision.ranked.forEach((e) => rankedOptions.add(e.option))
     }
   }
@@ -173,7 +171,6 @@ function buildElements(canon: Canonical, mode: ViewMode): ElementDefinition[] {
     const r: Record<string, unknown> = {}
     if (o.type === 'focus' && o.decision) r.decision = 1
     if (rankedOptions.has(o.id)) r.ranked = 1
-    if (bestOptions.has(o.id)) r.best = 1
     return r
   }
 
@@ -199,10 +196,10 @@ function buildElements(canon: Canonical, mode: ViewMode): ElementDefinition[] {
       // produced one, otherwise the authored quantity.
       const fmtQ = (q: { value: number; unit: string }) => (q.unit ? `${q.value} ${q.unit}` : `${q.value}`)
       let label = o.id
-      // A decision shows its recommended option; an option shows its expected
-      // value (Phase 9); otherwise a computed value (Phase 8) or authored one (7).
-      if (o.decision) label = `${o.id}\n▸ ${o.decision.best}`
-      else if (o.expected_value) label = `${o.id}\nEV ${fmtQ(o.expected_value)}`
+      // An option shows its expected value (§10.6); otherwise a computed value
+      // (Phase 8) or the authored quantity (Phase 7). A decision keeps its bare
+      // id — the mirror names no winning option on the node.
+      if (o.expected_value) label = `${o.id}\nEV ${fmtQ(o.expected_value)}`
       else if (o.computed_quantity) label = `${o.id}\n= ${fmtQ(o.computed_quantity)}`
       else if (o.quantity) label = `${o.id}\n${fmtQ(o.quantity)}`
       addNode(o.id, label, 'focus', { body: o.body ?? '', ...timeData(o), ...derivedData(o), ...statusData(o), ...decisionData(o) }, o.kind ? `kind-${o.kind}` : '')
@@ -346,12 +343,10 @@ function buildStyle(p: Palette): any[] {
     // load-bearing it is (|leverage|). The edge-side rules live at the end of the
     // sheet so they win over the base width/weight mappings.
     { selector: 'node.link.lever[levAbs]', style: { 'border-width': 'mapData(levAbs, 0, 0.4, 2, 9)' } },
-    // Decision overlay (v0.2, Phase 9): outline the decision, dim the options it
-    // weighs, and ring the recommended (max-EV) option in "go" green. `dv-best`
-    // sits after `dv-option` so the winner wins the border cascade.
+    // Decision overlay (v0.2, §10.6): outline the decision and mark the options it
+    // weighs. The mirror orders options by EV but rings no winner.
     { selector: 'node.dv-decision', style: { 'border-color': p.accent, 'border-width': 3, 'border-style': 'double' } },
     { selector: 'node.dv-option', style: { 'border-color': p.scope, 'border-width': 2, 'border-style': 'dashed', 'background-opacity': 0.1, 'text-opacity': 0.72 } },
-    { selector: 'node.dv-best', style: { 'border-color': p.agent, 'border-width': 4, 'background-opacity': p.nodeOpacity + 0.18, 'text-opacity': 1 } },
     // What-if (v0.2, Phase 6): a muted node and its edges read as removed.
     { selector: 'node.muted', style: { 'background-opacity': 0.04, opacity: 0.32, 'text-opacity': 0.45, 'border-style': 'dashed' } },
     { selector: 'node:selected', style: { 'border-color': p.select, 'border-width': 3.5, 'background-opacity': p.nodeOpacity + 0.2 } },
@@ -427,7 +422,7 @@ export interface GraphHandle {
   setStatus(on: boolean): void
   /** Toggle the sensitivity overlay (thicken evidence by |leverage|). */
   setSensitivity(on: boolean): void
-  /** Toggle the decision overlay (ring the recommended option, dim the rest). */
+  /** Toggle the decision overlay (mark the decision and the options it weighs). */
   setDecision(on: boolean): void
   /** Mark a set of node/link ids as muted (what-if), or clear with an empty set. */
   setMuted(ids: Set<string>): void
@@ -521,11 +516,10 @@ export function createGraph(container: HTMLElement, theme: Theme): GraphHandle {
   function setDecision(on: boolean) {
     decisionOn = on
     cy.batch(() => {
-      cy.nodes().removeClass('dv-decision dv-option dv-best')
+      cy.nodes().removeClass('dv-decision dv-option')
       if (on) {
         cy.nodes('[decision = 1]').addClass('dv-decision')
         cy.nodes('[ranked = 1]').addClass('dv-option')
-        cy.nodes('[best = 1]').addClass('dv-best')
       }
     })
   }

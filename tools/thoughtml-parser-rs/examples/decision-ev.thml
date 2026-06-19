@@ -1,10 +1,10 @@
 # Decision EV closes the computational track (v0.2, Phase 9). An option leads-to
 # outcomes, each with a probability and a payoff (a quantity — even a computed
 # one). ThoughtML weights payoff by probability and sums: the option's expected
-# value. A decision then ranks its options and names the highest-EV choice.
+# value. A decision then orders its options by EV — it does not name a winner.
 # Composes quantities (§4.7), formulas (§4.8), and would take derived confidence
 # (§10.3) as a probability where an edge omits one. Open the decision to see the
-# ranking, or switch on the "Decision" lens to spotlight the recommended option.
+# ordering, or switch on the "Decision" lens to mark the options it weighs.
 
 scope launch-decision
 
