@@ -1208,10 +1208,11 @@ is preserved and warned. v0.2 (Phase 9) also infers from decision-EV edges: the
 `to` of a `leads-to` is an `outcome` and its `from` an `option`; the `to` of an
 `option-of` is a `decision` — provisional, so an explicit or posture kind wins.
 
-### 12.4 Profiles (v0.2)
+### 12.4 Profiles (v0.2 — advanced, optional)
 
-A document may declare a **profile** — a dialect that extends the standard
-vocabulary so a domain's own terms validate cleanly:
+Profiles sit outside the core story; reach for one only when a domain genuinely
+needs its own vocabulary. A document may declare a **profile** — a dialect that
+extends the standard vocabulary so a domain's own terms validate cleanly:
 
 ```thoughtml
 profile risk-analysis
@@ -1233,9 +1234,11 @@ A custom posture is usable via the explicit `stance` form
 (`stance agent posture target`); the readable action shorthand
 (`agent posture target`) stays reserved for the core postures.
 
-### 12.5 Imports & Namespaces (v0.2)
+### 12.5 Imports & Namespaces (v0.2 — advanced, optional)
 
-A document may **import** another and reference its objects under a namespace:
+Like profiles, multi-document composition sits outside the core story — most
+reasoning lives in a single document. A document may **import** another and
+reference its objects under a namespace:
 
 ```thoughtml
 import shared-defs as base
@@ -1355,8 +1358,9 @@ correctness gap):
 
 Resolved since the original draft: the canonical JSON encoding is specified
 (§16.1) and pinned by a golden test; temporal comparison is zone-aware (§10.2);
-nested scopes and scope inheritance ship (§4.5); profile declarations extend the
-vocabulary (§12.4); and imports with namespaces compose documents (§12.5).
+nested scopes and scope inheritance ship (§4.5); and — as advanced, optional
+features outside the core story — profile declarations extend the vocabulary
+(§12.4) and imports with namespaces compose documents (§12.5).
 
 ## 16. Implementation Guidance
 
