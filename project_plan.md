@@ -1,8 +1,16 @@
-# ThoughtML V0 Draft Specification
+# ThoughtML Design Document
 
-Status: draft  
-Version: 0.0.1-draft  
-Date: 2026-06-09
+Status: design history + working spec  
+Version: tracks toward 0.1.0  
+Date: 2026-06-09 (origin)
+
+> **Note (v0.1.0):** this is the development design doc, kept for the full
+> history. The v0.1.0 release deliberately *subtracted* several things described
+> in the phase notes below — the decision `best`/`margin` outputs, the `rejects`
+> and `mitigates` relations, the `strongly`/`weakly` strength adverbs, and the
+> `conditioned-on` bridge are all **removed**; profiles/imports/namespaces and
+> the compute layer are **demoted to advanced/opt-in**. For the authoritative,
+> current picture see [`CHANGELOG.md`](CHANGELOG.md) and [`README.md`](README.md).
 
 ## 1. Purpose
 
@@ -1561,3 +1569,14 @@ Beyond the original v0 draft, the reference implementation adds:
   low in an accepted one). New `self-audit.thml` example demonstrates it — zero
   diagnostics, one conflict (an agent holding a defeated claim at 0.9). The web
   surfaces conflicts in the diagnostics bar with a distinct "conflict" chip.
+- **v0.1.0 — the subtraction** (release): cut the language back to its spine as a
+  *mirror, not an oracle*. Removed the decision `best`/`margin` outputs (EV now
+  orders options as a second reading, names no winner); folded `rejects` and
+  `mitigates` into `opposes` (relations 14 → 12); dropped the `strongly`/`weakly`
+  adverbs for the single numeric `weight`. Demoted the compute layer (no longer
+  "executable") and profiles/imports/namespaces to advanced/opt-in, and curated
+  the playground to a 10-example spine with Type/Argument lenses. Added the one
+  honest feature: **number provenance** — an authored number may declare a basis
+  (`measured`/`estimated`/`assumed`) inline, with an opt-in `--strict-provenance`
+  lint (§12.6). Several phase notes above describe features removed here; see
+  `CHANGELOG.md` for the authoritative record.
