@@ -1,0 +1,60 @@
+# A belief that changes as evidence arrives. Drag the as-of slider in the
+# playground to replay it day by day: an earlier stance dims and is struck
+# through the moment a later one revises it (v0.2, Phase 3).
+#
+# Demonstrates: the temporal layer (`observed-at` / `asserted-at`), stance
+# supersession (`revises` posture), and node supersession (`revises` relation).
+
+scope launch-readiness
+
+# --- Day 0: an early, optimistic read ---
+
+analyst noticed early-burndown
+  The first sprint cleared 40% of the backlog — ahead of plan.
+  observed-at 2026-06-01
+
+analyst suspects early-burndown causes on-track as on-track-claim
+  confidence 0.70
+  asserted-at 2026-06-01
+  note Comfortable start; the date looks safe.
+
+# --- Day 7: scope grows, and the date itself is pushed out ---
+
+analyst noticed scope-added
+  Two must-have features were added after the stakeholder review.
+  observed-at 2026-06-08
+
+link scope-added undercuts on-track-claim
+  Late scope eats the early lead.
+  asserted-at 2026-06-08
+
+analyst revises on-track-claim
+  confidence 0.40
+  asserted-at 2026-06-08
+  note The new scope cancels out the fast start.
+
+focus june-30-target
+  Original commitment: ship on June 30.
+
+focus july-14-target
+  Revised commitment: ship on July 14, absorbing the new scope.
+  asserted-at 2026-06-08
+
+link july-14-target revises june-30-target
+  The added scope pushed the committed date out by two weeks.
+  asserted-at 2026-06-08
+
+# --- Day 14: a hard blocker lands ---
+
+analyst noticed integration-blocker
+  The payment vendor's sandbox is down with no ETA.
+  observed-at 2026-06-15
+
+link integration-blocker undercuts on-track-claim
+  Nothing ships until payments can be tested end to end.
+  asserted-at 2026-06-15
+
+analyst revises on-track-claim
+  confidence 0.20
+  asserted-at 2026-06-15
+  note With payments blocked, holding the date is unlikely.

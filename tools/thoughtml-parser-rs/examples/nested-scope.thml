@@ -1,0 +1,22 @@
+# Nested scopes (Phase 5): members are written *inside* a scope by indentation.
+# Each member inherits the scope's provenance/temporal context (source,
+# observed-at), and a sub-scope can override that context for its own members.
+scope incident-993
+  source pagerduty
+  observed-at 2026-02-11T09:00Z
+
+  focus latency-spike
+    Checkout p99 latency tripled after the 09:00 rollout.
+
+  focus deploy-1f2c
+    The rollout swapped the cache layer.
+
+  link deploy-1f2c causes latency-spike
+
+  scope mitigation
+    observed-at 2026-02-11T09:45Z
+
+    focus rollback
+      Roll back deploy-1f2c and re-run the canary.
+
+    link rollback prevents latency-spike

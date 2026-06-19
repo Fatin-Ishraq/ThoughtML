@@ -1,0 +1,95 @@
+# why-harvard — the reasoning behind committing to Harvard.
+#
+# A personal decision, reasoned out: goals up front, what's known linked to
+# those goals with graded evidence (and one honest doubt), two options weighed
+# by expected value, the choice recorded, and the real downside kept on the
+# record with a plan that defends against it. Everything inherits the scope's
+# provenance and date; switch to the structural view to see the four sub-scopes.
+scope college-choice
+  source self-reflection
+  asserted-at 2026-04-01T00:00Z
+
+  scope what-i-want
+    focus goal-research
+      kind goal
+      Do undergraduate research with leading faculty.
+    focus goal-network
+      kind goal
+      A network that opens doors regardless of field.
+    focus goal-aid
+      kind goal
+      Graduate with as little debt as possible.
+
+  scope what-i-know
+    focus admit-harvard
+      kind observation
+      Admitted to Harvard with a strong aid package.
+    focus faculty-fit
+      kind observation
+      Two labs I emailed replied and take undergraduates.
+    focus aid-offer
+      kind observation
+      quantity 78000 USD
+      Annual grant aid offered — grants, not loans.
+    focus prestige-signal
+      kind claim
+      The brand helps for the first job and grad-school apps.
+    focus prestige-doubt
+      kind assumption
+      A few years into a career, fit may matter more than prestige.
+    link admit-harvard enables harvard
+    link faculty-fit supports goal-research
+    link aid-offer strongly supports goal-aid
+    link prestige-signal supports goal-network
+    link prestige-doubt undercuts prestige-signal
+
+  scope the-decision
+    focus where-to-go
+      kind decision
+      Which offer do I commit to?
+    focus harvard
+      kind option
+    focus state-honors
+      kind option
+    link harvard option-of where-to-go
+    link state-honors option-of where-to-go
+
+    # Rough five-year "opportunity value", net of cost.
+    focus harvard-thrive
+      kind outcome
+      quantity 600000 USD
+    focus harvard-coast
+      kind outcome
+      quantity 150000 USD
+    link harvard leads-to harvard-thrive
+      probability 0.7
+    link harvard leads-to harvard-coast
+      probability 0.3
+
+    focus state-solid
+      kind outcome
+      quantity 400000 USD
+    focus state-flat
+      kind outcome
+      quantity 250000 USD
+    link state-honors leads-to state-solid
+      probability 0.5
+    link state-honors leads-to state-flat
+      probability 0.5
+
+    link where-to-go depends-on goal-research
+    link where-to-go depends-on goal-aid
+
+    me chooses harvard
+      confidence 0.75
+      note Faculty access and the aid package clear a bar the state offer can't.
+
+  scope second-thoughts
+    focus far-from-home
+      kind observation
+      It's a five-hour flight from family.
+    focus visit-plan
+      kind action
+      Visit at reading week and over the summer.
+    link far-from-home opposes harvard
+    link visit-plan mitigates far-from-home

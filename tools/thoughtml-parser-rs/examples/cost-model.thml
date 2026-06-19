@@ -1,0 +1,43 @@
+# Formulas make the document executable (v0.2, Phase 8). A focus can state
+# `= <expr>` instead of a fixed number, and ThoughtML evaluates it over other
+# foci's quantities with full unit-checking: a USD/instance times an instance is
+# USD, the byte conversions in USD/GB × GB cancel, and a ratio of two costs comes
+# out dimensionless. Computed values stay separate from the authored ones.
+
+scope cost-model
+
+focus instances
+  How many instances we run.
+  quantity 12 instance
+
+focus cost-per-instance
+  Fully-loaded monthly cost of one instance.
+  quantity 180 USD/instance
+
+focus monthly-compute
+  Compute spend per month.
+  = cost-per-instance * instances
+
+focus storage
+  Object storage we keep.
+  quantity 4000 GB
+
+focus cost-per-gb
+  Storage price per gigabyte-month.
+  quantity 0.02 USD/GB
+
+focus monthly-storage
+  Storage spend per month.
+  = cost-per-gb * storage
+
+focus monthly-total
+  Everything we pay to run the service each month.
+  = monthly-compute + monthly-storage
+
+focus revenue
+  Monthly revenue this service drives.
+  quantity 50000 USD
+
+focus gross-margin
+  Share of revenue left after running costs.
+  = (revenue - monthly-total) / revenue

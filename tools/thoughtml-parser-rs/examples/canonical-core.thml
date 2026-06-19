@@ -1,0 +1,23 @@
+# The same reasoning as multi-agent-debate.thml, but written directly in the
+# canonical core (§3.2) using focus / link / stance records instead of the
+# readable action surface. Both forms produce the same kind of objects.
+#
+# Demonstrates: a core `link` with an alias and prose `body` (v0.1), and bare
+# `stance` records.
+
+scope payments-latency
+
+focus latency-spike
+  p99 checkout latency doubled at 14:00 UTC.
+
+focus cache-eviction
+  Aggressive eviction dropping hot keys under load.
+
+link cache-hypothesis: cache-eviction causes latency-spike
+  The proposed mechanism: evicted hot keys force slow cold reads.
+
+stance alice suspects cache-hypothesis
+  confidence 0.55
+
+stance bob doubts cache-hypothesis
+  confidence 0.30

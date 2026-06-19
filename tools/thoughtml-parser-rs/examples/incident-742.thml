@@ -1,0 +1,20 @@
+# The complete example from the ThoughtML v0 spec (§14).
+
+scope incident-742
+
+team noticed metric-shift
+  Activation metric increased after deployment.
+  observed-at 2026-06-09T09:20+06:00
+
+question cause-of-metric-shift
+  What caused metric-shift?
+  expects cause
+  status open
+
+team suspects deploy-change causes metric-shift as deploy-cause
+  confidence 0.25..0.70
+  answers cause-of-metric-shift
+
+team holds rollback-decision
+  Rollback the deployment.
+  until cause-of-metric-shift answered

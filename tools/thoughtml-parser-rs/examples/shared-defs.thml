@@ -1,0 +1,8 @@
+# Shared definitions other documents import (Phase 5). Strict-clean on its own:
+# its foci are members of the `shared` scope, so nothing is orphaned.
+scope shared
+  focus capacity-budget
+    quantity 1000 req/s
+
+  focus slo-target
+    p99 latency budget is 200 ms.

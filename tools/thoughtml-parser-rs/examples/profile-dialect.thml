@@ -1,0 +1,30 @@
+# A profile (Phase 5) declares a domain dialect — custom kinds, relations,
+# fields, and postures — so strict validation accepts them with no warnings.
+# Here a risk-analysis dialect. `mitigates` is a *core* defense relation, so it
+# needs no declaration; `risk`, `mitigation`, `aggravates`, `likelihood`, and
+# `flags` are this dialect's own — remove the profile and each would trip an
+# "unknown …" lint.
+profile risk-analysis
+  kinds risk, mitigation
+  relations aggravates
+  fields likelihood
+  postures flags
+
+scope supply-chain
+
+focus port-strike
+  kind risk
+  likelihood 0.4
+
+focus just-in-time
+  kind risk
+  likelihood 0.5
+
+focus dual-sourcing
+  kind mitigation
+
+link dual-sourcing mitigates port-strike
+link just-in-time aggravates port-strike
+
+stance ops flags port-strike
+  confidence 0.7

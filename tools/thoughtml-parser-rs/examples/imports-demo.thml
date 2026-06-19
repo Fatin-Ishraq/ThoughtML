@@ -1,0 +1,14 @@
+# Imports another document and references its objects by namespace (Phase 5).
+# Parse it as a project (with shared-defs available); on its own the `base.*`
+# references are unresolved.
+import shared-defs as base
+
+scope rollout
+
+focus rollout-plan
+  Ship the rollout to 100% over a week.
+
+link rollout-plan depends-on base.capacity-budget
+
+stance ops accepts rollout-plan
+  confidence 0.8

@@ -1,0 +1,25 @@
+[package]
+name = "thoughtml-parser-rs"
+version = "0.0.1"
+edition = "2021"
+description = "Reference parser for ThoughtML v0: surface AST -> canonical objects -> JSON, with diagnostics."
+license = "MIT OR Apache-2.0"
+
+[[bin]]
+name = "thoughtml"
+path = "src/main.rs"
+required-features = ["cli"]
+
+[lib]
+name = "thoughtml"
+path = "src/lib.rs"
+
+[features]
+default = ["cli"]
+# The CLI (clap) is optional so the library can compile to wasm without it.
+cli = ["dep:clap"]
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+clap = { version = "4", features = ["derive"], optional = true }

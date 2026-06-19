@@ -1,0 +1,105 @@
+# grand-tour — one decision that exercises the whole language.
+#
+# It imports a shared budget, declares an SRE dialect (profile), nests its
+# reasoning in scopes that pass down provenance, measures things (quantities),
+# computes a cost and a payoff (formulas), weighs two options by expected value
+# (decision EV), carries graded evidence, an attack, and a mitigation (confidence
+# + argument status), and revises an estimate over time. Try the lenses and the
+# as-of slider; switch to the structural view to see the scopes as nested boxes.
+import shared-defs as base
+
+profile sre
+  kinds risk
+
+scope capacity-program
+  source platform-review
+  observed-at 2026-03-01T09:00Z
+
+  scope signals
+    focus traffic-now
+      kind observation
+      quantity 850 req/s
+    focus growth-trend
+      kind hypothesis
+      Traffic keeps climbing toward the capacity ceiling.
+    focus seasonal-doubt
+      kind assumption
+      The Q1 surge might be seasonal rather than a real trend.
+    focus load-test
+      kind observation
+      A sustained load test reproduced the growth under steady traffic.
+    link traffic-now supports growth-trend
+    link load-test strongly supports growth-trend
+    link seasonal-doubt undercuts growth-trend
+    link load-test rejects seasonal-doubt
+
+  scope estimate
+    focus runway-early
+      kind claim
+      asserted-at 2026-02-15T00:00Z
+      We have about six months before we hit the ceiling.
+    focus runway-now
+      kind claim
+      asserted-at 2026-03-01T00:00Z
+      Revised to about three months after the Q1 surge.
+    link runway-now revises runway-early
+
+  scope decision
+    focus capacity-decision
+      kind decision
+      How do we stay ahead of the capacity ceiling?
+    link capacity-decision depends-on base.capacity-budget
+
+    focus migrate
+      kind option
+    focus shard
+      kind option
+    link migrate option-of capacity-decision
+    link shard option-of capacity-decision
+
+    focus migrate-revenue
+      kind assumption
+      quantity 1300000 USD
+    focus migrate-budget
+      kind assumption
+      quantity 300000 USD
+    focus migrate-ops
+      kind assumption
+      quantity 120000 USD
+    focus migrate-cost
+      First-year migration cost.
+      = migrate-budget + migrate-ops
+    focus migrate-win
+      kind outcome
+      = migrate-revenue - migrate-cost
+    focus migrate-stall
+      kind outcome
+      quantity -200000 USD
+    link migrate leads-to migrate-win
+      probability 0.6
+    link migrate leads-to migrate-stall
+      probability 0.4
+
+    focus shard-win
+      kind outcome
+      quantity 500000 USD
+    focus shard-strain
+      kind outcome
+      quantity -50000 USD
+    link shard leads-to shard-win
+      probability 0.7
+    link shard leads-to shard-strain
+      probability 0.3
+
+    team chooses migrate
+      confidence 0.7
+
+  scope risks
+    focus migration-risk
+      kind risk
+      A hard cutover could cause downtime.
+    focus canary-cutover
+      kind action
+      Roll over a canary slice first, then ramp.
+    link migration-risk opposes migrate
+    link canary-cutover mitigates migration-risk

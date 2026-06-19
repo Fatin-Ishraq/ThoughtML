@@ -1,0 +1,32 @@
+# An assistant's memory of a user, accrued over a session and revised as it learns.
+#
+# Demonstrates: noticed observations, infers from multiple supporting sources,
+# remembers with a source and confidence, revises an earlier belief, considers
+# with unknown (`?`) confidence, and `note` rationale on stances (v0.1).
+
+scope user-profile
+
+assistant noticed user-prefers-readable-syntax
+  The user chose the readable action surface over the canonical core.
+  asserted-at 2026-06-17T10:02+00:00
+
+assistant noticed user-cites-specs
+  The user keeps referencing the v0 specification by section number.
+
+assistant infers user-values-standards-thinking from user-prefers-readable-syntax, user-cites-specs
+  confidence 0.65
+  note Two weak signals pointing the same way.
+
+assistant remembers prefers-rust
+  The user asked for the parser in Rust, as the spec recommends.
+  source uri:https://example.invalid/session-log
+  confidence 0.90
+
+assistant revises user-values-standards-thinking
+  confidence 0.80
+  note Upgraded after the user corrected a spec misreading, unprompted.
+
+assistant considers user-timezone
+  Working hours hint at UTC+6, but this is unconfirmed.
+  confidence ?
+  note A guess from message timestamps, not a stated fact.
