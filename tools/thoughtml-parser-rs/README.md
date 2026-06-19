@@ -132,7 +132,13 @@ The parser is hardened against malformed and hostile input:
 - Every diagnostic carries a 1-based source line number; errors set a non-zero
   exit code (warnings too, under `--strict`).
 
+## Advanced (optional)
+
+Profiles (custom dialect vocabulary, §12.4), imports with namespaces
+(composing documents, §12.5), nested scopes, and scope inheritance are
+implemented but sit outside the core story — reach for them only when a
+document genuinely needs them.
+
 ## Not yet implemented (per §15)
 
-Imports/namespaces, profile declarations, nested scopes, the `act`
-source-preserving object, and non-English readable surfaces.
+The `act` source-preserving object and non-English readable surfaces.
