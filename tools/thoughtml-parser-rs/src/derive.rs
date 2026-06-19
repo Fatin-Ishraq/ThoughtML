@@ -249,8 +249,8 @@ fn build_evidence(canon: &Canonical, overrides: &Overrides) -> Vec<Evidence> {
         .collect();
 
     // Health of each undercut inference: ∏(1 − undercut weight) over surviving
-    // `undercuts`-of-a-link edges (a `strongly undercuts`, weight 0.85, leaves
-    // 0.15). 1.0 — untouched — when nothing undercuts it. The undercutter is
+    // `undercuts`-of-a-link edges (an undercut with `weight 0.85` leaves 0.15).
+    // 1.0 — untouched — when nothing undercuts it. The undercutter is
     // taken as asserted; folding in *its* believedness is a documented v-next.
     let mut health: HashMap<String, f64> = HashMap::new();
     for o in &canon.objects {

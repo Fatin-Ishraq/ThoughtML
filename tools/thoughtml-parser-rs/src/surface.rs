@@ -42,8 +42,6 @@ pub enum Header {
         from: String,
         relation: String,
         to: String,
-        /// Relation strength from a `strongly`/`weakly` adverb (v0.2).
-        weight: Option<f64>,
     },
     Stance {
         alias: Option<String>,

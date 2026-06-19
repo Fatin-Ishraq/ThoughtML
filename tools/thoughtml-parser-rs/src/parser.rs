@@ -150,32 +150,25 @@ fn simple_id_header(
 }
 
 fn parse_link_header(line: &Line, toks: &[&str], diags: &mut Diagnostics) -> Option<Header> {
-    // link [alias:] from [strongly|weakly] relation to
+    // link [alias:] from relation to    (strength is the `weight` field, §12.2)
     let rest = &toks[1..];
     let (alias, rest) = take_alias(rest);
-    // An optional strength adverb sits between `from` and the relation.
-    let (rel_at, weight) = match rest.get(1).and_then(|t| vocab::adverb_weight(t)) {
-        Some(w) => (2, Some(w)),
-        None => (1, None),
-    };
-    let expected_len = rel_at + 2;
-    if rest.len() != expected_len {
+    if rest.len() != 3 {
         diags.error(
             line.number,
-            "`link` header expects `[alias:] from [strongly|weakly] relation to`",
+            "`link` header expects `[alias:] from relation to`",
         );
         return None;
     }
     let from = ident(rest[0], line.number, diags)?;
-    let relation = symbol(rest[rel_at], line.number, diags)?;
-    let to = ident(rest[rel_at + 1], line.number, diags)?;
+    let relation = symbol(rest[1], line.number, diags)?;
+    let to = ident(rest[2], line.number, diags)?;
     let alias = alias.and_then(|a| ident(a, line.number, diags));
     Some(Header::Link {
         alias,
         from,
         relation,
         to,
-        weight,
     })
 }
 
@@ -475,35 +468,14 @@ mod tests {
     fn parses_link_header_with_and_without_alias() {
         let f = parse_ok("link deploy-cause: deploy-change causes metric-shift\nlink dashboard-bug undercuts deploy-cause");
         match &f.records[0].header {
-            Header::Link { alias, from, relation, to, weight } => {
+            Header::Link { alias, from, relation, to } => {
                 assert_eq!(alias.as_deref(), Some("deploy-cause"));
                 assert_eq!((from.as_str(), relation.as_str(), to.as_str()), ("deploy-change", "causes", "metric-shift"));
-                assert!(weight.is_none());
             }
             _ => panic!(),
         }
         match &f.records[1].header {
             Header::Link { alias, .. } => assert!(alias.is_none()),
-            _ => panic!(),
-        }
-    }
-
-    #[test]
-    fn parses_link_adverb() {
-        let f = parse_ok("link a strongly supports b\nlink c: d weakly undercuts e");
-        match &f.records[0].header {
-            Header::Link { from, relation, to, weight, .. } => {
-                assert_eq!((from.as_str(), relation.as_str(), to.as_str()), ("a", "supports", "b"));
-                assert_eq!(*weight, Some(0.85));
-            }
-            _ => panic!(),
-        }
-        match &f.records[1].header {
-            Header::Link { alias, relation, weight, .. } => {
-                assert_eq!(alias.as_deref(), Some("c"));
-                assert_eq!(relation, "undercuts");
-                assert_eq!(*weight, Some(0.30));
-            }
             _ => panic!(),
         }
     }

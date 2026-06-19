@@ -40,8 +40,9 @@ focus tasks-fully-automatable
   Support, copywriting, and first-draft code now run end to end with light review.
   kind observation
 
-link firms-cutting-headcount strongly supports displacement-hypothesis
+link firms-cutting-headcount supports displacement-hypothesis
   Headcount falling while output holds is what displacement looks like early on.
+  weight 0.85
 
 link tasks-fully-automatable supports displacement-hypothesis
   If whole task categories vanish, the roles built around them go too.
@@ -67,8 +68,9 @@ focus adaptation-too-slow
 analyst infers adaptation-too-slow from ai-capability-surge
   confidence 0.60
 
-link adaptation-too-slow strongly undercuts technology-creates-jobs
+link adaptation-too-slow undercuts technology-creates-jobs
   "New jobs eventually" is little comfort if workers can't reach them in time.
+  weight 0.85
 
 # --- The question it all hinges on ---
 
@@ -150,11 +152,13 @@ focus cache-hit-rate-drop
 focus eviction-config-unchanged
   The eviction policy hasn't changed in 30 days.
 
-link cache-hit-rate-drop strongly supports cache-hypothesis
+link cache-hit-rate-drop supports cache-hypothesis
   A cliff in hit rate is exactly what aggressive eviction would cause.
+  weight 0.85
 
-link eviction-config-unchanged weakly undercuts cache-hypothesis
+link eviction-config-unchanged undercuts cache-hypothesis
   If the policy never changed, eviction is an unlikely trigger on its own.
+  weight 0.30
 
 # Carol comes around after weighing the evidence.
 carol accepts cache-hypothesis
@@ -338,7 +342,7 @@ focus changelog-reviewed
   Every merged PR in the release carries a reviewer sign-off.
   kind observation
 
-link canary-healthy strongly supports ready-to-ship
+link canary-healthy supports ready-to-ship
   Real traffic at smaller scale with no regression is the strongest signal we have.
   weight 0.85
 
@@ -346,8 +350,9 @@ link tests-green supports ready-to-ship
   Green tests are necessary, but they have passed before failed releases too.
   weight 0.4
 
-link changelog-reviewed weakly supports ready-to-ship
+link changelog-reviewed supports ready-to-ship
   Review catches intent bugs, but says little about runtime behaviour.
+  weight 0.30
 
 # --- Evidence against ---
 
@@ -770,7 +775,8 @@ scope capacity-program
       kind observation
       A sustained load test reproduced the growth under steady traffic.
     link traffic-now supports growth-trend
-    link load-test strongly supports growth-trend
+    link load-test supports growth-trend
+      weight 0.85
     link seasonal-doubt undercuts growth-trend
     link load-test opposes seasonal-doubt
 
@@ -887,7 +893,8 @@ scope college-choice
       A few years into a career, fit may matter more than prestige.
     link admit-harvard enables harvard
     link faculty-fit supports goal-research
-    link aid-offer strongly supports goal-aid
+    link aid-offer supports goal-aid
+      weight 0.85
     link prestige-signal supports goal-network
     link prestige-doubt undercuts prestige-signal
 

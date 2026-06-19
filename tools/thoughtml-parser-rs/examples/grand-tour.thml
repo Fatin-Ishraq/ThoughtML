@@ -29,7 +29,8 @@ scope capacity-program
       kind observation
       A sustained load test reproduced the growth under steady traffic.
     link traffic-now supports growth-trend
-    link load-test strongly supports growth-trend
+    link load-test supports growth-trend
+      weight 0.85
     link seasonal-doubt undercuts growth-trend
     link load-test opposes seasonal-doubt
 

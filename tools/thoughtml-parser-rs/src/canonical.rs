@@ -184,7 +184,7 @@ pub struct Link {
     pub relation: String,
     pub to: String,
     /// Optional relation strength in 0..1 (v0.2): how strongly the relation
-    /// holds. Set by a `weight` field or a `strongly`/`weakly` adverb.
+    /// holds. Set by an explicit `weight` field.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub weight: Option<f64>,
     /// Probability in 0..1 of this edge's outcome given its option (v0.2,
