@@ -1,6 +1,7 @@
 name: Docs
 
 # Build the ThoughtML Book (mdBook) and publish it to GitHub Pages.
+# (Registered via a push whose diff includes this file.)
 on:
   push:
     branches: [main]
