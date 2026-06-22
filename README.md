@@ -26,31 +26,45 @@ practical [guides](https://fatin-ishraq.github.io/ThoughtML/guides/use-cases.htm
 
 ## The idea, in one example
 
+A hiring call, written as ThoughtML:
+
 ```thml
-focus cache-is-safe
+focus strong-hire
   kind claim
-  The new cache layer is safe to ship today.
+  Alex is a strong hire.
 
-focus load-test-passed
+focus aced-interview
   kind observation
-  Load test at 2x peak traffic passed with no errors.
+  Aced the system-design round.
 
-focus stale-reads
+focus take-home-failed
   kind observation
-  Staging showed stale reads under cache eviction.
+  The take-home didn't run — tests were failing.
 
-link load-test-passed supports cache-is-safe
-link stale-reads opposes cache-is-safe
+link aced-interview supports strong-hire
+link take-home-failed opposes strong-hire
 
-ops-agent holds cache-is-safe
+panel holds strong-hire
   confidence 0.9 assumed
-  note Shipping — the load test passed.
 ```
 
-This document is *clean* — no errors, no warnings. But the mirror flags a
-**conflict**: the agent holds `cache-is-safe` at 0.9, while its own recorded
-evidence (`stale-reads opposes cache-is-safe`) defeats that claim. It wrote down
-the counter-observation, then shipped anyway. ThoughtML surfaces that
+The document is **clean** — no errors, no warnings. But run the mirror over it
+(`thoughtml --audit`) and it reports a conflict:
+
+```json
+"audit": {
+  "conflicts": [
+    {
+      "kind": "confidence-vs-status",
+      "severity": "error",
+      "message": "`panel` asserts confidence 0.90 in `strong-hire`, but your own structure defeats it (argument status: out)"
+    }
+  ]
+}
+```
+
+The panel is 90% sure of a claim its *own* recorded evidence defeats — it noted
+the take-home failed, then made the offer anyway. ThoughtML surfaces that
 disagreement; it doesn't decide for you. (And that `0.9` declares itself
 `assumed`, not measured — provenance you can see.)
 
