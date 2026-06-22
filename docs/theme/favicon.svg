@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="ThoughtML">
+  <style>
+    .ln { stroke: #1e1c19; }
+    .nd { fill: #1e1c19; }
+    @media (prefers-color-scheme: dark) {
+      .ln { stroke: #f5f4f2; }
+      .nd { fill: #f5f4f2; }
+    }
+  </style>
+  <g fill="none" stroke-width="5.5" stroke-linecap="round">
+    <line class="ln" x1="15" y1="17" x2="49" y2="17" />
+    <line class="ln" x1="32" y1="17" x2="32" y2="51" />
+  </g>
+  <circle class="nd" cx="15" cy="17" r="7.5" />
+  <circle class="nd" cx="49" cy="17" r="7.5" />
+  <circle cx="32" cy="51" r="7.5" fill="#5cb0ff" />
+</svg>

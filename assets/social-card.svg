@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" role="img" aria-label="ThoughtML — a plain-text language for reasoning you can check">
+  <rect width="1280" height="640" fill="#161412" />
+  <rect x="40" y="40" width="1200" height="560" rx="14" fill="none" stroke="#3c3833" stroke-width="2" />
+
+  <!-- mark -->
+  <g transform="translate(338,232) scale(2.3)">
+    <g fill="none" stroke="#f5f4f2" stroke-width="5.5" stroke-linecap="round">
+      <line x1="15" y1="17" x2="49" y2="17" />
+      <line x1="32" y1="17" x2="32" y2="51" />
+    </g>
+    <circle cx="15" cy="17" r="7.5" fill="#f5f4f2" />
+    <circle cx="49" cy="17" r="7.5" fill="#f5f4f2" />
+    <circle cx="32" cy="51" r="7.5" fill="#5cb0ff" />
+  </g>
+
+  <!-- wordmark -->
+  <text x="500" y="338" font-family="Georgia, 'Iowan Old Style', 'Times New Roman', serif" font-size="96" font-weight="600" fill="#f5f4f2">Thought<tspan fill="#5cb0ff">ML</tspan></text>
+
+  <!-- tagline -->
+  <text x="640" y="446" text-anchor="middle" font-family="Georgia, 'Iowan Old Style', 'Times New Roman', serif" font-size="34" fill="#b4b0aa">A plain-text language for reasoning you can check.</text>
+  <text x="640" y="492" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="22" letter-spacing="3" fill="#807b74">A MIRROR, NOT AN ORACLE</text>
+</svg>

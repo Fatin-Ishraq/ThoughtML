@@ -1,11 +1,18 @@
-# ThoughtML
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/wordmark-dark.svg" />
+    <img alt="ThoughtML" src="assets/wordmark-light.svg" width="360" />
+  </picture>
+</p>
 
-**A plain-text language for reasoning you can check.**
+<p align="center"><strong>A plain-text language for reasoning you can check.</strong></p>
 
-[![docs](https://img.shields.io/badge/docs-The%20ThoughtML%20Book-1f6feb)](https://fatin-ishraq.github.io/ThoughtML/)
-[![CI](https://github.com/Fatin-Ishraq/ThoughtML/actions/workflows/ci.yml/badge.svg)](https://github.com/Fatin-Ishraq/ThoughtML/actions/workflows/ci.yml)
-[![license: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![version](https://img.shields.io/badge/version-0.1.0-blueviolet)](CHANGELOG.md)
+<p align="center">
+  <a href="https://fatin-ishraq.github.io/ThoughtML/"><img alt="docs" src="https://img.shields.io/badge/docs-The%20ThoughtML%20Book-1f6feb" /></a>
+  <a href="https://github.com/Fatin-Ishraq/ThoughtML/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/Fatin-Ishraq/ThoughtML/actions/workflows/ci.yml/badge.svg" /></a>
+  <a href="LICENSE"><img alt="license: MIT" src="https://img.shields.io/badge/license-MIT-green" /></a>
+  <a href="CHANGELOG.md"><img alt="version" src="https://img.shields.io/badge/version-0.1.0-blueviolet" /></a>
+</p>
 
 You write down what you believe and *why* — claims, evidence, who holds what, how
 confident, as of when — and ThoughtML reads it back as a typed, dated, defeasible
