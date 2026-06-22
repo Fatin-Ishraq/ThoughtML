@@ -1,0 +1,23 @@
+[book]
+title = "The ThoughtML Book"
+authors = ["Fatin Ishraq"]
+description = "Documentation for ThoughtML — a plain-text language for reasoning you can check."
+language = "en"
+src = "src"
+
+[output.html]
+default-theme = "navy"
+preferred-dark-theme = "navy"
+git-repository-url = "https://github.com/Fatin-Ishraq/ThoughtML"
+edit-url-template = "https://github.com/Fatin-Ishraq/ThoughtML/edit/main/docs/{path}"
+# Project site is served from a subpath (https://<user>.github.io/ThoughtML/),
+# so absolute asset/search links must be prefixed with the repo name.
+site-url = "/ThoughtML/"
+no-section-label = false
+
+[output.html.fold]
+enable = true
+level = 1
+
+[output.html.search]
+enable = true
