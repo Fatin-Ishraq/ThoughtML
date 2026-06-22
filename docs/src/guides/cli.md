@@ -69,9 +69,9 @@ import cycle is reported and broken. See
 
 ## Running from source
 
-Before installing the binary, you can run via cargo from
-`tools/thoughtml-parser-rs`:
+Before installing the binary, you can run via cargo from the repository root
+(`-p thoughtml` selects the parser crate):
 
 ```sh
-cargo run -- --compute examples/decision-ev.thml
+cargo run -p thoughtml -- --compute examples/decision-ev.thml
 ```

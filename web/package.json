@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Live editor and graph playground for ThoughtML.",
   "scripts": {
-    "wasm": "wasm-pack build ../thoughtml-wasm --target web --out-dir ../thoughtml-web/src/wasm --out-name thoughtml_wasm --release",
+    "wasm": "wasm-pack build ../crates/thoughtml-wasm --target web --out-dir ../../web/src/wasm --out-name thoughtml_wasm --release",
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview"

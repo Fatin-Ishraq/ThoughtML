@@ -66,7 +66,7 @@ Breaking changes will be recorded in the
 ### Where's the formal specification?
 
 The single source of truth is the **reference parser** in
-`tools/thoughtml-parser-rs`. This documentation is derived from it: if the two
+`crates/thoughtml`. This documentation is derived from it: if the two
 ever disagree, the parser wins (and that's a documentation bug worth reporting).
 There is no separate formal grammar document — this book *is* the specification,
 kept honest against the parser.

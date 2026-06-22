@@ -24,15 +24,17 @@ Clone the repository and build the reference implementation:
 
 ```sh
 git clone https://github.com/Fatin-Ishraq/ThoughtML.git
-cd ThoughtML/tools/thoughtml-parser-rs
-cargo build --release
-cargo test          # 171 tests; every bundled example is strict-clean
+cd ThoughtML
+cargo build --release   # builds the workspace (parser + wasm crate)
+cargo test              # 171 tests; every bundled example is strict-clean
 ```
 
-Run it on a document — canonical JSON goes to stdout, diagnostics to stderr:
+Run it on a document — canonical JSON goes to stdout, diagnostics to stderr.
+All commands run from the repository root; `-p thoughtml` selects the parser
+crate:
 
 ```sh
-cargo run -- examples/incident-742.thml
+cargo run -p thoughtml -- examples/incident-742.thml
 ```
 
 The binary is named `thoughtml`. After `cargo build --release` it lives at
@@ -47,7 +49,7 @@ See the [CLI reference](../guides/cli.md) for every flag.
 ## Running the playground
 
 ```sh
-cd tools/thoughtml-web
+cd web
 npm install
 npm run wasm        # compile the parser to wasm (uses the rustup toolchain)
 npm run dev         # start the dev server, then open the printed URL

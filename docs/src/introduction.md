@@ -73,6 +73,6 @@ is real and usable, but its surface may still move (hence 0.x, not 1.0). Where a
 feature is *opt-in* or *advanced*, this book says so plainly.
 
 > **The single source of truth is the reference parser** in
-> `tools/thoughtml-parser-rs`. Everything in this book is derived from it. If
+> `crates/thoughtml`. Everything in this book is derived from it. If
 > the two ever disagree, the parser wins — and that's a documentation bug worth
 > [reporting](https://github.com/Fatin-Ishraq/ThoughtML/issues).

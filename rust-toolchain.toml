@@ -1,0 +1,6 @@
+[toolchain]
+# The reference parser builds on stable. The wasm32 target is required for the
+# playground build (`web/ → npm run wasm`); pinning it here means `rustup` selects
+# a toolchain that can cross-compile to WebAssembly out of the box.
+channel = "stable"
+targets = ["wasm32-unknown-unknown"]

@@ -1,4 +1,4 @@
-// Bundled example sources, mirroring tools/thoughtml-parser-rs/examples/*.thml.
+// Bundled example sources, mirroring examples/*.thml.
 // Embedded as strings so the playground is fully self-contained.
 
 export const EXAMPLES: Record<string, string> = {

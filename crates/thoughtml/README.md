@@ -1,8 +1,11 @@
-# thoughtml-parser-rs
+# thoughtml
 
-Reference parser for **ThoughtML v0** (see [`../../project_plan.md`](../../project_plan.md)).
+Reference parser for **ThoughtML** — the single source of truth for the language.
+Full language documentation lives at
+<https://fatin-ishraq.github.io/ThoughtML/>; this crate is the implementation it
+is derived from.
 
-It implements the full v0 pipeline from §16:
+It implements the full pipeline:
 
 1. **parse** source text into a surface AST,
 2. **normalize** (desugar) the surface AST into canonical objects,
@@ -42,8 +45,9 @@ exits non-zero if there are any errors (or any warnings under `--strict`).
 
 ## Examples
 
-The [`examples/`](examples) directory holds runnable `.thml` files (all parse
-with zero diagnostics):
+The repository's [`examples/`](../../examples) directory holds runnable `.thml`
+files (all parse with zero diagnostics); run them from the repo root with
+`cargo run -p thoughtml -- examples/<file>.thml`:
 
 | File                       | Shows                                                            |
 |----------------------------|-----------------------------------------------------------------|

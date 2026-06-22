@@ -1419,7 +1419,7 @@ fn formula_references_count_as_connections() {
 
 #[test]
 fn cost_model_example_evaluates_clean() {
-    let r = parse_formulas(include_str!("../examples/cost-model.thml"));
+    let r = parse_formulas(include_str!("../../../examples/cost-model.thml"));
     assert!(!r.diagnostics.has_warnings(), "{:?}", r.diagnostics.items);
     let o = &r.canonical.objects;
     assert_eq!(computed_of(o, "monthly-compute").unwrap().value, 2160.0);
@@ -1629,7 +1629,7 @@ link opt leads-to win
 
 #[test]
 fn decision_ev_example_evaluates_clean() {
-    let r = parse_decisions(include_str!("../examples/decision-ev.thml"));
+    let r = parse_decisions(include_str!("../../../examples/decision-ev.thml"));
     assert!(!r.diagnostics.has_warnings(), "{:?}", r.diagnostics.items);
     let o = &r.canonical.objects;
     // launch-now: 0.4·900000 (computed payoff) + 0.6·(−200000) = 240000.
@@ -1759,7 +1759,7 @@ focus total
 fn release_bet_capstone_weaves_the_stack_and_flips() {
     // The capstone: formula payoffs (§4.8) + a derived-confidence probability
     // (§10.3) + EV ranking (§10.6) + a what-if that flips it (§10.5).
-    let src = include_str!("../examples/release-bet.thml");
+    let src = include_str!("../../../examples/release-bet.thml");
     let base = parse_decisions(src);
     assert!(!base.diagnostics.has_warnings(), "{:?}", base.diagnostics.items);
     let o = &base.canonical.objects;
@@ -1782,25 +1782,25 @@ fn release_bet_capstone_weaves_the_stack_and_flips() {
 #[test]
 fn bundled_examples_are_strict_clean() {
     let examples: &[(&str, &str)] = &[
-        ("ai-and-jobs", include_str!("../examples/ai-and-jobs.thml")),
-        ("incident-742", include_str!("../examples/incident-742.thml")),
-        ("multi-agent-debate", include_str!("../examples/multi-agent-debate.thml")),
-        ("decision-record", include_str!("../examples/decision-record.thml")),
-        ("agent-memory", include_str!("../examples/agent-memory.thml")),
-        ("estimate-revised", include_str!("../examples/estimate-revised.thml")),
-        ("sensitivity-demo", include_str!("../examples/sensitivity-demo.thml")),
-        ("capacity-plan", include_str!("../examples/capacity-plan.thml")),
-        ("cost-model", include_str!("../examples/cost-model.thml")),
-        ("decision-ev", include_str!("../examples/decision-ev.thml")),
-        ("release-bet", include_str!("../examples/release-bet.thml")),
-        ("canonical-core", include_str!("../examples/canonical-core.thml")),
-        ("nested-scope", include_str!("../examples/nested-scope.thml")),
-        ("profile-dialect", include_str!("../examples/profile-dialect.thml")),
-        ("why-harvard", include_str!("../examples/why-harvard.thml")),
-        ("self-audit", include_str!("../examples/self-audit.thml")),
+        ("ai-and-jobs", include_str!("../../../examples/ai-and-jobs.thml")),
+        ("incident-742", include_str!("../../../examples/incident-742.thml")),
+        ("multi-agent-debate", include_str!("../../../examples/multi-agent-debate.thml")),
+        ("decision-record", include_str!("../../../examples/decision-record.thml")),
+        ("agent-memory", include_str!("../../../examples/agent-memory.thml")),
+        ("estimate-revised", include_str!("../../../examples/estimate-revised.thml")),
+        ("sensitivity-demo", include_str!("../../../examples/sensitivity-demo.thml")),
+        ("capacity-plan", include_str!("../../../examples/capacity-plan.thml")),
+        ("cost-model", include_str!("../../../examples/cost-model.thml")),
+        ("decision-ev", include_str!("../../../examples/decision-ev.thml")),
+        ("release-bet", include_str!("../../../examples/release-bet.thml")),
+        ("canonical-core", include_str!("../../../examples/canonical-core.thml")),
+        ("nested-scope", include_str!("../../../examples/nested-scope.thml")),
+        ("profile-dialect", include_str!("../../../examples/profile-dialect.thml")),
+        ("why-harvard", include_str!("../../../examples/why-harvard.thml")),
+        ("self-audit", include_str!("../../../examples/self-audit.thml")),
         // shared-defs is dependency-free, so it is clean as a single document;
         // imports-demo references `base.*` and is checked as a project below.
-        ("shared-defs", include_str!("../examples/shared-defs.thml")),
+        ("shared-defs", include_str!("../../../examples/shared-defs.thml")),
     ];
     for (name, src) in examples {
         let r = parse_str(src);
@@ -1914,7 +1914,7 @@ fn nonscope_with_children_warns() {
 
 #[test]
 fn nested_scope_example_is_strict_clean() {
-    let r = parse_str(include_str!("../examples/nested-scope.thml"));
+    let r = parse_str(include_str!("../../../examples/nested-scope.thml"));
     assert!(!r.diagnostics.has_errors(), "errors: {:?}", r.diagnostics.items);
     assert!(!r.diagnostics.has_warnings(), "warnings: {:?}", r.diagnostics.items);
 }
@@ -1979,7 +1979,7 @@ fn profile_object_captures_its_lists() {
 
 #[test]
 fn profile_dialect_example_is_strict_clean() {
-    let r = parse_str(include_str!("../examples/profile-dialect.thml"));
+    let r = parse_str(include_str!("../../../examples/profile-dialect.thml"));
     assert!(!r.diagnostics.has_errors(), "errors: {:?}", r.diagnostics.items);
     assert!(!r.diagnostics.has_warnings(), "warnings: {:?}", r.diagnostics.items);
 }
@@ -1994,9 +1994,9 @@ fn project(entry: &str, sources: &[(&str, &str)]) -> crate::ParseResult {
     parse_project(entry, &map, Options::default())
 }
 
-const SHARED: &str = include_str!("../examples/shared-defs.thml");
-const IMPORTER: &str = include_str!("../examples/imports-demo.thml");
-const GRAND: &str = include_str!("../examples/grand-tour.thml");
+const SHARED: &str = include_str!("../../../examples/shared-defs.thml");
+const IMPORTER: &str = include_str!("../../../examples/imports-demo.thml");
+const GRAND: &str = include_str!("../../../examples/grand-tour.thml");
 
 /// Every computed view on — what the playground runs. The provenance lint stays
 /// opt-in (off), matching the playground, so bundled examples without a basis on
@@ -2200,7 +2200,7 @@ fn why_harvard_computes_and_ranks_both_options() {
     // The showcase decision must stay clean under the full stack, rank harvard
     // first, and — the fix for the original self-loop bug — rank *both* options
     // rather than silently dropping the unwired one.
-    let r = parse_str_with(include_str!("../examples/why-harvard.thml"), full_options());
+    let r = parse_str_with(include_str!("../../../examples/why-harvard.thml"), full_options());
     assert!(!r.diagnostics.has_errors(), "errors: {:?}", r.diagnostics.items);
     assert!(!r.diagnostics.has_warnings(), "warnings: {:?}", r.diagnostics.items);
     let d = decision_of(&r.canonical.objects, "where-to-go").expect("decision EV");
@@ -2262,7 +2262,7 @@ fn audit_is_opt_in() {
 
 #[test]
 fn self_audit_example_is_clean_in_form_but_conflicted_in_reasoning() {
-    let src = include_str!("../examples/self-audit.thml");
+    let src = include_str!("../../../examples/self-audit.thml");
     // Clean form — it belongs in the strict-clean bundle.
     let plain = parse_str(src);
     assert!(!plain.diagnostics.has_errors() && !plain.diagnostics.has_warnings(), "{:?}", plain.diagnostics.items);

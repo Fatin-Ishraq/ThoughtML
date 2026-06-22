@@ -1,0 +1,19 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/thoughtml",
+    "crates/thoughtml-wasm",
+]
+
+# Shared metadata for the workspace members.
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/Fatin-Ishraq/ThoughtML"
+
+# Release profile lives at the workspace root (per-crate profiles are ignored).
+# Keeps the wasm binary small: optimize for size + link-time optimization.
+[profile.release]
+opt-level = "s"
+lto = true

@@ -11,8 +11,8 @@ yarn-error.log*
 pnpm-debug.log*
 
 # Web build + generated wasm
-tools/thoughtml-web/dist/
-tools/thoughtml-web/src/wasm/
+web/dist/
+web/src/wasm/
 
 # mdBook rendered output (the docs source in docs/src/ stays tracked)
 docs/book/

@@ -1,9 +1,10 @@
 [package]
-name = "thoughtml-parser-rs"
+name = "thoughtml"
 version = "0.1.0"
 edition = "2021"
 description = "Reference parser for ThoughtML: surface AST -> canonical objects -> JSON, with diagnostics."
 license = "MIT"
+repository = "https://github.com/Fatin-Ishraq/ThoughtML"
 
 [[bin]]
 name = "thoughtml"

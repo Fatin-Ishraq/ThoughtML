@@ -110,20 +110,19 @@ ThoughtML is a *language*; this repo is its **reference implementation** — a
 parser, a wasm build of that same parser, and a browser playground. You don't
 need any Rust to use the language, only to run the implementation.
 
-**Run the parser (CLI):**
+**Run the parser (CLI)** — from the repository root:
 
 ```sh
-cd tools/thoughtml-parser-rs
-cargo run -- path/to/doc.thml              # canonical JSON + diagnostics
-cargo run -- --compute path/to/doc.thml    # plus the mirror's opt-in readings
-cargo run -- --strict-provenance doc.thml  # warn on numbers with no basis
+cargo run -p thoughtml -- examples/self-audit.thml             # canonical JSON + diagnostics
+cargo run -p thoughtml -- --compute examples/why-harvard.thml  # the mirror's opt-in readings
+cargo run -p thoughtml -- --strict-provenance doc.thml         # warn on numbers with no basis
 cargo test
 ```
 
 **Run the playground (live editor + graph):**
 
 ```sh
-cd tools/thoughtml-web
+cd web
 npm install
 npm run wasm    # build the parser to wasm (uses the rustup toolchain)
 npm run dev
@@ -147,12 +146,12 @@ for details.
 
 ## How it's built
 
-- **Reference parser** — [`tools/thoughtml-parser-rs`](tools/thoughtml-parser-rs)
+- **Reference parser** — [`crates/thoughtml`](crates/thoughtml)
   (Rust): source → surface AST → canonical objects → JSON, with diagnostics. The
   single source of truth for the language.
-- **wasm bindings** — [`tools/thoughtml-wasm`](tools/thoughtml-wasm): the same
+- **wasm bindings** — [`crates/thoughtml-wasm`](crates/thoughtml-wasm): the same
   parser, compiled for the web — so the browser and the CLI can never drift.
-- **Playground** — [`tools/thoughtml-web`](tools/thoughtml-web): a live editor and
+- **Playground** — [`web`](web): a live editor and
   graph view, in the spirit of mermaid.live.
 
 ## Status

@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: The ThoughtML Book (documentation)
+    url: https://fatin-ishraq.github.io/ThoughtML/
+    about: The tutorial, language reference, the mirror, and guides.
