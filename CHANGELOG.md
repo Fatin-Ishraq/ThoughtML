@@ -59,5 +59,5 @@ relations; defeasible evidence with derived confidence; grounded argument
 status; temporal assertion and revision (as-of views); a
 quantities / formulas / expected-value compute layer; nested scopes, profiles,
 and imports with namespaces; and the first mirror output — an opt-in conflict
-report (`confidence-vs-status`). See `project_plan.md` for the full development
-history (note: some of its phase notes describe features this release removed).
+report (`confidence-vs-status`). Those capabilities still ship in v0.1.0, behind
+opt-in flags; see the [documentation](docs/) for the language as it stands today.

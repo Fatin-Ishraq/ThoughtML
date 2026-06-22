@@ -62,6 +62,19 @@ It's to make the reasoning legible enough that its flaws can't hide.
 - **Playground** — [`tools/thoughtml-web`](tools/thoughtml-web): a live editor
   and graph view, in the spirit of mermaid.live.
 
+## Documentation
+
+Full documentation lives in [`docs/`](docs/) — *The ThoughtML Book*: a guided
+tutorial, a complete language reference, the mirror/evaluation layer, and
+practical guides (use cases, ThoughtML for AI agents, the CLI, the playground).
+It's written for [mdBook](https://rust-lang.github.io/mdBook/), but every page is
+plain Markdown you can read straight on GitHub.
+
+```sh
+cargo install mdbook
+cd docs && mdbook serve --open    # render the searchable site locally
+```
+
 ## Quickstart
 
 **CLI** (the parser):
@@ -100,8 +113,7 @@ npm run dev
 
 **v0.1.0** — the first public release. Real and usable; the surface may still
 move (hence 0.x, not 1.0). See [CHANGELOG.md](CHANGELOG.md) for what this release
-deliberately removed, and [project_plan.md](project_plan.md) for the full design
-history.
+deliberately removed, and the [documentation](docs/) for the full language.
 
 ## License
 

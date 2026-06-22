@@ -14,6 +14,9 @@ pnpm-debug.log*
 tools/thoughtml-web/dist/
 tools/thoughtml-web/src/wasm/
 
+# mdBook rendered output (the docs source in docs/src/ stays tracked)
+docs/book/
+
 # Environment / secrets
 .env
 .env.*
