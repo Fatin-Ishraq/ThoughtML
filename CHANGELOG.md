@@ -4,6 +4,25 @@ All notable changes to ThoughtML are recorded here. The project follows
 [Semantic Versioning](https://semver.org). **v0.1.0** is the first public
 release — real and usable, but the surface may still move.
 
+## [Unreleased]
+
+### Added
+
+- **Standalone interactive viewer (`thoughtml --html`).** Bake any document into a
+  single, self-contained HTML file — the interactive graph (pan/zoom, node detail,
+  the lenses, the as-of timeline, light/dark) with the canonical model inlined and
+  **no wasm and no server**. `--html` implies the full compute stack so every lens
+  has data. The graph is now an *output of the toolchain*, alongside JSON.
+
+### Changed
+
+- **The renderer is a wasm-free core.** The graph/detail/legend projection was
+  split from the wasm parser (a pure `model.ts` type seam), so the same renderer
+  drives both the playground and the standalone viewer — they can't drift. The
+  viewer ships with **system fonts** (no inlined web fonts), keeping each exported
+  file small. A CI freshness guard rebuilds the viewer template and fails if the
+  committed copy drifts, so `cargo build` still needs no Node.
+
 ## [0.1.0] — 2026-06-19
 
 The first release is a *subtraction*. ThoughtML had been built up across many

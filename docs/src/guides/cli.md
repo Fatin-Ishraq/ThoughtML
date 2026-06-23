@@ -19,7 +19,8 @@ thoughtml [OPTIONS] <FILE>
 |------|--------|
 | `--ast` | Emit the surface AST instead of the canonical model. |
 | `--compact` | Single-line JSON instead of pretty-printed. |
-| `-o`, `--out <PATH>` | Write JSON to a file instead of stdout. |
+| `--html` | Emit a self-contained interactive HTML viewer instead of JSON (implies `--compute`). See [The standalone viewer](viewer.md). |
+| `-o`, `--out <PATH>` | Write output to a file instead of stdout. |
 | `--strict` | Treat warnings as failures for the exit code. |
 
 ## Mirror options (opt-in readings)
@@ -50,6 +51,9 @@ thoughtml --compute --compact -o out.json examples/why-harvard.thml
 
 # Just the conflict report
 thoughtml --audit examples/self-audit.thml
+
+# A standalone interactive viewer — one self-contained HTML file, opens anywhere
+thoughtml --html -o decision-record.html examples/decision-record.thml
 
 # Enforce provenance and fail on any warning (good for CI)
 thoughtml --strict --strict-provenance reasoning.thml

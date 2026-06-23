@@ -47,6 +47,7 @@
 - [ThoughtML for AI agents](guides/for-ai-agents.md)
 - [CLI reference](guides/cli.md)
 - [Using the playground](guides/playground.md)
+- [The standalone viewer](guides/viewer.md)
 
 # Appendix
 

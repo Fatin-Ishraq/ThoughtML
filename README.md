@@ -119,6 +119,13 @@ cargo run -p thoughtml -- --strict-provenance doc.thml         # warn on numbers
 cargo test
 ```
 
+**Export a standalone view** — bake a document into one self-contained, interactive
+HTML file that opens in any browser (no server, no wasm):
+
+```sh
+cargo run -p thoughtml -- --html -o decision-record.html examples/decision-record.thml
+```
+
 **Run the playground (live editor + graph):**
 
 ```sh
@@ -153,6 +160,11 @@ for details.
   parser, compiled for the web — so the browser and the CLI can never drift.
 - **Playground** — [`web`](web): a live editor and
   graph view, in the spirit of mermaid.live.
+- **Standalone viewer** — `thoughtml --html` bakes a document into one
+  self-contained, interactive HTML file (the graph, the lenses, the as-of
+  timeline — model inlined, no wasm, no server). The renderer is a wasm-free core
+  shared with the playground, so both render identically. The graph is an *output
+  of the toolchain*, alongside JSON.
 
 ## Status
 

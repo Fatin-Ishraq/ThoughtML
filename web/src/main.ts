@@ -1,7 +1,9 @@
 import './styles.css'
-import { initParser, parseProject, parseWhatIf, parseTime, type ParseResult, type Diagnostic, type Conflict, type Overrides } from './parse'
+import { initParser, parseProject, parseWhatIf } from './parse'
+import { parseTime, type ParseResult, type Diagnostic, type Conflict, type Overrides } from './model'
 import { createEditor } from './editor'
-import { createGraph, legendItems, relationLegend, type ViewMode, type Theme } from './graph'
+import { createGraph, type ViewMode, type Theme } from './graph'
+import { buildLegend, buildLensKey } from './legend'
 import { renderDiagnostics } from './diagnostics'
 import { renderDetail, kindOf, labelOf, type WhatIfCtx } from './detail'
 import { EXAMPLES, DEFAULT_EXAMPLE, ADVANCED_EXAMPLES } from './examples'
@@ -67,46 +69,11 @@ async function boot(): Promise<void> {
   el('#examples-toggle').addEventListener('click', () => el('#examples-tray').classList.toggle('collapsed'))
 
   // ---- legend (visual key: node types + relation vocabulary) ----
-  function buildLegend() {
-    const legend = el('#legend')
-    legend.replaceChildren()
-    const section = (title: string, rows: string[]) => {
-      const wrap = document.createElement('div')
-      wrap.className = 'legend-group'
-      wrap.innerHTML = `<div class="legend-title">${title}</div>` +
-        rows.map((r) => `<div class="legend-row">${r}</div>`).join('')
-      legend.appendChild(wrap)
-    }
-    section('Node types', legendItems(theme).map(({ label, color }) =>
-      `<span class="legend-swatch" style="background:${color}"></span>${label}`))
-    section('Links', relationLegend(theme).map(({ label, color, arrow, line }) =>
-      `${relSample(color, arrow, line)}<span>${label}</span>`))
-  }
-  buildLegend()
+  buildLegend(el('#legend'), theme)
   el('#legend-toggle').addEventListener('click', () => { el('#legend').hidden = !el('#legend').hidden })
 
   // ---- lens: colour the whole graph by Type / Evidence / Argument ----
   const lensKey = el('#lens-key')
-  function buildLensKey(lens: string): void {
-    if (lens === 'evidence') {
-      lensKey.innerHTML = '<div class="lens-key-title">Derived confidence</div>'
-        + '<div class="lens-scale"><span class="sw" style="background:var(--error)"></span><span class="sw" style="background:var(--warning)"></span><span class="sw" style="background:var(--ok)"></span></div>'
-        + '<div class="lens-scale-ends"><span>weak</span><span>strong</span></div>'
-    } else if (lens === 'argument') {
-      const rows: Array<[string, string]> = [['var(--ok)', 'accepted'], ['var(--error)', 'defeated'], ['var(--warning)', 'undecided']]
-      lensKey.innerHTML = '<div class="lens-key-title">Argument status</div>'
-        + rows.map(([c, l]) => `<div class="lens-key-row"><span class="sw" style="background:${c}"></span>${l}</div>`).join('')
-    } else if (lens === 'sensitivity') {
-      lensKey.innerHTML = '<div class="lens-key-title">Load-bearing evidence</div>'
-        + '<div class="lens-key-row"><span class="lens-bar thin"></span>barely matters</div>'
-        + '<div class="lens-key-row"><span class="lens-bar thick"></span>holds it up</div>'
-    } else if (lens === 'decision') {
-      lensKey.innerHTML = '<div class="lens-key-title">Decision EV</div>'
-        + '<div class="lens-key-row"><span class="sw" style="background:var(--accent)"></span>decision</div>'
-        + '<div class="lens-key-row"><span class="sw" style="background:var(--text-dim)"></span>option weighed</div>'
-    }
-    lensKey.hidden = lens === 'type'
-  }
   const lensBtns = Array.from(el('#lens').querySelectorAll<HTMLButtonElement>('button[data-lens]'))
   for (const btn of lensBtns) {
     btn.addEventListener('click', () => {
@@ -116,7 +83,7 @@ async function boot(): Promise<void> {
       graph.setStatus(lens === 'argument')
       graph.setSensitivity(lens === 'sensitivity')
       graph.setDecision(lens === 'decision')
-      buildLensKey(lens)
+      buildLensKey(lensKey, lens)
     })
   }
 
@@ -242,7 +209,7 @@ async function boot(): Promise<void> {
     setIcon(el('#theme'), theme === 'dark' ? 'moon' : 'sun')
     graph.setTheme(theme)
     editor.setTheme(theme)
-    buildLegend()
+    buildLegend(el('#legend'), theme)
   })
 
   // ---- what-if (Phase 6) ----
@@ -406,21 +373,6 @@ function toast(message: string): void {
     t.classList.remove('show')
     setTimeout(() => (t.hidden = true), 220)
   }, 1600)
-}
-
-// A tiny inline edge sample for the legend: a coloured line ending in the
-// relation's arrowhead (triangle / tee / open vee / diamond), matching the graph.
-function relSample(color: string, arrow: string, line: string): string {
-  const y = 6, x = 26
-  const dash = line === 'dashed' ? ' stroke-dasharray="4 3"' : ''
-  const lineEnd = arrow === 'tee' ? x : x - 6
-  let head = ''
-  if (arrow === 'triangle') head = `<polygon points="${x - 7},${y - 3.5} ${x},${y} ${x - 7},${y + 3.5}" fill="${color}"/>`
-  else if (arrow === 'tee') head = `<line x1="${x}" y1="${y - 5}" x2="${x}" y2="${y + 5}" stroke="${color}" stroke-width="2.4"/>`
-  else if (arrow === 'vee') head = `<polyline points="${x - 7},${y - 3.5} ${x},${y} ${x - 7},${y + 3.5}" fill="none" stroke="${color}" stroke-width="1.8"/>`
-  else if (arrow === 'diamond') head = `<polygon points="${x - 8},${y} ${x - 4},${y - 3.5} ${x},${y} ${x - 4},${y + 3.5}" fill="${color}"/>`
-  else if (arrow === 'circle') head = `<circle cx="${x - 3}" cy="${y}" r="3" fill="${color}"/>`
-  return `<svg class="legend-edge" width="30" height="12" viewBox="0 0 30 12" aria-hidden="true"><line x1="2" y1="${y}" x2="${lineEnd}" y2="${y}" stroke="${color}" stroke-width="1.8"${dash}/>${head}</svg>`
 }
 
 function setupDivider(divider: HTMLElement, leftPane: HTMLElement, onResize: () => void): void {

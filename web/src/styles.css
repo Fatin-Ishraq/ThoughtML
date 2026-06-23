@@ -1,5 +1,3 @@
-@import '@fontsource-variable/inter';
-
 /* ============================================================
    Design tokens — "Graphite mono": near-neutral grayscale surfaces, one
    restrained steel accent, serif display. Editorial, not a diagram editor.
@@ -57,7 +55,7 @@
 
   /* type */
   --serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, 'Times New Roman', serif;
-  --sans: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --sans: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --mono: ui-monospace, 'Cascadia Code', 'JetBrains Mono', Consolas, monospace;
 
   --topbar-h: 52px;

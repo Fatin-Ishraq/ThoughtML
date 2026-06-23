@@ -13,7 +13,7 @@ import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirro
 import { StreamLanguage, syntaxHighlighting, HighlightStyle } from '@codemirror/language'
 import { tags as t } from '@lezer/highlight'
 import { lintGutter, setDiagnostics, type Diagnostic as CmDiagnostic } from '@codemirror/lint'
-import type { Diagnostic } from './parse'
+import type { Diagnostic } from './model'
 import type { Theme } from './graph'
 
 const RECORD_KEYWORDS = new Set(['focus', 'link', 'stance', 'scope', 'question'])

@@ -1,7 +1,7 @@
 // Renders the diagnostics list rows. The status summary lives in the bar
 // header; inline editor markers are handled by the editor's lint integration.
 
-import type { Diagnostic, Conflict } from './parse'
+import type { Diagnostic, Conflict } from './model'
 import { glyph } from './icons'
 
 export function renderDiagnostics(

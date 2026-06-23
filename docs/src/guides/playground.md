@@ -7,6 +7,11 @@ WebAssembly, so the two never disagree.
 To run it locally, see [Installation](../getting-started/installation.md):
 `npm run wasm && npm run dev`.
 
+> The playground is for **authoring** — live editing, examples, and what-if. To
+> *share* a finished document as a single self-contained interactive file (no
+> server, opens anywhere), export it with
+> [the standalone viewer](viewer.md): `thoughtml doc.thml --html -o doc.html`.
+
 ## The layout
 
 - **Editor** (left) — a code editor with ThoughtML syntax highlighting and a

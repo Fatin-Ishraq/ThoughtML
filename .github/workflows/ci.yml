@@ -34,6 +34,11 @@ jobs:
       - name: Install deps
         working-directory: web
         run: npm ci
+      - name: Viewer template freshness
+        # Rebuilds the standalone viewer and fails if the committed template
+        # (crates/thoughtml/assets/viewer.html, embedded via include_str!) is
+        # stale. Node + deps are present here, so this guard runs for real.
+        run: cargo test -p thoughtml --test viewer_freshness
       - name: Build wasm
         working-directory: web
         run: npm run wasm

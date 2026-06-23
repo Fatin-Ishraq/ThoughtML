@@ -65,7 +65,14 @@ struct Cli {
     #[arg(long)]
     compute: bool,
 
-    /// Write JSON output to a file instead of stdout.
+    /// Emit a self-contained, interactive HTML view of the document instead of
+    /// JSON: the canonical model is baked into a standalone graph viewer that
+    /// opens in any browser — no server, no wasm. Implies the full compute stack
+    /// so the lenses (evidence / argument / sensitivity / decision) are populated.
+    #[arg(long)]
+    html: bool,
+
+    /// Write output to a file instead of stdout.
     #[arg(short, long)]
     out: Option<PathBuf>,
 }
@@ -81,8 +88,9 @@ fn main() -> ExitCode {
         }
     };
 
-    // `--compute` is shorthand for the entire computational stack.
-    let all = cli.compute;
+    // `--compute` is shorthand for the entire computational stack; `--html` turns
+    // it on too, so a baked viewer's lenses have data to show.
+    let all = cli.compute || cli.html;
     let opts = thoughtml::Options {
         emit_acts: cli.acts,
         derive_confidence: cli.derived || all,
@@ -109,20 +117,32 @@ fn main() -> ExitCode {
         eprintln!("{d}");
     }
 
-    let json = if cli.ast {
-        to_json(&result.surface, cli.compact)
+    // `--html` bakes the canonical model into the standalone viewer; otherwise
+    // emit JSON (the canonical model, or the surface AST under `--ast`).
+    let output = if cli.html {
+        match render_html(&result.canonical) {
+            Ok(h) => h,
+            Err(e) => {
+                eprintln!("error: failed to render HTML: {e}");
+                return ExitCode::FAILURE;
+            }
+        }
     } else {
-        to_json(&result.canonical, cli.compact)
-    };
-    let json = match json {
-        Ok(j) => j,
-        Err(e) => {
-            eprintln!("error: failed to serialize output: {e}");
-            return ExitCode::FAILURE;
+        let json = if cli.ast {
+            to_json(&result.surface, cli.compact)
+        } else {
+            to_json(&result.canonical, cli.compact)
+        };
+        match json {
+            Ok(j) => j,
+            Err(e) => {
+                eprintln!("error: failed to serialize output: {e}");
+                return ExitCode::FAILURE;
+            }
         }
     };
 
-    if let Err(e) = write_output(cli.out.as_deref(), &json) {
+    if let Err(e) = write_output(cli.out.as_deref(), &output) {
         eprintln!("error: failed to write output: {e}");
         return ExitCode::FAILURE;
     }
@@ -175,6 +195,23 @@ fn collect_sources(entry: &Path, entry_src: &str) -> HashMap<String, String> {
         }
     }
     sources
+}
+
+/// Bake the canonical model into the standalone viewer, producing one
+/// self-contained interactive HTML file. The viewer template (built by the web
+/// package's `npm run build:viewer`, all JS/CSS inlined) carries an empty
+/// `<script type="application/json" id="thoughtml-model">` tag; we fill it with
+/// the compact canonical JSON. `</` is neutralized to `<\/` (still valid JSON) so
+/// a node's body text can never prematurely close the script tag.
+fn render_html(canon: &thoughtml::Canonical) -> Result<String, String> {
+    const TEMPLATE: &str = include_str!("../assets/viewer.html");
+    const MARKER: &str = "id=\"thoughtml-model\">";
+    if !TEMPLATE.contains(MARKER) {
+        return Err("viewer template is missing the model placeholder".into());
+    }
+    let json = serde_json::to_string(canon).map_err(|e| e.to_string())?;
+    let safe = json.replace("</", "<\\/");
+    Ok(TEMPLATE.replace(MARKER, &format!("{MARKER}{safe}")))
 }
 
 fn to_json<T: serde::Serialize>(value: &T, compact: bool) -> serde_json::Result<String> {

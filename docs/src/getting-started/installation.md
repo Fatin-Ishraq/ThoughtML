@@ -46,6 +46,18 @@ thoughtml examples/decision-record.thml
 
 See the [CLI reference](../guides/cli.md) for every flag.
 
+### Export a standalone view
+
+Turn any document into a single self-contained interactive HTML file — no server,
+opens in any browser:
+
+```sh
+thoughtml examples/decision-record.thml --html -o decision-record.html
+```
+
+It carries the interactive graph with the model baked in (no wasm). See
+[The standalone viewer](../guides/viewer.md).
+
 ## Running the playground
 
 ```sh

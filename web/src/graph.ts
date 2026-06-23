@@ -7,7 +7,7 @@
 
 import cytoscape, { type Core, type ElementDefinition } from 'cytoscape'
 import dagre from 'cytoscape-dagre'
-import { assertedAt, formatValue, type Canonical, type CanonObject, type Value } from './parse'
+import { assertedAt, formatValue, type Canonical, type CanonObject, type Value } from './model'
 
 cytoscape.use(dagre)
 
