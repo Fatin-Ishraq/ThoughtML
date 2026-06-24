@@ -57,3 +57,8 @@ Desktop.ini
 project_plan.md
 ROADMAP.md
 install.cmd
+
+# Scratch graph-design mockups (local only; the chosen format becomes the real renderer)
+experiments/
+# Dev-only preview copies served from web/public (duplicates of experiments/)
+web/public/vision*.html
