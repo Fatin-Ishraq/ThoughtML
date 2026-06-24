@@ -2,7 +2,10 @@
 
 use crate::canonical::Object;
 use crate::lex::Value;
-use crate::{parse_project, parse_str, parse_str_with, parse_str_with_overrides, Options, Overrides};
+use crate::{
+    parse_project, parse_str, parse_str_as_of, parse_str_with, parse_str_with_overrides, AsOf,
+    Options, Overrides,
+};
 
 const COMPLETE_EXAMPLE: &str = "\
 scope incident-742
@@ -164,7 +167,16 @@ fn canonical_json_shape_is_pinned() {
   ],
   "timeline": {
     "start": "2026-06-09T09:20+06:00",
-    "end": "2026-06-09T09:20+06:00"
+    "end": "2026-06-09T09:20+06:00",
+    "events": [
+      {
+        "at": "2026-06-09T09:20+06:00",
+        "seq": 2,
+        "id": "team-noticed-metric-shift",
+        "kind": "stance",
+        "agent": "team"
+      }
+    ]
   }
 }"#;
     // Normalize line endings: serde_json always emits `\n`, but this source
@@ -827,6 +839,91 @@ team noticed middle
 fn no_timestamps_means_no_timeline() {
     let r = parse_str("focus a\nfocus b\nlink a causes b");
     assert!(r.canonical.timeline.is_none());
+}
+
+#[test]
+fn timeline_spine_is_ordered_by_valid_time_not_transaction_order() {
+    // bob asserts an *earlier* valid-time than alice but is recorded *later*.
+    // The spine (Phase A) orders by when-in-the-world (valid time); `seq` records
+    // the ledger position — the bitemporal split.
+    let src = "\
+focus x
+  A claim under debate.
+alice holds x
+  confidence 0.6
+  asserted-at 2026-03-01
+bob holds x
+  confidence 0.8
+  asserted-at 2026-01-01";
+    let tl = parse_str(src).canonical.timeline.expect("a timeline should be derived");
+    assert_eq!(tl.events.len(), 2, "two dated stances on the spine: {:?}", tl.events);
+    // Valid-time order: bob (Jan) before alice (Mar)…
+    assert_eq!(tl.events[0].at, "2026-01-01");
+    assert_eq!(tl.events[0].agent.as_deref(), Some("bob"));
+    assert_eq!(tl.events[0].kind, "stance");
+    assert_eq!(tl.events[1].at, "2026-03-01");
+    assert_eq!(tl.events[1].agent.as_deref(), Some("alice"));
+    // …even though bob was recorded later (a higher transaction `seq`).
+    assert!(
+        tl.events[0].seq > tl.events[1].seq,
+        "spine sorts by valid-time, not transaction order: {:?}",
+        tl.events
+    );
+}
+
+#[test]
+fn as_of_valid_time_replays_a_belief_as_live_before_its_revision() {
+    // analyst holds an estimate in January, then revises it in March. As of
+    // mid-January the revision hasn't happened, so the original reads as LIVE —
+    // exact as-of replay, recomputed on the time-sliced model.
+    let src = "\
+focus estimate
+  The rollout takes two weeks.
+analyst holds estimate
+  confidence 0.6
+  asserted-at 2026-01-01
+analyst revises estimate
+  confidence 0.8
+  asserted-at 2026-03-01
+  note now three weeks";
+    // Full model: the January stance is superseded by the March revision.
+    let full = parse_str(src);
+    assert!(
+        superseded_by(&full.canonical.objects, "analyst-holds-estimate").is_some(),
+        "revised in the full model"
+    );
+    // As of 2026-01-15: the March revision is gone…
+    let jan = parse_str_as_of(src, Options::default(), AsOf::ValidTime("2026-01-15"));
+    let has_revision = jan
+        .canonical
+        .objects
+        .iter()
+        .any(|o| matches!(o, Object::Stance(s) if s.id == "analyst-revises-estimate"));
+    assert!(!has_revision, "the later revision is excluded as of January");
+    // …so the original belief is live, not superseded.
+    assert!(
+        superseded_by(&jan.canonical.objects, "analyst-holds-estimate").is_none(),
+        "not yet revised as of January"
+    );
+}
+
+#[test]
+fn as_of_transaction_keeps_a_prefix_of_the_ledger() {
+    // Transaction replay keeps records recorded up to seq N (document order):
+    // seq 0=a, 1=b, 2=c, 3=link. Cut at seq 1 keeps a and b only.
+    let src = "focus a\nfocus b\nfocus c\nlink a causes b";
+    let r = parse_str_as_of(src, Options::default(), AsOf::Transaction(1));
+    let ids: Vec<&str> = r
+        .canonical
+        .objects
+        .iter()
+        .map(|o| match o {
+            Object::Focus(f) => f.id.as_str(),
+            Object::Link(l) => l.id.as_str(),
+            _ => "?",
+        })
+        .collect();
+    assert_eq!(ids, vec!["a", "b"], "only the first two records survive: {ids:?}");
 }
 
 #[test]
@@ -1899,17 +1996,94 @@ fn inheritance_cascades_through_subscope() {
 }
 
 #[test]
-fn nonscope_with_children_warns() {
-    // Only a scope may contain nested objects.
-    let r = parse_str("focus parent\n  focus child");
+fn noncontainer_with_children_warns() {
+    // A focus or question may open a thought-tree, but a readable action (or a
+    // link/stance) may not contain nested objects — that still warns.
+    let r = parse_str("team holds decision\n  focus child");
     assert!(
         r.diagnostics
             .items
             .iter()
-            .any(|d| d.message.contains("only a scope may contain")),
-        "expected a non-scope-children warning: {:?}",
+            .any(|d| d.message.contains("can't contain nested objects")),
+        "expected a non-container-children warning: {:?}",
         r.diagnostics.items
     );
+}
+
+#[test]
+fn focus_opens_a_thought_tree_with_inherited_context() {
+    // Phase A tree-of-thought: a focus hosts nested children, which become its
+    // members (`includes`) and inherit its provenance/temporal context —
+    // generalizing what `scope` already does.
+    let src = "\
+focus debate
+  source pagerduty
+  observed-at 2026-02-11T09:00Z
+  focus option-a
+    Try the cache fix.
+  focus option-b
+    Roll back instead.";
+    let r = parse_str(src);
+    assert!(
+        !r.diagnostics.has_errors() && !r.diagnostics.has_warnings(),
+        "tree-of-thought should be clean: {:?}",
+        r.diagnostics.items
+    );
+    let objs = &r.canonical.objects;
+    // The parent focus lists its members in document order.
+    let debate = objs
+        .iter()
+        .find_map(|o| match o {
+            Object::Focus(f) if f.id == "debate" => Some(f),
+            _ => None,
+        })
+        .expect("focus `debate` present");
+    assert_eq!(
+        debate.includes,
+        vec!["option-a".to_string(), "option-b".to_string()]
+    );
+    // Members inherit the parent's source + observed-at (member-wins if set).
+    assert!(matches!(focus_field(objs, "option-a", "source"), Some(Value::Ref(s)) if s == "pagerduty"));
+    assert!(matches!(focus_field(objs, "option-b", "observed-at"), Some(Value::Time(t)) if t == "2026-02-11T09:00Z"));
+}
+
+#[test]
+fn focus_carries_lifecycle_status_and_keeps_abandonment_reason() {
+    // Phase A fold marker: `status` is first-class on a focus, and an abandoned
+    // branch keeps its reason (fold, don't forget — nothing is dropped).
+    let src = "\
+focus approach-a
+  kind option
+  status abandoned
+  note the load test never passed
+  Try the cache fix.
+focus approach-b
+  kind option
+  status settled
+link approach-a opposes approach-b";
+    let r = parse_str(src);
+    assert!(!r.diagnostics.has_errors(), "{:?}", r.diagnostics.items);
+    let objs = &r.canonical.objects;
+    let a = objs
+        .iter()
+        .find_map(|o| match o {
+            Object::Focus(f) if f.id == "approach-a" => Some(f),
+            _ => None,
+        })
+        .expect("approach-a present");
+    assert_eq!(a.status.as_deref(), Some("abandoned"));
+    // The drop-reason is retained, not dropped…
+    assert!(focus_field(objs, "approach-a", "note").is_some(), "abandonment reason kept");
+    // …and the status was lifted off the free-form fields onto the typed slot.
+    assert!(focus_field(objs, "approach-a", "status").is_none(), "status promoted off fields");
+    let b = objs
+        .iter()
+        .find_map(|o| match o {
+            Object::Focus(f) if f.id == "approach-b" => Some(f),
+            _ => None,
+        })
+        .expect("approach-b present");
+    assert_eq!(b.status.as_deref(), Some("settled"));
 }
 
 #[test]
@@ -2272,4 +2446,44 @@ fn self_audit_example_is_clean_in_form_but_conflicted_in_reasoning() {
     assert_eq!(c.len(), 1, "conflicts: {c:?}");
     assert_eq!(c[0].kind, "confidence-vs-status");
     assert!(c[0].subjects.contains(&"cache-is-safe".to_string()));
+}
+
+#[test]
+fn divergent_redefinition_is_kept_not_dropped() {
+    // Phase A keystone: the same focus id defined twice with different bodies.
+    // The old behavior silently dropped the second; now BOTH are kept and the
+    // audit reports a `definition-divergence`. This is what makes concurrent
+    // multi-agent authoring lossless.
+    let src = "focus deploy\n  We shipped the new build.\n\nfocus metric-shift\n  Latency rose after the deploy.\n\nlink deploy causes metric-shift\n\nfocus metric-shift\n  Error rate rose after the deploy.";
+
+    // Form stays clean — divergence is a coherence finding, not a parse problem,
+    // so it rides the audit channel and never trips strict parsing.
+    let plain = parse_str(src);
+    assert!(
+        !plain.diagnostics.has_errors() && !plain.diagnostics.has_warnings(),
+        "{:?}",
+        plain.diagnostics.items
+    );
+
+    // Nothing was dropped: the first body is canonical, the divergent one is kept.
+    let focus = plain
+        .canonical
+        .objects
+        .iter()
+        .find_map(|o| match o {
+            crate::canonical::Object::Focus(f) if f.id == "metric-shift" => Some(f),
+            _ => None,
+        })
+        .expect("focus `metric-shift` present");
+    assert!(focus.body.is_some(), "first body kept");
+    assert_eq!(focus.divergent.len(), 1, "the divergent definition is retained");
+    assert!(focus.divergent[0].body.is_some());
+    assert_ne!(focus.body, focus.divergent[0].body, "the two definitions differ");
+
+    // The mirror surfaces it under --audit.
+    let audited = parse_audit(src);
+    let c = conflicts_of(&audited);
+    assert_eq!(c.len(), 1, "conflicts: {c:?}");
+    assert_eq!(c[0].kind, "definition-divergence");
+    assert!(c[0].subjects.contains(&"metric-shift".to_string()));
 }

@@ -122,6 +122,17 @@ pub fn is_basis(s: &str) -> bool {
     BASES.contains(&s)
 }
 
+/// The belief-lifecycle a focus (and the thought-tree it opens) moves through
+/// (Phase A). `open` is live; `settled` is resolved; `superseded` was replaced by
+/// a later belief (cf. the `revises` relation); `abandoned` is a dead end kept
+/// with its reason. A `settled`/`superseded`/`abandoned` subtree folds by default
+/// in a view — but nothing is ever deleted (fold, don't forget).
+pub const LIFECYCLE: &[&str] = &["open", "settled", "superseded", "abandoned"];
+
+pub fn is_lifecycle(s: &str) -> bool {
+    LIFECYCLE.contains(&s)
+}
+
 pub fn is_known_field(s: &str) -> bool {
     FIELDS.contains(&s)
 }

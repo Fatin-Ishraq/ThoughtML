@@ -65,6 +65,18 @@ struct Cli {
     #[arg(long)]
     compute: bool,
 
+    /// Replay the document as it stood at a point in time (Phase A): keep only
+    /// records valid at or before this timestamp. Later beliefs — and the edges
+    /// that depended on them — drop out, and supersession / the audit are
+    /// recomputed as of this instant. Valid-time is the default axis.
+    #[arg(long, value_name = "TIME")]
+    as_of: Option<String>,
+
+    /// Replay by transaction order instead of valid-time: keep records up to and
+    /// including this 0-based `seq` (the order they were recorded in the ledger).
+    #[arg(long, value_name = "SEQ", conflicts_with = "as_of")]
+    as_of_seq: Option<u64>,
+
     /// Emit a self-contained, interactive HTML view of the document instead of
     /// JSON: the canonical model is baked into a standalone graph viewer that
     /// opens in any browser — no server, no wasm. Implies the full compute stack
@@ -101,9 +113,14 @@ fn main() -> ExitCode {
         audit: cli.audit || all,
         strict_provenance: cli.strict_provenance,
     };
-    // If the document imports others (§12.5), resolve them as a project from the
-    // entry's directory; otherwise parse the single file.
-    let result = if import_names(&source).is_empty() {
+    // An as-of replay (Phase A) projects the single document to a point in time.
+    // Otherwise: if it imports others (§12.5), resolve them as a project from the
+    // entry's directory; else parse the single file.
+    let result = if let Some(n) = cli.as_of_seq {
+        thoughtml::parse_str_as_of(&source, opts, thoughtml::AsOf::Transaction(n))
+    } else if let Some(t) = cli.as_of.as_deref() {
+        thoughtml::parse_str_as_of(&source, opts, thoughtml::AsOf::ValidTime(t))
+    } else if import_names(&source).is_empty() {
         thoughtml::parse_str_with(&source, opts)
     } else {
         let sources = collect_sources(&cli.file, &source);

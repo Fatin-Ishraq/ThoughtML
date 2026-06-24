@@ -26,7 +26,7 @@ pub mod validate;
 pub mod vocab;
 
 pub use canonical::Canonical;
-pub use derive::Overrides;
+pub use derive::{AsOf, Overrides};
 pub use diagnostics::{Diagnostic, Diagnostics, Severity};
 pub use surface::SurfaceFile;
 
@@ -105,6 +105,35 @@ pub fn parse_str_with_overrides(
         opts.decision_ev,
         opts.audit,
         overrides,
+        &mut diagnostics,
+    );
+    ParseResult {
+        surface,
+        canonical,
+        diagnostics,
+    }
+}
+
+/// Parse, then project the model to a point in time — the Phase A *as-of replay*.
+/// The time filter runs on the desugared objects *before* derivation, so the
+/// snapshot's timeline, supersession, and audit are recomputed as of the cut: a
+/// belief superseded only by a *later* revision still reads as live. Validation
+/// (an authoring-form check — orphans, provenance) is skipped, since a time slice
+/// is a derived projection, not a document the author wrote.
+pub fn parse_str_as_of(source: &str, opts: Options, cut: AsOf) -> ParseResult {
+    let mut diagnostics = Diagnostics::new();
+    let surface = parser::parse(source, &mut diagnostics);
+    let mut canonical = desugar::desugar(&surface, opts.emit_acts, &mut diagnostics);
+    derive::filter_as_of(&mut canonical, cut);
+    derive::derive(
+        &mut canonical,
+        opts.derive_confidence,
+        opts.argument_status,
+        opts.sensitivity,
+        opts.formulas,
+        opts.decision_ev,
+        opts.audit,
+        &Overrides::default(),
         &mut diagnostics,
     );
     ParseResult {

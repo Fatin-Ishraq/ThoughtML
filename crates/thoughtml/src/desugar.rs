@@ -175,6 +175,44 @@ fn object_fields_mut(o: &mut Object) -> Option<&mut Fields> {
     }
 }
 
+/// Read-only access to an object's free-form fields (to read a container's
+/// inheritable defaults before cascading them, Phase A).
+fn object_fields(o: &Object) -> Option<&Fields> {
+    match o {
+        Object::Focus(x) => Some(&x.fields),
+        Object::Question(x) => Some(&x.fields),
+        Object::Link(x) => Some(&x.fields),
+        Object::Stance(x) => Some(&x.fields),
+        Object::Scope(x) => Some(&x.fields),
+        Object::Act(x) => Some(&x.fields),
+        Object::Profile(_) => None,
+    }
+}
+
+/// Set the membership of a container object (Phase A). Only a scope, focus, or
+/// question can open a thought-tree; for anything else this is a no-op.
+fn set_includes(o: &mut Object, includes: Vec<String>) {
+    match o {
+        Object::Scope(x) => x.includes = includes,
+        Object::Focus(x) => x.includes = includes,
+        Object::Question(x) => x.includes = includes,
+        _ => {}
+    }
+}
+
+/// Remove a string-valued field by name from a canonical field list and return
+/// its value (symbol / ref / text). Used to lift a focus's lifecycle `status`
+/// onto a first-class slot (Phase A). A non-string value is left in place.
+fn take_field_string(fields: &mut Fields, name: &str) -> Option<String> {
+    let pos = fields.0.iter().position(|(k, _)| k == name)?;
+    let s = match &fields.0[pos].1 {
+        Value::Symbol(s) | Value::Ref(s) | Value::Text(s) => s.clone(),
+        _ => return None,
+    };
+    fields.0.remove(pos);
+    Some(s)
+}
+
 // --- Profiles & the vocabulary lint (Phase 5) -----------------------------
 
 /// The vocabulary a document accepts: the core sets (§12) plus anything its
@@ -295,17 +333,32 @@ impl<'a> Desugarer<'a> {
     }
 
     fn record(&mut self, rec: &Record) {
-        match &rec.header {
-            Header::Scope { id } => self.scope(rec, id),
-            Header::Profile { name } => self.profile(rec, name),
+        // Process the header. For a focus or question, remember the index of the
+        // object it produced so nested children can attach to it as a thought-tree.
+        let container: Option<usize> = match &rec.header {
+            Header::Scope { id } => {
+                self.scope(rec, id); // a scope consumes its own children
+                None
+            }
+            Header::Profile { name } => {
+                self.profile(rec, name);
+                None
+            }
             // Imports are resolved by `parse_project`; a no-op in single-doc desugar.
-            Header::Import { .. } => {}
-            Header::Question { id } => self.question(rec, id),
+            Header::Import { .. } => None,
+            Header::Question { id } => {
+                let idx = self.objects.len();
+                self.question(rec, id);
+                Some(idx)
+            }
             Header::Focus { id } => {
                 let (kind, mut fields) = self.split_kind(&rec.block);
                 let explicit = kind.is_some();
                 let quantity = self.build_quantity(&rec.block, rec.line);
                 fields.0.retain(|(k, _)| k != "quantity");
+                // Lift a lifecycle status onto the focus, first-class (Phase A
+                // fold marker), so it isn't buried among the free-form fields.
+                let status = take_field_string(&mut fields, "status");
                 self.ensure_focus(
                     id,
                     kind,
@@ -315,19 +368,32 @@ impl<'a> Desugarer<'a> {
                     rec.block.body.clone(),
                     fields,
                 );
+                let idx = self.focus_index.get(id).copied();
+                if let (Some(s), Some(i)) = (status, idx) {
+                    if let Object::Focus(f) = &mut self.objects[i] {
+                        f.status = Some(s);
+                    }
+                }
+                idx
             }
             Header::Link {
                 alias,
                 from,
                 relation,
                 to,
-            } => self.core_link(rec, alias.as_deref(), from, relation, to),
+            } => {
+                self.core_link(rec, alias.as_deref(), from, relation, to);
+                None
+            }
             Header::Stance {
                 alias,
                 agent,
                 posture,
                 target,
-            } => self.core_stance(rec, alias.as_deref(), agent, posture, target),
+            } => {
+                self.core_stance(rec, alias.as_deref(), agent, posture, target);
+                None
+            }
             Header::Action {
                 agent,
                 posture,
@@ -338,20 +404,39 @@ impl<'a> Desugarer<'a> {
                 if self.emit_acts {
                     self.emit_act(agent, posture, form, start);
                 }
+                None
             }
-        }
+        };
 
-        // Recurse into nested children. A `scope` consumes its own children (to
-        // record membership, Phase 5); for any other record nested headers are
-        // unexpected — warn, but still desugar them at the top level so nothing
-        // is lost.
-        if !matches!(rec.header, Header::Scope { .. }) && !rec.children.is_empty() {
-            self.diags.warning(
-                rec.line,
-                "only a scope may contain nested objects; desugaring them at the top level",
-            );
-            for child in &rec.children {
-                self.record(child);
+        // Nested children. A `scope` already consumed its own above. A `focus` or
+        // `question` opens a thought-tree (Phase A): its children become members
+        // and inherit its provenance/temporal context. Any other header can't
+        // contain objects — warn, but desugar them flat so nothing is lost.
+        if rec.children.is_empty() {
+            return;
+        }
+        match (&rec.header, container) {
+            (Header::Scope { .. }, _) => {}
+            (Header::Focus { .. } | Header::Question { .. }, Some(idx)) => {
+                let defaults: Vec<(String, Value)> = object_fields(&self.objects[idx])
+                    .map(|f| {
+                        f.0.iter()
+                            .filter(|(k, _)| INHERITABLE.contains(&k.as_str()))
+                            .cloned()
+                            .collect()
+                    })
+                    .unwrap_or_default();
+                let includes = self.contain(&rec.children, &defaults);
+                set_includes(&mut self.objects[idx], includes);
+            }
+            _ => {
+                self.diags.warning(
+                    rec.line,
+                    "this record can't contain nested objects; desugaring them at the top level",
+                );
+                for child in &rec.children {
+                    self.record(child);
+                }
             }
         }
     }
@@ -392,13 +477,24 @@ impl<'a> Desugarer<'a> {
             fields,
         }));
 
-        // Desugar each nested member, capturing its primary canonical id: the
-        // first object the child produces (a focus / question / link / stance /
-        // sub-scope, or the focus a readable action creates). A merge that pushes
-        // nothing falls back to the child's declared id.
+        let includes = self.contain(&rec.children, &defaults);
+        if let Object::Scope(s) = &mut self.objects[scope_idx] {
+            s.includes = includes;
+        }
+    }
+
+    /// Desugar a container's nested children as members, cascading the container's
+    /// inheritable (provenance/temporal) defaults onto the whole subtree
+    /// (member-wins — add only if a slot is absent). Returns the member ids in
+    /// document order: each child's primary canonical id (the first object it
+    /// produces), falling back to its declared id when a merge pushes nothing.
+    /// Shared by `scope` and by a `focus`/`question` opening a thought-tree
+    /// (Phase A). Innermost containers run first in this depth-first walk, so an
+    /// inner default already fills a slot and wins over an outer one.
+    fn contain(&mut self, children: &[Record], defaults: &[(String, Value)]) -> Vec<String> {
         let subtree_start = self.objects.len();
         let mut includes = Vec::new();
-        for child in &rec.children {
+        for child in children {
             let start = self.objects.len();
             self.record(child);
             let member = if self.objects.len() > start {
@@ -410,14 +506,10 @@ impl<'a> Desugarer<'a> {
                 includes.push(m);
             }
         }
-
-        // Cascade inheritable defaults onto everything in the subtree, member-wins
-        // (add only if absent). Innermost scopes ran first in this depth-first
-        // walk, so an inner default already fills the slot and wins over an outer.
         if !defaults.is_empty() {
             for obj in &mut self.objects[subtree_start..] {
                 if let Some(f) = object_fields_mut(obj) {
-                    for (k, v) in &defaults {
+                    for (k, v) in defaults {
                         if !f.0.iter().any(|(ek, _)| ek == k) {
                             f.0.push((k.clone(), v.clone()));
                         }
@@ -425,10 +517,7 @@ impl<'a> Desugarer<'a> {
                 }
             }
         }
-
-        if let Object::Scope(s) = &mut self.objects[scope_idx] {
-            s.includes = includes;
-        }
+        includes
     }
 
     /// A `profile` declaration: collect its custom-vocabulary lists into an
@@ -501,6 +590,7 @@ impl<'a> Desugarer<'a> {
             expects,
             status,
             fields,
+            includes: Vec::new(),
             superseded_by: None,
         }));
     }
@@ -916,16 +1006,38 @@ impl<'a> Desugarer<'a> {
             let mut conflict: Option<(String, String)> = None;
             let mut now_explicit = false;
             if let Object::Focus(focus) = &mut self.objects[idx] {
+                // First authored body / quantity / formula fills the slot. A later
+                // mention that *agrees* (or is empty) is a no-op — but one that
+                // *diverges* is KEPT (Phase A: never silently drop) and recorded
+                // as an alternative, which the audit reports as `definition-divergence`.
+                let mut divergence = DivergentDef { body: None, quantity: None, formula: None };
+                let mut diverged = false;
                 if focus.body.is_none() {
                     focus.body = body;
+                } else if let Some(new) = body {
+                    if focus.body.as_deref() != Some(new.as_str()) {
+                        divergence.body = Some(new);
+                        diverged = true;
+                    }
                 }
-                // First authored quantity / formula wins (like body) — a later
-                // mention of the same focus doesn't overwrite one already stated.
                 if focus.quantity.is_none() {
                     focus.quantity = quantity;
+                } else if let Some(new) = quantity {
+                    if focus.quantity.as_ref() != Some(&new) {
+                        divergence.quantity = Some(new);
+                        diverged = true;
+                    }
                 }
                 if focus.formula.is_none() {
                     focus.formula = formula;
+                } else if let Some(new) = formula {
+                    if focus.formula.as_deref() != Some(new.as_str()) {
+                        divergence.formula = Some(new);
+                        diverged = true;
+                    }
+                }
+                if diverged {
+                    focus.divergent.push(divergence);
                 }
                 match (focus.kind.clone(), kind) {
                     (None, new @ Some(_)) => {
@@ -975,12 +1087,15 @@ impl<'a> Desugarer<'a> {
             formula,
             computed_quantity: None,
             body,
+            status: None,
             fields,
+            includes: Vec::new(),
             superseded_by: None,
             derived_confidence: None,
             argument_status: None,
             expected_value: None,
             decision: None,
+            divergent: Vec::new(),
         }));
     }
 

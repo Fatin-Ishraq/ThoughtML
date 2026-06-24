@@ -15,7 +15,7 @@
 
 use crate::canonical::{
     Audit, Canonical, Conflict, DecisionEV, EvTerm, ExpectedValue, Fields, Link, Object, OptionEV,
-    Quantity, Timeline,
+    Quantity, Timeline, TimelineEvent,
 };
 use crate::diagnostics::Diagnostics;
 use crate::lex::Value;
@@ -165,8 +165,11 @@ fn compute_supersession(canon: &mut Canonical, diags: &mut Diagnostics) {
 
 fn compute_timeline(canon: &Canonical, diags: &mut Diagnostics) -> Option<Timeline> {
     let mut times: Vec<(i64, String)> = Vec::new();
-    for o in &canon.objects {
+    // The spine: one event per dated record, keyed by valid-time for sorting.
+    let mut events: Vec<(i64, TimelineEvent)> = Vec::new();
+    for (i, o) in canon.objects.iter().enumerate() {
         let Some(fields) = obj_fields(o) else { continue };
+        // Valid-time span: every timestamp counts (both ends of a `valid-during`).
         for (name, value) in &fields.0 {
             let Value::Time(raw) = value else { continue };
             match name.as_str() {
@@ -198,10 +201,158 @@ fn compute_timeline(canon: &Canonical, diags: &mut Diagnostics) -> Option<Timeli
                 _ => {}
             }
         }
+        // Spine event: the record's primary valid instant + its transaction seq.
+        if let Some(at) = primary_instant(fields) {
+            if let Some(k) = time_key(&at) {
+                events.push((
+                    k,
+                    TimelineEvent {
+                        at,
+                        seq: i as u64,
+                        id: obj_id(o).to_string(),
+                        kind: obj_type_name(o).to_string(),
+                        agent: obj_agent(o),
+                    },
+                ));
+            }
+        }
     }
     let start = times.iter().min_by_key(|(k, _)| *k)?.1.clone();
     let end = times.iter().max_by_key(|(k, _)| *k)?.1.clone();
-    Some(Timeline { start, end })
+    // Spine in valid-time order; transaction order (`seq`) breaks ties so the
+    // result is deterministic regardless of how records were interleaved.
+    events.sort_by(|a, b| a.0.cmp(&b.0).then(a.1.seq.cmp(&b.1.seq)));
+    let events = events.into_iter().map(|(_, e)| e).collect();
+    Some(Timeline { start, end, events })
+}
+
+/// The primary valid-time instant of a record for the timeline spine:
+/// `asserted-at`, else `observed-at`, else the start of a `valid-during` span.
+fn primary_instant(fields: &Fields) -> Option<String> {
+    field_time(fields, "asserted-at")
+        .or_else(|| field_time(fields, "observed-at"))
+        .or_else(|| {
+            field_time(fields, "valid-during").map(|s| {
+                s.split_once("..")
+                    .map(|(a, _)| a.to_string())
+                    .unwrap_or(s)
+            })
+        })
+}
+
+/// The object-type tag used on a timeline event (matches the serialized `type`).
+fn obj_type_name(o: &Object) -> &'static str {
+    match o {
+        Object::Focus(_) => "focus",
+        Object::Question(_) => "question",
+        Object::Link(_) => "link",
+        Object::Stance(_) => "stance",
+        Object::Scope(_) => "scope",
+        Object::Act(_) => "act",
+        Object::Profile(_) => "profile",
+    }
+}
+
+/// The author of a record, when it has one (only a stance does today).
+fn obj_agent(o: &Object) -> Option<String> {
+    match o {
+        Object::Stance(s) => Some(s.agent.clone()),
+        _ => None,
+    }
+}
+
+// --- As-of replay (Phase A) -----------------------------------------------
+
+/// The axis and cut for an as-of projection (Phase A replay).
+#[derive(Debug, Clone, Copy)]
+pub enum AsOf<'a> {
+    /// Keep records whose valid-time instant (asserted-at / observed-at /
+    /// valid-during) is at or before `t`; untimed structural records are always
+    /// kept. The default — "what was held true about the world as of `t`".
+    ValidTime(&'a str),
+    /// Keep records whose transaction position (document `seq`) is ≤ `n` —
+    /// "what the ledger had recorded by step `n`".
+    Transaction(u64),
+}
+
+/// Project the model to a point in time: drop every record after the cut, then
+/// cascade — drop any link/stance whose endpoint was dropped — so the result is a
+/// self-consistent graph "as it stood". Meant to run *before* [`derive`], so the
+/// snapshot's timeline, supersession, and audit are all recomputed as of the cut
+/// (a belief superseded only by a *later* revision correctly reads as live).
+pub fn filter_as_of(canon: &mut Canonical, cut: AsOf) {
+    let cut_key = match cut {
+        AsOf::ValidTime(t) => time_key(t),
+        AsOf::Transaction(_) => None,
+    };
+    let mut kept: Vec<bool> = canon
+        .objects
+        .iter()
+        .enumerate()
+        .map(|(i, o)| match cut {
+            AsOf::ValidTime(_) => match obj_fields(o).and_then(primary_instant) {
+                // A dated record is in scope iff its instant is at/before the cut;
+                // an unparseable stamp is kept rather than dropped on a bad clock.
+                Some(at) => match (time_key(&at), cut_key) {
+                    (Some(k), Some(c)) => k <= c,
+                    _ => true,
+                },
+                None => true, // untimed structural record stays
+            },
+            AsOf::Transaction(n) => (i as u64) <= n,
+        })
+        .collect();
+
+    let mut live: HashSet<String> = canon
+        .objects
+        .iter()
+        .zip(&kept)
+        .filter(|(_, &k)| k)
+        .map(|(o, _)| obj_id(o).to_string())
+        .collect();
+
+    // Cascade: a kept link/stance whose endpoint is gone must go too. Iterate to a
+    // fixpoint, since a dropped reified link can in turn orphan one that points at it.
+    loop {
+        let mut changed = false;
+        for (i, o) in canon.objects.iter().enumerate() {
+            if !kept[i] {
+                continue;
+            }
+            let dangles = match o {
+                Object::Link(l) => !live.contains(&l.from) || !live.contains(&l.to),
+                Object::Stance(s) => !live.contains(&s.target),
+                _ => false,
+            };
+            if dangles {
+                kept[i] = false;
+                live.remove(obj_id(o));
+                changed = true;
+            }
+        }
+        if !changed {
+            break;
+        }
+    }
+
+    // Rebuild, pruning membership / asks-about of any dropped id.
+    let mut out = Vec::with_capacity(canon.objects.len());
+    for (mut o, keep) in canon.objects.drain(..).zip(kept) {
+        if !keep {
+            continue;
+        }
+        match &mut o {
+            Object::Scope(s) => s.includes.retain(|m| live.contains(m)),
+            Object::Focus(f) => f.includes.retain(|m| live.contains(m)),
+            Object::Question(q) => {
+                q.includes.retain(|m| live.contains(m));
+                q.asks_about.retain(|m| live.contains(m));
+            }
+            _ => {}
+        }
+        out.push(o);
+    }
+    canon.objects = out;
 }
 
 // --- Derived confidence (Phase 4) -----------------------------------------
@@ -1074,6 +1225,28 @@ fn compute_conflicts(canon: &Canonical) -> Audit {
             });
         }
     }
+
+    // Definition divergence (Phase A): the same focus id was defined more than
+    // once with differing content. Nothing was dropped — every alternative is
+    // kept on the focus — and the divergence is surfaced here so a human or a
+    // peer agent can reconcile it. This is what makes concurrent authoring lossless.
+    for o in &canon.objects {
+        if let Object::Focus(f) = o {
+            if !f.divergent.is_empty() {
+                conflicts.push(Conflict {
+                    kind: "definition-divergence".to_string(),
+                    severity: "warning".to_string(),
+                    subjects: vec![f.id.clone()],
+                    message: format!(
+                        "`{}` is defined more than once with differing content; all {} definitions are kept",
+                        f.id,
+                        f.divergent.len() + 1
+                    ),
+                });
+            }
+        }
+    }
+
     Audit { conflicts }
 }
 

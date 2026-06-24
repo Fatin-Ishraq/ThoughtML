@@ -72,8 +72,21 @@ pub struct Focus {
     pub computed_quantity: Option<Quantity>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub body: Option<String>,
+    /// Belief-lifecycle status (Phase A): `open` / `settled` / `superseded` /
+    /// `abandoned`. A `settled`/`superseded`/`abandoned` focus (and the thought-
+    /// tree it opens) folds by default in a view — the *marker* lives here; the
+    /// actual collapse is ephemeral view state, never written back. Nothing is
+    /// ever deleted (fold, don't forget).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub status: Option<String>,
     #[serde(skip_serializing_if = "Fields::is_empty")]
     pub fields: Fields,
+    /// Members of the thought-tree this focus opens (Phase A). When a focus hosts
+    /// nested children, they become its members (their ids, in document order)
+    /// and inherit its provenance/temporal context — generalizing `scope`, so a
+    /// thought can open a tree of questions/answers/iterations. Empty for a leaf.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub includes: Vec<String>,
     /// The id of a later belief that revises this one (v0.2, Phase 3). Computed
     /// by the derive pass from a `revises` relation; both nodes are kept.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -97,6 +110,29 @@ pub struct Focus {
     /// ordered by expected value, highest first. Opt-in and derived.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub decision: Option<DecisionEV>,
+    /// Alternative definitions of this focus that diverged from the first
+    /// (Phase A — *keep everything*). When the same id is defined again with a
+    /// different `body`/`quantity`/`formula`, the alternative is retained here
+    /// instead of being silently dropped, and the audit emits a
+    /// `definition-divergence` conflict. Empty for a focus defined once.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub divergent: Vec<DivergentDef>,
+}
+
+/// An alternative definition of a focus that diverged from the one already
+/// recorded (Phase A). ThoughtML keeps everything: rather than silently dropping
+/// a second, different definition of the same id, the divergent content is
+/// preserved here and surfaced as a `definition-divergence` conflict. This is the
+/// keystone that makes concurrent multi-agent authoring lossless — two agents
+/// defining the same id differently leaves *both* on the record.
+#[derive(Debug, Clone, Serialize)]
+pub struct DivergentDef {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub body: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub quantity: Option<Quantity>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub formula: Option<String>,
 }
 
 /// The expected-value analysis of an option (v0.2, Phase 9, §10.6). `value` is
@@ -178,6 +214,10 @@ pub struct Question {
     pub status: Option<String>,
     #[serde(skip_serializing_if = "Fields::is_empty")]
     pub fields: Fields,
+    /// Members of the thought-tree this question opens (Phase A): nested children
+    /// become its members and inherit its context, just like a focus or scope.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub includes: Vec<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub superseded_by: Option<String>,
 }
@@ -283,14 +323,33 @@ pub struct Act {
     pub fields: Fields,
 }
 
-/// The document's overall time span (v0.2, Phase 3): the earliest and latest
-/// timestamps found across all `asserted-at` / `observed-at` / `valid-during`
-/// fields. `start` and `end` are the raw source strings (the as-of view reads
-/// them back with a full ISO-8601 parser).
+/// The document's time spine (Phase A). `start`/`end` are the earliest and latest
+/// timestamps across all `asserted-at` / `observed-at` / `valid-during` fields
+/// (the valid-time span, raw source strings). `events` is the ordered backbone:
+/// every dated record in valid-time order, each carrying both *when in the world*
+/// it holds (`at`) and *when in the ledger* it was recorded (`seq`) — the
+/// bitemporal split that makes "replay how it got here" and play/pause exact.
 #[derive(Debug, Clone, Serialize)]
 pub struct Timeline {
     pub start: String,
     pub end: String,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub events: Vec<TimelineEvent>,
+}
+
+/// One dated record on the timeline spine (Phase A). `at` is the valid-time
+/// instant (when it is true / was believed / was observed — author-supplied);
+/// `seq` is the transaction position (the monotonic order it was recorded in the
+/// ledger). Keeping both axes is the bitemporal split: the clock says *when in
+/// the world*, `seq` says *when in the record*.
+#[derive(Debug, Clone, Serialize)]
+pub struct TimelineEvent {
+    pub at: String,
+    pub seq: u64,
+    pub id: String,
+    pub kind: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub agent: Option<String>,
 }
 
 /// A single mirror conflict (§10.7): a place the engine's mechanical second

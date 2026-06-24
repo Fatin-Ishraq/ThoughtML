@@ -89,8 +89,12 @@ export interface Profile {
 }
 
 export type CanonObject = Focus | Question | Link | Stance | Scope | Act
-/** The document's earliest/latest timestamps (raw ISO-8601 source strings). */
-export interface Timeline { start: string; end: string }
+/** One dated record on the timeline spine (Phase A): `at` = valid-time instant
+ *  (when in the world), `seq` = transaction position (when in the ledger). */
+export interface TimelineEvent { at: string; seq: number; id: string; kind: string; agent?: string }
+/** The document's time spine: earliest/latest valid timestamps (`start`/`end`,
+ *  raw ISO-8601 strings) plus the ordered `events` backbone for replay. */
+export interface Timeline { start: string; end: string; events?: TimelineEvent[] }
 /** A mirror conflict (§10.7): where the engine's reading of the graph disagrees
  *  with what the author asserted. Distinct from diagnostics — it judges coherence,
  *  not form, and ships the conflict rather than a verdict. */

@@ -344,6 +344,10 @@ fn check_orphans(canon: &Canonical, diags: &mut Diagnostics) {
                 for r in &q.asks_about {
                     referenced.insert(r.clone());
                 }
+                // Members of a thought-tree a question opens are connected (Phase A).
+                for r in &q.includes {
+                    referenced.insert(r.clone());
+                }
                 collect_ref_values(&q.fields, &mut referenced);
             }
             Object::Scope(sc) => {
@@ -360,6 +364,14 @@ fn check_orphans(canon: &Canonical, diags: &mut Diagnostics) {
                     referenced.insert(f.id.clone());
                     for r in crate::formula::referenced_ids(expr) {
                         referenced.insert(r);
+                    }
+                }
+                // A focus that opens a thought-tree (Phase A) is a container root —
+                // a meaningful node — and its members are connected to it.
+                if !f.includes.is_empty() {
+                    referenced.insert(f.id.clone());
+                    for r in &f.includes {
+                        referenced.insert(r.clone());
                     }
                 }
             }
