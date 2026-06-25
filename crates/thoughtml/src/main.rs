@@ -137,7 +137,10 @@ fn main() -> ExitCode {
     // `--html` bakes the canonical model into the standalone viewer; otherwise
     // emit JSON (the canonical model, or the surface AST under `--ast`).
     let output = if cli.html {
-        match render_html(&result.canonical) {
+        // title the standalone view after the source file (the canonical model has
+        // no document-level name; a flat multi-scope doc has no single root scope).
+        let title = cli.file.file_stem().and_then(|s| s.to_str());
+        match render_html(&result.canonical, title) {
             Ok(h) => h,
             Err(e) => {
                 eprintln!("error: failed to render HTML: {e}");
@@ -220,15 +223,22 @@ fn collect_sources(entry: &Path, entry_src: &str) -> HashMap<String, String> {
 /// `<script type="application/json" id="thoughtml-model">` tag; we fill it with
 /// the compact canonical JSON. `</` is neutralized to `<\/` (still valid JSON) so
 /// a node's body text can never prematurely close the script tag.
-fn render_html(canon: &thoughtml::Canonical) -> Result<String, String> {
+fn render_html(canon: &thoughtml::Canonical, title: Option<&str>) -> Result<String, String> {
     const TEMPLATE: &str = include_str!("../assets/viewer.html");
     const MARKER: &str = "id=\"thoughtml-model\">";
+    const TITLE_MARKER: &str = "id=\"thoughtml-title\">";
     if !TEMPLATE.contains(MARKER) {
         return Err("viewer template is missing the model placeholder".into());
     }
     let json = serde_json::to_string(canon).map_err(|e| e.to_string())?;
     let safe = json.replace("</", "<\\/");
-    Ok(TEMPLATE.replace(MARKER, &format!("{MARKER}{safe}")))
+    let mut out = TEMPLATE.replace(MARKER, &format!("{MARKER}{safe}"));
+    // bake the document title (file name) when the template has the slot
+    if let Some(t) = title {
+        let ts = t.replace("</", "<\\/");
+        out = out.replace(TITLE_MARKER, &format!("{TITLE_MARKER}{ts}"));
+    }
+    Ok(out)
 }
 
 fn to_json<T: serde::Serialize>(value: &T, compact: bool) -> serde_json::Result<String> {

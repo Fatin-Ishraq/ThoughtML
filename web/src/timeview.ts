@@ -71,8 +71,12 @@ interface TEdge { from: string; to: string; cat: RelCat; colorVar: string; arrow
   sa?: Side; sb?: Side; fa?: number; fb?: number }
 interface Tension { target: string; tFrom: number; tTo: number; message: string }
 interface Beat { t: number; text: string }
+// A beat is one distinct event instant: the nodes that *arrive* at time `t`, in
+// document/time order, plus a caption. It's the shared spine — replay advances by
+// beat (even pacing) and the layout columns by beat (collapsed dead time).
+interface TBeat { index: number; t: number; nodeIds: string[]; caption: string }
 interface Band { id: string; label: string; y: number }
-interface TimeModel { nodes: TNode[]; edges: TEdge[]; narration: Beat[]; tension: Tension[]; tMin: number; tMax: number; bands: Band[]; worldW: number; bandH: number }
+interface TimeModel { nodes: TNode[]; edges: TEdge[]; narration: Beat[]; beats: TBeat[]; tension: Tension[]; tMin: number; tMax: number; bands: Band[]; worldW: number; bandH: number }
 
 type Side = 'L' | 'R' | 'T' | 'B'
 
@@ -233,7 +237,23 @@ function buildTimeModel(canon: Canonical): TimeModel {
   for (const ten of tension) beats.push({ t: ten.tFrom, text: ten.message })
   beats.sort((a, b) => a.t - b.t)
 
-  return { nodes, edges, narration: beats, tension, tMin, tMax, bands: [], worldW: 0, bandH: 150 }
+  // the beat spine: group nodes by distinct instant, ordered in time. Timeless
+  // nodes (t === null) are always visible (applyAsOf shows them at any t), so they
+  // don't get their own beat — they ride along from the first. The caption prefers
+  // an authored node's prose, so a beat reads like a documentary subtitle.
+  const captionFor = (ns: TNode[]): string => {
+    const lead = ns.find((n) => n.author) ?? ns[0]
+    const text = firstLine(lead.note) || lead.label
+    return lead.author ? `${lead.author}: ${text}` : text
+  }
+  const byInstant = new Map<number, TNode[]>()
+  for (const n of nodes) { if (n.t === null) continue; const a = byInstant.get(n.t) ?? []; a.push(n); byInstant.set(n.t, a) }
+  const tbeats: TBeat[] = [...byInstant.keys()].sort((a, b) => a - b).map((t, index) => {
+    const ns = byInstant.get(t)!.slice().sort((p, q) => hash(p.id) - hash(q.id))
+    return { index, t, nodeIds: ns.map((n) => n.id), caption: captionFor(ns) }
+  })
+
+  return { nodes, edges, narration: beats, beats: tbeats, tension, tMin, tMax, bands: [], worldW: 0, bandH: 150 }
 }
 
 // --- lane-less layout: x = time (pinned), y = emergent force relaxation ---
@@ -242,8 +262,101 @@ const NODE_W = 162
 const NODE_H = 54
 const TOP_Y = 60
 
+// Serpentine layout for the "strip" case: a long, single-lane document (e.g. a
+// life story with no scopes) whose events would otherwise stretch into one
+// unreadable horizontal ribbon. Columns = beats (equal width → dead time
+// collapses); rows wrap boustrophedon (L→R, then R→L) so time stays continuous
+// while the aspect ratio stays sane. y within a row is settled by force relaxation.
+const COL_W = NODE_W + 56
+const ROW_H = 250
+function layoutSerpentine(model: TimeModel): { worldW: number; worldH: number } {
+  const { nodes, edges, beats } = model
+  const beatOf = new Map<string, number>()
+  beats.forEach((b) => b.nodeIds.forEach((id) => beatOf.set(id, b.index)))
+  const nBeats = Math.max(1, beats.length)
+  const colsPerRow = Math.max(8, Math.min(nBeats, Math.round(Math.sqrt(nBeats * 2.2))))
+  const place = (i: number) => {
+    const row = Math.floor(i / colsPerRow)
+    let col = i % colsPerRow
+    if (row % 2 === 1) col = colsPerRow - 1 - col // boustrophedon: odd rows run R→L
+    return { x: PAD + col * COL_W, rowY: TOP_Y + row * ROW_H + ROW_H / 2 }
+  }
+  const rowYOf = new Float64Array(nodes.length)
+  const perBeat = new Map<number, number>()
+  nodes.forEach((n, i) => {
+    const bi = beatOf.get(n.id) ?? 0
+    const { x, rowY } = place(bi)
+    const k = perBeat.get(bi) ?? 0; perBeat.set(bi, k + 1)
+    n.x0 = x
+    n.x = x + ((hash(n.id) % 40) - 20)
+    n.y = rowY + ((k % 5) - 2) * (NODE_H + 16) + ((hash(n.id) % 30) - 15)
+    n.vx = 0; n.vy = 0
+    rowYOf[i] = rowY
+  })
+
+  const idx = new Map(nodes.map((n, i) => [n.id, i]))
+  const COLL = Math.hypot(NODE_W, NODE_H) * 0.5 + 18
+  const iters = Math.min(420, Math.max(200, Math.floor(12000 / Math.max(1, nodes.length))))
+  for (let it = 0; it < iters; it++) {
+    const cool = 0.5 + 0.5 * (1 - it / iters)
+    const fx = new Float64Array(nodes.length)
+    const fy = new Float64Array(nodes.length)
+    for (let i = 0; i < nodes.length; i++) {
+      fx[i] += (nodes[i].x0 - nodes[i].x) * 0.085      // hold the time column
+      fy[i] += (rowYOf[i] - nodes[i].y) * 0.04          // hold the row
+    }
+    // link attraction: a little y pull aligns connected threads; keep it weak so
+    // a cross-row link doesn't drag a node off its row
+    for (const e of edges) {
+      const a = idx.get(e.from), b = idx.get(e.to)
+      if (a === undefined || b === undefined) continue
+      fx[a] += (nodes[b].x - nodes[a].x) * 0.006; fx[b] += (nodes[a].x - nodes[b].x) * 0.006
+      fy[a] += (nodes[b].y - nodes[a].y) * 0.0025; fy[b] += (nodes[a].y - nodes[b].y) * 0.0025
+    }
+    const order = nodes.map((_, i) => i).sort((i, j) => nodes[i].x - nodes[j].x)
+    for (let oi = 0; oi < order.length; oi++) {
+      const i = order[oi]
+      for (let oj = oi + 1; oj < order.length; oj++) {
+        const j = order[oj]
+        let dx = nodes[j].x - nodes[i].x
+        if (dx > COLL * 2.4) break
+        let dy = nodes[j].y - nodes[i].y
+        const dist = Math.hypot(dx, dy) || 0.01
+        if (dist < COLL * 1.72) {
+          const push = (COLL * 1.72 - dist) / dist * 0.6
+          dx *= push; dy *= push
+          fx[i] -= dx; fy[i] -= dy; fx[j] += dx; fy[j] += dy
+        }
+      }
+    }
+    for (let i = 0; i < nodes.length; i++) {
+      const n = nodes[i]
+      n.vx = (n.vx + fx[i]) * 0.82; n.vy = (n.vy + fy[i]) * 0.82
+      n.x += n.vx * cool; n.y += n.vy * cool
+    }
+  }
+
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
+  for (const n of nodes) { minX = Math.min(minX, n.x); minY = Math.min(minY, n.y); maxX = Math.max(maxX, n.x + NODE_W); maxY = Math.max(maxY, n.y + NODE_H) }
+  const dx0 = PAD - (Number.isFinite(minX) ? minX : 0)
+  const dy0 = TOP_Y - (Number.isFinite(minY) ? minY : 0)
+  for (const n of nodes) { n.x += dx0; n.y += dy0 }
+  const worldW = (maxX - minX) + PAD * 2
+  const worldH = (maxY - minY) + TOP_Y + 70
+  model.bands = []
+  model.worldW = worldW
+  model.bandH = ROW_H
+  assignPorts(model)
+  return { worldW, worldH }
+}
+
 function layout(model: TimeModel): { worldW: number; worldH: number } {
   const { nodes, edges } = model
+
+  // A long single-lane document (no scopes, many events) becomes an unreadable
+  // horizontal strip under the swimlane layout — wrap it serpentine instead.
+  const distinctBands = new Set(nodes.map((n) => n.band ?? '·ungrouped'))
+  if (nodes.length > 16 && distinctBands.size <= 1) return layoutSerpentine(model)
 
   // --- bands: one horizontal lane per enclosing scope, ordered by first time ---
   const UNGROUPED = '·ungrouped'
@@ -399,7 +512,12 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
   bar.innerHTML =
     '<div class="tv-bar-row">' +
       '<span class="tv-clock"></span>' +
-      '<button class="tv-play" type="button" title="Play the run">▶ Play the run</button>' +
+      '<div class="tv-controls">' +
+        '<button class="tv-step tv-prev" type="button" title="Previous moment (Left arrow)">&#9664;</button>' +
+        '<button class="tv-play" type="button" title="Play the run">&#9654; Play</button>' +
+        '<button class="tv-step tv-next" type="button" title="Next moment (Right arrow)">&#9654;</button>' +
+        '<button class="tv-follow" type="button" title="Follow the story - the camera rides each moment" aria-pressed="false">Follow</button>' +
+      '</div>' +
     '</div>' +
     '<div class="tv-track"><input class="tv-range" type="range" min="0" max="1000" value="1000" step="1" aria-label="time" /><div class="tv-ticks"></div></div>' +
     '<div class="tv-ends"><span class="tv-start"></span><span class="tv-end"></span></div>'
@@ -409,15 +527,22 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
   const clockEl = bar.querySelector('.tv-clock') as HTMLElement
   const rangeEl = bar.querySelector('.tv-range') as HTMLInputElement
   const playEl = bar.querySelector('.tv-play') as HTMLButtonElement
+  const prevEl = bar.querySelector('.tv-prev') as HTMLButtonElement
+  const nextEl = bar.querySelector('.tv-next') as HTMLButtonElement
+  const followEl = bar.querySelector('.tv-follow') as HTMLButtonElement
   const ticksEl = bar.querySelector('.tv-ticks') as HTMLElement
   const startEl = bar.querySelector('.tv-start') as HTMLElement
   const endEl = bar.querySelector('.tv-end') as HTMLElement
 
-  let model: TimeModel = { nodes: [], edges: [], narration: [], tension: [], tMin: 0, tMax: 1, bands: [], worldW: 0, bandH: 150 }
+  let model: TimeModel = { nodes: [], edges: [], narration: [], beats: [], tension: [], tMin: 0, tMax: 1, bands: [], worldW: 0, bandH: 150 }
   let byId = new Map<string, TNode>()
   let asOf: number | null = null
   let focusId: string | null = null
   let pendingFit = false
+  let followMode = false
+  let beatIdx = -1            // current beat in the tour; -1 = unstarted / showing all
+  let rafId: number | null = null
+  let emphaTimer: number | undefined
   let selectCb: (info: { id: string; kind: string } | null) => void = () => {}
   let zoomCb: (pct: number) => void = () => {}
   const T = { x: 0, y: 0, k: 1 }
@@ -440,6 +565,69 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
     const nk = Math.max(0.15, Math.min(2.8, T.k * f))
     const wx = (cx - T.x) / T.k, wy = (cy - T.y) / T.k
     setView(nk, cx - wx * nk, cy - wy * nk)
+  }
+
+  // A runtime camera glide for Follow mode. Driven by setInterval rather than
+  // requestAnimationFrame: rAF is paused in a backgrounded/headless tab, which
+  // would silently freeze the tour — the same reliability reason the initial fit
+  // is synchronous. setInterval keeps firing, so the camera always moves.
+  function cancelAnim() { if (rafId !== null) { clearInterval(rafId); rafId = null } }
+  function animateTo(k: number, x: number, y: number, ms = 540) {
+    cancelAnim()
+    const k0 = T.k, x0 = T.x, y0 = T.y, dk = k - k0, dx = x - x0, dy = y - y0
+    if (Math.abs(dk) < 1e-3 && Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) { setView(k, x, y); return }
+    const t0 = performance.now()
+    const ease = (u: number) => (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2)
+    rafId = window.setInterval(() => {
+      const u = Math.min(1, (performance.now() - t0) / ms), e = ease(u)
+      T.k = k0 + dk * e; T.x = x0 + dx * e; T.y = y0 + dy * e
+      applyTransform(); zoomCb(Math.round(T.k * 100))
+      if (u >= 1) cancelAnim()
+    }, 16)
+  }
+
+  // Target view that frames a beat's nodes (centred) at a readable zoom, backing
+  // off just enough to hint their 1-hop neighbours — what the moment connects to.
+  function frameOf(ids: string[]): { k: number; x: number; y: number } | null {
+    if (!ids.length) return null
+    const primary = ids.map((id) => byId.get(id)).filter((n): n is TNode => !!n)
+    if (!primary.length) return null
+    const ext = new Set(ids)
+    for (const e of model.edges) { if (ext.has(e.from)) ext.add(e.to); if (ext.has(e.to)) ext.add(e.from) }
+    // centre on the primary nodes; size from primary ∪ neighbours
+    let cMinX = Infinity, cMinY = Infinity, cMaxX = -Infinity, cMaxY = -Infinity
+    for (const n of primary) { cMinX = Math.min(cMinX, n.x); cMinY = Math.min(cMinY, n.y); cMaxX = Math.max(cMaxX, n.x + NODE_W); cMaxY = Math.max(cMaxY, n.y + NODE_H) }
+    let uMinX = cMinX, uMinY = cMinY, uMaxX = cMaxX, uMaxY = cMaxY
+    for (const id of ext) { const n = byId.get(id); if (!n) continue; uMinX = Math.min(uMinX, n.x); uMinY = Math.min(uMinY, n.y); uMaxX = Math.max(uMaxX, n.x + NODE_W); uMaxY = Math.max(uMaxY, n.y + NODE_H) }
+    const W = svg.clientWidth || 1000, Hh = svg.clientHeight || 700
+    const padX = 130, topRoom = 96, botRoom = 124
+    const bw = (uMaxX - uMinX) || 1, bh = (uMaxY - uMinY) || 1
+    let k = Math.min((W - padX * 2) / bw, (Hh - topRoom - botRoom) / bh)
+    k = Math.max(0.7, Math.min(1.05, k))
+    const cx = (cMinX + cMaxX) / 2, cy = (cMinY + cMaxY) / 2
+    return { k, x: W / 2 - cx * k, y: topRoom + (Hh - topRoom - botRoom) / 2 - cy * k }
+  }
+
+  // Brief "just arrived" emphasis on the nodes that land at a beat.
+  function emphasize(ids: string[]) {
+    for (const n of model.nodes) n.g?.classList.remove('tv-arrive')
+    for (const id of ids) { const g = byId.get(id)?.g; if (g) { void g.getBoundingClientRect(); g.classList.add('tv-arrive') } }
+    if (emphaTimer) clearTimeout(emphaTimer)
+    emphaTimer = window.setTimeout(() => { for (const id of ids) byId.get(id)?.g?.classList.remove('tv-arrive') }, 1100)
+  }
+
+  // Move the tour to beat i: reveal up to its instant, caption it, emphasise the
+  // arrivals, and (in follow mode) glide the camera to frame them.
+  function setBeat(i: number, opts: { emphasis?: boolean; camera?: boolean } = {}) {
+    if (!model.beats.length) return
+    const { emphasis = true, camera = true } = opts
+    beatIdx = Math.max(0, Math.min(model.beats.length - 1, i))
+    const beat = model.beats[beatIdx]
+    applyAsOf(beat.t)
+    rangeEl.value = String(beatIdx) // the slider is beat-indexed (even spacing)
+    narr.textContent = beat.caption
+    if (emphasis) emphasize(beat.nodeIds)
+    if (camera && followMode) { const f = frameOf(beat.nodeIds); if (f) animateTo(f.k, f.x, f.y) }
   }
 
   function buildDefs() {
@@ -544,7 +732,12 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
     for (const bt of model.narration) { if (t === null || bt.t <= t) text = bt.text }
     narr.textContent = text
     clockEl.textContent = t === null ? clk(model.tMax) : clk(t)
-    const pct = t === null ? 100 : Math.max(0, Math.min(100, ((t - model.tMin) / (model.tMax - model.tMin)) * 100))
+    // the slider fill tracks the beat index (even spacing), not raw clock time, so
+    // the dense years aren't crushed into a sliver of the bar
+    const nb = model.beats.length
+    let bi = nb - 1
+    if (t !== null && nb) { bi = -1; for (let i = 0; i < nb; i++) if (model.beats[i].t <= t + 1e-9) bi = i }
+    const pct = nb > 1 ? Math.max(0, Math.min(100, (bi / (nb - 1)) * 100)) : 100
     rangeEl.style.setProperty('--fill', pct + '%')
     if (focusId) applyFocus()
   }
@@ -571,16 +764,20 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
   }
 
   function setBar() {
-    rangeEl.min = String(model.tMin); rangeEl.max = String(model.tMax)
-    rangeEl.step = String(Math.max(1, Math.floor((model.tMax - model.tMin) / 240)))
-    rangeEl.value = String(model.tMax)
+    // beat-indexed slider: one notch per event, evenly spaced. Falls back to raw
+    // time only when a document has no dated events.
+    const nb = model.beats.length
+    if (nb > 0) {
+      rangeEl.min = '0'; rangeEl.max = String(Math.max(1, nb - 1)); rangeEl.step = '1'; rangeEl.value = String(nb - 1)
+    } else {
+      rangeEl.min = String(model.tMin); rangeEl.max = String(model.tMax); rangeEl.step = '1'; rangeEl.value = String(model.tMax)
+    }
     startEl.textContent = clk(model.tMin); endEl.textContent = clk(model.tMax)
-    const span = model.tMax - model.tMin || 1
     ticksEl.replaceChildren()
-    const seen = new Set<number>()
-    for (const bt of model.narration) {
-      if (seen.has(bt.t)) continue; seen.add(bt.t)
-      const i = document.createElement('i'); i.style.left = `${((bt.t - model.tMin) / span) * 100}%`; ticksEl.appendChild(i)
+    if (nb > 1) {
+      for (let i = 0; i < nb; i++) {
+        const tick = document.createElement('i'); tick.style.left = `${(i / (nb - 1)) * 100}%`; ticksEl.appendChild(tick)
+      }
     }
   }
 
@@ -608,6 +805,7 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
     layout(model)
     renderGraph()
     setBar()
+    beatIdx = -1 // a fresh document starts the tour unstarted (all shown)
     applyAsOf(model.tMax)
     pendingFit = true // if the pane isn't sized yet, the observer re-fits once it is
     fit()
@@ -621,6 +819,7 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
   // ---- interactions ----
   svg.addEventListener('wheel', (ev) => {
     ev.preventDefault()
+    cancelAnim() // a manual zoom interrupts any follow glide
     const r = svg.getBoundingClientRect(), mx = ev.clientX - r.left, my = ev.clientY - r.top
     const f = ev.deltaY < 0 ? 1.1 : 1 / 1.1, nk = Math.max(0.15, Math.min(2.6, T.k * f))
     const wx = (mx - T.x) / T.k, wy = (my - T.y) / T.k
@@ -636,6 +835,7 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
   }
   svg.addEventListener('pointerdown', (ev) => {
     if (ev.button !== 0) return // pan only with the primary button
+    cancelAnim() // grabbing the canvas interrupts any follow glide
     const ge = (ev.target as Element).closest?.('g[data-id]') as SVGGElement | null
     drag = { x: ev.clientX, y: ev.clientY, tx: T.x, ty: T.y, node: ge?.getAttribute('data-id') ?? null, moved: false }
     pointerId = ev.pointerId
@@ -676,22 +876,46 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
     else selectCb(null)
   }
 
-  // ---- timeline bar ----
+  // ---- timeline bar: beat-stepped playback ----
+  // The tour advances one *event* at a time (even pacing), not by sweeping clock
+  // time — so dense years and dead centuries get the same dwell.
   let timer: number | undefined
-  function stopPlay() { if (timer) { clearInterval(timer); timer = undefined } playEl.textContent = '▶ Play the run' }
-  playEl.addEventListener('click', () => {
-    if (timer) { stopPlay(); return }
-    const min = Number(rangeEl.min), max = Number(rangeEl.max)
-    if (Number(rangeEl.value) >= max) rangeEl.value = String(min)
-    playEl.textContent = '❚❚ Pause'
-    const step = (max - min) / 120
+  function stopPlay() { if (timer) { clearInterval(timer); timer = undefined } playEl.innerHTML = '&#9654; Play' }
+  function startPlay() {
+    if (!model.beats.length) return
+    if (beatIdx >= model.beats.length - 1) beatIdx = -1 // at the end → restart
+    playEl.innerHTML = '&#10074;&#10074; Pause'
+    const dwell = followMode ? 2200 : 1300
     timer = window.setInterval(() => {
-      const next = Number(rangeEl.value) + step
-      if (next >= max) { rangeEl.value = String(max); applyAsOf(max); stopPlay() }
-      else { rangeEl.value = String(next); applyAsOf(next) }
-    }, 70)
+      if (beatIdx >= model.beats.length - 1) { stopPlay(); return }
+      setBeat(beatIdx + 1)
+    }, dwell)
+  }
+  playEl.addEventListener('click', () => { if (timer) stopPlay(); else startPlay() })
+  prevEl.addEventListener('click', () => { stopPlay(); setBeat(beatIdx <= 0 ? 0 : beatIdx - 1) })
+  nextEl.addEventListener('click', () => { stopPlay(); setBeat(beatIdx + 1) })
+  followEl.addEventListener('click', () => {
+    followMode = !followMode
+    followEl.classList.toggle('on', followMode)
+    followEl.setAttribute('aria-pressed', String(followMode))
+    if (followMode) { if (beatIdx < 0) setBeat(0); else { const f = frameOf(model.beats[beatIdx]?.nodeIds ?? []); if (f) animateTo(f.k, f.x, f.y) } }
+    else fit() // back to the overview
   })
-  rangeEl.addEventListener('input', () => { stopPlay(); applyAsOf(Number(rangeEl.value)) })
+  rangeEl.addEventListener('input', () => {
+    stopPlay(); cancelAnim()
+    // the slider is beat-indexed: scrub jumps to that event (no camera/emphasis jank)
+    if (model.beats.length) setBeat(Number(rangeEl.value), { emphasis: false, camera: false })
+    else applyAsOf(Number(rangeEl.value))
+  })
+  // keyboard: ← / → step the story, space toggles play (skip when typing or on a control)
+  window.addEventListener('keydown', (e) => {
+    if (root.style.display === 'none') return // not the active surface
+    const ae = document.activeElement as HTMLElement | null
+    if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.tagName === 'BUTTON' || ae.isContentEditable || ae.closest?.('.cm-editor'))) return
+    if (e.key === 'ArrowRight') { e.preventDefault(); stopPlay(); setBeat(beatIdx + 1) }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); stopPlay(); setBeat(beatIdx <= 0 ? 0 : beatIdx - 1) }
+    else if (e.key === ' ') { e.preventDefault(); if (timer) stopPlay(); else startPlay() }
+  })
 
   return {
     render,
@@ -707,6 +931,6 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
     centerOn: (id) => { const n = byId.get(id); if (!n) return; const W = svg.clientWidth, Hh = svg.clientHeight; setView(T.k, W / 2 - (n.x + NODE_W / 2) * T.k, Hh / 2 - (n.y + NODE_H / 2) * T.k) },
     resize: () => { /* svg is responsive; nothing to do */ },
     setActive: (on) => { root.style.display = on ? '' : 'none' },
-    destroy: () => { stopPlay(); ro.disconnect(); root.remove() },
+    destroy: () => { stopPlay(); cancelAnim(); if (emphaTimer) clearTimeout(emphaTimer); ro.disconnect(); root.remove() },
   }
 }

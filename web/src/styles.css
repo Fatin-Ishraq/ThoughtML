@@ -322,16 +322,30 @@ a { color: inherit; }
 }
 .tv-bar-row { display: flex; align-items: center; gap: 10px; }
 .tv-clock { font: 600 14px var(--mono); font-variant-numeric: tabular-nums; letter-spacing: 0.4px; color: var(--text); }
-/* play — a labelled glass button on the right ("▶ Play the run") */
-.tv-play {
-  margin-left: auto; display: inline-flex; align-items: center; gap: 6px;
+/* transport controls — step / play / follow, grouped on the right */
+.tv-controls { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; }
+.tv-play, .tv-step, .tv-follow {
+  display: inline-flex; align-items: center; gap: 6px;
   padding: 6px 13px; border-radius: var(--r-md);
   background: var(--bg-elev); color: var(--text-dim); border: 1px solid var(--border);
   font: 500 12.5px var(--sans); line-height: 1; cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
 }
-.tv-play:hover { background: var(--bg-elev-2); color: var(--text); border-color: var(--border-strong); }
-.tv-play:active { transform: scale(0.98); }
+.tv-play:hover, .tv-step:hover, .tv-follow:hover { background: var(--bg-elev-2); color: var(--text); border-color: var(--border-strong); }
+.tv-play:active, .tv-step:active, .tv-follow:active { transform: scale(0.98); }
+/* step buttons: compact, icon-only */
+.tv-step { padding: 6px 9px; font-size: 11px; }
+/* follow toggle: lights up with the accent when armed */
+.tv-follow.on {
+  background: color-mix(in srgb, var(--accent) 20%, var(--bg-panel));
+  color: var(--text); border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent), 0 4px 16px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+/* "just arrived" emphasis — a scale-in + stroke flash as a beat lands */
+.tv-node.tv-arrive { transform-box: fill-box; transform-origin: center; animation: tv-arrive 0.7s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.tv-node.tv-arrive rect:first-of-type { animation: tv-arrive-stroke 1s ease-out; }
+@keyframes tv-arrive { 0% { transform: scale(0.55); } 55% { transform: scale(1.13); } 100% { transform: scale(1); } }
+@keyframes tv-arrive-stroke { 0% { stroke-width: 3.6; } 100% { stroke-width: 1.4; } }
 .tv-track { position: relative; width: 100%; display: flex; align-items: center; }
 /* range — custom track with a JS-driven progress fill (--fill) and a ringed thumb */
 .tv-range { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; margin: 0; background: transparent; cursor: pointer; }

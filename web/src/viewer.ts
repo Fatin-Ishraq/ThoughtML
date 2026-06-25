@@ -81,8 +81,12 @@ async function boot(): Promise<void> {
     return
   }
 
-  el('#doc-title').textContent = docTitle(canon)
-  document.title = `${docTitle(canon)} — ThoughtML`
+  // prefer the title baked by the CLI (the source file name); fall back to the
+  // document's root scope when developing against a dev fixture.
+  const bakedTitle = document.getElementById('thoughtml-title')?.textContent?.trim()
+  const title = bakedTitle || docTitle(canon)
+  el('#doc-title').textContent = title
+  document.title = `${title} — ThoughtML`
 
   const view = createTimeView(el('#graph'), theme, { embedded: false })
 
