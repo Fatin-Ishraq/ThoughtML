@@ -23,6 +23,17 @@ thoughtml [OPTIONS] <FILE>
 | `-o`, `--out <PATH>` | Write output to a file instead of stdout. |
 | `--strict` | Treat warnings as failures for the exit code. |
 
+## Time options (as-of replay)
+
+Project the model to a point in time before emitting it (see
+[Time and revision](../tutorial/time.md)). Dangling links and stances are cascaded
+away so the projection stays coherent.
+
+| Flag | Effect |
+|------|--------|
+| `--as-of <INSTANT>` | Keep only what was valid as of this date/time (valid-time axis). |
+| `--as-of-seq <N>` | Keep only the first `N` recorded events (transaction order). The two are mutually exclusive. |
+
 ## Mirror options (opt-in readings)
 
 All off by default; each adds a derived field to the output. See
@@ -51,6 +62,9 @@ thoughtml --compute --compact -o out.json examples/why-harvard.thml
 
 # Just the conflict report
 thoughtml --audit examples/self-audit.thml
+
+# Replay: what did the document believe as of a date?
+thoughtml --as-of 2026-01-13 examples/build-tetris.thml
 
 # A standalone interactive viewer — one self-contained HTML file, opens anywhere
 thoughtml --html -o decision-record.html examples/decision-record.thml

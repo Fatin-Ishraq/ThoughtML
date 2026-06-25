@@ -8,12 +8,13 @@ HTML file that opens in any browser — no server, no install, no network.
 thoughtml decision-record.thml --html -o decision-record.html
 ```
 
-Open the result and you get the same interactive graph the playground shows:
-pan / zoom, hover spotlight, click a node for its detail, the lenses, the
-readable / structural toggle, the as-of timeline, and light / dark — all running
-on a model baked into the file. `--html` turns on the full
-[mirror](../mirror/index.md) compute stack automatically, so the **evidence**,
-**argument**, **sensitivity**, and **decision** lenses all have data to show.
+Open the result and you get the same **time-driven view** the playground shows
+under "Viewer": reasoning laid out along time (earlier left, later right), pan /
+zoom, click a node for its detail, the legend, an **as-of bar with replay**, and
+light / dark — all running on a model baked into the file. Press play (or drag the
+bar) and beliefs fade in as of when they were asserted. `--html` turns on the full
+[mirror](../mirror/index.md) compute stack automatically, so the derived readings
+have data to show.
 
 ## What's in the file
 
@@ -37,7 +38,7 @@ the playground.)
 |---|---|
 | Author live, experiment, what-if | the [playground](playground.md) |
 | Check a document in CI or a script | `thoughtml doc.thml` → JSON + exit code |
-| Hand someone a readable, interactive view | `thoughtml doc.thml --html -o doc.html` |
+| Hand someone an interactive, time-driven view | `thoughtml doc.thml --html -o doc.html` |
 
-All three render the **same graph** from the **same parser** — one canonical
-model, many faithful projections.
+All three render from the **same parser** and the **same time-driven renderer** —
+one canonical model, many faithful projections.

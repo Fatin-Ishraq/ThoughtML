@@ -18,9 +18,32 @@ analyst noticed early-burndown
   observed-at 2026-06-01
 ```
 
-From all the timestamps in a document, ThoughtML derives a **timeline** (its
-earliest and latest instants). Dates can be partial (`2026`, `2026-06`) and carry
-a zone (`2026-06-14T14:05+05:00`); they're compared correctly regardless.
+From all the timestamps in a document, ThoughtML derives a **timeline**. It's not
+just the earliest and latest instants: it carries an ordered `events` array —
+every dated record as `{ at, seq, id, kind }` (plus `agent` for a stance) — sorted
+by *valid-time*, with a `seq` tiebreak for events that share an instant. That
+ordering is the document's reasoning as a *sequence of moments*, independent of the
+order you happened to type it in; it's what the [viewer](../guides/viewer.md)
+replays. Dates can be partial (`2026`, `2026-06`) and carry a zone
+(`2026-06-14T14:05+05:00`); they're compared correctly regardless.
+
+## A belief's lifecycle
+
+A focus can record where it stands with a first-class `status`:
+
+```thml
+focus webgl-renderer
+  kind option
+  A shader-based renderer for particle juice.
+  status abandoned
+  Canvas 2D already holds 60fps — this was over-engineering.
+```
+
+The four values are `open` (live), `settled` (resolved), `superseded` (replaced by
+a later belief — see `revises` below), and `abandoned` (a dead end). The point is
+the same as with revision: an `abandoned` or `superseded` branch is **kept with its
+reason, not deleted**, so the path *not* taken stays inspectable. The viewer folds
+those branches by default and dims them in replay.
 
 ## Revising a belief
 
@@ -65,9 +88,21 @@ revises, you get a warning.
 
 Because the history is the point. A superseded belief no longer counts as live
 evidence (the mirror ignores it when deriving confidence), but it's still in the
-graph. In the [playground](../guides/playground.md), an **as-of slider** lets you
-replay the document day by day: drag it back and the later beliefs disappear, the
-earlier ones un-dim. You can watch the reasoning evolve.
+graph. In the [playground](../guides/playground.md), the **as-of bar** lets you
+replay the document moment by moment: drag it back and the later beliefs disappear,
+the earlier ones un-dim. You can watch the reasoning evolve.
+
+The same projection is available from the CLI, so you can ask "what did this
+document believe *as of* a date?" in a script:
+
+```sh
+thoughtml --as-of 2026-06-08 doc.thml      # the model as it stood on that day
+thoughtml --as-of-seq 3 doc.thml           # …as of the 3rd recorded event
+```
+
+`--as-of` filters on valid-time (the default axis); `--as-of-seq` filters on
+transaction order. Either way, links and stances that would dangle once a node
+drops out are cascaded away, so the projected model is always coherent.
 
 The bundled [`estimate-revised.thml`](../appendix/examples.md) is built entirely
 around this — a launch date that slips twice as evidence arrives.

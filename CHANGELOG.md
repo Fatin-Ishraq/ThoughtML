@@ -8,6 +8,28 @@ release — real and usable, but the surface may still move.
 
 ### Added
 
+- **Memory & time overhaul (Phase A) — valid-time is now the backbone.** Five
+  temporal primitives toward "version control for reasoning":
+  - **Time spine.** The derived `timeline` now carries an ordered `events` array
+    (`at`, `seq`, `id`, `kind`, optional `agent`), sorted by *valid-time* with a
+    `seq` tiebreak — the document's reasoning as a sequence of moments, not the
+    order you happened to type it.
+  - **Tree-of-thought.** A `focus` or `question` can **contain** other records by
+    nesting them (indentation); the members are recorded on `includes` and inherit
+    the container's provenance/temporal context. A thought-tree, not a flat list.
+  - **Lifecycle / fold.** A focus gains a first-class `status`:
+    `open` / `settled` / `superseded` / `abandoned`. An abandoned branch is **kept
+    with its reason**, not deleted, so dead ends stay inspectable.
+  - **Keep-everything.** Redefining a focus with *differing* content no longer
+    silently clobbers the first definition — every alternative is retained on
+    `divergent` and surfaced as a `definition-divergence` conflict. Concurrent
+    authoring is lossless.
+  - **As-of replay.** `--as-of <instant>` (valid-time, the default axis) and
+    `--as-of-seq <n>` (transaction order) project the model to a point in time,
+    cascading to drop dangling links and stances to a fixpoint. Exposed in the
+    library as `parse_str_as_of` / `AsOf`.
+- **A second conflict type: `definition-divergence`** (warning). The mirror now
+  flags a focus defined more than once with differing content — see above.
 - **Standalone interactive viewer (`thoughtml --html`).** Bake any document into a
   single, self-contained HTML file — the interactive graph (pan/zoom, node detail,
   the lenses, the as-of timeline, light/dark) with the canonical model inlined and
@@ -16,6 +38,14 @@ release — real and usable, but the surface may still move.
 
 ### Changed
 
+- **The viewer is now a time-driven reasoning view (Track D).** The playground's
+  "Readable" surface is replaced by a **Viewer** that lays reasoning out along
+  time — earlier beliefs to the left, later to the right — with vertical position
+  emerging from a force layout rather than fixed lanes, and a built-in **replay**
+  (drag the as-of bar, or press play) that fades beliefs in as of when they were
+  asserted. "Structural" stays as the node-link view. The same time-driven
+  renderer (`timeview.ts`, dependency-free SVG) drives the standalone `--html`
+  export, so both render identically.
 - **The renderer is a wasm-free core.** The graph/detail/legend projection was
   split from the wasm parser (a pure `model.ts` type seam), so the same renderer
   drives both the playground and the standalone viewer — they can't drift. The

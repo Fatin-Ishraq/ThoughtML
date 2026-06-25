@@ -27,7 +27,7 @@ channel, in an `audit` section, and never affect strict parsing.
 Each conflict has a `kind`, a `severity` (`error` / `warning` / `info`), the
 `subjects` it concerns, and a human-readable `message`.
 
-## The one conflict type in v0.1.0: `confidence-vs-status`
+## `confidence-vs-status`
 
 It compares each authored stance's **confidence** against the grounded
 [argument status](argument-status.md) of its target. Two cases fire:
@@ -61,9 +61,28 @@ impossible to miss.
 The bundled [`self-audit.thml`](../appendix/examples.md) exists precisely to
 demonstrate this: clean document, real conflict, no verdict.
 
+## `definition-divergence`
+
+The second conflict type catches a different kind of disagreement: the same focus
+**defined more than once with differing content**.
+
+```json
+{ "kind": "definition-divergence", "severity": "warning",
+  "subjects": ["launch-date"],
+  "message": "`launch-date` is defined more than once with differing content; all 2 definitions are kept" }
+```
+
+Ordinarily a repeated focus id [merges](../reference/foci-and-kinds.md#merging)
+(first-wins on body / quantity / formula). But when a later mention states a
+*genuinely different* value, ThoughtML does **not** drop it — every alternative is
+retained on the focus's `divergent` list, and this conflict points at the
+disagreement. It's the lossless-authoring tell: two agents (or two of your own
+passes) wrote down incompatible versions of the same thing, and the mirror asks you
+to reconcile them rather than picking one silently.
+
 ## More conflict types are coming
 
-`confidence-vs-status` is the first. The conflict report is built as an extensible
-channel; future readings (calibration drift, numeric inconsistency, stale beliefs)
-will land here as additional `kind`s — each one a disagreement surfaced, never a
-decision made.
+`confidence-vs-status` and `definition-divergence` are the first two. The conflict
+report is built as an extensible channel; future readings (calibration drift,
+numeric inconsistency, stale beliefs) will land here as additional `kind`s — each
+one a disagreement surfaced, never a decision made.

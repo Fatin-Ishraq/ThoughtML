@@ -16,10 +16,15 @@ To run it locally, see [Installation](../getting-started/installation.md):
 
 - **Editor** (left) — a code editor with ThoughtML syntax highlighting and a
   lint gutter. Diagnostics appear inline as you type.
-- **Graph** (centre) — the document rendered as an interactive graph. Foci are
-  nodes (shaped by [kind](../reference/foci-and-kinds.md)), links are labelled
-  arrows (styled by [relation](../reference/relations.md)), stances attach to
-  their targets.
+- **Graph** (centre) — the document rendered interactively, in one of two
+  surfaces:
+  - **Viewer** (default) — a *time-driven* view: reasoning laid out along time
+    (earlier beliefs left, later right), vertical position emerging from a force
+    layout, with an as-of bar and replay. This is the same renderer the standalone
+    [`--html` viewer](viewer.md) uses.
+  - **Structural** — the classic node-link graph: foci as nodes (shaped by
+    [kind](../reference/foci-and-kinds.md)), links as labelled arrows (styled by
+    [relation](../reference/relations.md)), stances attached to their targets.
 - **Detail panel** — click any node to see its facts: body, fields, authored
   numbers, and the mirror's derived values **beside** them (never merged).
 - **Example tray** — load any bundled example to explore it.
@@ -40,17 +45,22 @@ conflict — exactly the [`self-audit.thml`](../appendix/examples.md) case.
 
 ## Lenses
 
-A lens recolours the whole graph to foreground one reading:
+On the **Structural** surface, a lens recolours the whole graph to foreground one
+reading:
 
 - **Type** — colour by record/kind. The default, for reading structure.
 - **Argument** — colour by `in` / `out` / `undecided`, to see what survives.
 
-## The as-of slider
+## Replay (the as-of bar)
 
-For documents with [timestamps](../tutorial/time.md), an **as-of slider** replays
-the reasoning over time. Drag it back and beliefs asserted later disappear, while
-revised-away beliefs un-dim — so you can watch a conclusion form (or fall apart)
-as evidence arrived. Try it on [`estimate-revised.thml`](../appendix/examples.md).
+For documents with [timestamps](../tutorial/time.md), the **Viewer** carries an
+**as-of bar** built into the timeline. Press play (or drag it back) and the
+reasoning replays moment by moment: beliefs fade in as of when they were asserted,
+and revised-away or abandoned branches dim — so you can watch a conclusion form (or
+fall apart) as evidence arrived. Try it on
+[`build-tetris.thml`](../appendix/examples.md) or
+[`estimate-revised.thml`](../appendix/examples.md). The same projection is on the
+CLI as [`--as-of`](cli.md#time-options-as-of-replay).
 
 ## What-if
 

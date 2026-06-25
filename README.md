@@ -141,15 +141,20 @@ for details.
 ## Core ideas
 
 - **Typed reasoning.** A focus is an `observation`, `claim`, `hypothesis`,
-  `option`, `decision`, `goal`, `assumption`, … — not just a node.
+  `option`, `decision`, `goal`, `assumption`, … — not just a node. Foci nest into
+  *thought-trees* (a claim and the reasoning that hangs off it, as one unit).
 - **Defeasible evidence.** `supports` / `opposes` / `undercuts` form an argument
   graph; an opt-in grounded status reads each node as `in` / `out` / `undecided`.
-- **Time and revision.** Beliefs are dated and can be revised; the playground has
-  an as-of view that replays the reasoning.
+- **Time is the spine.** Beliefs are dated and ordered by valid-time; they can be
+  revised, and a branch can be `abandoned` — *kept with its reason, not deleted*.
+  An as-of replay (`--as-of`, or the viewer's play button) projects the model to
+  any point in time. Nothing is forgotten.
 - **Honest numbers.** One strength encoding (numeric `weight`); authored numbers
   can declare their basis — `measured` / `estimated` / `assumed`.
 - **The mirror.** An opt-in conflict report flags where your structure disagrees
-  with your stated confidence — it reports, it does not decide.
+  with what you said — high confidence in a claim your own evidence defeats
+  (`confidence-vs-status`), or the same focus defined two incompatible ways
+  (`definition-divergence`). It reports, it does not decide.
 
 ## How it's built
 
@@ -161,10 +166,11 @@ for details.
 - **Playground** — [`web`](web): a live editor and
   graph view, in the spirit of mermaid.live.
 - **Standalone viewer** — `thoughtml --html` bakes a document into one
-  self-contained, interactive HTML file (the graph, the lenses, the as-of
-  timeline — model inlined, no wasm, no server). The renderer is a wasm-free core
-  shared with the playground, so both render identically. The graph is an *output
-  of the toolchain*, alongside JSON.
+  self-contained, interactive HTML file (a *time-driven* reasoning view with replay
+  — model inlined, no wasm, no server). The renderer is a dependency-free, wasm-free
+  core shared with the playground (where it's the **Viewer** surface, alongside
+  **Structural**), so both render identically. The graph is an *output of the
+  toolchain*, alongside JSON.
 
 ## Status
 
