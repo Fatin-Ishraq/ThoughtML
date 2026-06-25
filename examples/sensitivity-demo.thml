@@ -10,51 +10,63 @@ scope ship-decision
 focus ready-to-ship
   The release is safe to ship to all users on Friday.
   kind hypothesis
+  asserted-at 2026-04-15
 
 # --- Evidence for it, of very different load-bearing weight ---
 
 focus canary-healthy
   A 5% canary has run for 48 hours with no error-rate or latency regression.
   kind observation
+  observed-at 2026-04-16
 
 focus tests-green
   The full suite — unit, integration, end-to-end — passes on the release branch.
   kind observation
+  observed-at 2026-04-16
 
 focus changelog-reviewed
   Every merged PR in the release carries a reviewer sign-off.
   kind observation
+  observed-at 2026-04-17
 
 link canary-healthy supports ready-to-ship
   Real traffic at smaller scale with no regression is the strongest signal we have.
   weight 0.85
+  asserted-at 2026-04-18
 
 link tests-green supports ready-to-ship
   Green tests are necessary, but they have passed before failed releases too.
   weight 0.4
+  asserted-at 2026-04-18
 
 link changelog-reviewed supports ready-to-ship
   Review catches intent bugs, but says little about runtime behaviour.
   weight 0.30
+  asserted-at 2026-04-18
 
 # --- Evidence against ---
 
 focus rollback-untested
   The automated rollback path hasn't been exercised since the last migration.
   kind observation
+  observed-at 2026-04-17
 
 link rollback-untested undercuts ready-to-ship
   If the ship goes wrong, we're not sure we can cleanly back it out.
   weight 0.5
+  asserted-at 2026-04-19
 
 # --- The decision that rides on it ---
 
 focus ship-friday
   Ship the release to 100% of users on Friday.
   kind decision
+  asserted-at 2026-04-20
 
 link ready-to-ship supports ship-friday
   The go/no-go call follows directly from whether the release is safe.
+  asserted-at 2026-04-20
 
 release-manager holds ship-friday
   note Leaning yes — but the rollback gap is the one thing that could flip it.
+  asserted-at 2026-04-20

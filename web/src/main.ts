@@ -3,6 +3,7 @@ import { initParser, parseProject, parseWhatIf } from './parse'
 import { parseTime, type ParseResult, type Diagnostic, type Conflict, type Overrides } from './model'
 import { createEditor } from './editor'
 import { createGraph, type ViewMode, type Theme } from './graph'
+import { createTimeView } from './timeview'
 import { buildLegend, buildLensKey } from './legend'
 import { renderDiagnostics } from './diagnostics'
 import { renderDetail, kindOf, labelOf, type WhatIfCtx } from './detail'
@@ -38,6 +39,17 @@ async function boot(): Promise<void> {
   await initParser()
 
   const graph = createGraph(el('#graph'), theme)
+  // The primary "Viewer" is the lane-less, time-driven renderer (timeview),
+  // overlaid on the graph pane; "Structural" stays the Cytoscape compound view.
+  // Exactly one is active at a time; the toggle swaps them.
+  const view = createTimeView(el('#graph').parentElement!, theme, { embedded: true })
+  const isView = () => mode === 'readable'
+  const rSelect = (id: string | null) => { if (isView()) view.select(id); else if (id) graph.select(id); else graph.cy.elements().unselect() }
+  const rFit = () => (isView() ? view.fit() : graph.fit())
+  const rZoomIn = () => (isView() ? view.zoomIn() : graph.zoomIn())
+  const rZoomOut = () => (isView() ? view.zoomOut() : graph.zoomOut())
+  const rZoomReset = () => (isView() ? view.zoomReset() : graph.zoomReset())
+  const rCenter = (id: string) => (isView() ? view.centerOn(id) : graph.centerOn(id))
   // `baseline` is the unperturbed parse; `last` is what the UI shows — equal to
   // baseline until the user mutes nodes/links for a what-if (Phase 6), at which
   // point `last` is the recomputed counterfactual and `muted` names what's off.
@@ -104,18 +116,19 @@ async function boot(): Promise<void> {
     detailBadge.innerHTML = `${gname ? glyph(gname) : ''}<span>${kind}</span>`
     detailId.textContent = labelOf(id)
     renderDetail(detailBody, last.canonical, id, navigateTo, whatIfCtx())
-    graph.select(id)
-    window.setTimeout(() => { graph.resize(); graph.centerOn(id) }, 230)
+    rSelect(id)
+    window.setTimeout(() => { if (!isView()) graph.resize(); rCenter(id) }, 230)
   }
   function closeDetail() {
     selectedId = null
     detailPane.classList.add('collapsed')
-    graph.cy.elements().unselect()
-    window.setTimeout(() => graph.resize(), 230)
+    rSelect(null)
+    if (!isView()) window.setTimeout(() => graph.resize(), 230)
   }
   function navigateTo(id: string) { showDetail(id) }
 
   graph.onSelect((info) => { if (info) showDetail(info.id); else closeDetail() })
+  view.onSelect((info) => { if (info) showDetail(info.id); else closeDetail() })
   el('#detail-close').addEventListener('click', closeDetail)
 
   // ---- data drawer ----
@@ -141,6 +154,17 @@ async function boot(): Promise<void> {
   el('#diag-toggle').addEventListener('click', () => diagBar.classList.toggle('open'))
 
   // ---- view toggle ----
+  // Swaps which renderer is live: the timeview (Viewer) overlays the pane and the
+  // Cytoscape canvas hides, or vice-versa for Structural.
+  function syncRenderers(animate: boolean): void {
+    view.setActive(isView())
+    el('#graph').style.display = isView() ? 'none' : ''
+    if (isView() && timelineEl) timelineEl.hidden = true
+    if (!last) return
+    if (isView()) { view.render(last.canonical) } else { graph.render(last.canonical, mode, animate); graph.setMuted(muted) }
+    if (!isView()) syncTimeline(last)
+    if (selectedId) rSelect(selectedId)
+  }
   const viewBtns = Array.from(el('#view').querySelectorAll<HTMLButtonElement>('button'))
   viewBtns.forEach((b) => b.classList.toggle('active', b.dataset.view === mode))
   for (const btn of viewBtns) {
@@ -148,18 +172,18 @@ async function boot(): Promise<void> {
       mode = btn.dataset.view as ViewMode
       localStorage.setItem(LS.view, mode)
       viewBtns.forEach((b) => b.classList.toggle('active', b === btn))
-      if (last) graph.render(last.canonical, mode, true)
-      if (selectedId) graph.select(selectedId)
+      syncRenderers(true)
     })
   }
 
   // ---- graph controls + zoom ----
-  el('#fit').addEventListener('click', () => graph.fit())
-  el('#relayout').addEventListener('click', () => graph.relayout())
-  el('#zoom-in').addEventListener('click', () => graph.zoomIn())
-  el('#zoom-out').addEventListener('click', () => graph.zoomOut())
-  el('#zoom-pct').addEventListener('click', () => graph.zoomReset())
+  el('#fit').addEventListener('click', () => rFit())
+  el('#relayout').addEventListener('click', () => (isView() ? view.fit() : graph.relayout()))
+  el('#zoom-in').addEventListener('click', () => rZoomIn())
+  el('#zoom-out').addEventListener('click', () => rZoomOut())
+  el('#zoom-pct').addEventListener('click', () => rZoomReset())
   graph.onZoom((pct) => { el('#zoom-pct').textContent = `${pct}%` })
+  view.onZoom((pct) => { el('#zoom-pct').textContent = `${pct}%` })
 
   // ---- as-of timeline (Phase 3) ----
   const timelineEl = el('#timeline')
@@ -182,6 +206,9 @@ async function boot(): Promise<void> {
   // (full final state); preserves the user's position across edits if still in
   // range.
   function syncTimeline(res: ParseResult): void {
+    // In Viewer mode the timeview owns its own play/scrub bar, so the host
+    // as-of slider stays hidden.
+    if (isView()) { timelineEl.hidden = true; return }
     const tl = res.canonical.timeline
     const start = parseTime(tl?.start)
     const end = parseTime(tl?.end)
@@ -208,6 +235,7 @@ async function boot(): Promise<void> {
     document.body.dataset.theme = theme
     setIcon(el('#theme'), theme === 'dark' ? 'moon' : 'sun')
     graph.setTheme(theme)
+    view.setTheme(theme)
     editor.setTheme(theme)
     buildLegend(el('#legend'), theme)
   })
@@ -287,8 +315,10 @@ async function boot(): Promise<void> {
     last = muted.size === 0 ? baseline : safeWhatIf()
     const canon = last.canonical
     el('#empty-state').hidden = canon.objects.length > 0
-    graph.render(canon, mode)
-    graph.setMuted(muted)
+    el('#graph').style.display = isView() ? 'none' : ''
+    view.setActive(isView())
+    if (isView()) view.render(canon)
+    else { graph.render(canon, mode); graph.setMuted(muted) }
     syncTimeline(last)
     setDiagStatus(last.diagnostics.items, canon.audit?.conflicts ?? [])
     renderDiagnostics(el('#diagnostics'), last.diagnostics.items, canon.audit?.conflicts ?? [], (line) => editor.gotoLine(line))
@@ -304,12 +334,12 @@ async function boot(): Promise<void> {
         : canon.objects.some((o) => o.id === selectedId)
       if (stillThere) {
         renderDetail(detailBody, canon, selectedId, navigateTo, whatIfCtx())
-        graph.select(selectedId)
+        rSelect(selectedId)
       } else {
         closeDetail()
       }
     }
-    el('#zoom-pct').textContent = `${Math.round(graph.cy.zoom() * 100)}%`
+    if (!isView()) el('#zoom-pct').textContent = `${Math.round(graph.cy.zoom() * 100)}%`
   }
 
   function setDiagStatus(items: Diagnostic[], conflicts: Conflict[]): void {
@@ -352,8 +382,8 @@ async function boot(): Promise<void> {
   })
 
   // ---- divider + resize ----
-  setupDivider(el('#divider'), el('.editor-pane'), () => graph.resize())
-  window.addEventListener('resize', () => graph.resize())
+  setupDivider(el('#divider'), el('.editor-pane'), () => { graph.resize(); if (isView()) view.fit() })
+  window.addEventListener('resize', () => { graph.resize(); if (isView()) view.fit() })
 
   run(editor.getValue())
 

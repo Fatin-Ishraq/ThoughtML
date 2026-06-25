@@ -56,9 +56,24 @@ Desktop.ini
 # Internal planning docs
 project_plan.md
 ROADMAP.md
+PHILOSOPHY.md
+
+
 install.cmd
 
 # Scratch graph-design mockups (local only; the chosen format becomes the real renderer)
 experiments/
+
 # Dev-only preview copies served from web/public (duplicates of experiments/)
 web/public/vision*.html
+
+# Per-example dev fixtures for viewer.html?dev=<name> (generated from examples/,
+# regenerate with: thoughtml <doc>.thml --compute --compact). Keep the two
+# documented fallbacks the viewer loads by default.
+web/public/dev-model-*.json
+!web/public/dev-model.json
+!web/public/dev-model-grand.json
+
+graphify-out/
+exampleview/
+

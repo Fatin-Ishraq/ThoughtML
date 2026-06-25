@@ -2,6 +2,98 @@
 // Embedded as strings so the playground is fully self-contained.
 
 export const EXAMPLES: Record<string, string> = {
+  'build-tetris': `# Mason and two helpers build a Tetris clone over ten days. Three tracks run in
+# parallel — rendering, rotation, and the core loop — so the reasoning reads as
+# swimlanes over time. Beliefs are revised as evidence lands, one branch is
+# abandoned but kept (not deleted), and one claim is held with more confidence
+# than the structure can justify, so the mirror flags it.
+#
+# Open the Timeline view and press Play to replay the run.
+
+scope build-tetris
+  observed-at 2026-01-10
+
+  # --- Track: rendering ---
+  scope rendering
+    observed-at 2026-01-10
+
+    focus canvas-2d
+      Render the well and pieces on a 2D canvas — the standard footing for grid games.
+      kind decision
+
+    focus webgl-juice
+      A WebGL renderer for shader-based particle juice. Abandoned: Canvas 2D holds
+      60fps comfortably, so this was over-engineering for a ten-day learning demo.
+      kind option
+      status abandoned
+      observed-at 2026-01-14
+
+    link canvas-2d blocks webgl-juice
+      Once Canvas 2D proved fast enough, the WebGL branch was pruned.
+      asserted-at 2026-01-14
+
+  # --- Track: rotation ---
+  scope rotation
+    observed-at 2026-01-12
+
+    focus naive-rotation
+      Rotate the piece matrix directly — the obvious first attempt.
+      kind hypothesis
+
+    focus correct-spin
+      Pieces rotate correctly against the walls.
+      kind outcome
+
+    focus wall-clip-bug
+      Naive rotation drives the I-piece into the wall and it vanishes.
+      kind observation
+      observed-at 2026-01-13
+
+    link wall-clip-bug undercuts naive-claim
+      The clipping bug defeats the naive approach.
+      asserted-at 2026-01-13
+
+  # --- Track: core loop ---
+  scope core-loop
+    observed-at 2026-01-15
+
+    focus frame-tied-speed
+      Fall speed is tied to frame rate — too fast on high-refresh monitors.
+      kind observation
+
+    focus fixed-timestep
+      Decouple game logic from frames with an accumulator.
+      kind decision
+      observed-at 2026-01-16
+
+    focus stable-speed
+      Fall speed is identical across 60Hz and 144Hz displays.
+      kind outcome
+
+    link fixed-timestep revises frame-tied-speed
+      The accumulator replaces the frame-tied loop.
+      asserted-at 2026-01-16
+
+# --- Agents weigh in: each gets its own lane ---
+
+mason suspects naive-rotation causes correct-spin as naive-claim
+  confidence 0.9
+  asserted-at 2026-01-12
+  note Confident the simple approach will just work.
+
+atlas noticed wall-clip-bug
+  observed-at 2026-01-13
+
+mason suspects fixed-timestep enables stable-speed as timestep-claim
+  confidence 0.6
+  asserted-at 2026-01-15
+
+sam revises timestep-claim
+  confidence 0.85
+  asserted-at 2026-01-17
+  note Verified stable across refresh rates and low-end devices.
+`,
+
   'ai-and-jobs': `# How AI could destroy jobs — a debate you can read straight from the graph.
 # Click any node: every focus, link, and stance explains itself.
 
@@ -236,24 +328,29 @@ assistant noticed user-prefers-readable-syntax
 
 assistant noticed user-cites-specs
   The user keeps referencing the v0 specification by section number.
+  observed-at 2026-06-17T10:15+00:00
 
 assistant infers user-values-standards-thinking from user-prefers-readable-syntax, user-cites-specs
   confidence 0.65
   note Two weak signals pointing the same way.
+  asserted-at 2026-06-17T10:40+00:00
 
 assistant remembers prefers-rust
   The user asked for the parser in Rust, as the spec recommends.
   source uri:https://example.invalid/session-log
   confidence 0.90
+  asserted-at 2026-06-17T11:05+00:00
 
 assistant revises user-values-standards-thinking
   confidence 0.80
   note Upgraded after the user corrected a spec misreading, unprompted.
+  asserted-at 2026-06-17T14:20+00:00
 
 assistant considers user-timezone
   Working hours hint at UTC+6, but this is unconfirmed.
   confidence ?
   note A guess from message timestamps, not a stated fact.
+  asserted-at 2026-06-17T15:00+00:00
 `,
 
   'estimate-revised': `# A belief that changes as evidence arrives. Drag the "As of" slider to
@@ -327,54 +424,66 @@ scope ship-decision
 focus ready-to-ship
   The release is safe to ship to all users on Friday.
   kind hypothesis
+  asserted-at 2026-04-15
 
 # --- Evidence for it, of very different load-bearing weight ---
 
 focus canary-healthy
   A 5% canary has run for 48 hours with no error-rate or latency regression.
   kind observation
+  observed-at 2026-04-16
 
 focus tests-green
   The full suite — unit, integration, end-to-end — passes on the release branch.
   kind observation
+  observed-at 2026-04-16
 
 focus changelog-reviewed
   Every merged PR in the release carries a reviewer sign-off.
   kind observation
+  observed-at 2026-04-17
 
 link canary-healthy supports ready-to-ship
   Real traffic at smaller scale with no regression is the strongest signal we have.
   weight 0.85
+  asserted-at 2026-04-18
 
 link tests-green supports ready-to-ship
   Green tests are necessary, but they have passed before failed releases too.
   weight 0.4
+  asserted-at 2026-04-18
 
 link changelog-reviewed supports ready-to-ship
   Review catches intent bugs, but says little about runtime behaviour.
   weight 0.30
+  asserted-at 2026-04-18
 
 # --- Evidence against ---
 
 focus rollback-untested
   The automated rollback path hasn't been exercised since the last migration.
   kind observation
+  observed-at 2026-04-17
 
 link rollback-untested undercuts ready-to-ship
   If the ship goes wrong, we're not sure we can cleanly back it out.
   weight 0.5
+  asserted-at 2026-04-19
 
 # --- The decision that rides on it ---
 
 focus ship-friday
   Ship the release to 100% of users on Friday.
   kind decision
+  asserted-at 2026-04-20
 
 link ready-to-ship supports ship-friday
   The go/no-go call follows directly from whether the release is safe.
+  asserted-at 2026-04-20
 
 release-manager holds ship-friday
   note Leaning yes — but the rollback gap is the one thing that could flip it.
+  asserted-at 2026-04-20
 `,
 
   'capacity-plan': `# Quantities give reasoning real numbers (v0.2, Phase 7). Each focus can carry a
@@ -387,65 +496,81 @@ scope capacity-plan
 focus scale-up-decision
   Add capacity ahead of the holiday traffic spike.
   kind decision
+  asserted-at 2026-04-08
 
 focus current-load
   Sustained production traffic today.
   kind observation
   quantity 4500 req/s
+  observed-at 2026-04-01
 
 focus spike-forecast
   Expected peak during the holiday sale.
   kind observation
   quantity 14000 req/s
+  observed-at 2026-04-02
 
 focus instance-throughput
   What one instance sustains in load tests before latency degrades.
   kind observation
   quantity 1200 req/s
+  observed-at 2026-04-03
 
 focus latency-budget
   The p99 latency SLO we must stay under.
   kind goal
   quantity 200 ms
+  asserted-at 2026-04-03
 
 focus monthly-cost-per-instance
   Fully-loaded monthly cost of one instance.
   kind observation
   quantity 180 USD
+  observed-at 2026-04-04
 
 focus storage-per-node
   Disk each new instance brings with it.
   kind observation
   quantity 512 GB
+  observed-at 2026-04-04
 
 focus current-headroom
   Spare capacity already sitting in the current fleet.
   kind observation
   quantity 30 %
+  observed-at 2026-04-05
 
 link current-load supports spike-forecast
   The forecast is a multiple of today's baseline, so the baseline grounds it.
+  asserted-at 2026-04-06
 
 link spike-forecast supports scale-up-decision
   A 3x jump over today's load is more than current capacity can absorb.
+  asserted-at 2026-04-06
 
 link instance-throughput supports scale-up-decision
   Per-instance headroom tells us how many to add.
+  asserted-at 2026-04-06
 
 link latency-budget supports scale-up-decision
   Holding p99 under budget during the spike takes more instances, not fewer.
+  asserted-at 2026-04-07
 
 link storage-per-node supports scale-up-decision
   More nodes also bring storage we happen to need.
+  asserted-at 2026-04-07
 
 link monthly-cost-per-instance opposes scale-up-decision
   Every added instance is recurring spend we have to justify.
+  asserted-at 2026-04-07
 
 link current-headroom undercuts scale-up-decision
   Some of the spike fits in existing headroom, reducing what we must add.
+  asserted-at 2026-04-07
 
 team holds scale-up-decision
   note Over-provisioning is cheap to reverse; under-provisioning during the sale is not.
+  asserted-at 2026-04-08
 `,
 
   'cost-model': `# Formulas let a focus compute its number from others (v0.2, opt-in). A focus can
@@ -460,38 +585,47 @@ scope cost-model
 focus instances
   How many instances we run.
   quantity 12 instance
+  asserted-at 2026-02-10
 
 focus cost-per-instance
   Fully-loaded monthly cost of one instance.
   quantity 180 USD/instance
+  asserted-at 2026-02-10
 
 focus monthly-compute
   Compute spend per month.
   = cost-per-instance * instances
+  asserted-at 2026-02-12
 
 focus storage
   Object storage we keep.
   quantity 4000 GB
+  asserted-at 2026-02-11
 
 focus cost-per-gb
   Storage price per gigabyte-month.
   quantity 0.02 USD/GB
+  asserted-at 2026-02-11
 
 focus monthly-storage
   Storage spend per month.
   = cost-per-gb * storage
+  asserted-at 2026-02-12
 
 focus monthly-total
   Everything we pay to run the service each month.
   = monthly-compute + monthly-storage
+  asserted-at 2026-02-13
 
 focus revenue
   Monthly revenue this service drives.
   quantity 50000 USD
+  asserted-at 2026-02-11
 
 focus gross-margin
   Share of revenue left after running costs.
   = (revenue - monthly-total) / revenue
+  asserted-at 2026-02-13
 `,
 
   'decision-ev': `# Decision EV is the last of the opt-in compute features (v0.2). An option leads-to
@@ -506,58 +640,73 @@ scope launch-decision
 focus go-to-market
   kind decision
   How aggressively to launch the new product.
+  asserted-at 2026-03-10
 
 # --- Option A: launch to everyone now ---
 
 focus launch-now
   kind option
   Ship to all users on day one and capture the whole market at once.
+  asserted-at 2026-03-11
 link launch-now option-of go-to-market
+  asserted-at 2026-03-11
 
 # This outcome's payoff is computed, not stated: a breakout launch nets its
 # revenue less the cost of supporting it (Phase 8 feeding Phase 9).
 focus launch-cost
   Marketing and on-call to support a full-blast launch.
   quantity 100000 USD
+  asserted-at 2026-03-11
 
 focus blockbuster-revenue
   Revenue if a launch-now bet pays off.
   quantity 1000000 USD
+  asserted-at 2026-03-11
 
 focus blockbuster
   A breakout launch: strong demand, low churn.
   = blockbuster-revenue - launch-cost
+  asserted-at 2026-03-12
 
 focus stumble
   A rough launch: refunds and churn eat into the upside.
   quantity -200000 USD
+  asserted-at 2026-03-12
 
 link launch-now leads-to blockbuster
   probability 0.4
+  asserted-at 2026-03-13
 
 link launch-now leads-to stumble
   probability 0.6
+  asserted-at 2026-03-13
 
 # --- Option B: staged, region-by-region rollout ---
 
 focus staged-rollout
   kind option
   Roll out region by region, fixing as we learn.
+  asserted-at 2026-03-12
 link staged-rollout option-of go-to-market
+  asserted-at 2026-03-12
 
 focus steady-growth
   Predictable adoption with fewer surprises.
   quantity 500000 USD
+  asserted-at 2026-03-12
 
 focus slow-start
   Cautious uptake, but very little downside.
   quantity 120000 USD
+  asserted-at 2026-03-12
 
 link staged-rollout leads-to steady-growth
   probability 0.7
+  asserted-at 2026-03-14
 
 link staged-rollout leads-to slow-start
   probability 0.3
+  asserted-at 2026-03-14
 `,
 
   'release-bet': `# The whole opt-in compute layer woven into one decision (v0.2):
@@ -573,70 +722,90 @@ scope release-bet
 focus release-decision
   kind decision
   Ship the new checkout flow now, or hold a week to harden it.
+  asserted-at 2026-03-20
 
 # --- Option A: ship now (explicit probabilities) ---
 
 focus ship-now
   kind option
   Ship today and capture the launch window.
+  asserted-at 2026-03-21
 link ship-now option-of release-decision
+  asserted-at 2026-03-21
 
 focus base-revenue
   Revenue the launch window is worth.
   quantity 800000 USD
+  asserted-at 2026-03-21
 
 focus ship-clean
   Ships smoothly; we capture half the available revenue.
   = base-revenue * 0.5
+  asserted-at 2026-03-22
 
 focus ship-buggy
   A bug slips through and we burn goodwill plus a hotfix.
   quantity -150000 USD
+  asserted-at 2026-03-22
 
 link ship-now leads-to ship-clean
   probability 0.6
+  asserted-at 2026-03-25
 link ship-now leads-to ship-buggy
   probability 0.4
+  asserted-at 2026-03-25
 
 # --- Option B: hold a week (probability from evidence) ---
 
 focus hold-week
   kind option
   Hold a week to harden the flow, then ship.
+  asserted-at 2026-03-21
 link hold-week option-of release-decision
+  asserted-at 2026-03-21
 
 focus harden-gain
   Extra revenue a polished launch is expected to earn.
   quantity 300000 USD
+  asserted-at 2026-03-22
 
 focus delay-cost
   What a week of delay costs us.
   quantity 50000 USD
+  asserted-at 2026-03-22
 
 focus hold-pays-off
   The extra week pays for itself - a clean, polished launch.
   = harden-gain - delay-cost
+  asserted-at 2026-03-23
 
 focus hold-stale
   The week is wasted: nothing improves and a rival moves first.
   quantity -80000 USD
+  asserted-at 2026-03-23
 
 # Evidence for hold-pays-off. Its leads-to edge states no probability, so its
 # derived confidence (from this evidence) is used as the likelihood.
 focus canary-clean
   A 5% canary of the hardened flow ran 48h with no regression.
   kind observation
+  observed-at 2026-03-24
 
 focus load-test-passed
   The hardened flow held p99 under budget at 3x peak load.
   kind observation
+  observed-at 2026-03-24
 
 link canary-clean supports hold-pays-off
+  asserted-at 2026-03-25
 link load-test-passed supports hold-pays-off
+  asserted-at 2026-03-25
 
 link hold-week leads-to hold-pays-off
+  asserted-at 2026-03-26
 link hold-week leads-to hold-stale
   probability 0.1
+  asserted-at 2026-03-26
 `,
 
   'canonical-core': `# The same reasoning as multi-agent-debate, written directly in the canonical
@@ -646,18 +815,23 @@ scope payments-latency
 
 focus latency-spike
   p99 checkout latency doubled at 14:00 UTC.
+  observed-at 2026-03-01T14:05Z
 
 focus cache-eviction
   Aggressive eviction dropping hot keys under load.
+  observed-at 2026-03-01T14:20Z
 
 link cache-hypothesis: cache-eviction causes latency-spike
   The proposed mechanism: evicted hot keys force slow cold reads.
+  asserted-at 2026-03-01T14:40Z
 
 stance alice suspects cache-hypothesis
   confidence 0.55
+  asserted-at 2026-03-01T15:00Z
 
 stance bob doubts cache-hypothesis
   confidence 0.30
+  asserted-at 2026-03-01T15:10Z
 `,
 
   'nested-scope': `# Nested scopes (Phase 5): members are written *inside* a scope by indentation.
@@ -703,30 +877,39 @@ scope supply-chain
 focus port-strike
   kind risk
   likelihood 0.4
+  asserted-at 2026-04-22
 
 focus just-in-time
   kind risk
   likelihood 0.5
+  asserted-at 2026-04-22
 
 focus dual-sourcing
   kind mitigation
+  asserted-at 2026-04-23
 
 link dual-sourcing opposes port-strike
+  asserted-at 2026-04-24
 link just-in-time aggravates port-strike
+  asserted-at 2026-04-24
 
 stance ops flags port-strike
   confidence 0.3
   note Low residual risk once dual-sourcing opposes the strike.
+  asserted-at 2026-04-25
 `,
 
   'shared-defs': `# Shared definitions other documents import (Phase 5). Strict-clean on its own:
 # its foci are members of the \`shared\` scope, so nothing is orphaned.
 scope shared
+  asserted-at 2026-05-20
   focus capacity-budget
     quantity 1000 req/s
+    asserted-at 2026-05-20
 
   focus slo-target
     p99 latency budget is 200 ms.
+    asserted-at 2026-05-21
 `,
 
   'imports-demo': `# Imports another document and references its objects by namespace (Phase 5).
@@ -738,11 +921,14 @@ scope rollout
 
 focus rollout-plan
   Ship the rollout to 100% over a week.
+  asserted-at 2026-05-25
 
 link rollout-plan depends-on base.capacity-budget
+  asserted-at 2026-05-26
 
 stance ops accepts rollout-plan
   confidence 0.8
+  asserted-at 2026-05-27
 `,
 
   'grand-tour': `# grand-tour — one decision that exercises the whole language.
@@ -878,28 +1064,40 @@ scope college-choice
   scope what-i-know
     focus admit-harvard
       kind observation
+      observed-at 2026-04-02
       Admitted to Harvard with a strong aid package.
-    focus faculty-fit
-      kind observation
-      Two labs I emailed replied and take undergraduates.
     focus aid-offer
       kind observation
+      observed-at 2026-04-03
       quantity 78000 USD
       Annual grant aid offered — grants, not loans.
+    focus faculty-fit
+      kind observation
+      observed-at 2026-04-05
+      Two labs I emailed replied and take undergraduates.
     focus prestige-signal
       kind claim
+      asserted-at 2026-04-06
       The brand helps for the first job and grad-school apps.
     focus prestige-doubt
       kind assumption
+      asserted-at 2026-04-08
       A few years into a career, fit may matter more than prestige.
     link admit-harvard enables harvard
+      asserted-at 2026-04-09
     link faculty-fit supports goal-research
+      asserted-at 2026-04-05
     link aid-offer supports goal-aid
+      asserted-at 2026-04-03
       weight 0.85
     link prestige-signal supports goal-network
+      asserted-at 2026-04-06
     link prestige-doubt undercuts prestige-signal
+      asserted-at 2026-04-08
 
   scope the-decision
+    asserted-at 2026-04-10
+
     focus where-to-go
       kind decision
       Which offer do I commit to?
@@ -938,17 +1136,22 @@ scope college-choice
 
     me chooses harvard
       confidence 0.75
+      asserted-at 2026-04-15
       note Faculty access and the aid package clear a bar the state offer can't.
 
   scope second-thoughts
     focus far-from-home
       kind observation
+      observed-at 2026-04-12
       It's a five-hour flight from family.
     focus visit-plan
       kind action
+      asserted-at 2026-04-16
       Visit at reading week and over the summer.
     link far-from-home opposes harvard
+      asserted-at 2026-04-12
     link visit-plan opposes far-from-home
+      asserted-at 2026-04-16
 `,
 
   'self-audit': `# self-audit — an agent's reasoning that its own structure defeats.

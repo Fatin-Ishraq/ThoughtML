@@ -9,15 +9,20 @@ scope payments-latency
 
 focus latency-spike
   p99 checkout latency doubled at 14:00 UTC.
+  observed-at 2026-03-01T14:05Z
 
 focus cache-eviction
   Aggressive eviction dropping hot keys under load.
+  observed-at 2026-03-01T14:20Z
 
 link cache-hypothesis: cache-eviction causes latency-spike
   The proposed mechanism: evicted hot keys force slow cold reads.
+  asserted-at 2026-03-01T14:40Z
 
 stance alice suspects cache-hypothesis
   confidence 0.55
+  asserted-at 2026-03-01T15:00Z
 
 stance bob doubts cache-hypothesis
   confidence 0.30
+  asserted-at 2026-03-01T15:10Z

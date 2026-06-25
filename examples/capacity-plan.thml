@@ -8,62 +8,78 @@ scope capacity-plan
 focus scale-up-decision
   Add capacity ahead of the holiday traffic spike.
   kind decision
+  asserted-at 2026-04-08
 
 focus current-load
   Sustained production traffic today.
   kind observation
   quantity 4500 req/s
+  observed-at 2026-04-01
 
 focus spike-forecast
   Expected peak during the holiday sale.
   kind observation
   quantity 14000 req/s
+  observed-at 2026-04-02
 
 focus instance-throughput
   What one instance sustains in load tests before latency degrades.
   kind observation
   quantity 1200 req/s
+  observed-at 2026-04-03
 
 focus latency-budget
   The p99 latency SLO we must stay under.
   kind goal
   quantity 200 ms
+  asserted-at 2026-04-03
 
 focus monthly-cost-per-instance
   Fully-loaded monthly cost of one instance.
   kind observation
   quantity 180 USD
+  observed-at 2026-04-04
 
 focus storage-per-node
   Disk each new instance brings with it.
   kind observation
   quantity 512 GB
+  observed-at 2026-04-04
 
 focus current-headroom
   Spare capacity already sitting in the current fleet.
   kind observation
   quantity 30 %
+  observed-at 2026-04-05
 
 link current-load supports spike-forecast
   The forecast is a multiple of today's baseline, so the baseline grounds it.
+  asserted-at 2026-04-06
 
 link spike-forecast supports scale-up-decision
   A 3x jump over today's load is more than current capacity can absorb.
+  asserted-at 2026-04-06
 
 link instance-throughput supports scale-up-decision
   Per-instance headroom tells us how many to add.
+  asserted-at 2026-04-06
 
 link latency-budget supports scale-up-decision
   Holding p99 under budget during the spike takes more instances, not fewer.
+  asserted-at 2026-04-07
 
 link storage-per-node supports scale-up-decision
   More nodes also bring storage we happen to need.
+  asserted-at 2026-04-07
 
 link monthly-cost-per-instance opposes scale-up-decision
   Every added instance is recurring spend we have to justify.
+  asserted-at 2026-04-07
 
 link current-headroom undercuts scale-up-decision
   Some of the spike fits in existing headroom, reducing what we must add.
+  asserted-at 2026-04-07
 
 team holds scale-up-decision
   note Over-provisioning is cheap to reverse; under-provisioning during the sale is not.
+  asserted-at 2026-04-08

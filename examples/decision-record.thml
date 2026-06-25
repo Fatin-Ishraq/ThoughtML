@@ -3,7 +3,8 @@
 # Demonstrates: scope, question, considers, rejects / chooses / holds, opposing
 # and supporting links with prose `body` (v0.1), `because` and `answers`
 # justification, a blocking benchmark (`until`), and `note` rationale on the
-# stances (v0.1). The graph IS the ADR.
+# stances (v0.1). The graph IS the ADR. Reasoned out over a week — scrub the
+# timeline to replay how the decision was reached.
 
 scope adr-017-datastore
 
@@ -11,51 +12,65 @@ question which-datastore
   Which datastore should back the event log?
   expects option
   status open
+  asserted-at 2026-03-02
 
 team considers postgres-option
   A single Postgres instance with a partitioned events table.
+  asserted-at 2026-03-02
 
 team considers kafka-option
   An append-only Kafka topic with a compacted changelog.
+  asserted-at 2026-03-02
 
 team considers dynamo-option
   DynamoDB with a composite sort key.
+  asserted-at 2026-03-02
 
 focus cross-region-cost
   Multi-region DynamoDB write costs exceed the budget on their own.
+  observed-at 2026-03-03
 
 link cross-region-cost opposes dynamo-option
   Cost alone disqualifies it before we even weigh latency or ergonomics.
+  asserted-at 2026-03-03
 
 team rejects dynamo-option
   because cross-region-cost
   confidence 0.80
+  asserted-at 2026-03-04
   note Reluctantly — its latency story was actually the best of the three.
 
 focus operational-burden
   Kafka would be the team's first stateful streaming system to operate.
+  observed-at 2026-03-04
 
 link operational-burden opposes kafka-option
   A new operational muscle we'd have to build in the middle of the project.
+  asserted-at 2026-03-04
 
 question throughput-benchmark
   Can Postgres sustain 50k events per second on target hardware?
   expects number
   status open
+  asserted-at 2026-03-05
 
 team holds datastore-decision
   Commit to a datastore for the event log.
   until throughput-benchmark answered
+  asserted-at 2026-03-05
   note Provisionally Postgres, but not signed off until the benchmark lands.
 
 focus operational-familiarity
   The team already runs Postgres in production every day.
+  observed-at 2026-03-06
 
 link operational-familiarity supports postgres-option
   Boring technology the team can already debug at 3am.
+  asserted-at 2026-03-06
 
 team chooses postgres-option
   Start with Postgres; revisit if throughput ceilings appear.
   because operational-familiarity
   answers which-datastore
+  asserted-at 2026-03-07
   note Optimize for what we can operate, not what benchmarks best on paper.

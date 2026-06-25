@@ -16,17 +16,23 @@ scope supply-chain
 focus port-strike
   kind risk
   likelihood 0.4
+  asserted-at 2026-04-22
 
 focus just-in-time
   kind risk
   likelihood 0.5
+  asserted-at 2026-04-22
 
 focus dual-sourcing
   kind mitigation
+  asserted-at 2026-04-23
 
 link dual-sourcing opposes port-strike
+  asserted-at 2026-04-24
 link just-in-time aggravates port-strike
+  asserted-at 2026-04-24
 
 stance ops flags port-strike
   confidence 0.3
   note Low residual risk once dual-sourcing opposes the strike.
+  asserted-at 2026-04-25

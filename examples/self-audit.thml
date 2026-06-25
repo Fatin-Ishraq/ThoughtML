@@ -8,21 +8,27 @@
 # declares its basis — `assumed` — so the mirror surfaces not just how sure the
 # agent is, but on what footing.
 
-focus cache-is-safe
-  kind claim
-  The new cache layer is safe to ship today.
-
 focus load-test-passed
   kind observation
+  observed-at 2026-05-20T09:00Z
   Load test at 2x peak traffic passed with no errors.
 
 focus stale-reads
   kind observation
+  observed-at 2026-05-20T09:30Z
   Staging showed stale reads under cache eviction.
 
+focus cache-is-safe
+  kind claim
+  asserted-at 2026-05-20T10:00Z
+  The new cache layer is safe to ship today.
+
 link load-test-passed supports cache-is-safe
+  asserted-at 2026-05-20T10:00Z
 link stale-reads opposes cache-is-safe
+  asserted-at 2026-05-20T10:00Z
 
 ops-agent holds cache-is-safe
   confidence 0.9 assumed
+  asserted-at 2026-05-20T10:05Z
   note Shipping — the load test passed.

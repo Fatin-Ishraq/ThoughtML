@@ -13,62 +13,37 @@
     -->
     <script type="application/json" id="thoughtml-model"></script>
 
-    <header class="topbar">
-      <div class="brand">
-        <span class="brand-mark">
-          <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
-            <g stroke="var(--text)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="15" y1="17" x2="49" y2="17" />
-              <line x1="32" y1="17" x2="32" y2="51" />
-            </g>
-            <circle cx="15" cy="17" r="7.5" fill="var(--text)" />
-            <circle cx="49" cy="17" r="7.5" fill="var(--text)" />
-            <circle cx="32" cy="51" r="7.5" fill="var(--accent)" />
-          </svg>
-        </span>
-        <span class="brand-name">ThoughtML</span>
-        <span class="brand-badge" id="doc-title">viewer</span>
-      </div>
-      <div class="topbar-actions">
-        <button class="icon-btn" id="theme" title="Toggle light / dark"></button>
-      </div>
-    </header>
-
     <main class="split viewer-split">
       <section class="pane graph-pane">
         <div id="graph" class="graph-canvas"></div>
 
-        <div class="cluster cluster-tl">
-          <div class="segmented" id="view">
-            <button data-view="readable" class="active">Readable</button>
-            <button data-view="structural">Structural</button>
+        <div class="doc-head">
+          <div class="doc-brand">
+            <span class="brand-mark">
+              <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                <g stroke="var(--text)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="15" y1="17" x2="49" y2="17" />
+                  <line x1="32" y1="17" x2="32" y2="51" />
+                </g>
+                <circle cx="15" cy="17" r="7.5" fill="var(--text)" />
+                <circle cx="49" cy="17" r="7.5" fill="var(--text)" />
+                <circle cx="32" cy="51" r="7.5" fill="var(--accent)" />
+              </svg>
+            </span>
+            <span class="brand-name">ThoughtML</span>
           </div>
-          <div class="segmented" id="lens" title="Colour the graph by a lens">
-            <button data-lens="type" class="active">Type</button>
-            <button data-lens="evidence">Evidence</button>
-            <button data-lens="argument">Argument</button>
-            <button data-lens="sensitivity">Sensitivity</button>
-            <button data-lens="decision">Decision</button>
-          </div>
-          <div class="lens-key" id="lens-key" hidden></div>
+          <div class="doc-title" id="doc-title">viewer</div>
+          <div class="doc-sub" id="doc-sub">a reasoning timeline</div>
         </div>
 
-        <div class="cluster cluster-tr">
+        <div class="cluster dock">
+          <button class="icon-btn" id="theme" title="Toggle light / dark"></button>
           <button class="icon-btn" id="fit" title="Fit to view"></button>
-          <button class="icon-btn" id="relayout" title="Re-run layout"></button>
           <button class="icon-btn" id="legend-toggle" title="Toggle legend"></button>
-        </div>
-
-        <div class="cluster cluster-br zoom-cluster">
+          <span class="dock-sep"></span>
           <button class="icon-btn" id="zoom-in" title="Zoom in"></button>
           <button class="zoom-pct" id="zoom-pct" title="Reset zoom">100%</button>
           <button class="icon-btn" id="zoom-out" title="Zoom out"></button>
-        </div>
-
-        <div class="cluster timeline" id="timeline" hidden title="Replay the argument as of a point in time">
-          <span class="timeline-label">As&nbsp;of</span>
-          <input type="range" id="time-slider" class="time-slider" min="0" max="1000" value="1000" step="1" />
-          <span class="timeline-date" id="time-date">—</span>
         </div>
 
         <div class="legend" id="legend" hidden></div>

@@ -13,30 +13,37 @@ team noticed latency-spike
 
 alice suspects cache-eviction causes latency-spike as cache-hypothesis
   confidence 0.55
+  asserted-at 2026-06-14T14:12+00:00
   note The timing lines up with a cache-layer deploy.
 
 # Bob is skeptical of Alice's hypothesis.
 bob doubts cache-hypothesis
   confidence 0.30
+  asserted-at 2026-06-14T14:20+00:00
   note Latency moved before the deploy reached every node.
 
 # Evidence for and against.
 focus cache-hit-rate-drop
   Cache hit rate fell from 0.98 to 0.61 at 14:00.
+  observed-at 2026-06-14T14:25+00:00
 
 focus eviction-config-unchanged
   The eviction policy hasn't changed in 30 days.
+  observed-at 2026-06-14T14:28+00:00
 
 link cache-hit-rate-drop supports cache-hypothesis
   A cliff in hit rate is exactly what aggressive eviction would cause.
   weight 0.85
+  asserted-at 2026-06-14T14:25+00:00
 
 link eviction-config-unchanged undercuts cache-hypothesis
   If the policy never changed, eviction is an unlikely trigger on its own.
   weight 0.30
+  asserted-at 2026-06-14T14:28+00:00
 
 # Carol comes around after weighing the evidence.
 carol accepts cache-hypothesis
   because cache-hit-rate-drop
   confidence 0.70
+  asserted-at 2026-06-14T14:40+00:00
   note The hit-rate cliff outweighs the unchanged config for me.

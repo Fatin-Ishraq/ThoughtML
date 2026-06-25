@@ -4,7 +4,7 @@
 # suspects (with alias), considers, infers, doubts / accepts, a blocking
 # question (`until`), and the v0.1 additions: prose `body` on links and `note`
 # rationale on stances. Click any node: every focus, link, and stance explains
-# itself.
+# itself. The debate unfolds over a week — scrub the timeline to replay it.
 
 scope ai-and-jobs
 
@@ -17,17 +17,21 @@ focus ai-capability-surge
   observed-at 2026-06-17
 
 analyst noticed ai-capability-surge
+  observed-at 2026-06-17
 
 # --- The central hypothesis ---
 
 focus ai-automation
   Using AI to do whole tasks end to end, instead of hiring people to do them.
+  asserted-at 2026-06-18
 
 focus job-displacement
   A net loss of paid human roles as their tasks are automated away.
+  asserted-at 2026-06-18
 
 analyst suspects ai-automation causes job-displacement as displacement-hypothesis
   confidence 0.45..0.70
+  asserted-at 2026-06-18
   note The fear is not change itself, but its speed.
 
 # --- Evidence for the hypothesis ---
@@ -36,42 +40,52 @@ focus firms-cutting-headcount
   Firms report the same output with smaller teams after adopting AI.
   kind observation
   source "Public layoff trackers and earnings calls, 2025-2026"
+  observed-at 2026-06-19
 
 focus tasks-fully-automatable
   Support, copywriting, and first-draft code now run end to end with light review.
   kind observation
+  observed-at 2026-06-19
 
 link firms-cutting-headcount supports displacement-hypothesis
   Headcount falling while output holds is what displacement looks like early on.
   weight 0.85
+  asserted-at 2026-06-19
 
 link tasks-fully-automatable supports displacement-hypothesis
   If whole task categories vanish, the roles built around them go too.
   weight 0.65
+  asserted-at 2026-06-19
 
 # --- The optimist's reply ---
 
 focus technology-creates-jobs
   Historically automation destroyed roles but created more new ones over time.
   kind assumption
+  asserted-at 2026-06-20
 
 economist considers technology-creates-jobs
+  asserted-at 2026-06-20
 
 link technology-creates-jobs undercuts displacement-hypothesis
   Every past wave eventually produced jobs nobody had imagined beforehand.
   weight 0.5
+  asserted-at 2026-06-20
 
 # --- Why this time may be different ---
 
 focus adaptation-too-slow
   Reskilling and new industries take years; this wave arrives in months.
+  asserted-at 2026-06-21
 
 analyst infers adaptation-too-slow from ai-capability-surge
   confidence 0.60
+  asserted-at 2026-06-21
 
 link adaptation-too-slow undercuts technology-creates-jobs
   "New jobs eventually" is little comfort if workers can't reach them in time.
   weight 0.85
+  asserted-at 2026-06-21
 
 # --- The question it all hinges on ---
 
@@ -81,27 +95,33 @@ question new-jobs-in-time
   about job-displacement, technology-creates-jobs
   expects forecast
   status open
+  asserted-at 2026-06-22
 
 # --- Where each agent stands ---
 
 focus lived-experience
   Frontline workers already watching their teams shrink and roles merge.
   kind observation
+  observed-at 2026-06-22
 
 worker accepts displacement-hypothesis
   because lived-experience
   confidence 0.80
+  asserted-at 2026-06-23
   note Speaking from the floor, not from the forecast.
 
 economist doubts displacement-hypothesis
   confidence 0.35
+  asserted-at 2026-06-23
   note Betting on precedent, and on jobs we can't yet name.
 
 # --- The decision we can't make yet ---
 
 focus reskilling-program
   Fund large-scale reskilling and a safety net for displaced workers.
+  asserted-at 2026-06-24
 
 policy-maker holds reskilling-program
   until new-jobs-in-time answered
+  asserted-at 2026-06-24
   note Can't commit the budget until the timing question resolves.

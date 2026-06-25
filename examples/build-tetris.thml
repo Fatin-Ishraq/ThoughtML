@@ -1,0 +1,90 @@
+# Mason and two helpers build a Tetris clone over ten days. Three tracks run in
+# parallel — rendering, rotation, and the core loop — so the reasoning reads as
+# swimlanes over time. Beliefs are revised as evidence lands, one branch is
+# abandoned but kept (not deleted), and one claim is held with more confidence
+# than the structure can justify, so the mirror flags it.
+#
+# Open the Timeline view and press Play to replay the run.
+
+scope build-tetris
+  observed-at 2026-01-10
+
+  # --- Track: rendering ---
+  scope rendering
+    observed-at 2026-01-10
+
+    focus canvas-2d
+      Render the well and pieces on a 2D canvas — the standard footing for grid games.
+      kind decision
+
+    focus webgl-juice
+      A WebGL renderer for shader-based particle juice. Abandoned: Canvas 2D holds
+      60fps comfortably, so this was over-engineering for a ten-day learning demo.
+      kind option
+      status abandoned
+      observed-at 2026-01-14
+
+    link canvas-2d blocks webgl-juice
+      Once Canvas 2D proved fast enough, the WebGL branch was pruned.
+      asserted-at 2026-01-14
+
+  # --- Track: rotation ---
+  scope rotation
+    observed-at 2026-01-12
+
+    focus naive-rotation
+      Rotate the piece matrix directly — the obvious first attempt.
+      kind hypothesis
+
+    focus correct-spin
+      Pieces rotate correctly against the walls.
+      kind outcome
+
+    focus wall-clip-bug
+      Naive rotation drives the I-piece into the wall and it vanishes.
+      kind observation
+      observed-at 2026-01-13
+
+    link wall-clip-bug undercuts naive-claim
+      The clipping bug defeats the naive approach.
+      asserted-at 2026-01-13
+
+  # --- Track: core loop ---
+  scope core-loop
+    observed-at 2026-01-15
+
+    focus frame-tied-speed
+      Fall speed is tied to frame rate — too fast on high-refresh monitors.
+      kind observation
+
+    focus fixed-timestep
+      Decouple game logic from frames with an accumulator.
+      kind decision
+      observed-at 2026-01-16
+
+    focus stable-speed
+      Fall speed is identical across 60Hz and 144Hz displays.
+      kind outcome
+
+    link fixed-timestep revises frame-tied-speed
+      The accumulator replaces the frame-tied loop.
+      asserted-at 2026-01-16
+
+# --- Agents weigh in: each gets its own lane ---
+
+mason suspects naive-rotation causes correct-spin as naive-claim
+  confidence 0.9
+  asserted-at 2026-01-12
+  note Confident the simple approach will just work.
+
+atlas noticed wall-clip-bug
+  observed-at 2026-01-13
+
+mason suspects fixed-timestep enables stable-speed as timestep-claim
+  confidence 0.6
+  asserted-at 2026-01-15
+
+sam revises timestep-claim
+  confidence 0.85
+  asserted-at 2026-01-17
+  note Verified stable across refresh rates and low-end devices.

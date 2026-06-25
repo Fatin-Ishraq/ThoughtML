@@ -7,8 +7,11 @@ scope rollout
 
 focus rollout-plan
   Ship the rollout to 100% over a week.
+  asserted-at 2026-05-25
 
 link rollout-plan depends-on base.capacity-budget
+  asserted-at 2026-05-26
 
 stance ops accepts rollout-plan
   confidence 0.8
+  asserted-at 2026-05-27

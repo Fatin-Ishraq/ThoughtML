@@ -10,11 +10,14 @@ question cause-of-metric-shift
   What caused metric-shift?
   expects cause
   status open
+  asserted-at 2026-06-09T09:22+06:00
 
 team suspects deploy-change causes metric-shift as deploy-cause
   confidence 0.25..0.70
   answers cause-of-metric-shift
+  asserted-at 2026-06-09T09:30+06:00
 
 team holds rollback-decision
   Rollback the deployment.
   until cause-of-metric-shift answered
+  asserted-at 2026-06-09T09:35+06:00

@@ -11,55 +11,70 @@ scope launch-decision
 focus go-to-market
   kind decision
   How aggressively to launch the new product.
+  asserted-at 2026-03-10
 
 # --- Option A: launch to everyone now ---
 
 focus launch-now
   kind option
   Ship to all users on day one and capture the whole market at once.
+  asserted-at 2026-03-11
 link launch-now option-of go-to-market
+  asserted-at 2026-03-11
 
 # This outcome's payoff is computed, not stated: a breakout launch nets its
 # revenue less the cost of supporting it (Phase 8 feeding Phase 9).
 focus launch-cost
   Marketing and on-call to support a full-blast launch.
   quantity 100000 USD
+  asserted-at 2026-03-11
 
 focus blockbuster-revenue
   Revenue if a launch-now bet pays off.
   quantity 1000000 USD
+  asserted-at 2026-03-11
 
 focus blockbuster
   A breakout launch: strong demand, low churn.
   = blockbuster-revenue - launch-cost
+  asserted-at 2026-03-12
 
 focus stumble
   A rough launch: refunds and churn eat into the upside.
   quantity -200000 USD
+  asserted-at 2026-03-12
 
 link launch-now leads-to blockbuster
   probability 0.4
+  asserted-at 2026-03-13
 
 link launch-now leads-to stumble
   probability 0.6
+  asserted-at 2026-03-13
 
 # --- Option B: staged, region-by-region rollout ---
 
 focus staged-rollout
   kind option
   Roll out region by region, fixing as we learn.
+  asserted-at 2026-03-12
 link staged-rollout option-of go-to-market
+  asserted-at 2026-03-12
 
 focus steady-growth
   Predictable adoption with fewer surprises.
   quantity 500000 USD
+  asserted-at 2026-03-12
 
 focus slow-start
   Cautious uptake, but very little downside.
   quantity 120000 USD
+  asserted-at 2026-03-12
 
 link staged-rollout leads-to steady-growth
   probability 0.7
+  asserted-at 2026-03-14
 
 link staged-rollout leads-to slow-start
   probability 0.3
+  asserted-at 2026-03-14

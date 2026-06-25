@@ -10,35 +10,44 @@ scope cost-model
 focus instances
   How many instances we run.
   quantity 12 instance
+  asserted-at 2026-02-10
 
 focus cost-per-instance
   Fully-loaded monthly cost of one instance.
   quantity 180 USD/instance
+  asserted-at 2026-02-10
 
 focus monthly-compute
   Compute spend per month.
   = cost-per-instance * instances
+  asserted-at 2026-02-12
 
 focus storage
   Object storage we keep.
   quantity 4000 GB
+  asserted-at 2026-02-11
 
 focus cost-per-gb
   Storage price per gigabyte-month.
   quantity 0.02 USD/GB
+  asserted-at 2026-02-11
 
 focus monthly-storage
   Storage spend per month.
   = cost-per-gb * storage
+  asserted-at 2026-02-12
 
 focus monthly-total
   Everything we pay to run the service each month.
   = monthly-compute + monthly-storage
+  asserted-at 2026-02-13
 
 focus revenue
   Monthly revenue this service drives.
   quantity 50000 USD
+  asserted-at 2026-02-11
 
 focus gross-margin
   Share of revenue left after running costs.
   = (revenue - monthly-total) / revenue
+  asserted-at 2026-02-13

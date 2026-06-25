@@ -17,67 +17,87 @@ scope release-bet
 focus release-decision
   kind decision
   Ship the new checkout flow now, or hold a week to harden it.
+  asserted-at 2026-03-20
 
 # --- Option A: ship now (explicit probabilities) ---
 
 focus ship-now
   kind option
   Ship today and capture the launch window.
+  asserted-at 2026-03-21
 link ship-now option-of release-decision
+  asserted-at 2026-03-21
 
 focus base-revenue
   Revenue the launch window is worth.
   quantity 800000 USD
+  asserted-at 2026-03-21
 
 focus ship-clean
   Ships smoothly; we capture half the available revenue.
   = base-revenue * 0.5
+  asserted-at 2026-03-22
 
 focus ship-buggy
   A bug slips through and we burn goodwill plus a hotfix.
   quantity -150000 USD
+  asserted-at 2026-03-22
 
 link ship-now leads-to ship-clean
   probability 0.6
+  asserted-at 2026-03-25
 link ship-now leads-to ship-buggy
   probability 0.4
+  asserted-at 2026-03-25
 
 # --- Option B: hold a week (probability from evidence) ---
 
 focus hold-week
   kind option
   Hold a week to harden the flow, then ship.
+  asserted-at 2026-03-21
 link hold-week option-of release-decision
+  asserted-at 2026-03-21
 
 focus harden-gain
   Extra revenue a polished launch is expected to earn.
   quantity 300000 USD
+  asserted-at 2026-03-22
 
 focus delay-cost
   What a week of delay costs us.
   quantity 50000 USD
+  asserted-at 2026-03-22
 
 focus hold-pays-off
   The extra week pays for itself — a clean, polished launch.
   = harden-gain - delay-cost
+  asserted-at 2026-03-23
 
 focus hold-stale
   The week is wasted: nothing improves and a rival moves first.
   quantity -80000 USD
+  asserted-at 2026-03-23
 
 # Evidence for `hold-pays-off`. Its `leads-to` edge below states no probability,
 # so its derived confidence (from this evidence) is used as the likelihood.
 focus canary-clean
   A 5% canary of the hardened flow ran 48h with no regression.
   kind observation
+  observed-at 2026-03-24
 
 focus load-test-passed
   The hardened flow held p99 under budget at 3x peak load.
   kind observation
+  observed-at 2026-03-24
 
 link canary-clean supports hold-pays-off
+  asserted-at 2026-03-25
 link load-test-passed supports hold-pays-off
+  asserted-at 2026-03-25
 
 link hold-week leads-to hold-pays-off
+  asserted-at 2026-03-26
 link hold-week leads-to hold-stale
   probability 0.1
+  asserted-at 2026-03-26

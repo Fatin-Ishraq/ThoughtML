@@ -12,21 +12,26 @@ assistant noticed user-prefers-readable-syntax
 
 assistant noticed user-cites-specs
   The user keeps referencing the v0 specification by section number.
+  observed-at 2026-06-17T10:15+00:00
 
 assistant infers user-values-standards-thinking from user-prefers-readable-syntax, user-cites-specs
   confidence 0.65
   note Two weak signals pointing the same way.
+  asserted-at 2026-06-17T10:40+00:00
 
 assistant remembers prefers-rust
   The user asked for the parser in Rust, as the spec recommends.
   source uri:https://example.invalid/session-log
   confidence 0.90
+  asserted-at 2026-06-17T11:05+00:00
 
 assistant revises user-values-standards-thinking
   confidence 0.80
   note Upgraded after the user corrected a spec misreading, unprompted.
+  asserted-at 2026-06-17T14:20+00:00
 
 assistant considers user-timezone
   Working hours hint at UTC+6, but this is unconfirmed.
   confidence ?
   note A guess from message timestamps, not a stated fact.
+  asserted-at 2026-06-17T15:00+00:00

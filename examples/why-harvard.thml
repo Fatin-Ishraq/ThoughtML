@@ -23,28 +23,40 @@ scope college-choice
   scope what-i-know
     focus admit-harvard
       kind observation
+      observed-at 2026-04-02
       Admitted to Harvard with a strong aid package.
-    focus faculty-fit
-      kind observation
-      Two labs I emailed replied and take undergraduates.
     focus aid-offer
       kind observation
+      observed-at 2026-04-03
       quantity 78000 USD
       Annual grant aid offered — grants, not loans.
+    focus faculty-fit
+      kind observation
+      observed-at 2026-04-05
+      Two labs I emailed replied and take undergraduates.
     focus prestige-signal
       kind claim
+      asserted-at 2026-04-06
       The brand helps for the first job and grad-school apps.
     focus prestige-doubt
       kind assumption
+      asserted-at 2026-04-08
       A few years into a career, fit may matter more than prestige.
     link admit-harvard enables harvard
+      asserted-at 2026-04-09
     link faculty-fit supports goal-research
+      asserted-at 2026-04-05
     link aid-offer supports goal-aid
+      asserted-at 2026-04-03
       weight 0.85
     link prestige-signal supports goal-network
+      asserted-at 2026-04-06
     link prestige-doubt undercuts prestige-signal
+      asserted-at 2026-04-08
 
   scope the-decision
+    asserted-at 2026-04-10
+
     focus where-to-go
       kind decision
       Which offer do I commit to?
@@ -83,14 +95,19 @@ scope college-choice
 
     me chooses harvard
       confidence 0.75
+      asserted-at 2026-04-15
       note Faculty access and the aid package clear a bar the state offer can't.
 
   scope second-thoughts
     focus far-from-home
       kind observation
+      observed-at 2026-04-12
       It's a five-hour flight from family.
     focus visit-plan
       kind action
+      asserted-at 2026-04-16
       Visit at reading week and over the summer.
     link far-from-home opposes harvard
+      asserted-at 2026-04-12
     link visit-plan opposes far-from-home
+      asserted-at 2026-04-16

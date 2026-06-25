@@ -163,11 +163,12 @@ a { color: inherit; }
 
 /* ---- topbar ---- */
 .topbar {
+  position: relative;
   flex: 0 0 var(--topbar-h);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
+  padding: 0 14px;
   background: var(--bg-panel);
   border-bottom: 1px solid var(--border);
   z-index: 20;
@@ -188,6 +189,15 @@ a { color: inherit; }
   padding: 2px 9px;
 }
 .topbar-actions { display: flex; align-items: center; gap: 4px; }
+.topbar-spacer { flex: 1 1 auto; }
+/* viewer: a light, borderless brand + document title over the canvas — no app top-bar */
+.doc-head { position: absolute; top: 14px; left: 18px; z-index: 5; pointer-events: none; max-width: 56%; }
+.doc-brand { display: flex; align-items: center; gap: 7px; margin-bottom: 9px; }
+.doc-brand .brand-mark { display: inline-flex; }
+.doc-brand .brand-mark svg { width: 20px; height: 20px; }
+.doc-brand .brand-name { font-family: var(--serif); font-weight: 600; font-size: 14px; color: var(--text-dim); letter-spacing: 0.1px; }
+.doc-title { font-size: 16px; font-weight: 600; color: var(--text); letter-spacing: 0.1px; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.doc-sub { font-size: 12px; color: var(--text-dim); margin-top: 1px; }
 
 /* ---- split ---- */
 .split { display: flex; flex: 1 1 auto; min-height: 0; }
@@ -251,6 +261,130 @@ a { color: inherit; }
   inset: 0;
   background-color: var(--bg-canvas);
 }
+
+/* ============================================================
+   The reasoning viewer (timeview): a lane-less, time-driven SVG stage. Themed
+   entirely through the design tokens above, so dark/light is free. Shared by
+   the playground (overlaying the graph pane) and the standalone viewer.
+   ============================================================ */
+.timeview { position: absolute; inset: 0; background: var(--bg-canvas); overflow: hidden; }
+.tv-svg { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: grab; }
+.timeview.dragging .tv-svg { cursor: grabbing; }
+.tv-node { cursor: pointer; transition: opacity 0.4s ease; }
+.tv-node rect { transition: stroke-width 0.18s ease; }
+.tv-node:hover rect:first-of-type { stroke-width: 2.4; }
+.tv-edge { transition: opacity 0.45s ease; }
+.tv-nt { font-family: var(--sans); font-weight: 600; font-size: 12px; fill: var(--text); }
+.tv-na { font-family: var(--sans); font-size: 10px; fill: var(--text-faint); }
+/* tension ring: pulses while a conflict is live in the current as-of window */
+.tv-ring { opacity: 0; }
+.tv-node.tv-tension .tv-ring { animation: tv-pulse 1.4s ease-in-out infinite; }
+@keyframes tv-pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.95; } }
+/* a soft entrance for the whole stage on load */
+.timeview { animation: tv-fade-in 0.5s ease; }
+@keyframes tv-fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+/* narration — an elegant, boxless serif line floating over the stage */
+.tv-narr {
+  position: absolute; top: 20px; left: 50%; transform: translateX(-50%); z-index: 5;
+  max-width: 620px; text-align: center; padding: 0 20px;
+  font-family: var(--serif); font-style: italic; font-size: 15.5px; letter-spacing: 0.2px;
+  color: var(--text-dim); pointer-events: none;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-shadow: 0 1px 16px var(--bg-canvas), 0 1px 16px var(--bg-canvas);
+  transition: opacity 0.3s ease;
+}
+.tv-narr:empty { display: none; }
+/* conflict banner — a glowing alert pill, pops in when a tension is live */
+.tv-banner {
+  position: absolute; top: 56px; left: 50%; transform: translateX(-50%); z-index: 6;
+  display: none; align-items: center; gap: 8px; max-width: 580px;
+  padding: 8px 16px 8px 14px; font-size: 12.5px; line-height: 1.4; color: var(--text);
+  background: color-mix(in srgb, var(--error) 16%, var(--bg-panel));
+  border: 1px solid color-mix(in srgb, var(--error) 42%, transparent);
+  border-radius: var(--r-pill);
+  box-shadow: 0 8px 28px color-mix(in srgb, var(--error) 26%, transparent);
+  backdrop-filter: blur(12px) saturate(1.2);
+}
+.tv-banner.on { display: flex; animation: tv-pop 0.3s cubic-bezier(0.2, 0.7, 0.2, 1); }
+@keyframes tv-pop { from { opacity: 0; transform: translateX(-50%) translateY(-7px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+
+/* time bar — the bottom-centre centrepiece, same flat glass as the dock */
+.tv-bar {
+  position: absolute; left: 50%; transform: translateX(-50%); bottom: 20px; z-index: 6;
+  display: flex; flex-direction: column; gap: 10px; width: min(620px, 72%);
+  padding: 12px 18px 11px;
+  background: color-mix(in srgb, var(--bg-panel) 85%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border-strong) 40%, transparent);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(14px);
+}
+.tv-bar-row { display: flex; align-items: center; gap: 10px; }
+.tv-clock { font: 600 14px var(--mono); font-variant-numeric: tabular-nums; letter-spacing: 0.4px; color: var(--text); }
+/* play — a labelled glass button on the right ("▶ Play the run") */
+.tv-play {
+  margin-left: auto; display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 13px; border-radius: var(--r-md);
+  background: var(--bg-elev); color: var(--text-dim); border: 1px solid var(--border);
+  font: 500 12.5px var(--sans); line-height: 1; cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+.tv-play:hover { background: var(--bg-elev-2); color: var(--text); border-color: var(--border-strong); }
+.tv-play:active { transform: scale(0.98); }
+.tv-track { position: relative; width: 100%; display: flex; align-items: center; }
+/* range — custom track with a JS-driven progress fill (--fill) and a ringed thumb */
+.tv-range { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; margin: 0; background: transparent; cursor: pointer; }
+.tv-range::-webkit-slider-runnable-track {
+  height: 6px; border-radius: var(--r-pill);
+  background: linear-gradient(to right, var(--accent) 0%, var(--accent) var(--fill, 100%), var(--bg-elev-2) var(--fill, 100%), var(--bg-elev-2) 100%);
+}
+.tv-range::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 16px; height: 16px; margin-top: -5px; border-radius: 50%;
+  background: var(--text); border: 3px solid var(--accent);
+  box-shadow: 0 1px 7px rgba(0, 0, 0, 0.5); transition: transform 0.15s ease;
+}
+.tv-range::-webkit-slider-thumb:hover { transform: scale(1.18); }
+.tv-range::-moz-range-track { height: 6px; border-radius: var(--r-pill); background: var(--bg-elev-2); }
+.tv-range::-moz-range-progress { height: 6px; border-radius: var(--r-pill); background: var(--accent); }
+.tv-range::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--text); border: 3px solid var(--accent); box-shadow: 0 1px 7px rgba(0, 0, 0, 0.5); }
+/* ticks — soft dots under the track, aligned to its width */
+.tv-ticks { position: absolute; left: 0; right: 0; bottom: -8px; height: 6px; pointer-events: none; }
+.tv-ticks i { position: absolute; top: 1px; width: 2px; height: 5px; border-radius: 1px; background: var(--accent); opacity: 0.5; transform: translateX(-50%); }
+.tv-ends { display: flex; justify-content: space-between; font: 500 10px var(--mono); color: var(--text-faint); letter-spacing: 0.3px; }
+/* lane bands — a faint separator + an uppercase scope label per swimlane */
+.tv-band-sep { stroke: var(--border); opacity: 0.32; stroke-width: 1; }
+.tv-band-label { font-family: var(--sans); font-weight: 600; font-size: 10.5px; letter-spacing: 0.6px; text-transform: uppercase; fill: var(--text-faint); }
+
+/* ============================================================
+   Standalone-viewer chrome polish (scoped to `.viewer`, so the playground is
+   untouched): a glassier topbar, lifted dock buttons, refined detail panel.
+   ============================================================ */
+.viewer .topbar {
+  background: color-mix(in srgb, var(--bg-app) 82%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  backdrop-filter: blur(14px);
+}
+.viewer .brand-name { letter-spacing: 0.2px; }
+.viewer .icon-btn { width: 34px; height: 34px; border-radius: var(--r-md); transition: background 0.15s, color 0.15s; }
+.viewer .icon-btn:hover { color: var(--text); background: var(--bg-elev); }
+.viewer .icon-btn:active { background: var(--bg-elev-2); }
+/* unified glass surface for every floating panel (flat & modern, vision_4-style) */
+.viewer .cluster {
+  background: color-mix(in srgb, var(--bg-panel) 85%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border-strong) 40%, transparent);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(14px); padding: 5px; gap: 3px;
+}
+/* one consolidated control dock, bottom-right (fit · legend · zoom) */
+.viewer .dock { bottom: 20px; right: 16px; flex-direction: column; align-items: stretch; gap: 2px; }
+.viewer .dock .icon-btn { width: 34px; height: 30px; }
+.dock-sep { height: 1px; margin: 3px 5px; background: color-mix(in srgb, var(--border) 85%, transparent); }
+.viewer .zoom-pct { font: 600 11px var(--mono); width: 100%; padding: 3px 0; text-align: center; color: var(--text-dim); border-radius: var(--r-sm); transition: background 0.15s, color 0.15s; }
+.viewer .zoom-pct:hover { color: var(--text); background: var(--bg-elev); }
+.viewer .detail-pane { background: var(--bg-app); border-left: 1px solid color-mix(in srgb, var(--border) 70%, transparent); }
+.viewer .detail-head { padding: 14px 16px; border-bottom: 1px solid color-mix(in srgb, var(--border) 55%, transparent); }
 
 /* floating clusters */
 .cluster {

@@ -16,17 +16,22 @@ scope capacity-program
   observed-at 2026-03-01T09:00Z
 
   scope signals
+    observed-at 2026-02-20T00:00Z
+
     focus traffic-now
       kind observation
       quantity 850 req/s
     focus growth-trend
       kind hypothesis
+      observed-at 2026-02-23T00:00Z
       Traffic keeps climbing toward the capacity ceiling.
     focus seasonal-doubt
       kind assumption
+      observed-at 2026-02-24T00:00Z
       The Q1 surge might be seasonal rather than a real trend.
     focus load-test
       kind observation
+      observed-at 2026-02-26T00:00Z
       A sustained load test reproduced the growth under steady traffic.
     link traffic-now supports growth-trend
     link load-test supports growth-trend
@@ -46,6 +51,8 @@ scope capacity-program
     link runway-now revises runway-early
 
   scope decision
+    asserted-at 2026-03-05T00:00Z
+
     focus capacity-decision
       kind decision
       How do we stay ahead of the capacity ceiling?
@@ -94,8 +101,11 @@ scope capacity-program
 
     team chooses migrate
       confidence 0.7
+      asserted-at 2026-03-08T00:00Z
 
   scope risks
+    observed-at 2026-03-10T00:00Z
+
     focus migration-risk
       kind risk
       A hard cutover could cause downtime.

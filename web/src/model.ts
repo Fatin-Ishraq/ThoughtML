@@ -43,7 +43,11 @@ export interface OptionEV { option: string; value: number; unit: string; downsid
  *  A second reading of the author's numbers — it orders, it crowns no winner. */
 export interface DecisionEV { ranked: OptionEV[] }
 
-export interface Focus { type: 'focus'; id: string; kind?: string; quantity?: Quantity; formula?: string; computed_quantity?: Quantity; body?: string; fields?: Fields; superseded_by?: string; derived_confidence?: number; argument_status?: string; expected_value?: ExpectedValue; decision?: DecisionEV }
+/** A kept, divergent redefinition of a focus (Phase A4): when the same id is
+ *  defined more than once, the alternatives are retained here rather than
+ *  clobbered — the mirror surfaces them as a `definition-divergence` conflict. */
+export interface DivergentDef { body?: string; quantity?: Quantity; formula?: string }
+export interface Focus { type: 'focus'; id: string; kind?: string; quantity?: Quantity; formula?: string; computed_quantity?: Quantity; body?: string; fields?: Fields; superseded_by?: string; derived_confidence?: number; argument_status?: string; expected_value?: ExpectedValue; decision?: DecisionEV; includes?: string[]; status?: string; divergent?: DivergentDef[] }
 export interface Question {
   type: 'question'
   id: string
@@ -53,6 +57,7 @@ export interface Question {
   status?: string
   fields?: Fields
   superseded_by?: string
+  includes?: string[]
 }
 export interface Link { type: 'link'; id: string; from: string; relation: string; to: string; weight?: number; probability?: number; basis?: string; body?: string; fields?: Fields; superseded_by?: string; derived_confidence?: number; leverage?: number; argument_status?: string }
 export interface Stance {
