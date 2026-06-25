@@ -153,6 +153,15 @@ async function boot(): Promise<void> {
   const diagBar = el('#diag-bar')
   el('#diag-toggle').addEventListener('click', () => diagBar.classList.toggle('open'))
 
+  // Copy the current diagnostics + conflicts as plain text, so a warning can be
+  // pasted into an issue or shared without retyping. Hidden when the doc is clean.
+  setIcon(el('#diag-copy'), 'copy')
+  let diagText = ''
+  el('#diag-copy').addEventListener('click', (e) => {
+    e.stopPropagation()
+    if (diagText) navigator.clipboard?.writeText(diagText).then(() => toast('Diagnostics copied'))
+  })
+
   // ---- view toggle ----
   // Swaps which renderer is live: the timeview (Viewer) overlays the pane and the
   // Cytoscape canvas hides, or vice-versa for Structural.
@@ -320,9 +329,12 @@ async function boot(): Promise<void> {
     if (isView()) view.render(canon)
     else { graph.render(canon, mode); graph.setMuted(muted) }
     syncTimeline(last)
-    setDiagStatus(last.diagnostics.items, canon.audit?.conflicts ?? [])
-    renderDiagnostics(el('#diagnostics'), last.diagnostics.items, canon.audit?.conflicts ?? [], (line) => editor.gotoLine(line))
+    const conflicts = canon.audit?.conflicts ?? []
+    setDiagStatus(last.diagnostics.items, conflicts)
+    renderDiagnostics(el('#diagnostics'), last.diagnostics.items, conflicts, (line) => editor.gotoLine(line))
     editor.setDiagnostics(last.diagnostics.items)
+    diagText = formatDiagnostics(last.diagnostics.items, conflicts)
+    el('#diag-copy').hidden = diagText === ''
     el('#json').textContent = JSON.stringify(canon, null, 2)
     el('#ast').textContent = JSON.stringify(last.surface, null, 2)
     updateWhatIfBanner()
@@ -340,6 +352,18 @@ async function boot(): Promise<void> {
       }
     }
     if (!isView()) el('#zoom-pct').textContent = `${Math.round(graph.cy.zoom() * 100)}%`
+  }
+
+  // Plain-text rendering of the diagnostics panel, for the clipboard. Conflicts
+  // (the mirror's second reading) come first, then source diagnostics by line —
+  // the same order the panel shows them in.
+  function formatDiagnostics(items: Diagnostic[], conflicts: Conflict[]): string {
+    const lines: string[] = []
+    for (const c of conflicts) lines.push(`conflict [${c.severity}]: ${c.message}`)
+    for (const d of [...items].sort((a, b) => a.line - b.line)) {
+      lines.push(`${d.line > 0 ? `line ${d.line}` : '–'} [${d.severity}]: ${d.message}`)
+    }
+    return lines.join('\n')
   }
 
   function setDiagStatus(items: Diagnostic[], conflicts: Conflict[]): void {

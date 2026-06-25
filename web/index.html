@@ -110,10 +110,13 @@
         </aside>
 
         <div class="diagnostics-bar" id="diag-bar">
-          <button class="diag-head" id="diag-toggle">
-            <span class="diag-status ok" id="diag-status"><span class="dot"></span>No diagnostics</span>
-            <span class="chevron"></span>
-          </button>
+          <div class="diag-head">
+            <button class="diag-toggle" id="diag-toggle">
+              <span class="diag-status ok" id="diag-status"><span class="dot"></span>No diagnostics</span>
+              <span class="chevron"></span>
+            </button>
+            <button class="icon-btn diag-copy" id="diag-copy" title="Copy diagnostics" hidden></button>
+          </div>
           <div class="diag-list" id="diagnostics"></div>
         </div>
       </section>

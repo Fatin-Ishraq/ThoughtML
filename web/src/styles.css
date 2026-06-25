@@ -549,14 +549,24 @@ pre.code {
 .diag-head {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   width: 100%;
-  padding: 7px 14px;
-  background: transparent;
-  border: none;
+  padding: 7px 8px 7px 14px;
   color: var(--text-dim);
   font-size: 12px;
 }
+.diag-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+  gap: 10px;
+  background: transparent;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.diag-copy { flex: none; margin-left: 6px; }
 .diag-status { display: inline-flex; align-items: center; gap: 8px; font-weight: 500; }
 .diag-status .dot { width: 7px; height: 7px; border-radius: 50%; }
 .diag-status.ok { color: var(--ok); }
