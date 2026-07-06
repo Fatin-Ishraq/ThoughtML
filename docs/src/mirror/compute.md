@@ -100,12 +100,7 @@ support); **negative** means it drags it down (an attack); the **magnitude** is
 how much the conclusion rests on that single edge.
 
 `leverage` is set on each evidence link. The bundled
-[`sensitivity-demo.thml`](../appendix/examples.md) ranks evidence by it.
-
-## What-if (playground only)
-
-The same propagation engine powers an interactive what-if: in the playground you
-can **mute** a node or link and watch the whole stack — derived confidence,
-status, leverage, expected value — recompute live. The CLI never perturbs; it
-reports the document as authored. (Leverage is essentially single-edge what-if,
-precomputed for every edge at once.)
+[`sensitivity-demo.thml`](../appendix/examples.md) ranks evidence by it. It is
+computed by re-deriving the graph with each edge ablated in turn — single-edge
+sensitivity, precomputed for every edge at once — so the CLI never perturbs the
+document; it reports it as authored.

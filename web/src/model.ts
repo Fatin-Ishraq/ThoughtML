@@ -113,12 +113,6 @@ export interface ParseResult {
   surface: unknown
 }
 
-/** A what-if perturbation: links/nodes to drop from the evidence/attack graphs. */
-export interface Overrides {
-  disabled_links?: string[]
-  disabled_nodes?: string[]
-}
-
 /** Parse a (loose) ISO-8601 date/time to epoch ms, or undefined if unparseable. */
 export function parseTime(s: string | undefined): number | undefined {
   if (!s) return undefined

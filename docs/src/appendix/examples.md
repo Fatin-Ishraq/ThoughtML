@@ -39,7 +39,7 @@ run `thoughtml <file>` (add `--compute` for the second reading).
 | [`capacity-plan.thml`](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/examples/capacity-plan.thml) | Quantities across dimensions (req/s, ms, USD, GB, %) woven into a scale-up decision. |
 | [`cost-model.thml`](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/examples/cost-model.thml) | Formulas (`= expr`) computing over other foci with full unit-checking. |
 | [`decision-ev.thml`](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/examples/decision-ev.thml) | Decision expected value: options `leads-to` outcomes with probability and payoff, ranked by EV. |
-| [`sensitivity-demo.thml`](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/examples/sensitivity-demo.thml) | Leverage / what-if: evidence ranked by how load-bearing it is. |
+| [`sensitivity-demo.thml`](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/examples/sensitivity-demo.thml) | Leverage: evidence ranked by how load-bearing it is. |
 | [`release-bet.thml`](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/examples/release-bet.thml) | The whole compute layer in one decision: formula payoffs, a probability borrowed from derived confidence, EV ordering. |
 
 ## Structure and modularity (advanced)

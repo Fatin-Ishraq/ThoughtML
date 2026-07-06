@@ -4,25 +4,6 @@
 import { formatValue, type Canonical, type CanonObject, type DecisionEV, type ExpectedValue, type Fields, type Link, type Quantity, type Value } from './model'
 import { glyph } from './icons'
 
-/** What-if context (Phase 6): which nodes/links are muted, the unperturbed
- *  baseline to diff against, and a toggle callback. Optional — the detail panel
- *  renders fine without it. */
-export interface WhatIfCtx {
-  /** Whether what-if mode is on (gates the mute control). */
-  enabled: boolean
-  muted: Set<string>
-  baseline: Canonical
-  /** Whether anything is currently muted (gates the baseline-delta display). */
-  active: boolean
-  onToggle: (id: string) => void
-}
-
-/** The derived confidence of a node in a given model, or undefined. */
-function derivedOf(canon: Canonical, id: string): number | undefined {
-  const o = canon.objects.find((x) => x.id === id)
-  return o && (o.type === 'focus' || o.type === 'link') ? o.derived_confidence : undefined
-}
-
 /** A row in the "load-bearing evidence" list: an incoming evidence link, its
  *  signed leverage, and a magnitude bar. Clicking navigates to the source. */
 function leverageRow(l: Link, isTop: boolean, onNav: (id: string) => void): HTMLElement {
@@ -311,21 +292,9 @@ export function renderDetail(
   canon: Canonical,
   id: string,
   onNav: (id: string) => void,
-  whatIf?: WhatIfCtx,
 ): void {
   bodyEl.replaceChildren()
   const obj: CanonObject | undefined = canon.objects.find((x) => x.id === id)
-
-  // What-if control (Phase 6): mute a focus or link to drop it from the evidence
-  // and attack graphs, then watch every derived value recompute.
-  if (whatIf?.enabled && obj && (obj.type === 'focus' || obj.type === 'link')) {
-    const isMuted = whatIf.muted.has(id)
-    const btn = document.createElement('button')
-    btn.className = `whatif-toggle${isMuted ? ' active' : ''}`
-    btn.innerHTML = `<span>${isMuted ? 'Restore to graph' : 'Mute in what-if'}</span>`
-    btn.addEventListener('click', () => whatIf.onToggle(id))
-    bodyEl.appendChild(btn)
-  }
 
   const makeChip = (label: string, navId: string, glyphName?: string) => {
     const b = document.createElement('button')
@@ -431,18 +400,8 @@ export function renderDetail(
         const ab = meterBar(authored, 'authored', 'var(--c-stance)')
         if (ab) facts.appendChild(ab)
       }
-      const label = whatIf?.active ? 'from evidence (what-if)' : 'from evidence'
-      const db = meterBar({ kind: 'number', value: obj.derived_confidence }, label, 'var(--accent)')
+      const db = meterBar({ kind: 'number', value: obj.derived_confidence }, 'from evidence', 'var(--accent)')
       if (db) facts.appendChild(db)
-      // When a what-if is live, show how this value moved from the baseline.
-      const base = whatIf?.active ? derivedOf(whatIf.baseline, id) : undefined
-      if (base !== undefined && Math.abs(base - obj.derived_confidence) >= 0.001) {
-        const delta = obj.derived_confidence - base
-        const d = document.createElement('div')
-        d.className = `detail-delta ${delta >= 0 ? 'pos' : 'neg'}`
-        d.textContent = `was ${base.toFixed(3)} · ${delta >= 0 ? '+' : '−'}${Math.abs(delta).toFixed(3)}`
-        facts.appendChild(d)
-      }
     }
 
     const fl = fieldsList('fields' in obj ? obj.fields : undefined)

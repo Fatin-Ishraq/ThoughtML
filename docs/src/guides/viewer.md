@@ -27,16 +27,14 @@ compiler. The fonts are the reader's system fonts, so nothing is fetched.
 ## A snapshot, by design
 
 The viewer renders a *snapshot* of the model at export time. There is no live
-re-parsing and no [what-if](playground.md#what-if) inside the file — re-run
-`thoughtml --html` after editing the source to refresh it, the same way you would
-recompile. (Live what-if is the one thing that needs the parser, so it stays in
-the playground.)
+re-parsing inside the file — re-run `thoughtml --html` after editing the source to
+refresh it, the same way you would recompile.
 
 ## Which surface when
 
 | You want to… | Use |
 |---|---|
-| Author live, experiment, what-if | the [playground](playground.md) |
+| Author live, edit, experiment | the [playground](playground.md) |
 | Check a document in CI or a script | `thoughtml doc.thml` → JSON + exit code |
 | Hand someone an interactive, time-driven view | `thoughtml doc.thml --html -o doc.html` |
 

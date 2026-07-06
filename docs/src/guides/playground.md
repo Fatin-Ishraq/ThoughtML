@@ -7,7 +7,7 @@ WebAssembly, so the two never disagree.
 To run it locally, see [Installation](../getting-started/installation.md):
 `npm run wasm && npm run dev`.
 
-> The playground is for **authoring** — live editing, examples, and what-if. To
+> The playground is for **authoring** — live editing and examples. To
 > *share* a finished document as a single self-contained interactive file (no
 > server, opens anywhere), export it with
 > [the standalone viewer](viewer.md): `thoughtml doc.thml --html -o doc.html`.
@@ -61,13 +61,6 @@ fall apart) as evidence arrived. Try it on
 [`build-tetris.thml`](../appendix/examples.md) or
 [`estimate-revised.thml`](../appendix/examples.md). The same projection is on the
 CLI as [`--as-of`](cli.md#time-options-as-of-replay).
-
-## What-if
-
-Mute a node or link and the whole computed stack — derived confidence, status,
-leverage, [expected value](../mirror/compute.md) — recomputes live, so you can ask
-"what if this evidence weren't here?" without editing the document. This is the
-interactive face of [sensitivity](../mirror/compute.md#sensitivity).
 
 > **Note.** The playground curates a **spine** of ten examples and the two lenses
 > above for v0.1.0. The compute and multi-document demos and additional lenses are

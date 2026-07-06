@@ -4,9 +4,9 @@
 // this file, so a renderer can be driven by canonical JSON that was produced
 // anywhere — live here, or baked into a standalone artifact.
 
-import init, { parse as wasmParse, parse_what_if as wasmWhatIf, parse_project as wasmProject } from './wasm/thoughtml_wasm.js'
+import init, { parse as wasmParse, parse_project as wasmProject } from './wasm/thoughtml_wasm.js'
 import wasmUrl from './wasm/thoughtml_wasm_bg.wasm?url'
-import type { ParseResult, Overrides } from './model'
+import type { ParseResult } from './model'
 
 // Re-export the model contract so existing `./parse` importers keep working and
 // the compile boundary presents a single surface.
@@ -29,10 +29,4 @@ export function parse(src: string): ParseResult {
  *  (a `name -> source` map). A document with no imports parses just like `parse`. */
 export function parseProject(src: string, sources: Record<string, string>): ParseResult {
   return JSON.parse(wasmProject(src, JSON.stringify(sources))) as ParseResult
-}
-
-/** Re-parse with a what-if perturbation (§10.5); confidence, status, and
- *  leverage are recomputed for the counterfactual. */
-export function parseWhatIf(src: string, overrides: Overrides): ParseResult {
-  return JSON.parse(wasmWhatIf(src, JSON.stringify(overrides))) as ParseResult
 }

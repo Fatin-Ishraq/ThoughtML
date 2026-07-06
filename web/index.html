@@ -55,10 +55,9 @@
             <button data-view="readable" class="active">Viewer</button>
             <button data-view="structural">Structural</button>
           </div>
-          <div class="segmented" id="lens" title="Colour the graph by a lens; What-if mutes nodes to test the argument">
+          <div class="segmented" id="lens" title="Colour the graph by a lens">
             <button data-lens="type" class="active">Type</button>
             <button data-lens="argument">Argument</button>
-            <button id="whatif" class="seg-sep" title="What-if — mute a node to test how the argument holds up without it">What-if</button>
           </div>
           <div class="lens-key" id="lens-key" hidden></div>
         </div>
@@ -80,15 +79,6 @@
           <span class="timeline-label">As&nbsp;of</span>
           <input type="range" id="time-slider" class="time-slider" min="0" max="1000" value="1000" step="1" />
           <span class="timeline-date" id="time-date">—</span>
-        </div>
-
-        <div class="cluster whatif-banner" id="whatif-banner" hidden title="What-if: muted nodes are dropped from the evidence and attack graphs">
-          <span class="whatif-mark">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6.5L4.8 18A2 2 0 0 0 6.5 21h11a2 2 0 0 0 1.7-3L14 9.5V3"/><line x1="7.5" y1="14" x2="16.5" y2="14"/></svg>
-          </span>
-          <span class="whatif-label">What-if</span>
-          <span class="whatif-count" id="whatif-count">0 muted</span>
-          <button class="whatif-reset" id="whatif-reset">Reset</button>
         </div>
 
         <div class="legend" id="legend" hidden></div>

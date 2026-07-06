@@ -1,12 +1,12 @@
 import './styles.css'
-import { initParser, parseProject, parseWhatIf } from './parse'
-import { parseTime, type ParseResult, type Diagnostic, type Conflict, type Overrides } from './model'
+import { initParser, parseProject } from './parse'
+import { parseTime, type ParseResult, type Diagnostic, type Conflict } from './model'
 import { createEditor } from './editor'
 import { createGraph, type ViewMode, type Theme } from './graph'
 import { createTimeView } from './timeview'
 import { buildLegend, buildLensKey } from './legend'
 import { renderDiagnostics } from './diagnostics'
-import { renderDetail, kindOf, labelOf, type WhatIfCtx } from './detail'
+import { renderDetail, kindOf, labelOf } from './detail'
 import { EXAMPLES, DEFAULT_EXAMPLE, ADVANCED_EXAMPLES } from './examples'
 import { setIcon, glyph } from './icons'
 
@@ -50,14 +50,9 @@ async function boot(): Promise<void> {
   const rZoomOut = () => (isView() ? view.zoomOut() : graph.zoomOut())
   const rZoomReset = () => (isView() ? view.zoomReset() : graph.zoomReset())
   const rCenter = (id: string) => (isView() ? view.centerOn(id) : graph.centerOn(id))
-  // `baseline` is the unperturbed parse; `last` is what the UI shows — equal to
-  // baseline until the user mutes nodes/links for a what-if (Phase 6), at which
-  // point `last` is the recomputed counterfactual and `muted` names what's off.
+  // `baseline` is the parsed document; `last` is what the UI currently shows.
   let baseline: ParseResult | null = null
   let last: ParseResult | null = null
-  let currentSrc = ''
-  const muted = new Set<string>()
-  let whatIfMode = false
   let selectedId: string | null = null
 
   const editor = createEditor(el('#editor'), initialSrc, scheduleRun, theme)
@@ -115,7 +110,7 @@ async function boot(): Promise<void> {
     detailBadge.className = `detail-badge k-${kind}`
     detailBadge.innerHTML = `${gname ? glyph(gname) : ''}<span>${kind}</span>`
     detailId.textContent = labelOf(id)
-    renderDetail(detailBody, last.canonical, id, navigateTo, whatIfCtx())
+    renderDetail(detailBody, last.canonical, id, navigateTo)
     rSelect(id)
     window.setTimeout(() => { if (!isView()) graph.resize(); rCenter(id) }, 230)
   }
@@ -170,7 +165,7 @@ async function boot(): Promise<void> {
     el('#graph').style.display = isView() ? 'none' : ''
     if (isView() && timelineEl) timelineEl.hidden = true
     if (!last) return
-    if (isView()) { view.render(last.canonical) } else { graph.render(last.canonical, mode, animate); graph.setMuted(muted) }
+    if (isView()) { view.render(last.canonical) } else { graph.render(last.canonical, mode, animate) }
     if (!isView()) syncTimeline(last)
     if (selectedId) rSelect(selectedId)
   }
@@ -249,49 +244,8 @@ async function boot(): Promise<void> {
     buildLegend(el('#legend'), theme)
   })
 
-  // ---- what-if (Phase 6) ----
-  // Muting drops a node/link from the evidence + attack graphs and re-derives the
-  // counterfactual via the same wasm engine; `last` becomes that recomputed view.
-  function whatIfCtx(): WhatIfCtx {
-    return { enabled: whatIfMode, muted, baseline: (baseline ?? last)!.canonical, active: muted.size > 0, onToggle: toggleMute }
-  }
-  function buildOverrides(): Overrides {
-    const links: string[] = []
-    const nodes: string[] = []
-    const objs = baseline?.canonical.objects ?? []
-    muted.forEach((id) => {
-      const o = objs.find((x) => x.id === id)
-      if (o?.type === 'link') links.push(id)
-      else nodes.push(id)
-    })
-    return { disabled_links: links, disabled_nodes: nodes }
-  }
-  function toggleMute(id: string): void {
-    if (muted.has(id)) muted.delete(id)
-    else muted.add(id)
-    applyView()
-  }
-  function resetWhatIf(): void {
-    if (muted.size === 0) return
-    muted.clear()
-    applyView()
-  }
-  function updateWhatIfBanner(): void {
-    el('#whatif-banner').hidden = !whatIfMode
-    el('#whatif-count').textContent = muted.size > 0 ? `${muted.size} muted` : 'select a node, then Mute'
-  }
-  const whatifBtn = el<HTMLButtonElement>('#whatif')
-  whatifBtn.addEventListener('click', () => {
-    whatIfMode = !whatIfMode
-    whatifBtn.classList.toggle('active', whatIfMode)
-    if (!whatIfMode) muted.clear()
-    applyView()
-  })
-  el('#whatif-reset').addEventListener('click', resetWhatIf)
-
   // ---- pipeline ----
-  // `run` parses the source into the baseline; `applyView` renders either the
-  // baseline or the what-if counterfactual, and is also called on every mute.
+  // `run` parses the source into the baseline; `applyView` renders it.
   function run(src: string): void {
     let res: ParseResult
     try {
@@ -303,31 +257,19 @@ async function boot(): Promise<void> {
       return
     }
     baseline = res
-    currentSrc = src
     localStorage.setItem(LS.src, src)
-    // Drop any muted ids the edit removed, so a stale id can't perturb the graph.
-    for (const id of [...muted]) if (!res.canonical.objects.some((o) => o.id === id)) muted.delete(id)
     applyView()
-  }
-
-  function safeWhatIf(): ParseResult {
-    try {
-      return parseWhatIf(currentSrc, buildOverrides())
-    } catch (err) {
-      toast(`What-if error: ${String(err)}`)
-      return baseline!
-    }
   }
 
   function applyView(): void {
     if (!baseline) return
-    last = muted.size === 0 ? baseline : safeWhatIf()
+    last = baseline
     const canon = last.canonical
     el('#empty-state').hidden = canon.objects.length > 0
     el('#graph').style.display = isView() ? 'none' : ''
     view.setActive(isView())
     if (isView()) view.render(canon)
-    else { graph.render(canon, mode); graph.setMuted(muted) }
+    else graph.render(canon, mode)
     syncTimeline(last)
     const conflicts = canon.audit?.conflicts ?? []
     setDiagStatus(last.diagnostics.items, conflicts)
@@ -337,7 +279,6 @@ async function boot(): Promise<void> {
     el('#diag-copy').hidden = diagText === ''
     el('#json').textContent = JSON.stringify(canon, null, 2)
     el('#ast').textContent = JSON.stringify(last.surface, null, 2)
-    updateWhatIfBanner()
 
     // keep detail panel in sync with the latest view
     if (selectedId) {
@@ -345,7 +286,7 @@ async function boot(): Promise<void> {
         ? canon.objects.some((o) => o.type === 'stance' && o.agent === selectedId!.slice(6))
         : canon.objects.some((o) => o.id === selectedId)
       if (stillThere) {
-        renderDetail(detailBody, canon, selectedId, navigateTo, whatIfCtx())
+        renderDetail(detailBody, canon, selectedId, navigateTo)
         rSelect(selectedId)
       } else {
         closeDetail()

@@ -347,8 +347,6 @@ function buildStyle(p: Palette): any[] {
     // weighs. The mirror orders options by EV but rings no winner.
     { selector: 'node.dv-decision', style: { 'border-color': p.accent, 'border-width': 3, 'border-style': 'double' } },
     { selector: 'node.dv-option', style: { 'border-color': p.scope, 'border-width': 2, 'border-style': 'dashed', 'background-opacity': 0.1, 'text-opacity': 0.72 } },
-    // What-if (v0.2, Phase 6): a muted node and its edges read as removed.
-    { selector: 'node.muted', style: { 'background-opacity': 0.04, opacity: 0.32, 'text-opacity': 0.45, 'border-style': 'dashed' } },
     { selector: 'node:selected', style: { 'border-color': p.select, 'border-width': 3.5, 'background-opacity': p.nodeOpacity + 0.2 } },
     { selector: 'node.faded', style: { 'background-opacity': 0.04, opacity: 0.32, 'text-opacity': 0.3 } },
     // As-of view (v0.2, Phase 3): hide assertions later than the slider time;
@@ -394,7 +392,6 @@ function buildStyle(p: Palette): any[] {
     // the base edge and the relation-weight mapping above.
     { selector: 'edge.lever-faded', style: { opacity: p.faded } },
     { selector: 'edge.lever[levAbs]', style: { opacity: 1, width: 'mapData(levAbs, 0, 0.4, 1.5, 9)' } },
-    { selector: 'edge.muted', style: { opacity: 0.12, 'line-style': 'dashed' } },
   ]
 }
 
@@ -424,8 +421,6 @@ export interface GraphHandle {
   setSensitivity(on: boolean): void
   /** Toggle the decision overlay (mark the decision and the options it weighs). */
   setDecision(on: boolean): void
-  /** Mark a set of node/link ids as muted (what-if), or clear with an empty set. */
-  setMuted(ids: Set<string>): void
 }
 
 export function createGraph(container: HTMLElement, theme: Theme): GraphHandle {
@@ -524,20 +519,6 @@ export function createGraph(container: HTMLElement, theme: Theme): GraphHandle {
     })
   }
 
-  let muted = new Set<string>()
-  function setMuted(ids: Set<string>) {
-    muted = ids
-    cy.batch(() => {
-      cy.elements().removeClass('muted')
-      ids.forEach((id) => {
-        const ele = cy.getElementById(id)
-        if (ele.empty()) return
-        ele.addClass('muted')
-        if (ele.isNode()) ele.connectedEdges().addClass('muted')
-      })
-    })
-  }
-
   function render(canon: Canonical, mode: ViewMode, animate = false) {
     cy.elements().remove()
     cy.add(buildElements(canon, mode))
@@ -547,7 +528,6 @@ export function createGraph(container: HTMLElement, theme: Theme): GraphHandle {
     setStatus(statusOn)
     setSensitivity(sensOn)
     setDecision(decisionOn)
-    setMuted(muted)
   }
 
   function onSelect(cb: (info: { id: string; kind: string } | null) => void) {
@@ -592,6 +572,5 @@ export function createGraph(container: HTMLElement, theme: Theme): GraphHandle {
     setStatus,
     setSensitivity,
     setDecision,
-    setMuted,
   }
 }

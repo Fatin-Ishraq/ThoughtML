@@ -1,7 +1,6 @@
 # Which evidence is actually holding the conclusion up? Open a claim to see its
 # evidence ranked by leverage — the confidence it would lose if that one link
-# were removed — or switch on the "Load" lens. Then enter What-if and mute a
-# node to watch the whole argument recompute (v0.2, Phase 6 — sensitivity).
+# were removed (v0.2, Phase 6 — sensitivity).
 
 scope ship-decision
 
