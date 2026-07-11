@@ -53,6 +53,16 @@ release — real and usable, but the surface may still move.
   file small. A CI freshness guard rebuilds the viewer template and fails if the
   committed copy drifts, so `cargo build` still needs no Node.
 
+### Removed
+
+- **Interactive what-if.** The playground's what-if control (mute a node/link and
+  re-derive the counterfactual live) is gone, along with its wasm bridge
+  (`parse_what_if`). It leaned oracle rather than mirror, never worked in the
+  standalone viewer (it needs a live parser), and left the playground with a third
+  control the docs already described as a two-lens spine. The underlying override
+  engine (`Overrides` / `parse_str_with_overrides`) stays — it's the derive
+  pipeline's spine and still powers **sensitivity / leverage**, which is unchanged.
+
 ## [0.1.0] — 2026-06-19
 
 The first release is a *subtraction*. ThoughtML had been built up across many
