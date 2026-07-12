@@ -73,7 +73,7 @@ export function legendItems(theme: Theme): Array<{ label: string; color: string 
 // drives (teal triangle), enables suggests (open chevron), depends-on is
 // tentative (dashed), revises replaces (mauve diamond).
 
-export type RelCat = 'support' | 'attack' | 'causal' | 'enable' | 'depend' | 'revise' | 'answer' | 'lead' | 'option' | 'other'
+export type RelCat = 'support' | 'attack' | 'causal' | 'enable' | 'depend' | 'revise' | 'answer' | 'lead' | 'option' | 'member' | 'other'
 
 export function relationCategory(rel: string): RelCat {
   switch (rel) {
@@ -83,9 +83,12 @@ export function relationCategory(rel: string): RelCat {
     case 'enables': return 'enable'
     case 'depends-on': return 'depend'
     case 'revises': return 'revise'
-    case 'answers': return 'answer'
+    case 'answers': case 'candidate-for': return 'answer'
     case 'leads-to': return 'lead'
     case 'option-of': return 'option'
+    // M3: collection membership — deliberately NOT evidence, so it reads as a soft,
+    // structural tie rather than a support arrow.
+    case 'part-of': return 'member'
     default: return 'other'
   }
 }
@@ -105,13 +108,15 @@ export const REL_STYLE: Record<RelCat, RelStyle> = {
   // (a soft, dashed membership tie).
   lead: { color: 'accent', arrow: 'triangle', line: 'solid', label: 'leads-to' },
   option: { color: 'scope', arrow: 'circle', line: 'dashed', label: 'option-of' },
+  // M3: a collection member — muted and dashed, subordinate to the evidence edges.
+  member: { color: 'link', arrow: 'circle', line: 'dashed', label: 'part-of' },
   other: { color: 'link', arrow: 'triangle', line: 'solid', label: 'related' },
 }
 
 /** The relation categories worth showing in the legend, in reading order. */
 export function relationLegend(theme: Theme): Array<{ cat: RelCat; label: string; color: string; arrow: string; line: string }> {
   const p = PALETTE[theme]
-  const cats: RelCat[] = ['support', 'attack', 'causal', 'enable', 'depend', 'revise', 'answer', 'lead', 'option']
+  const cats: RelCat[] = ['support', 'attack', 'causal', 'enable', 'depend', 'revise', 'answer', 'lead', 'option', 'member']
   return cats.map((cat) => ({ cat, label: REL_STYLE[cat].label, color: p[REL_STYLE[cat].color] as string, arrow: REL_STYLE[cat].arrow, line: REL_STYLE[cat].line }))
 }
 

@@ -62,6 +62,12 @@ pub const RELATIONS: &[&str] = &[
     // `probability`), and is an option-of a decision.
     "leads-to",
     "option-of",
+    // v0.x (M3): non-evidential structural relations. `part-of` marks collection
+    // membership (an item in a list/group), `candidate-for` a proposed answer to a
+    // question. Neither has an evidence polarity, so — unlike `supports` — they do
+    // not inflate the target's derived confidence: enumerations stay structure.
+    "part-of",
+    "candidate-for",
 ];
 
 /// Known block field phrases (§7). `note` is a Tier-1 addition: a free-text

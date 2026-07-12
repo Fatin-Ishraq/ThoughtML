@@ -43,7 +43,7 @@ const KIND_VAR: Record<string, string> = {
 const REL_VAR: Record<RelCat, string> = {
   support: '--c-agent', attack: '--error', causal: '--c-link', enable: '--accent',
   depend: '--c-scope', revise: '--c-stance', answer: '--c-question',
-  lead: '--accent', option: '--c-scope', other: '--c-link',
+  lead: '--accent', option: '--c-scope', member: '--c-link', other: '--c-link',
 }
 
 // --- the time model (no lanes) -------------------------------------------
@@ -647,7 +647,7 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
   function buildDefs() {
     const old = svg.querySelector('defs'); if (old) old.remove()
     const defs = document.createElementNS(SVGNS, 'defs')
-    const cats: RelCat[] = ['support', 'attack', 'causal', 'enable', 'depend', 'revise', 'answer', 'lead', 'option', 'other']
+    const cats: RelCat[] = ['support', 'attack', 'causal', 'enable', 'depend', 'revise', 'answer', 'lead', 'option', 'member', 'other']
     for (const c of cats) {
       const m = EL('marker', { id: `tv-mk-${c}`, markerWidth: 9, markerHeight: 9, refX: 7, refY: 4, orient: 'auto' })
       const arrow = REL_STYLE[c].arrow

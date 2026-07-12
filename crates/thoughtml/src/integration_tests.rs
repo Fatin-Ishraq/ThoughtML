@@ -1114,6 +1114,60 @@ fn single_support_derives_confidence() {
 }
 
 #[test]
+fn part_of_does_not_pollute_derived_confidence() {
+    // The crux of M3: `part-of` (collection membership) has no evidence polarity,
+    // so enumerating a claim's members must NOT inflate its derived confidence —
+    // unlike `supports`, which does.
+    let base = "observation a\nobservation b\nobservation c\nclaim group\n";
+    let collection = parse_derived(&format!(
+        "{base}link a part-of group\nlink b part-of group\nlink c part-of group"
+    ));
+    let evidence = parse_derived(&format!(
+        "{base}link a supports group\nlink b supports group\nlink c supports group"
+    ));
+    // `supports` inflates the claim's belief above the single-edge 0.731…
+    let inflated = derived_of(&evidence.canonical.objects, "group").unwrap();
+    assert!(inflated > 0.8, "supports should inflate, got {inflated}");
+    // …`part-of` leaves it untouched — a labelled group, not an evidence-backed belief.
+    assert_eq!(derived_of(&collection.canonical.objects, "group"), None);
+}
+
+#[test]
+fn part_of_bundle_parses_clean_and_stays_non_evidential() {
+    // `part-of` works as an M2 bundle header and is a known relation (no warnings).
+    let r = parse_derived("claim group\nobservation a\nobservation b\npart-of group\n  a\n  b");
+    assert!(!r.diagnostics.has_errors(), "{:?}", r.diagnostics.items);
+    let links: Vec<_> = r
+        .canonical
+        .objects
+        .iter()
+        .filter_map(|o| match o {
+            Object::Link(l) => Some((l.from.as_str(), l.relation.as_str(), l.to.as_str())),
+            _ => None,
+        })
+        .collect();
+    assert!(links.contains(&("a", "part-of", "group")));
+    assert!(links.contains(&("b", "part-of", "group")));
+    assert_eq!(derived_of(&r.canonical.objects, "group"), None);
+}
+
+#[test]
+fn candidate_for_is_a_known_relation() {
+    let r = parse_str(
+        "question q\n  What?\n  expects option\ndecision d1\ndecision d2\n\
+         candidate-for q\n  d1\n  d2",
+    );
+    assert!(!r.diagnostics.has_errors(), "{:?}", r.diagnostics.items);
+    let n = r
+        .canonical
+        .objects
+        .iter()
+        .filter(|o| matches!(o, Object::Link(l) if l.relation == "candidate-for"))
+        .count();
+    assert_eq!(n, 2);
+}
+
+#[test]
 fn opposing_evidence_cancels() {
     let src = "\
 focus a

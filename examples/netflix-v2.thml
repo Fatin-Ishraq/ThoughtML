@@ -86,7 +86,7 @@ scope netflix-case-study
   claim customer-pain-points
     Consumers faced several frustrations with physical rentals.
 
-  supports customer-pain-points
+  part-of customer-pain-points
     late-fees-problem weight 0.90 assumed
     limited-availability weight 0.85 assumed
     long-travel-time weight 0.85 assumed
@@ -114,7 +114,7 @@ scope netflix-case-study
   claim technological-changes
     Several technological developments changed the industry.
 
-  supports technological-changes
+  part-of technological-changes
     growth-of-internet weight 0.90 assumed
     increasing-broadband weight 0.90 assumed
     falling-storage-costs weight 0.85 assumed
@@ -230,7 +230,7 @@ scope netflix-case-study
     link eliminate-late-fees causes higher-satisfaction-loyalty
       weight 0.90 assumed
 
-    link eliminate-late-fees answers which-strategy-most-impactful
+    link eliminate-late-fees candidate-for which-strategy-most-impactful
       weight 0.80 assumed
 
     decision recommendation-algorithms
@@ -257,7 +257,7 @@ scope netflix-case-study
     link recommendation-algorithms causes lower-cancellation
       weight 0.80 assumed
 
-    link recommendation-algorithms answers which-strategy-most-impactful
+    link recommendation-algorithms candidate-for which-strategy-most-impactful
       weight 0.85 assumed
 
     decision original-content-strategy
@@ -291,7 +291,7 @@ scope netflix-case-study
     link original-content-strategy causes greater-retention
       weight 0.85 assumed
 
-    link original-content-strategy answers which-strategy-most-impactful
+    link original-content-strategy candidate-for which-strategy-most-impactful
       weight 0.90 assumed
 
     decision global-expansion
@@ -324,7 +324,7 @@ scope netflix-case-study
     link global-expansion causes reduced-market-dependence
       weight 0.85 assumed
 
-    link global-expansion answers which-strategy-most-impactful
+    link global-expansion candidate-for which-strategy-most-impactful
       weight 0.85 assumed
 
   scope competitive-analysis
@@ -449,7 +449,7 @@ scope netflix-case-study
     claim netflix-strengths
       Netflix has significant strengths.
 
-    supports netflix-strengths
+    part-of netflix-strengths
       strong-global-brand weight 0.90 assumed
       large-subscriber-base weight 0.90 assumed
       advanced-algorithms weight 0.85 assumed
@@ -468,7 +468,7 @@ scope netflix-case-study
     claim netflix-weaknesses
       Netflix has notable weaknesses.
 
-    supports netflix-weaknesses
+    part-of netflix-weaknesses
       high-production-costs weight 0.85 assumed
       dependence-subscription-revenue weight 0.80 assumed
       increasing-competition weight 0.85 assumed
@@ -488,7 +488,7 @@ scope netflix-case-study
     claim netflix-opportunities
       Netflix has significant opportunities.
 
-    supports netflix-opportunities
+    part-of netflix-opportunities
       expansion-gaming weight 0.80 assumed
       live-entertainment weight 0.75 assumed
       emerging-markets weight 0.85 assumed
@@ -512,7 +512,7 @@ scope netflix-case-study
     claim netflix-threats
       Netflix faces significant threats.
 
-    supports netflix-threats
+    part-of netflix-threats
       password-sharing weight 0.80 assumed
       content-piracy weight 0.80 assumed
       rising-production-costs weight 0.85 assumed
@@ -536,7 +536,7 @@ scope netflix-case-study
     claim major-competitors
       Major competitors entered the streaming market.
 
-    supports major-competitors
+    part-of major-competitors
       disney-competitor weight 0.90 assumed
       amazon-competitor weight 0.90 assumed
       warner-bros-competitor weight 0.85 assumed
@@ -601,7 +601,7 @@ scope netflix-case-study
     claim netflix-success-factors
       Several factors contributed to Netflix's success.
 
-    supports netflix-success-factors
+    part-of netflix-success-factors
       customer-focused-innovation weight 0.90 assumed
       early-adoption-streaming weight 0.90 assumed
       continuous-tech-investment weight 0.85 assumed
@@ -636,7 +636,7 @@ scope netflix-case-study
     claim business-lessons
       Businesses can learn several important lessons from Netflix.
 
-    supports business-lessons
+    part-of business-lessons
       solve-real-problems weight 0.90 assumed
       disrupt-yourself weight 0.90 assumed
       use-data-responsibly weight 0.85 assumed
