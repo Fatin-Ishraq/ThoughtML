@@ -320,6 +320,10 @@ a { color: inherit; }
   box-shadow: var(--shadow-md);
   backdrop-filter: blur(14px);
 }
+/* In the playground the diagnostics strip is pinned to the pane bottom; lift the
+   time bar above it so the two floaters never overlap. Scoped via :has() so the
+   standalone viewer (which has no diagnostics bar) keeps the tighter bottom. */
+.graph-pane:has(.diagnostics-bar) .tv-bar { bottom: 60px; }
 .tv-bar-row { display: flex; align-items: center; gap: 10px; }
 .tv-clock { font: 600 14px var(--mono); font-variant-numeric: tabular-nums; letter-spacing: 0.4px; color: var(--text); }
 /* transport controls — step / play / follow, grouped on the right */
