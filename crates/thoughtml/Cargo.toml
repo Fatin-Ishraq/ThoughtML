@@ -2,11 +2,15 @@
 name = "thoughtml"
 version.workspace = true
 edition.workspace = true
-description = "Reference parser for ThoughtML: surface AST -> canonical objects -> JSON, with diagnostics."
+description = "A plain-text language for reasoning you can check — reference parser and CLI toolchain (check, fmt, explain, diff, and the mirror)."
 license.workspace = true
 repository.workspace = true
+homepage = "https://fatin-ishraq.github.io/ThoughtML/"
+keywords = ["reasoning", "argumentation", "parser", "cli", "dsl"]
+categories = ["command-line-utilities", "parser-implementations", "text-processing"]
 # The workspace README is the canonical landing page; it's what ships on the npm
-# package and in the release archives (dist bundles the package's readme).
+# package, the crates.io page, and in the release archives. cargo resolves this
+# path and bundles it into the package as README.md at publish time.
 readme = "../../README.md"
 
 [[bin]]
