@@ -1,0 +1,2 @@
+# Downloaded release binaries, generated wheels, and test venvs — all reproducible.
+build/
