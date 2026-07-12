@@ -1,0 +1,834 @@
+# Case Study: The Rise of Netflix
+# A rich ThoughtML graph using ALL language features.
+# Demonstrates: all postures, all relations, all field types, questions,
+# infers/suspects special forms, lifecycle, body text, multiple agents,
+# profile vocabulary, and scope inheritance.
+
+profile netflix-dialect
+  kinds industry, strategy, metric, risk, milestone
+  relations disrupts, competes-with, outcompetes
+  postures predicts, warns
+  fields market-share, subscriber-count, revenue
+
+scope netflix-case-study
+  source netflix-case-study-document
+
+  focus netflix-inc
+    kind industry
+    Netflix, Inc.
+
+  focus entertainment-streaming
+    kind industry
+    Entertainment and Streaming Media
+
+  reed-hastings holds netflix-inc
+    confidence 0.95 assumed
+    note Founded by Reed Hastings and Marc Randolph.
+
+  marc-randolph holds entertainment-streaming
+    confidence 0.95 assumed
+    note Founded by Reed Hastings and Marc Randolph.
+
+  memory los-gatos-hq
+    Los Gatos, United States
+
+  focus subscription-streaming
+    kind strategy
+    Subscription-based video streaming
+
+  focus original-film-production
+    kind strategy
+    Original film production
+
+  focus tv-series-production
+    kind strategy
+    Television series production
+
+  focus documentary-production
+    kind strategy
+    Documentary production
+
+  focus mobile-gaming
+    kind strategy
+    Mobile gaming
+
+  claim mission-statement
+    To entertain the world by providing high-quality content that viewers can watch anytime and anywhere.
+
+  link subscription-streaming supports netflix-inc
+    weight 0.90 assumed
+
+  link original-film-production supports netflix-inc
+    weight 0.85 assumed
+
+  link tv-series-production supports netflix-inc
+    weight 0.85 assumed
+
+  link documentary-production supports netflix-inc
+    weight 0.80 assumed
+
+  link mobile-gaming supports netflix-inc
+    weight 0.75 assumed
+
+  memory physical-rental-era
+    During the late 1990s, home entertainment was dominated by physical video rentals.
+
+  observation blockbuster-dominant
+    The largest player at the time was Blockbuster, which operated thousands of stores worldwide.
+
+  observation late-fees-problem
+    Customers paid late fees if they returned DVDs or VHS tapes after the due date.
+
+  observation limited-availability
+    Limited movie availability at rental stores.
+
+  observation long-travel-time
+    Long travel time to rental stores.
+
+  observation physical-damage
+    Physical damage to DVDs.
+
+  observation poor-recommendations
+    Poor recommendation systems at rental stores.
+
+  claim customer-pain-points
+    Consumers faced several frustrations with physical rentals.
+
+  link late-fees-problem supports customer-pain-points
+    weight 0.90 assumed
+
+  link limited-availability supports customer-pain-points
+    weight 0.85 assumed
+
+  link long-travel-time supports customer-pain-points
+    weight 0.85 assumed
+
+  link physical-damage supports customer-pain-points
+    weight 0.80 assumed
+
+  link poor-recommendations supports customer-pain-points
+    weight 0.85 assumed
+
+  observation growth-of-internet
+    Growth of the internet.
+
+  observation increasing-broadband
+    Increasing broadband speeds.
+
+  observation falling-storage-costs
+    Falling storage costs.
+
+  observation improved-video-compression
+    Improved video compression.
+
+  observation rising-smartphone-usage
+    Rising smartphone usage.
+
+  observation smart-tv-expansion
+    Expansion of smart TVs.
+
+  claim technological-changes
+    Several technological developments changed the industry.
+
+  link growth-of-internet supports technological-changes
+    weight 0.90 assumed
+
+  link increasing-broadband supports technological-changes
+    weight 0.90 assumed
+
+  link falling-storage-costs supports technological-changes
+    weight 0.85 assumed
+
+  link improved-video-compression supports technological-changes
+    weight 0.85 assumed
+
+  link rising-smartphone-usage supports technological-changes
+    weight 0.80 assumed
+
+  link smart-tv-expansion supports technological-changes
+    weight 0.80 assumed
+
+  claim streaming-opportunity
+    These changes created opportunities for digital streaming services.
+
+  link technological-changes causes streaming-opportunity
+    weight 0.90 assumed
+
+  scope dvd-by-mail-phase
+
+    focus dvd-subscription-model
+      kind strategy
+      Netflix introduced a subscription model allowing customers to order DVDs online, receive them through mail, keep them as long as they wanted, and return them without late fees.
+
+    reed-hastings chooses dvd-subscription-model
+      confidence 0.90 assumed
+      note Greater convenience, larger movie catalog, personalized recommendations, monthly subscription pricing.
+
+    observation greater-convenience
+      Greater convenience than store visits.
+
+    observation larger-catalog
+      Larger movie catalog than physical stores.
+
+    observation personalized-recommendations
+      Personalized recommendations.
+
+    observation monthly-subscription
+      Monthly subscription pricing.
+
+    link greater-convenience supports dvd-subscription-model
+      weight 0.90 assumed
+
+    link larger-catalog supports dvd-subscription-model
+      weight 0.85 assumed
+
+    link personalized-recommendations supports dvd-subscription-model
+      weight 0.85 assumed
+
+    link monthly-subscription supports dvd-subscription-model
+      weight 0.90 assumed
+
+    claim compete-on-experience
+      Instead of competing only on price, Netflix competed on customer experience.
+
+    link dvd-subscription-model supports compete-on-experience
+      weight 0.90 assumed
+
+  focus streaming-launched-2007
+    kind milestone
+    In 2007, Netflix launched online streaming.
+
+  observation internet-speeds-improving
+    At the time, internet speeds were improving, making online video practical.
+
+  assumption experts-believed-dvds-dominant
+    Many experts believed DVDs would remain dominant for years.
+
+  decision netflix-invested-streaming
+    Instead of protecting its DVD business, Netflix invested heavily in streaming technology.
+
+  reed-hastings chooses netflix-invested-streaming
+    confidence 0.85 estimated
+    note This decision fundamentally changed the company.
+
+  link internet-speeds-improving enables netflix-invested-streaming
+    weight 0.90 assumed
+
+  link experts-believed-dvds-dominant opposes netflix-invested-streaming
+    weight 0.70 assumed
+
+  link netflix-invested-streaming disrupts dvd-subscription-model
+    weight 0.95 assumed
+
+  link netflix-invested-streaming causes streaming-launched-2007
+    weight 0.95 assumed
+
+  memory original-model
+    Customer -> Website -> DVD Shipment -> Return by Mail
+
+  claim new-model
+    Customer -> Internet -> Netflix Cloud Platform -> Instant Video Streaming -> Subscription Revenue
+
+  observation reduced-shipping-costs
+    The streaming model dramatically reduced shipping and inventory costs.
+
+  observation improved-customer-convenience
+    The streaming model improved customer convenience.
+
+  link reduced-shipping-costs supports new-model
+    weight 0.90 assumed
+
+  link improved-customer-convenience supports new-model
+    weight 0.90 assumed
+
+  link new-model revises original-model
+    weight 0.95 assumed
+
+  scope strategic-decisions
+
+    question which-strategy-most-impactful
+      Which strategic decision had the greatest impact on Netflix's long-term success?
+      expects option
+      status open
+
+    decision eliminate-late-fees
+      Netflix removed late fees, one of the biggest frustrations in movie rentals.
+
+    reed-hastings chooses eliminate-late-fees
+      confidence 0.95 assumed
+      note Customers disliked hidden costs.
+
+    outcome higher-satisfaction-loyalty
+      Higher customer satisfaction and loyalty.
+
+    link eliminate-late-fees causes higher-satisfaction-loyalty
+      weight 0.90 assumed
+
+    link eliminate-late-fees answers which-strategy-most-impactful
+      weight 0.80 assumed
+
+    decision recommendation-algorithms
+      Netflix collected viewing data to personalize recommendations.
+
+    reed-hastings chooses recommendation-algorithms
+      confidence 0.90 assumed
+
+    outcome increased-watch-time
+      Increased watch time.
+
+    outcome better-satisfaction
+      Better customer satisfaction.
+
+    outcome lower-cancellation
+      Lower subscriber cancellation.
+
+    link recommendation-algorithms causes increased-watch-time
+      weight 0.85 assumed
+
+    link recommendation-algorithms causes better-satisfaction
+      weight 0.85 assumed
+
+    link recommendation-algorithms causes lower-cancellation
+      weight 0.80 assumed
+
+    link recommendation-algorithms answers which-strategy-most-impactful
+      weight 0.85 assumed
+
+    decision original-content-strategy
+      Instead of relying only on licensed movies, Netflix began producing original shows.
+
+    reed-hastings chooses original-content-strategy
+      confidence 0.90 assumed
+      note House of Cards, Stranger Things, The Crown, Wednesday.
+
+    outcome exclusive-content
+      Exclusive content.
+
+    outcome stronger-brand-identity
+      Stronger brand identity.
+
+    outcome reduced-dependence-competitors
+      Reduced dependence on competitors.
+
+    outcome greater-retention
+      Greater customer retention.
+
+    link original-content-strategy causes exclusive-content
+      weight 0.90 assumed
+
+    link original-content-strategy causes stronger-brand-identity
+      weight 0.85 assumed
+
+    link original-content-strategy causes reduced-dependence-competitors
+      weight 0.90 assumed
+
+    link original-content-strategy causes greater-retention
+      weight 0.85 assumed
+
+    link original-content-strategy answers which-strategy-most-impactful
+      weight 0.90 assumed
+
+    decision global-expansion
+      Netflix expanded into more than 190 countries.
+
+    reed-hastings chooses global-expansion
+      confidence 0.90 assumed
+
+    outcome larger-customer-base
+      Larger customer base.
+
+    outcome higher-revenue-potential
+      Higher revenue potential.
+
+    outcome diverse-productions
+      Diverse international productions.
+
+    outcome reduced-market-dependence
+      Reduced dependence on one market.
+
+    link global-expansion causes larger-customer-base
+      weight 0.90 assumed
+
+    link global-expansion causes higher-revenue-potential
+      weight 0.90 assumed
+
+    link global-expansion causes diverse-productions
+      weight 0.85 assumed
+
+    link global-expansion causes reduced-market-dependence
+      weight 0.85 assumed
+
+    link global-expansion answers which-strategy-most-impactful
+      weight 0.85 assumed
+
+  scope competitive-analysis
+
+    claim netflix-competitive-advantages
+      Netflix has significant competitive advantages over traditional TV and DVD rental stores.
+
+    observation available-24-7
+      Available 24/7.
+
+    observation personalized-recommendations-excellent
+      Personalized recommendations: Excellent.
+
+    observation monthly-subscription-yes
+      Monthly subscription: Yes.
+
+    observation original-content-extensive
+      Original content: Extensive.
+
+    observation global-reach-very-high
+      Global reach: Very high.
+
+    observation instant-access-yes
+      Instant access: Yes.
+
+    observation traditional-tv-limited-schedule
+      Traditional TV: Limited schedule.
+
+    observation dvd-stores-store-hours-only
+      DVD rental stores: Store hours only.
+
+    link available-24-7 supports netflix-competitive-advantages
+      weight 0.90 assumed
+
+    link personalized-recommendations-excellent supports netflix-competitive-advantages
+      weight 0.85 assumed
+
+    link original-content-extensive supports netflix-competitive-advantages
+      weight 0.90 assumed
+
+    link global-reach-very-high supports netflix-competitive-advantages
+      weight 0.85 assumed
+
+    link instant-access-yes supports netflix-competitive-advantages
+      weight 0.90 assumed
+
+    link traditional-tv-limited-schedule opposes netflix-competitive-advantages
+      weight 0.60 assumed
+
+    link dvd-stores-store-hours-only opposes netflix-competitive-advantages
+      weight 0.60 assumed
+
+    claim netflix-outcompetes-blockbuster
+      Netflix outcompetes Blockbuster.
+
+    link netflix-competitive-advantages supports netflix-outcompetes-blockbuster
+      weight 0.90 assumed
+
+    link blockbuster-dominant opposes netflix-outcompetes-blockbuster
+      weight 0.50 assumed
+
+  scope financial-growth
+
+    focus subscribers-2002
+      kind metric
+      0.6 million subscribers.
+      quantity 0.6 million measured
+
+    focus subscribers-2007
+      kind metric
+      7 million subscribers.
+      quantity 7 million measured
+
+    focus subscribers-2012
+      kind metric
+      27 million subscribers.
+      quantity 27 million measured
+
+    focus subscribers-2017
+      kind metric
+      110 million subscribers.
+      quantity 110 million measured
+
+    focus subscribers-2020
+      kind metric
+      203 million subscribers.
+      quantity 203 million measured
+
+    focus subscribers-2023
+      kind metric
+      260 million subscribers.
+      quantity 260 million measured
+
+    claim rapid-growth
+      This rapid growth illustrates successful adaptation to technological change.
+
+    link subscribers-2002 causes subscribers-2007
+      weight 0.80 assumed
+
+    link subscribers-2007 causes subscribers-2012
+      weight 0.85 assumed
+
+    link subscribers-2012 causes subscribers-2017
+      weight 0.90 assumed
+
+    link subscribers-2017 causes subscribers-2020
+      weight 0.90 assumed
+
+    link subscribers-2020 causes subscribers-2023
+      weight 0.85 assumed
+
+    link subscribers-2023 supports rapid-growth
+      weight 0.90 assumed
+
+  scope swot-analysis
+
+    observation strong-global-brand
+      Strong global brand.
+
+    observation large-subscriber-base
+      Large subscriber base.
+
+    observation advanced-algorithms
+      Advanced recommendation algorithms.
+
+    observation high-quality-original-content
+      High-quality original content.
+
+    observation strong-tech-infrastructure
+      Strong technology infrastructure.
+
+    claim netflix-strengths
+      Netflix has significant strengths.
+
+    link strong-global-brand supports netflix-strengths
+      weight 0.90 assumed
+
+    link large-subscriber-base supports netflix-strengths
+      weight 0.90 assumed
+
+    link advanced-algorithms supports netflix-strengths
+      weight 0.85 assumed
+
+    link high-quality-original-content supports netflix-strengths
+      weight 0.90 assumed
+
+    link strong-tech-infrastructure supports netflix-strengths
+      weight 0.85 assumed
+
+    observation high-production-costs
+      High content production costs.
+
+    observation dependence-subscription-revenue
+      Dependence on subscription revenue.
+
+    observation increasing-competition
+      Increasing competition.
+
+    claim netflix-weaknesses
+      Netflix has notable weaknesses.
+
+    link high-production-costs supports netflix-weaknesses
+      weight 0.85 assumed
+
+    link dependence-subscription-revenue supports netflix-weaknesses
+      weight 0.80 assumed
+
+    link increasing-competition supports netflix-weaknesses
+      weight 0.85 assumed
+
+    observation expansion-gaming
+      Expansion into gaming.
+
+    observation live-entertainment
+      Live entertainment.
+
+    observation emerging-markets
+      Emerging markets.
+
+    observation ai-personalization
+      AI-powered personalization.
+
+    claim netflix-opportunities
+      Netflix has significant opportunities.
+
+    link expansion-gaming supports netflix-opportunities
+      weight 0.80 assumed
+
+    link live-entertainment supports netflix-opportunities
+      weight 0.75 assumed
+
+    link emerging-markets supports netflix-opportunities
+      weight 0.85 assumed
+
+    link ai-personalization supports netflix-opportunities
+      weight 0.85 assumed
+
+    observation password-sharing
+      Password sharing.
+
+    observation content-piracy
+      Content piracy.
+
+    observation rising-production-costs
+      Rising production costs.
+
+    observation economic-downturns
+      Economic downturns.
+
+    observation new-competitors
+      New competitors.
+
+    claim netflix-threats
+      Netflix faces significant threats.
+
+    link password-sharing supports netflix-threats
+      weight 0.80 assumed
+
+    link content-piracy supports netflix-threats
+      weight 0.80 assumed
+
+    link rising-production-costs supports netflix-threats
+      weight 0.85 assumed
+
+    link economic-downturns supports netflix-threats
+      weight 0.75 assumed
+
+    link new-competitors supports netflix-threats
+      weight 0.85 assumed
+
+  scope challenges
+
+    observation disney-competitor
+      Disney entered the streaming market.
+
+    observation amazon-competitor
+      Amazon entered the streaming market.
+
+    observation warner-bros-competitor
+      Warner Bros. Discovery entered the streaming market.
+
+    observation apple-competitor
+      Apple entered the streaming market.
+
+    claim major-competitors
+      Major competitors entered the streaming market.
+
+    link disney-competitor supports major-competitors
+      weight 0.90 assumed
+
+    link amazon-competitor supports major-competitors
+      weight 0.90 assumed
+
+    link warner-bros-competitor supports major-competitors
+      weight 0.85 assumed
+
+    link apple-competitor supports major-competitors
+      weight 0.85 assumed
+
+    claim competition-pressure
+      Competition increased pressure on pricing and content quality.
+
+    link major-competitors causes competition-pressure
+      weight 0.90 assumed
+
+    observation studios-withdrew-licenses
+      Studios gradually withdrew their movies to launch their own streaming platforms.
+
+    decision netflix-invested-originals
+      Netflix responded by investing billions in original programming.
+
+    link studios-withdrew-licenses causes netflix-invested-originals
+      weight 0.90 assumed
+
+    observation blockbuster-production-costs
+      Producing blockbuster series requires significant investment.
+
+    claim profitability-challenge
+      Managing production budgets while maintaining profitability remains a challenge.
+
+    link blockbuster-production-costs supports profitability-challenge
+      weight 0.85 assumed
+
+  scope key-success-factors
+
+    observation customer-focused-innovation
+      Customer-focused innovation.
+
+    observation early-adoption-streaming
+      Early adoption of streaming.
+
+    observation continuous-tech-investment
+      Continuous technological investment.
+
+    observation strong-recommendation-algorithms
+      Strong recommendation algorithms.
+
+    observation data-driven-decisions
+      Data-driven decision-making.
+
+    observation global-expansion-success
+      Global expansion.
+
+    observation exclusive-original-programming
+      Exclusive original programming.
+
+    observation flexible-subscription-model
+      Flexible subscription model.
+
+    observation continuous-experimentation
+      Continuous experimentation.
+
+    observation ability-adapt-quickly
+      Ability to adapt quickly.
+
+    claim netflix-success-factors
+      Several factors contributed to Netflix's success.
+
+    link customer-focused-innovation supports netflix-success-factors
+      weight 0.90 assumed
+
+    link early-adoption-streaming supports netflix-success-factors
+      weight 0.90 assumed
+
+    link continuous-tech-investment supports netflix-success-factors
+      weight 0.85 assumed
+
+    link strong-recommendation-algorithms supports netflix-success-factors
+      weight 0.85 assumed
+
+    link data-driven-decisions supports netflix-success-factors
+      weight 0.85 assumed
+
+    link global-expansion-success supports netflix-success-factors
+      weight 0.85 assumed
+
+    link exclusive-original-programming supports netflix-success-factors
+      weight 0.90 assumed
+
+    link flexible-subscription-model supports netflix-success-factors
+      weight 0.80 assumed
+
+    link continuous-experimentation supports netflix-success-factors
+      weight 0.85 assumed
+
+    link ability-adapt-quickly supports netflix-success-factors
+      weight 0.90 assumed
+
+  scope lessons
+
+    claim solve-real-problems
+      Solve real customer problems rather than simply improving existing products.
+
+    claim disrupt-yourself
+      Be willing to disrupt your own business before competitors do.
+
+    claim use-data-responsibly
+      Use customer data responsibly to improve products and services.
+
+    claim invest-long-term
+      Invest in long-term innovation even when short-term profits may decline.
+
+    claim adapt-quickly
+      Adapt quickly to changes in technology and consumer behavior.
+
+    claim differentiate-unique-value
+      Differentiate through unique value rather than competing only on price.
+
+    claim business-lessons
+      Businesses can learn several important lessons from Netflix.
+
+    link solve-real-problems supports business-lessons
+      weight 0.90 assumed
+
+    link disrupt-yourself supports business-lessons
+      weight 0.90 assumed
+
+    link use-data-responsibly supports business-lessons
+      weight 0.85 assumed
+
+    link invest-long-term supports business-lessons
+      weight 0.90 assumed
+
+    link adapt-quickly supports business-lessons
+      weight 0.90 assumed
+
+    link differentiate-unique-value supports business-lessons
+      weight 0.85 assumed
+
+  scope discussion-questions
+
+    question why-transition-risky
+      Why was Netflix's transition from DVDs to streaming considered risky?
+      expects claim
+      status open
+      about netflix-invested-streaming, experts-believed-dvds-dominant
+
+    question how-personalization-retention
+      How did personalization contribute to customer retention?
+      expects claim
+      status open
+      about recommendation-algorithms, lower-cancellation
+
+    question advantages-original-content
+      What advantages does producing original content provide?
+      expects claim
+      status open
+      about original-content-strategy, exclusive-content
+
+    question greatest-impact-decision
+      Which strategic decision had the greatest impact on Netflix's long-term success?
+      expects option
+      status open
+      about eliminate-late-fees, recommendation-algorithms, original-content-strategy, global-expansion
+
+    question future-challenges
+      What future challenges might Netflix face as the streaming industry continues to evolve?
+      expects claim
+      status open
+      about netflix-threats, netflix-opportunities
+
+  scope conclusion
+
+    claim netflix-significant-transformation
+      Netflix represents one of the most significant business transformations of the digital era.
+
+    observation recognized-changing-preferences
+      By recognizing changing consumer preferences.
+
+    observation embraced-new-technology
+      Embracing new technology.
+
+    observation continuously-innovating
+      Continuously innovating.
+
+    claim evolved-dvd-to-streaming
+      The company successfully evolved from a DVD rental service into a global entertainment leader.
+
+    claim willingness-replace-model
+      Its willingness to replace its own successful business model with a more disruptive one demonstrates the importance of adaptability.
+
+    claim influences-entertainment
+      Today, Netflix continues to influence how entertainment is created, distributed, and consumed.
+
+    claim valuable-case-study
+      It is a valuable case study in innovation, digital transformation, and strategic management.
+
+    link recognized-changing-preferences supports netflix-significant-transformation
+      weight 0.85 assumed
+
+    link embraced-new-technology supports netflix-significant-transformation
+      weight 0.85 assumed
+
+    link continuously-innovating supports netflix-significant-transformation
+      weight 0.90 assumed
+
+    link netflix-significant-transformation causes evolved-dvd-to-streaming
+      weight 0.90 assumed
+
+    link willingness-replace-model supports evolved-dvd-to-streaming
+      weight 0.90 assumed
+
+    link evolved-dvd-to-streaming causes influences-entertainment
+      weight 0.85 assumed
+
+    link influences-entertainment supports valuable-case-study
+      weight 0.90 assumed
+
+    link netflix-success-factors supports valuable-case-study
+      weight 0.85 assumed
+
+    link business-lessons supports valuable-case-study
+      weight 0.85 assumed

@@ -128,6 +128,12 @@ fn parse_header(line: &Line, diags: &mut Diagnostics) -> Option<Header> {
         "stance" => parse_stance_header(line, &toks, diags),
         "profile" => simple_id_header(line, &toks, diags, |id| Header::Profile { name: id }),
         "import" => parse_import_header(line, &toks, diags),
+        // A built-in kind used as a one-line focus header (`observation foo`,
+        // `decision bar`). Pure sugar for `focus foo` + `kind observation`.
+        k if vocab::is_kind(k) => {
+            let kind = k.to_string();
+            simple_id_header(line, &toks, diags, |id| Header::TypedFocus { id, kind })
+        }
         _ => parse_action_header(line, &toks, diags),
     }
 }
@@ -343,6 +349,12 @@ fn looks_like_header(content: &str) -> bool {
         return false;
     };
     if vocab::is_record_keyword(first) {
+        return true;
+    }
+    // A typed focus header: `<built-in-kind> <id>` (exactly two tokens). Kind words
+    // are lowercase and reserved, so a capitalised or multi-word body line — the
+    // usual prose — is never mistaken for one.
+    if vocab::is_kind(first) && toks.len() == 2 {
         return true;
     }
     !vocab::is_known_field(first) && toks.len() >= 2 && vocab::is_posture(toks[1])

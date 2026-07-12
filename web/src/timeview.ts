@@ -59,6 +59,7 @@ interface TNode {
   supersededAt: number | null
   abandoned: boolean
   band: string | null
+  seq: number
   // layout (filled by layout())
   x: number; y: number; vx: number; vy: number; x0: number
   // runtime
@@ -76,7 +77,7 @@ interface Beat { t: number; text: string }
 // beat (even pacing) and the layout columns by beat (collapsed dead time).
 interface TBeat { index: number; t: number; nodeIds: string[]; caption: string }
 interface Band { id: string; label: string; y: number }
-interface TimeModel { nodes: TNode[]; edges: TEdge[]; narration: Beat[]; beats: TBeat[]; tension: Tension[]; tMin: number; tMax: number; bands: Band[]; worldW: number; bandH: number }
+interface TimeModel { nodes: TNode[]; edges: TEdge[]; narration: Beat[]; beats: TBeat[]; tension: Tension[]; tMin: number; tMax: number; narrative: boolean; bands: Band[]; worldW: number; bandH: number }
 
 type Side = 'L' | 'R' | 'T' | 'B'
 
@@ -171,6 +172,7 @@ function buildTimeModel(canon: Canonical): TimeModel {
       supersededAt: sup ? (assertedAt(sup) ?? null) : null,
       abandoned: o.type === 'focus' && o.status === 'abandoned',
       band,
+      seq: 0,
       x: 0, y: 0, vx: 0, vy: 0, x0: 0, visible: true,
     })
     nodeIds.add(o.id)
@@ -201,6 +203,18 @@ function buildTimeModel(canon: Canonical): TimeModel {
       if (nodeIds.has(o.to)) edges.push({ from: o.id, to: o.to, cat: relationCategory(o.relation), colorVar: REL_VAR[relationCategory(o.relation)], arrow: REL_STYLE[relationCategory(o.relation)].arrow, dash: REL_STYLE[relationCategory(o.relation)].line === 'dashed' })
     }
   }
+
+  // reveal order = document position: the spine when authored time is absent or
+  // coarse. `canon.objects` is already in document order (nested objects included).
+  const orderOf = new Map(objects.map((o, i) => [o.id, i]))
+  for (const n of nodes) n.seq = orderOf.get(n.id) ?? 0
+  // Narrative mode: a document with no real time spread (dateless, or everything at
+  // one instant) reveals in document order. We map `seq` onto a synthetic monotonic
+  // timeline so beats, layout, replay, and the slider all keep working unchanged —
+  // the only difference downstream is that the clock/date labels are hidden.
+  const distinctT = new Set(nodes.map((n) => n.t).filter((t): t is number => t !== null))
+  const narrative = distinctT.size < 2
+  if (narrative) for (const n of nodes) n.t = n.seq
 
   // tension windows from the mirror's confidence-vs-status conflicts
   const tension: Tension[] = []
@@ -253,7 +267,7 @@ function buildTimeModel(canon: Canonical): TimeModel {
     return { index, t, nodeIds: ns.map((n) => n.id), caption: captionFor(ns) }
   })
 
-  return { nodes, edges, narration: beats, beats: tbeats, tension, tMin, tMax, bands: [], worldW: 0, bandH: 150 }
+  return { nodes, edges, narration: beats, beats: tbeats, tension, tMin, tMax, narrative, bands: [], worldW: 0, bandH: 150 }
 }
 
 // --- lane-less layout: x = time (pinned), y = emergent force relaxation ---
@@ -534,7 +548,7 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
   const startEl = bar.querySelector('.tv-start') as HTMLElement
   const endEl = bar.querySelector('.tv-end') as HTMLElement
 
-  let model: TimeModel = { nodes: [], edges: [], narration: [], beats: [], tension: [], tMin: 0, tMax: 1, bands: [], worldW: 0, bandH: 150 }
+  let model: TimeModel = { nodes: [], edges: [], narration: [], beats: [], tension: [], tMin: 0, tMax: 1, narrative: false, bands: [], worldW: 0, bandH: 150 }
   let byId = new Map<string, TNode>()
   let asOf: number | null = null
   let focusId: string | null = null
@@ -731,7 +745,7 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
     let text = ''
     for (const bt of model.narration) { if (t === null || bt.t <= t) text = bt.text }
     narr.textContent = text
-    clockEl.textContent = t === null ? clk(model.tMax) : clk(t)
+    clockEl.textContent = model.narrative ? '' : t === null ? clk(model.tMax) : clk(t)
     // the slider fill tracks the beat index (even spacing), not raw clock time, so
     // the dense years aren't crushed into a sliver of the bar
     const nb = model.beats.length
@@ -772,7 +786,8 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
     } else {
       rangeEl.min = String(model.tMin); rangeEl.max = String(model.tMax); rangeEl.step = '1'; rangeEl.value = String(model.tMax)
     }
-    startEl.textContent = clk(model.tMin); endEl.textContent = clk(model.tMax)
+    startEl.textContent = model.narrative ? 'start' : clk(model.tMin)
+    endEl.textContent = model.narrative ? 'now' : clk(model.tMax)
     ticksEl.replaceChildren()
     if (nb > 1) {
       for (let i = 0; i < nb; i++) {

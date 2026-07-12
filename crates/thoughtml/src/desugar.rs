@@ -156,7 +156,10 @@ const INHERITABLE: &[&str] = &["asserted-at", "observed-at", "source", "valid-du
 /// still record it as a member. `None` for records that always push.
 fn declared_id(header: &Header) -> Option<String> {
     match header {
-        Header::Scope { id } | Header::Question { id } | Header::Focus { id } => Some(id.clone()),
+        Header::Scope { id }
+        | Header::Question { id }
+        | Header::Focus { id }
+        | Header::TypedFocus { id, .. } => Some(id.clone()),
         _ => None,
     }
 }
@@ -332,6 +335,52 @@ impl<'a> Desugarer<'a> {
         }
     }
 
+    /// Desugar a focus record. `header_kind` is `Some` for the typed-header form
+    /// (`observation foo`), where the kind comes from the header word and wins over
+    /// any redundant `kind` field; `None` for a plain `focus foo`, where the kind
+    /// (if any) is read from a `kind` field. Returns the focus's object index.
+    fn focus_record(&mut self, id: &str, header_kind: Option<&str>, rec: &Record) -> Option<usize> {
+        let (field_kind, mut fields) = self.split_kind(&rec.block);
+        let (kind, explicit) = match header_kind {
+            Some(hk) => {
+                if let Some(fk) = &field_kind {
+                    if fk != hk {
+                        self.diags.warning(
+                            rec.line,
+                            format!("`{id}` is declared `{hk}` in its header but `kind {fk}` in its block; using `{hk}`"),
+                        );
+                    }
+                }
+                (Some(hk.to_string()), true)
+            }
+            None => {
+                let explicit = field_kind.is_some();
+                (field_kind, explicit)
+            }
+        };
+        let quantity = self.build_quantity(&rec.block, rec.line);
+        fields.0.retain(|(k, _)| k != "quantity");
+        // Lift a lifecycle status onto the focus, first-class (Phase A fold marker),
+        // so it isn't buried among the free-form fields.
+        let status = take_field_string(&mut fields, "status");
+        self.ensure_focus(
+            id,
+            kind,
+            explicit,
+            quantity,
+            rec.block.formula.clone(),
+            rec.block.body.clone(),
+            fields,
+        );
+        let idx = self.focus_index.get(id).copied();
+        if let (Some(s), Some(i)) = (status, idx) {
+            if let Object::Focus(f) = &mut self.objects[i] {
+                f.status = Some(s);
+            }
+        }
+        idx
+    }
+
     fn record(&mut self, rec: &Record) {
         // Process the header. For a focus or question, remember the index of the
         // object it produced so nested children can attach to it as a thought-tree.
@@ -351,31 +400,11 @@ impl<'a> Desugarer<'a> {
                 self.question(rec, id);
                 Some(idx)
             }
-            Header::Focus { id } => {
-                let (kind, mut fields) = self.split_kind(&rec.block);
-                let explicit = kind.is_some();
-                let quantity = self.build_quantity(&rec.block, rec.line);
-                fields.0.retain(|(k, _)| k != "quantity");
-                // Lift a lifecycle status onto the focus, first-class (Phase A
-                // fold marker), so it isn't buried among the free-form fields.
-                let status = take_field_string(&mut fields, "status");
-                self.ensure_focus(
-                    id,
-                    kind,
-                    explicit,
-                    quantity,
-                    rec.block.formula.clone(),
-                    rec.block.body.clone(),
-                    fields,
-                );
-                let idx = self.focus_index.get(id).copied();
-                if let (Some(s), Some(i)) = (status, idx) {
-                    if let Object::Focus(f) = &mut self.objects[i] {
-                        f.status = Some(s);
-                    }
-                }
-                idx
-            }
+            // `focus id` (kind from a `kind` field) and the typed-header sugar
+            // `<kind> id` (kind from the header word) share one path; the header
+            // kind, when present, is authoritative.
+            Header::Focus { id } => self.focus_record(id, None, rec),
+            Header::TypedFocus { id, kind } => self.focus_record(id, Some(kind), rec),
             Header::Link {
                 alias,
                 from,
@@ -417,7 +446,7 @@ impl<'a> Desugarer<'a> {
         }
         match (&rec.header, container) {
             (Header::Scope { .. }, _) => {}
-            (Header::Focus { .. } | Header::Question { .. }, Some(idx)) => {
+            (Header::Focus { .. } | Header::TypedFocus { .. } | Header::Question { .. }, Some(idx)) => {
                 let defaults: Vec<(String, Value)> = object_fields(&self.objects[idx])
                     .map(|f| {
                         f.0.iter()

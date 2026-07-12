@@ -560,6 +560,54 @@ assistant infers root-cause from metric-shift";
 }
 
 #[test]
+fn typed_header_desugars_to_focus_plus_kind() {
+    // `observation foo` is exact sugar for `focus foo` + `kind observation`.
+    let typed = parse_str("observation internet-speeds\n  Internet speeds improved.");
+    let plain = parse_str("focus internet-speeds\n  kind observation\n  Internet speeds improved.");
+    assert!(!typed.diagnostics.has_errors(), "{:?}", typed.diagnostics.items);
+    let (to, po) = (&typed.canonical.objects, &plain.canonical.objects);
+    assert_eq!(focus_kind(to, "internet-speeds"), Some("observation"));
+    assert_eq!(
+        focus(to, "internet-speeds").map(|f| (f.kind.clone(), f.body.clone())),
+        focus(po, "internet-speeds").map(|f| (f.kind.clone(), f.body.clone())),
+        "typed header must desugar identically to focus + kind",
+    );
+}
+
+#[test]
+fn typed_header_nested_in_scope_is_a_member() {
+    // A typed header used as a nested child still registers in the scope's includes.
+    let r = parse_str("scope s\n  decision d\n    Do the thing.\n  observation o\n    Saw it.");
+    assert!(!r.diagnostics.has_errors(), "{:?}", r.diagnostics.items);
+    let o = &r.canonical.objects;
+    assert_eq!(focus_kind(o, "d"), Some("decision"));
+    assert_eq!(focus_kind(o, "o"), Some("observation"));
+    let scope = o
+        .iter()
+        .find_map(|x| match x {
+            Object::Scope(s) => Some(s),
+            _ => None,
+        })
+        .unwrap();
+    assert!(scope.includes.contains(&"d".to_string()));
+    assert!(scope.includes.contains(&"o".to_string()));
+}
+
+#[test]
+fn typed_header_does_not_capture_prose_body() {
+    // A capitalised, multi-word body line beginning with a kind word stays body
+    // text — it is not mistaken for a stray typed header.
+    let r = parse_str("focus x\n  Action needed now.\n  Memory usage grew.");
+    assert!(!r.diagnostics.has_errors(), "{:?}", r.diagnostics.items);
+    let o = &r.canonical.objects;
+    assert!(focus(o, "needed").is_none() && focus(o, "usage").is_none());
+    assert_eq!(
+        focus(o, "x").and_then(|f| f.body.as_deref()),
+        Some("Action needed now.\nMemory usage grew."),
+    );
+}
+
+#[test]
 fn explicit_kind_beats_inferred_silently() {
     // An explicit kind is authoritative; a later posture-inferred kind does not
     // override it and does not warn.

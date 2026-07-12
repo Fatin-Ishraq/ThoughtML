@@ -37,6 +37,14 @@ pub enum Header {
     Focus {
         id: String,
     },
+    /// A typed focus declaration: a built-in kind used as a one-line header, e.g.
+    /// `observation internet-speeds-improving` or `decision migrate`. Pure sugar —
+    /// it desugars to a `focus` with an explicit `kind`, so the canonical model is
+    /// unchanged.
+    TypedFocus {
+        id: String,
+        kind: String,
+    },
     Link {
         alias: Option<String>,
         from: String,
