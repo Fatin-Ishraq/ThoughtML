@@ -2266,12 +2266,8 @@ link approach-a opposes approach-b";
     assert_eq!(b.status.as_deref(), Some("settled"));
 }
 
-#[test]
-fn nested_scope_example_is_strict_clean() {
-    let r = parse_str(include_str!("../../../examples/nested-scope.thml"));
-    assert!(!r.diagnostics.has_errors(), "errors: {:?}", r.diagnostics.items);
-    assert!(!r.diagnostics.has_warnings(), "warnings: {:?}", r.diagnostics.items);
-}
+// (nested-scope.thml's strict-cleanliness is covered by
+// `bundled_examples_are_strict_clean`; its structure by the tests above.)
 
 // --- Profiles (Phase 5, Stage 3) ------------------------------------------
 
@@ -2331,12 +2327,8 @@ fn profile_object_captures_its_lists() {
     assert_eq!(p.relations, vec!["correlates"]);
 }
 
-#[test]
-fn profile_dialect_example_is_strict_clean() {
-    let r = parse_str(include_str!("../../../examples/profile-dialect.thml"));
-    assert!(!r.diagnostics.has_errors(), "errors: {:?}", r.diagnostics.items);
-    assert!(!r.diagnostics.has_warnings(), "warnings: {:?}", r.diagnostics.items);
-}
+// (profile-dialect.thml's strict-cleanliness is covered by
+// `bundled_examples_are_strict_clean`; its structure by the tests above.)
 
 // --- Imports & namespaces (Phase 5, Stage 4) ------------------------------
 
