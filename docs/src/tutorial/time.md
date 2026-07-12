@@ -4,6 +4,11 @@ Beliefs change. ThoughtML treats time as first-class: records can be dated, and 
 later belief can *revise* an earlier one without erasing it — the history stays
 inspectable.
 
+> **Time is optional.** You never have to timestamp anything. A document with no
+> dates parses and renders fine — the [viewer](../guides/viewer.md) simply reveals
+> it in **document order** (narrative replay) instead of by date. Reach for dates
+> only when *when* actually matters; don't invent them to force an ordering.
+
 ## Dating records
 
 Three timestamp fields, all ISO-8601:

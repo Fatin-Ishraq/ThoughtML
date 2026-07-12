@@ -24,7 +24,24 @@ link cache-hypothesis: cache-eviction causes latency-spike
 | `basis` | a [provenance](numbers.md#provenance) keyword on the number |
 | `body` | the indented prose (why the relation holds) |
 
-## The twelve relations
+## Evidence bundles (authoring shortcut)
+
+When many sources share one relation and target — the common "several observations
+→ one claim" shape — a **bundle** collapses the repetition. A bare
+`<relation> <target>` header lists its sources, one per line:
+
+```thml
+supports customer-pain-points
+  late-fees-problem      weight 0.90 assumed
+  limited-availability   weight 0.85
+  long-travel-time
+```
+
+Each line desugars to an ordinary `link <source> <relation> <target>` carrying its
+optional `weight` and provenance — identical to writing the links out longhand. A
+bare source (no weight) is a normal, full-strength link.
+
+## The relations
 
 ### Evidence (defeasible)
 
@@ -61,6 +78,31 @@ flagged (an impossible circular dependency).
 | `option-of` | an option belongs to a decision |
 
 These power [decision expected value](../mirror/compute.md#decision-expected-value).
+
+### Membership and candidacy (non-evidential)
+
+| Relation | Meaning |
+|----------|---------|
+| `part-of` | source is one item **in** the target (a collection member) |
+| `candidate-for` | source is a proposed answer to a question — not a resolved one |
+
+These exist to keep **enumerations out of the evidence graph**. Using `supports`
+for the items of a list — SWOT strengths, competitors, success factors — silently
+inflates the target's [derived confidence](../mirror/derived-confidence.md): the
+mirror counts each list item as evidence, so *"Netflix has strengths"* reads as
+100%-certain just for naming them. `part-of` says *"this is one of the things,"* not
+*"this is evidence it's true"* — it has **no evidence polarity**, so it never touches
+confidence, argument status, or leverage. `candidate-for` does the same for a
+question's options: a candidate is a proposal, not the resolved `answers`.
+
+Both compose with the bundle shortcut:
+
+```thml
+part-of netflix-strengths
+  strong-global-brand
+  large-subscriber-base
+  advanced-algorithms
+```
 
 ## What can be linked
 

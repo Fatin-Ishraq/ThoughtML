@@ -8,6 +8,27 @@ release — real and usable, but the surface may still move.
 
 ### Added
 
+- **Concise authoring surface (M1–M2) — less boilerplate, same model.** Pure sugar
+  that desugars to the existing canonical model; every prior `.thml` still parses.
+  - **Typed headers.** A built-in kind used as the header word — `observation foo`,
+    `decision bar` — is shorthand for `focus foo` + `kind`.
+  - **Optional time / narrative replay.** Time is no longer required to get a good
+    view. A document with no real time spread reveals and lays out in **document
+    order** (each node carries a `seq`), so authors stop inventing timestamps just
+    to force an ordering; dated documents are unchanged.
+  - **Evidence bundles.** A `<relation> <target>` header lists its sources, one per
+    line (`supports claim` + members), each desugaring to an ordinary `link`.
+  - On the ~1,200-line Netflix case study these cut the file **~40%** with an
+    identical canonical model.
+- **Collections & candidates (M3) — enumerations stop polluting the mirror.** Two
+  non-evidential relations: **`part-of`** (a collection member) and
+  **`candidate-for`** (a proposed answer to a question). Using `supports` to *list*
+  a claim's parts silently inflated its derived confidence (a SWOT-summary read as
+  100%-certain just for naming its items); `part-of` has no evidence polarity, so it
+  never touches confidence, argument status, or leverage. The engine needed no
+  change — non-`supports`/`opposes`/`undercuts` relations were already ignored by
+  evidence propagation. The viewer renders them as a muted, subordinate `member`
+  edge.
 - **Memory & time overhaul (Phase A) — valid-time is now the backbone.** Five
   temporal primitives toward "version control for reasoning":
   - **Time spine.** The derived `timeline` now carries an ordered `events` array

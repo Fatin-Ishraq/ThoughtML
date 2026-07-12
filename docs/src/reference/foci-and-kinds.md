@@ -8,7 +8,16 @@ focus cache-is-safe
   The new cache layer is safe to ship today.
 ```
 
-or created implicitly by a focus-creating [posture](postures.md).
+or, more concisely, with a **typed header** — a built-in kind used as the header
+word, which desugars to exactly the same `focus` + `kind`:
+
+```thml
+claim cache-is-safe
+  The new cache layer is safe to ship today.
+```
+
+Either form works anywhere a focus does (including nested in a scope). A focus can
+also be created implicitly by a focus-creating [posture](postures.md).
 
 ## Anatomy
 
