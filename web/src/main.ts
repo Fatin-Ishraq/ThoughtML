@@ -9,6 +9,7 @@ import { renderDiagnostics } from './diagnostics'
 import { renderDetail, kindOf, labelOf } from './detail'
 import { EXAMPLES, DEFAULT_EXAMPLE, ADVANCED_EXAMPLES } from './examples'
 import { setIcon, glyph } from './icons'
+import { downloadStandalone, documentTitle } from './download'
 
 const LS = { src: 'thoughtml:src', theme: 'thoughtml:theme', view: 'thoughtml:view' }
 
@@ -30,6 +31,7 @@ async function boot(): Promise<void> {
   setIcon(el('#relayout'), 'relayout')
   setIcon(el('#legend-toggle'), 'legend')
   setIcon(el('#data-toggle'), 'braces')
+  setIcon(el('#download-html'), 'download')
   setIcon(el('#copy-data'), 'copy')
   setIcon(el('#drawer-close'), 'close')
   setIcon(el('#detail-close'), 'close')
@@ -181,6 +183,9 @@ async function boot(): Promise<void> {
   }
 
   // ---- graph controls + zoom ----
+  el('#download-html').addEventListener('click', () => {
+    if (last) void downloadStandalone(last.canonical, documentTitle(last.canonical))
+  })
   el('#fit').addEventListener('click', () => rFit())
   el('#relayout').addEventListener('click', () => (isView() ? view.fit() : graph.relayout()))
   el('#zoom-in').addEventListener('click', () => rZoomIn())

@@ -8,6 +8,9 @@ import { resolve } from 'node:path'
 // `viewer.html` (the standalone, read-only, wasm-free document view).
 export default defineConfig({
   base: './',
+  // Allow importing the baked standalone-viewer template from the sibling Rust
+  // crate (`../crates/thoughtml/assets/viewer.html`) for the download feature.
+  server: { fs: { allow: ['..'] } },
   build: {
     target: 'es2022',
     rollupOptions: {
