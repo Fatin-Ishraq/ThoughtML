@@ -1,9 +1,10 @@
 [package]
 name = "thoughtml-wasm"
-version = "0.1.0"
-edition = "2021"
+version.workspace = true
+edition.workspace = true
 description = "WebAssembly bindings for the ThoughtML parser."
-license = "MIT"
+license.workspace = true
+repository.workspace = true
 
 [lib]
 crate-type = ["cdylib", "rlib"]

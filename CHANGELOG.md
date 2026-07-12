@@ -4,10 +4,15 @@ All notable changes to ThoughtML are recorded here. The project follows
 [Semantic Versioning](https://semver.org). **v0.1.0** is the first public
 release — real and usable, but the surface may still move.
 
-## [Unreleased]
+## [0.2.0] — 2026-07-13
 
 ### Added
 
+- **Installable, not just cloneable.** `thoughtml` now ships as prebuilt binaries for
+  macOS, Linux, and Windows — attached to each GitHub release, built by
+  [`cargo-dist`](https://github.com/axodotdev/cargo-dist) — and as an **npm package**:
+  `npm install -g thoughtml` puts the CLI on your `PATH` with no Rust toolchain
+  required. Building from source (`cargo install` / `cargo build`) still works.
 - **A subcommand CLI — the toolchain, not just a compiler.** `thoughtml` grows
   git-style subcommands; the bare `thoughtml <file> [--compute/--html/…]` invocation
   is unchanged and still the default.

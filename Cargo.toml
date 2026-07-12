@@ -5,9 +5,10 @@ members = [
     "crates/thoughtml-wasm",
 ]
 
-# Shared metadata for the workspace members.
+# Shared metadata for the workspace members. Each crate inherits these with
+# `<field>.workspace = true`, so the version is bumped in exactly one place.
 [workspace.package]
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 license = "MIT"
 repository = "https://github.com/Fatin-Ishraq/ThoughtML"
@@ -17,3 +18,8 @@ repository = "https://github.com/Fatin-Ishraq/ThoughtML"
 [profile.release]
 opt-level = "s"
 lto = true
+
+# The profile that 'dist' will build with
+[profile.dist]
+inherits = "release"
+lto = "thin"

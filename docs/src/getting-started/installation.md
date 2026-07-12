@@ -12,41 +12,58 @@ There are two ways to run it:
   the source of truth for the language.
 - **The playground** — a live editor with a graph view, for exploring visually.
 
-## Prerequisites
+## Installing the CLI
 
-- **Rust** (stable) with `cargo` — install from [rustup.rs](https://rustup.rs).
-- For the playground only: **Node.js 20+** and **npm**, plus the
-  `wasm32-unknown-unknown` target and [`wasm-pack`](https://rustwasm.github.io/wasm-pack/).
+The CLI is one self-contained binary named `thoughtml`. Pick whichever fits — none
+of them require you to know any Rust:
 
-## Running the CLI
-
-Clone the repository and build the reference implementation:
+**npm** — the quickest, on any platform with [Node.js](https://nodejs.org) (14+):
 
 ```sh
-git clone https://github.com/Fatin-Ishraq/ThoughtML.git
-cd ThoughtML
-cargo build --release   # builds the workspace (parser + wasm crate)
-cargo test              # 171 tests; every bundled example is strict-clean
+npm install -g thoughtml
 ```
 
-Run it on a document — canonical JSON goes to stdout, diagnostics to stderr.
-All commands run from the repository root; `-p thoughtml` selects the parser
-crate:
+This downloads the prebuilt binary for your platform and puts `thoughtml` on your
+`PATH`. (`npx thoughtml <file>` works too, without a global install.)
+
+**Cargo** — if you have a Rust toolchain ([rustup.rs](https://rustup.rs)):
 
 ```sh
-cargo run -p thoughtml -- examples/incident-742.thml
+cargo install --git https://github.com/Fatin-Ishraq/ThoughtML thoughtml
 ```
 
-The binary is named `thoughtml`. After `cargo build --release` it lives at
-`target/release/thoughtml`; put it on your `PATH` to call it anywhere:
+**Prebuilt binary** — download the archive for macOS, Linux, or Windows from the
+[latest release](https://github.com/Fatin-Ishraq/ThoughtML/releases/latest), unpack
+it, and put the `thoughtml` binary on your `PATH`.
+
+Once it's installed, run it on a document — canonical JSON goes to stdout,
+diagnostics to stderr:
 
 ```sh
 thoughtml examples/decision-record.thml
 ```
 
-See the [CLI reference](../guides/cli.md) for every flag.
+See the [CLI reference](../guides/cli.md) for every flag and subcommand.
 
-### Export a standalone view
+## Building from source
+
+To hack on the parser itself, build the workspace:
+
+```sh
+git clone https://github.com/Fatin-Ishraq/ThoughtML.git
+cd ThoughtML
+cargo build --release   # parser + wasm crate; binary at target/release/thoughtml
+cargo test              # every bundled example is strict-clean
+```
+
+From a source checkout you can run without installing — `-p thoughtml` selects the
+parser crate:
+
+```sh
+cargo run -p thoughtml -- examples/incident-742.thml
+```
+
+## Export a standalone view
 
 Turn any document into a single self-contained interactive HTML file — no server,
 opens in any browser:
@@ -59,6 +76,11 @@ It carries the interactive graph with the model baked in (no wasm). See
 [The standalone viewer](../guides/viewer.md).
 
 ## Running the playground
+
+Building the playground locally needs **Node.js 20+**, a Rust toolchain with the
+`wasm32-unknown-unknown` target, and [`wasm-pack`](https://rustwasm.github.io/wasm-pack/)
+(or just try it live — no install — at the
+[hosted playground](https://fatin-ishraq.github.io/ThoughtML/playground/)).
 
 ```sh
 cd web

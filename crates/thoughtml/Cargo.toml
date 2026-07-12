@@ -1,10 +1,13 @@
 [package]
 name = "thoughtml"
-version = "0.1.0"
-edition = "2021"
+version.workspace = true
+edition.workspace = true
 description = "Reference parser for ThoughtML: surface AST -> canonical objects -> JSON, with diagnostics."
-license = "MIT"
-repository = "https://github.com/Fatin-Ishraq/ThoughtML"
+license.workspace = true
+repository.workspace = true
+# The workspace README is the canonical landing page; it's what ships on the npm
+# package and in the release archives (dist bundles the package's readme).
+readme = "../../README.md"
 
 [[bin]]
 name = "thoughtml"
