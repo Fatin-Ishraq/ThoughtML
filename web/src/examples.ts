@@ -2,1205 +2,908 @@
 // Embedded as strings so the playground is fully self-contained.
 
 export const EXAMPLES: Record<string, string> = {
-  'build-tetris': `# Mason and two helpers build a Tetris clone over ten days. Three tracks run in
-# parallel — rendering, rotation, and the core loop — so the reasoning reads as
-# swimlanes over time. Beliefs are revised as evidence lands, one branch is
-# abandoned but kept (not deleted), and one claim is held with more confidence
-# than the structure can justify, so the mirror flags it.
+  'ship-the-hotfix': `# ship-the-hotfix — a clean document the mirror still catches.
 #
-# Open the Timeline view and press Play to replay the run.
+# The form is fine: zero errors, zero warnings. But \`--audit\` flags that the
+# on-call engineer holds "safe to ship" at 0.90 while their own recorded evidence
+# — a failing canary — defeats it. ThoughtML shows the conflict; it does not
+# decide. This is the flagship demonstration of the mirror.
 
-scope build-tetris
-  observed-at 2026-01-10
+focus hotfix-is-safe
+  kind claim
+  The payments hotfix is safe to ship to production now.
 
-  # --- Track: rendering ---
-  scope rendering
-    observed-at 2026-01-10
-
-    focus canvas-2d
-      Render the well and pieces on a 2D canvas — the standard footing for grid games.
-      kind decision
-
-    focus webgl-juice
-      A WebGL renderer for shader-based particle juice. Abandoned: Canvas 2D holds
-      60fps comfortably, so this was over-engineering for a ten-day learning demo.
-      kind option
-      status abandoned
-      observed-at 2026-01-14
-
-    link canvas-2d blocks webgl-juice
-      Once Canvas 2D proved fast enough, the WebGL branch was pruned.
-      asserted-at 2026-01-14
-
-  # --- Track: rotation ---
-  scope rotation
-    observed-at 2026-01-12
-
-    focus naive-rotation
-      Rotate the piece matrix directly — the obvious first attempt.
-      kind hypothesis
-
-    focus correct-spin
-      Pieces rotate correctly against the walls.
-      kind outcome
-
-    focus wall-clip-bug
-      Naive rotation drives the I-piece into the wall and it vanishes.
-      kind observation
-      observed-at 2026-01-13
-
-    link wall-clip-bug undercuts naive-claim
-      The clipping bug defeats the naive approach.
-      asserted-at 2026-01-13
-
-  # --- Track: core loop ---
-  scope core-loop
-    observed-at 2026-01-15
-
-    focus frame-tied-speed
-      Fall speed is tied to frame rate — too fast on high-refresh monitors.
-      kind observation
-
-    focus fixed-timestep
-      Decouple game logic from frames with an accumulator.
-      kind decision
-      observed-at 2026-01-16
-
-    focus stable-speed
-      Fall speed is identical across 60Hz and 144Hz displays.
-      kind outcome
-
-    link fixed-timestep revises frame-tied-speed
-      The accumulator replaces the frame-tied loop.
-      asserted-at 2026-01-16
-
-# --- Agents weigh in: each gets its own lane ---
-
-mason suspects naive-rotation causes correct-spin as naive-claim
-  confidence 0.9
-  asserted-at 2026-01-12
-  note Confident the simple approach will just work.
-
-atlas noticed wall-clip-bug
-  observed-at 2026-01-13
-
-mason suspects fixed-timestep enables stable-speed as timestep-claim
-  confidence 0.6
-  asserted-at 2026-01-15
-
-sam revises timestep-claim
-  confidence 0.85
-  asserted-at 2026-01-17
-  note Verified stable across refresh rates and low-end devices.
-`,
-
-  'ai-and-jobs': `# How AI could destroy jobs — a debate you can read straight from the graph.
-# Click any node: every focus, link, and stance explains itself.
-
-scope ai-and-jobs
-
-# --- What we observe ---
-
-focus ai-capability-surge
-  AI now drafts, codes, and analyzes work that recently needed skilled people,
-  and it is improving faster than any prior wave of automation.
-  source uri:https://example.org/ai-capability-index
-  observed-at 2026-06-17
-
-analyst noticed ai-capability-surge
-
-# --- The central hypothesis ---
-
-focus ai-automation
-  Using AI to do whole tasks end to end, instead of hiring people to do them.
-
-focus job-displacement
-  A net loss of paid human roles as their tasks are automated away.
-
-analyst suspects ai-automation causes job-displacement as displacement-hypothesis
-  confidence 0.45..0.70
-  note The fear is not change itself, but its speed.
-
-# --- Evidence for the hypothesis ---
-
-focus firms-cutting-headcount
-  Firms report the same output with smaller teams after adopting AI.
+focus suite-is-green
   kind observation
-  source "Public layoff trackers and earnings calls, 2025-2026"
+  The full unit and integration suite passed on the release branch.
 
-focus tasks-fully-automatable
-  Support, copywriting, and first-draft code now run end to end with light review.
+focus canary-errored
   kind observation
+  The 5% canary threw a spike of HTTP 500s on checkout within ten minutes.
 
-link firms-cutting-headcount supports displacement-hypothesis
-  Headcount falling while output holds is what displacement looks like early on.
-  weight 0.85
+link suite-is-green supports hotfix-is-safe
+link canary-errored opposes hotfix-is-safe
 
-link tasks-fully-automatable supports displacement-hypothesis
-  If whole task categories vanish, the roles built around them go too.
-  weight 0.65
-
-# --- The optimist's reply ---
-
-focus technology-creates-jobs
-  Historically automation destroyed roles but created more new ones over time.
-  kind assumption
-
-economist considers technology-creates-jobs
-
-link technology-creates-jobs undercuts displacement-hypothesis
-  Every past wave eventually produced jobs nobody had imagined beforehand.
-  weight 0.5
-
-# --- Why this time may be different ---
-
-focus adaptation-too-slow
-  Reskilling and new industries take years; this wave arrives in months.
-
-analyst infers adaptation-too-slow from ai-capability-surge
-  confidence 0.60
-
-link adaptation-too-slow undercuts technology-creates-jobs
-  "New jobs eventually" is little comfort if workers can't reach them in time.
-  weight 0.85
-
-# --- The question it all hinges on ---
-
-question new-jobs-in-time
-  Will new jobs arrive fast enough, and within reach of displaced workers,
-  to offset the losses this decade?
-  about job-displacement, technology-creates-jobs
-  expects forecast
-  status open
-
-# --- Where each agent stands ---
-
-focus lived-experience
-  Frontline workers already watching their teams shrink and roles merge.
-  kind observation
-
-worker accepts displacement-hypothesis
-  because lived-experience
-  confidence 0.80
-  note Speaking from the floor, not from the forecast.
-
-economist doubts displacement-hypothesis
-  confidence 0.35
-  note Betting on precedent, and on jobs we can't yet name.
-
-# --- The decision we can't make yet ---
-
-focus reskilling-program
-  Fund large-scale reskilling and a safety net for displaced workers.
-
-policy-maker holds reskilling-program
-  until new-jobs-in-time answered
-  note Can't commit the budget until the timing question resolves.
-`,
-
-  'incident-742': `# The complete example from the ThoughtML v0 spec (§14).
+oncall holds hotfix-is-safe
+  confidence 0.9 assumed
+  note Shipping — the suite is green and the release window closes at 17:00.`,
+  'triage-742': `# triage-742 — the smallest complete piece of reasoning.
+#
+# An on-call team notices a metric move, opens a question about the cause,
+# records a suspicion (a stance over a \`causes\` edge, confidence as a range),
+# and makes a decision that is blocked until the question is answered. Dated,
+# so the viewer's play button replays it in the order it actually happened.
 
 scope incident-742
 
-team noticed metric-shift
-  Activation metric increased after deployment.
-  observed-at 2026-06-09T09:20+06:00
+team noticed error-rate-up
+  Checkout error rate jumped from 0.2% to 3% right after the 14:00 deploy.
+  observed-at 2026-03-04T14:12+06:00
 
-question cause-of-metric-shift
-  What caused metric-shift?
+question what-caused-it
+  What caused the error-rate spike?
+  expects cause
+  status open
+  asserted-at 2026-03-04T14:15+06:00
+
+team suspects deploy-1487 causes error-rate-up as deploy-cause
+  confidence 0.3..0.7
+  answers what-caused-it
+  asserted-at 2026-03-04T14:20+06:00
+
+team holds rollback
+  Roll back deploy-1487 and freeze further releases.
+  until what-caused-it answered
+  asserted-at 2026-03-04T14:25+06:00`,
+  'bad-oyster': `# bad-oyster — everyday causal reasoning.
+#
+# After a rough night, Sam reasons backward from symptoms to a likely cause and
+# raises the open question that would settle it. Shows the \`asks\` posture — an
+# agent putting a question on the table — alongside \`suspects\` and a \`causes\` edge.
+
+focus felt-sick
+  kind observation
+  Nausea and cramps set in about four hours after dinner.
+
+sam suspects raw-oysters causes felt-sick as oyster-theory
+  confidence 0.6 estimated
+  note Classic timing for shellfish, but not proof.
+
+question what-made-me-sick
+  What actually caused the illness?
   expects cause
   status open
 
-team suspects deploy-change causes metric-shift as deploy-cause
-  confidence 0.25..0.70
-  answers cause-of-metric-shift
+sam asks what-made-me-sick
+  note Worth ruling out the leftover chicken from lunch before blaming the oysters.`,
+  'weekend-plan': `# weekend-plan — a small, everyday decision, written plainly.
+#
+# A decision, two options, a goal they serve, and the pick. The most pared-down
+# shape in the set: proof that ThoughtML reads naturally even for low-stakes
+# reasoning, not just engineering or research.
 
-team holds rollback-decision
-  Rollback the deployment.
-  until cause-of-metric-shift answered
-`,
+decision weekend-choice
+  How to spend the weekend.
 
-  'multi-agent-debate': `# Multi-agent disagreement over a hypothesis — the links carry the argument.
+goal recharge
+  Come back Monday actually rested.
 
-scope payments-latency
+option cabin-trip
+  Two nights at a cabin upstate, no wifi.
 
-team noticed latency-spike
-  p99 checkout latency doubled at 14:00 UTC.
-  observed-at 2026-06-14T14:05+00:00
+option stay-in
+  A quiet weekend at home catching up on sleep.
 
-alice suspects cache-eviction causes latency-spike as cache-hypothesis
-  confidence 0.55
-  note The timing lines up with a cache-layer deploy.
+link cabin-trip option-of weekend-choice
+link stay-in option-of weekend-choice
+link cabin-trip enables recharge
+link stay-in enables recharge
 
-# Bob is skeptical of Alice's hypothesis.
-bob doubts cache-hypothesis
-  confidence 0.30
-  note Latency moved before the deploy reached every node.
+observation long-drive
+  The cabin is a four-hour drive each way.
 
-# Evidence for and against.
-focus cache-hit-rate-drop
-  Cache hit rate fell from 0.98 to 0.61 at 14:00.
+link long-drive opposes cabin-trip
 
-focus eviction-config-unchanged
-  The eviction policy hasn't changed in 30 days.
+me chooses cabin-trip
+  because recharge
+  note Worth the drive — the change of scenery is the whole point.`,
+  'pr-feedback': `# pr-feedback — \`undercuts\` (attack an inference) vs \`opposes\` (attack a claim).
+#
+# In review, two comments push back in different ways. One attacks the
+# CONCLUSION head-on (\`opposes\`). The other leaves the conclusion alone and
+# attacks the REASONING that supports it (\`undercuts\` the inference itself).
+# ThoughtML keeps the two moves distinct, so the argument graph stays honest.
 
-link cache-hit-rate-drop supports cache-hypothesis
-  A cliff in hit rate is exactly what aggressive eviction would cause.
-  weight 0.85
+claim ready-to-merge
+  This pull request is ready to merge.
 
-link eviction-config-unchanged undercuts cache-hypothesis
-  If the policy never changed, eviction is an unlikely trigger on its own.
-  weight 0.30
+observation benchmarks-improved
+  The new index cut p95 query latency by 40% in the benchmark.
 
-# Carol comes around after weighing the evidence.
-carol accepts cache-hypothesis
-  because cache-hit-rate-drop
-  confidence 0.70
-  note The hit-rate cliff outweighs the unchanged config for me.
-`,
+link perf-argument: benchmarks-improved supports ready-to-merge
 
-  'decision-record': `# An architecture decision recorded as reasoning, not prose.
-# The graph IS the ADR: the options, the evidence against them, and the choice.
+observation benchmark-was-warm-cache
+  The benchmark ran against a warm cache, unlike production.
 
-scope adr-017-datastore
+link benchmark-was-warm-cache undercuts perf-argument
 
-question which-datastore
-  Which datastore should back the event log?
+observation no-rollback-plan
+  There is no rollback plan for the schema migration.
+
+link no-rollback-plan opposes ready-to-merge
+
+reviewer doubts ready-to-merge
+  because no-rollback-plan
+  note The warm-cache caveat weakens the perf argument; the missing rollback is the real blocker.`,
+  'choose-datastore': `# choose-datastore — an architecture decision, as a checkable graph.
+#
+# The gating question, the options weighed, the one rejected (kept on the record
+# as \`abandoned\`, not deleted), the one chosen, and the benchmark that blocked
+# sign-off \`until\` it ran. When the load test passed, the question moved to
+# \`settled\`. An ADR you can lint.
+
+scope adr-datastore
+
+decision datastore-choice
+  Which datastore backs the new events service.
+
+option postgres
+  Managed Postgres with a JSONB events table.
+
+option dynamo
+  DynamoDB with a single-table design.
+
+option cassandra
+  A self-hosted Cassandra cluster.
+  status abandoned
+
+link postgres option-of datastore-choice
+link dynamo option-of datastore-choice
+link cassandra option-of datastore-choice
+
+observation team-knows-sql
+  The team has deep Postgres experience and none operating Cassandra.
+
+link team-knows-sql supports postgres
+link team-knows-sql opposes cassandra
+
+architect rejects cassandra
+  note Operational burden we can't staff — parked with its reason, not deleted.
+
+question benchmark-passed
+  Did Postgres hold p99 under 2x projected load?
+  expects observation
+  status settled
+
+observation load-test-ok
+  Postgres held p99 at 45ms under 2x projected write load.
+
+link load-test-ok answers benchmark-passed
+
+architect chooses postgres
+  because team-knows-sql
+  until benchmark-passed answered`,
+  'prod-outage': `# prod-outage — a postmortem as a causal graph.
+#
+# The chain behind a 38-minute outage: the root cause sits in a nested scope with
+# its own timestamp, the failures it caused flow down, an \`action\` recovers it,
+# and a new control \`prevents\` a repeat. An acyclic causes/enables/prevents graph,
+# with \`-by\` attribution recording who saw what and which reading proved unreliable.
+
+scope postmortem-2026-03-11
+  source pagerduty
+  observed-at 2026-03-11T02:00Z
+
+  observation checkout-down
+    Checkout was unavailable for 38 minutes.
+    status settled
+
+  observation writes-failing
+    Every write failed once the database disk filled.
+    noticed-by monitoring
+
+  observation disk-filled
+    The primary database disk hit 100% at 02:03.
+
+  link disk-filled causes writes-failing
+  link writes-failing causes checkout-down
+
+  observation dashboards-green
+    The status dashboards showed green the whole time.
+    undercut-by stale-metrics
+
+  observation stale-metrics
+    The metrics pipeline had lagged 15 minutes behind reality.
+
+  scope root-cause
+    observed-at 2026-03-11T03:30Z
+    observation verbose-logging-on
+      A debug flag left verbose logging on in production.
+    observation log-rotation-off
+      Log rotation was misconfigured, so debug logs grew unbounded.
+
+    link verbose-logging-on enables log-rotation-off
+    link log-rotation-off causes disk-filled
+
+  action purge-and-fix
+    Purged old logs and repaired the rotation cron; writes recovered at 02:41.
+    asserted-at 2026-03-11T02:41Z
+
+  link purge-and-fix prevents checkout-down
+
+  observation disk-alert
+    A disk-usage alert now fires at 80% utilization.
+
+  link disk-alert prevents disk-filled`,
+  'differential-dx': `# differential-dx — a clinician's differential diagnosis.
+#
+# Three competing hypotheses for one presentation, and the findings that support
+# or defeat each. The proposed diagnoses are \`candidate-for\` the open question —
+# they don't resolve it. Once the labs return, one hypothesis \`answers\` it. Note
+# \`candidate-for\` (proposing) versus \`answers\` (resolving) are different edges.
+
+scope chest-pain-case
+
+observation presentation
+  A 45-year-old with acute chest pain radiating to the left arm, onset 30 minutes ago.
+
+hypothesis mi
+  Acute myocardial infarction.
+
+hypothesis reflux
+  Severe acid reflux.
+
+hypothesis costochondritis
+  Musculoskeletal chest-wall inflammation.
+
+question the-diagnosis
+  What is causing the chest pain?
+  about presentation
+  expects hypothesis
+  status settled
+
+candidate-for the-diagnosis
+  mi
+  reflux
+  costochondritis
+
+observation troponin-elevated
+  Serial troponin returned sharply elevated.
+
+link troponin-elevated supports mi
+link troponin-elevated opposes reflux
+
+observation st-elevation
+  The ECG shows ST-segment elevation in the inferior leads.
+
+link st-elevation supports mi
+
+observation reproducible-pain
+  The pain was partly reproducible on chest-wall palpation.
+
+link reproducible-pain supports costochondritis
+link reproducible-pain undercuts st-elevation
+
+link mi answers the-diagnosis
+
+clinician accepts mi
+  because troponin-elevated
+  confidence 0.92 measured
+  note ST-elevation MI — activate the cath lab; the palpation finding is incidental.`,
+  'hiring-panel': `# hiring-panel — several interviewers, one call, honest disagreement.
+#
+# Three interviewers weigh the same candidate and land in different places. The
+# evidence is shared; the confidence is not. \`because\` ties each stance to what
+# moved it, and per-stance \`note\`s keep the panel's actual voices on the record.
+# One interviewer's "no tests" worry is itself undercut — was it a real signal,
+# or an artifact of a rushed take-home?
+
+claim strong-hire
+  Priya is a strong hire for the senior backend role.
+
+observation aced-system-design
+  Designed a clean, scalable rate limiter under time pressure.
+
+observation great-references
+  Two former leads gave unusually strong references.
+
+observation shaky-on-testing
+  Wrote almost no tests unprompted during the take-home.
+
+observation take-home-was-rushed
+  The take-home was completed in one evening around a full-time job.
+
+link aced-system-design supports strong-hire
+link great-references supports strong-hire
+link shaky-on-testing opposes strong-hire
+link take-home-was-rushed undercuts shaky-on-testing
+
+lead holds strong-hire
+  confidence 0.8 estimated
+  because aced-system-design
+  note The design round was the best I've seen this cycle.
+
+ic accepts strong-hire
+  confidence 0.65 estimated
+  because great-references
+
+skeptic doubts strong-hire
+  confidence 0.45 estimated
+  because shaky-on-testing
+  note Testing discipline matters here; the rushed-take-home point partly answers me.`,
+  'replication-study': `# replication-study — weighing a scientific claim on the evidence.
+#
+# A hypothesis, a pre-registered replication that supports it, a failed
+# replication that opposes it, and a methodological critique that \`undercuts\` the
+# failed one rather than attacking the hypothesis directly. Each weight carries a
+# \`measured\` or \`estimated\` basis, so the strength of every edge says on what
+# footing it stands.
+
+hypothesis effect-is-real
+  The facilitation effect reported in the 2019 study is real.
+
+observation direct-replication
+  A pre-registered direct replication reproduced the effect at p < 0.01.
+
+observation failed-replication
+  A larger, better-powered study found no effect.
+
+observation different-task
+  The failed replication substituted a materially harder task.
+
+link direct-replication supports effect-is-real
+  weight 0.8 measured
+
+link failed-replication opposes effect-is-real
+  weight 0.6 measured
+
+link different-task undercuts failed-replication
+  weight 0.5 estimated
+
+researcher accepts effect-is-real
+  confidence 0.7 estimated
+  because direct-replication
+  note The null result is confounded by the task change; the pre-registered replication is the cleaner signal.`,
+  'roadmap-priorities': `# roadmap-priorities — product planning: grouping vs deciding.
+#
+# The three friction points behind the Q3 theme are grouped with \`part-of\` —
+# structure, not evidence, so listing them never inflates the theme's confidence
+# (using \`supports\` here would be the classic mistake). The open question of what
+# to build first contains its candidate options as a nested thought-tree.
+
+scope q3-roadmap
+
+claim onboarding-friction
+  New teams hit three distinct friction points before they reach first value.
+
+observation onboarding-drop-off
+  60% of new teams never finish setup.
+
+observation slow-first-import
+  The first data import averages 40 minutes.
+
+observation unclear-next-step
+  New users report not knowing what to do after signup.
+
+part-of onboarding-friction
+  onboarding-drop-off
+  slow-first-import
+  unclear-next-step
+
+question build-first
+  Which fix ships first this quarter?
   expects option
   status open
+  option guided-setup
+    A guided setup wizard that walks teams to first value.
+  option faster-import
+    A streaming import that starts returning rows in seconds.
+  option sample-project
+    A one-click sample project to explore before importing real data.
 
-team considers postgres-option
-  A single Postgres instance with a partitioned events table.
+observation import-top-complaint
+  Import speed is the single most common complaint in support tickets.
 
-team considers kafka-option
-  An append-only Kafka topic with a compacted changelog.
-
-team considers dynamo-option
-  DynamoDB with a composite sort key.
-
-focus cross-region-cost
-  Multi-region DynamoDB write costs exceed the budget on their own.
-
-link cross-region-cost opposes dynamo-option
-  Cost alone disqualifies it before we even weigh latency or ergonomics.
-
-team rejects dynamo-option
-  because cross-region-cost
-  confidence 0.80
-  note Reluctantly — its latency story was actually the best of the three.
-
-focus operational-burden
-  Kafka would be the team's first stateful streaming system to operate.
-
-link operational-burden opposes kafka-option
-  A new operational muscle we'd have to build in the middle of the project.
-
-question throughput-benchmark
-  Can Postgres sustain 50k events per second on target hardware?
-  expects number
-  status open
-
-team holds datastore-decision
-  Commit to a datastore for the event log.
-  until throughput-benchmark answered
-  note Provisionally Postgres, but not signed off until the benchmark lands.
-
-focus operational-familiarity
-  The team already runs Postgres in production every day.
-
-link operational-familiarity supports postgres-option
-  Boring technology the team can already debug at 3am.
-
-team chooses postgres-option
-  Start with Postgres; revisit if throughput ceilings appear.
-  because operational-familiarity
-  answers which-datastore
-  note Optimize for what we can operate, not what benchmarks best on paper.
-`,
-
-  'agent-memory': `# An assistant's memory of a user, accrued over a session and revised as it learns.
-
-scope user-profile
-
-assistant noticed user-prefers-readable-syntax
-  The user chose the readable action surface over the canonical core.
-  asserted-at 2026-06-17T10:02+00:00
-
-assistant noticed user-cites-specs
-  The user keeps referencing the v0 specification by section number.
-  observed-at 2026-06-17T10:15+00:00
-
-assistant infers user-values-standards-thinking from user-prefers-readable-syntax, user-cites-specs
-  confidence 0.65
-  note Two weak signals pointing the same way.
-  asserted-at 2026-06-17T10:40+00:00
-
-assistant remembers prefers-rust
-  The user asked for the parser in Rust, as the spec recommends.
-  source uri:https://example.invalid/session-log
-  confidence 0.90
-  asserted-at 2026-06-17T11:05+00:00
-
-assistant revises user-values-standards-thinking
-  confidence 0.80
-  note Upgraded after the user corrected a spec misreading, unprompted.
-  asserted-at 2026-06-17T14:20+00:00
-
-assistant considers user-timezone
-  Working hours hint at UTC+6, but this is unconfirmed.
-  confidence ?
-  note A guess from message timestamps, not a stated fact.
-  asserted-at 2026-06-17T15:00+00:00
-`,
-
-  'estimate-revised': `# A belief that changes as evidence arrives. Drag the "As of" slider to
-# replay it: an earlier stance dims and strikes through the moment a later one
-# revises it (v0.2, Phase 3 — temporal & revision).
+link import-top-complaint supports faster-import`,
+  'launch-readiness': `# launch-readiness — a belief that changes as the evidence lands.
+#
+# The go/no-go readiness call is asserted, then revised twice over three days as
+# new signals arrive. Earlier versions are \`superseded\`, not erased — run
+# \`--as-of\` (or drag the viewer's time slider) to replay the call as it stood at
+# any moment. \`valid-during\` marks the window a finding actually held.
 
 scope launch-readiness
 
-# --- Day 0: an early, optimistic read ---
-
-analyst noticed early-burndown
-  The first sprint cleared 40% of the backlog — ahead of plan.
-  observed-at 2026-06-01
-
-analyst suspects early-burndown causes on-track as on-track-claim
-  confidence 0.70
-  asserted-at 2026-06-01
-  note Comfortable start; the date looks safe.
-
-# --- Day 7: scope grows, and the date itself is pushed out ---
-
-analyst noticed scope-added
-  Two must-have features were added after the stakeholder review.
-  observed-at 2026-06-08
-
-link scope-added undercuts on-track-claim
-  Late scope eats the early lead.
-  asserted-at 2026-06-08
-
-analyst revises on-track-claim
-  confidence 0.40
-  asserted-at 2026-06-08
-  note The new scope cancels out the fast start.
-
-focus june-30-target
-  Original commitment: ship on June 30.
-
-focus july-14-target
-  Revised commitment: ship on July 14, absorbing the new scope.
-  asserted-at 2026-06-08
-
-link july-14-target revises june-30-target
-  The added scope pushed the committed date out by two weeks.
-  asserted-at 2026-06-08
-
-# --- Day 14: a hard blocker lands ---
-
-analyst noticed integration-blocker
-  The payment vendor's sandbox is down with no ETA.
-  observed-at 2026-06-15
-
-link integration-blocker undercuts on-track-claim
-  Nothing ships until payments can be tested end to end.
-  asserted-at 2026-06-15
-
-analyst revises on-track-claim
-  confidence 0.20
-  asserted-at 2026-06-15
-  note With payments blocked, holding the date is unlikely.
-`,
-
-  'sensitivity-demo': `# Which evidence is actually holding the conclusion up? Open a claim to see its
-# evidence ranked by leverage — the confidence it would lose if that one link
-# were removed — or switch on the "Load" lens. Then enter What-if and mute a
-# node to watch the whole argument recompute (v0.2, Phase 6 — sensitivity).
-
-scope ship-decision
-
-# --- The hypothesis under test ---
-
-focus ready-to-ship
-  The release is safe to ship to all users on Friday.
-  kind hypothesis
-  asserted-at 2026-04-15
-
-# --- Evidence for it, of very different load-bearing weight ---
-
-focus canary-healthy
-  A 5% canary has run for 48 hours with no error-rate or latency regression.
-  kind observation
-  observed-at 2026-04-16
-
-focus tests-green
-  The full suite — unit, integration, end-to-end — passes on the release branch.
-  kind observation
-  observed-at 2026-04-16
-
-focus changelog-reviewed
-  Every merged PR in the release carries a reviewer sign-off.
-  kind observation
-  observed-at 2026-04-17
-
-link canary-healthy supports ready-to-ship
-  Real traffic at smaller scale with no regression is the strongest signal we have.
-  weight 0.85
-  asserted-at 2026-04-18
-
-link tests-green supports ready-to-ship
-  Green tests are necessary, but they have passed before failed releases too.
-  weight 0.4
-  asserted-at 2026-04-18
-
-link changelog-reviewed supports ready-to-ship
-  Review catches intent bugs, but says little about runtime behaviour.
-  weight 0.30
-  asserted-at 2026-04-18
-
-# --- Evidence against ---
-
-focus rollback-untested
-  The automated rollback path hasn't been exercised since the last migration.
-  kind observation
-  observed-at 2026-04-17
-
-link rollback-untested undercuts ready-to-ship
-  If the ship goes wrong, we're not sure we can cleanly back it out.
-  weight 0.5
-  asserted-at 2026-04-19
-
-# --- The decision that rides on it ---
-
-focus ship-friday
-  Ship the release to 100% of users on Friday.
-  kind decision
-  asserted-at 2026-04-20
-
-link ready-to-ship supports ship-friday
-  The go/no-go call follows directly from whether the release is safe.
-  asserted-at 2026-04-20
-
-release-manager holds ship-friday
-  note Leaning yes — but the rollback gap is the one thing that could flip it.
-  asserted-at 2026-04-20
-`,
-
-  'capacity-plan': `# Quantities give reasoning real numbers (v0.2, Phase 7). Each focus can carry a
-# typed measure — time, data, money, throughput, ratio — classified by dimension
-# and normalized to a base unit where the units convert. Open a node to see it.
-# (Phase 8 will compute over these.)
-
-scope capacity-plan
-
-focus scale-up-decision
-  Add capacity ahead of the holiday traffic spike.
-  kind decision
-  asserted-at 2026-04-08
-
-focus current-load
-  Sustained production traffic today.
-  kind observation
-  quantity 4500 req/s
-  observed-at 2026-04-01
-
-focus spike-forecast
-  Expected peak during the holiday sale.
-  kind observation
-  quantity 14000 req/s
-  observed-at 2026-04-02
-
-focus instance-throughput
-  What one instance sustains in load tests before latency degrades.
-  kind observation
-  quantity 1200 req/s
-  observed-at 2026-04-03
-
-focus latency-budget
-  The p99 latency SLO we must stay under.
-  kind goal
-  quantity 200 ms
-  asserted-at 2026-04-03
-
-focus monthly-cost-per-instance
-  Fully-loaded monthly cost of one instance.
-  kind observation
-  quantity 180 USD
-  observed-at 2026-04-04
-
-focus storage-per-node
-  Disk each new instance brings with it.
-  kind observation
-  quantity 512 GB
-  observed-at 2026-04-04
-
-focus current-headroom
-  Spare capacity already sitting in the current fleet.
-  kind observation
-  quantity 30 %
-  observed-at 2026-04-05
-
-link current-load supports spike-forecast
-  The forecast is a multiple of today's baseline, so the baseline grounds it.
-  asserted-at 2026-04-06
-
-link spike-forecast supports scale-up-decision
-  A 3x jump over today's load is more than current capacity can absorb.
-  asserted-at 2026-04-06
-
-link instance-throughput supports scale-up-decision
-  Per-instance headroom tells us how many to add.
-  asserted-at 2026-04-06
-
-link latency-budget supports scale-up-decision
-  Holding p99 under budget during the spike takes more instances, not fewer.
-  asserted-at 2026-04-07
-
-link storage-per-node supports scale-up-decision
-  More nodes also bring storage we happen to need.
-  asserted-at 2026-04-07
-
-link monthly-cost-per-instance opposes scale-up-decision
-  Every added instance is recurring spend we have to justify.
-  asserted-at 2026-04-07
-
-link current-headroom undercuts scale-up-decision
-  Some of the spike fits in existing headroom, reducing what we must add.
-  asserted-at 2026-04-07
-
-team holds scale-up-decision
-  note Over-provisioning is cheap to reverse; under-provisioning during the sale is not.
-  asserted-at 2026-04-08
-`,
-
-  'cost-model': `# Formulas let a focus compute its number from others (v0.2, opt-in). A focus can
-# state \`= <expr>\` instead of a fixed number, and ThoughtML evaluates it over
-# other foci's quantities with full unit-checking: a USD/instance times an
-# instance is USD, the byte conversions in USD/GB × GB cancel, and a ratio of two
-# costs comes out dimensionless. Computed values stay separate from the authored
-# ones — a second reading, not a program the document runs.
-
-scope cost-model
-
-focus instances
-  How many instances we run.
-  quantity 12 instance
-  asserted-at 2026-02-10
-
-focus cost-per-instance
-  Fully-loaded monthly cost of one instance.
-  quantity 180 USD/instance
-  asserted-at 2026-02-10
-
-focus monthly-compute
-  Compute spend per month.
-  = cost-per-instance * instances
-  asserted-at 2026-02-12
-
-focus storage
-  Object storage we keep.
-  quantity 4000 GB
-  asserted-at 2026-02-11
-
-focus cost-per-gb
-  Storage price per gigabyte-month.
-  quantity 0.02 USD/GB
-  asserted-at 2026-02-11
-
-focus monthly-storage
-  Storage spend per month.
-  = cost-per-gb * storage
-  asserted-at 2026-02-12
-
-focus monthly-total
-  Everything we pay to run the service each month.
-  = monthly-compute + monthly-storage
-  asserted-at 2026-02-13
-
-focus revenue
-  Monthly revenue this service drives.
-  quantity 50000 USD
-  asserted-at 2026-02-11
-
-focus gross-margin
-  Share of revenue left after running costs.
-  = (revenue - monthly-total) / revenue
-  asserted-at 2026-02-13
-`,
-
-  'decision-ev': `# Decision EV is the last of the opt-in compute features (v0.2). An option leads-to
-# outcomes, each with a probability and a payoff (a quantity — even a computed
-# one). ThoughtML weights payoff by probability and sums: the option's expected
-# value. A decision then orders its options by EV — it does not name a winner.
-# Open "go-to-market" for the ordering, or switch on the "Decision" lens to
-# mark the options it weighs.
-
-scope launch-decision
-
-focus go-to-market
-  kind decision
-  How aggressively to launch the new product.
-  asserted-at 2026-03-10
-
-# --- Option A: launch to everyone now ---
-
-focus launch-now
-  kind option
-  Ship to all users on day one and capture the whole market at once.
-  asserted-at 2026-03-11
-link launch-now option-of go-to-market
-  asserted-at 2026-03-11
-
-# This outcome's payoff is computed, not stated: a breakout launch nets its
-# revenue less the cost of supporting it (Phase 8 feeding Phase 9).
-focus launch-cost
-  Marketing and on-call to support a full-blast launch.
+observation readiness-v1
+  On track for Friday launch; all P0 bugs are closed.
+  asserted-at 2026-05-04T10:00Z
+  status superseded
+
+observation load-test-failed
+  The pre-launch load test failed at 1.5x projected traffic.
+  asserted-at 2026-05-05T14:00Z
+  valid-during 2026-05-05/2026-05-06
+
+link load-test-failed opposes readiness-v1
+
+observation readiness-v2
+  Launch at risk: a load-test regression must be fixed first.
+  asserted-at 2026-05-05T15:00Z
+  status superseded
+
+link readiness-v2 revises readiness-v1
+
+observation fix-verified
+  The connection-pool fix passed a re-run at 2x traffic.
+  asserted-at 2026-05-06T11:00Z
+
+observation readiness-v3
+  Go for Friday launch; the load-test regression is resolved.
+  asserted-at 2026-05-06T12:00Z
+
+link fix-verified supports readiness-v3
+link readiness-v3 revises readiness-v2`,
+  'assistant-memory': `# assistant-memory — what an AI assistant carries between turns.
+#
+# Across one session the assistant notices facts, *infers* a preference from two
+# of them (infers wires its sources explicitly, so the reasoning is visible),
+# commits it to memory with a source and a timestamp, then revises it when the
+# user contradicts it. Confidence can be genuinely unknown (\`?\`), and every
+# belief stays auditable rather than collapsing into a hidden score.
+
+scope user-session
+
+observation asked-for-python
+  The user asked for the first snippet in Python.
+  observed-at 2026-06-01T09:10Z
+
+observation mentioned-pandas
+  The user mentioned working in pandas every day.
+  observed-at 2026-06-01T09:12Z
+
+assistant infers prefers-python from asked-for-python mentioned-pandas
+  kind memory
+  The user prefers Python for code examples.
+  confidence 0.6 estimated
+
+assistant remembers prefers-python
+  source uri:session/2026-06-01
+  asserted-at 2026-06-01T09:13Z
+
+observation asked-for-rust
+  Later the user asked for a Rust version, explicitly.
+  observed-at 2026-06-01T09:40Z
+
+link asked-for-rust undercuts prefers-python
+
+assistant revises prefers-python
+  because asked-for-rust
+  confidence ?
+  note The preference looks task-specific, not a global default — downgrading to unknown.`,
+  'moderation-decision': `# moderation-decision — an AI moderation call, emitted for a human to audit.
+#
+# The classifier states its claim, the signals for and against it, the action it
+# would take, and how sure it is — all as structure a reviewer (or another agent)
+# can check. The point of writing the reasoning down is that the confidence and
+# the evidence become inspectable, instead of collapsing into one opaque score.
+
+focus violates-policy
+  kind claim
+  This post violates the harassment policy.
+
+observation targets-individual
+  The post names a specific user and tells them to leave the platform.
+
+observation quotes-prior-abuse
+  It quotes a message already actioned for abuse.
+
+observation flagged-satire
+  The account is flagged as satire and the tone is exaggerated.
+
+link targets-individual supports violates-policy
+link quotes-prior-abuse supports violates-policy
+link flagged-satire undercuts targets-individual
+
+action remove-post
+  Remove the post and warn the author.
+
+link violates-policy supports remove-post
+
+classifier holds violates-policy
+  confidence 0.72 estimated
+  because quotes-prior-abuse
+  note Directed at a named user with a leave-or-else demand; the satire flag is noted but the target is real.`,
+  'merge-conflict-beliefs': `# merge-conflict-beliefs — two agents, one id, two definitions.
+#
+# When two agents (or two branches of one investigation) are merged, they can each
+# define the same focus a different way. ThoughtML keeps BOTH — it never silently
+# drops one — and \`--audit\` reports a \`definition-divergence\`. That is what makes
+# concurrent, multi-agent authoring lossless: nothing is overwritten, and the
+# disagreement is surfaced instead of hidden. Written with a mix of the readable
+# surface and the raw \`stance\`/\`link\` core, to show they are one model underneath.
+
+scope incident-merge
+
+observation checkout-failing
+  Checkout has been failing intermittently for two hours.
+  observed-at 2026-04-02T13:00Z
+
+observation error-spike
+  5xx errors on the payments service spiked to 20x baseline.
+  observed-at 2026-04-02T13:05Z
+
+# --- Branch A: the payments team's investigation ---
+focus root-cause
+  The failures are caused by the new payment gateway timing out under load.
+
+observation gateway-latency
+  The gateway's p99 latency crossed its 5s timeout during peak.
+
+link gateway-latency supports root-cause
+link root-cause causes checkout-failing
+link root-cause causes error-spike
+
+stance payments-agent holds root-cause
+  confidence 0.6
+  because gateway-latency
+
+# --- Branch B: the database team's investigation, merged in ---
+# Same id, a different story. Both definitions are retained on \`divergent\`; the
+# mirror reports the clash rather than quietly keeping one and dropping the other.
+focus root-cause
+  The failures are caused by database connection-pool exhaustion.
+
+observation pool-saturated
+  The primary's connection pool sat at 100% utilization throughout the window.
+
+link pool-saturated supports root-cause
+
+stance database-agent holds root-cause
+  confidence 0.55
+  because pool-saturated
+
+question which-root-cause
+  Which root cause is correct — or are both contributing?
+  about root-cause
+  expects claim
+  status open`,
+  'cloud-bill': `# cloud-bill — a monthly cost model that computes itself.
+#
+# Every input line is a focus with a \`quantity\`; every derived line is an
+# \`= formula\` over the others. The parser checks units as it goes (USD/hour ×
+# hour = USD, USD × a dimensionless factor = USD), so a unit mistake is caught,
+# not silently shipped. Change one input and the whole bill recomputes — the
+# numbers are a *second reading* of what you wrote, not a spreadsheet you keep by
+# hand. Turn it on with \`--compute\`.
+
+scope cloud-bill-march
+
+# --- Compute ---
+observation instance-price
+  On-demand price per instance-hour.
+  quantity 0.096 USD/hour
+
+observation instance-hours
+  Total instance-hours across the fleet this month.
+  quantity 21600 hour
+
+focus compute-cost
+  kind claim
+  Monthly compute spend.
+  = instance-price * instance-hours
+
+# --- Storage ---
+observation storage-price
+  Object-storage price per GB-month.
+  quantity 0.021 USD/GB
+
+observation storage-used
+  Average stored volume this month.
+  quantity 12000 GB
+
+focus storage-cost
+  kind claim
+  Monthly storage spend.
+  = storage-price * storage-used
+
+# --- Egress ---
+observation egress-price
+  Data-transfer price per GB.
+  quantity 0.085 USD/GB
+
+observation egress-volume
+  Outbound transfer this month.
+  quantity 8000 GB
+
+focus egress-cost
+  kind claim
+  Monthly egress spend.
+  = egress-price * egress-volume
+
+# --- Database ---
+observation db-price
+  Managed-database price per instance-hour.
+  quantity 0.24 USD/hour
+
+observation db-hours
+  Database instance-hours this month.
+  quantity 1440 hour
+
+focus db-cost
+  kind claim
+  Monthly database spend.
+  = db-price * db-hours
+
+# --- Support ---
+observation support-plan
+  Flat monthly business-support fee.
+  quantity 400 USD
+
+# --- Totals ---
+focus total-bill
+  kind claim
+  Total monthly cloud bill.
+  = compute-cost + storage-cost + egress-cost + db-cost + support-plan
+
+# --- Unit economics ---
+observation active-users
+  Monthly active users served this month.
+  quantity 5000 user
+
+focus cost-per-user
+  kind claim
+  Blended infrastructure cost per active user.
+  = total-bill / active-users`,
+  'ship-or-hold': `# ship-or-hold — the whole compute layer in one decision.
+#
+# This is the capstone. It weaves together every part of the second reading:
+#   * formula payoffs (\`= expr\`) that compute an outcome's value from inputs,
+#   * a probability *borrowed from derived confidence* — one \`leads-to\` omits its
+#     probability, so the engine uses the outcome's own belief (from the evidence
+#     below) as its likelihood: belief becomes probability, once and visibly,
+#   * expected-value ranking over the options, and
+#   * a what-if: mute one piece of evidence and the EV ordering flips.
+# None of it decides for you — it is a second reading of the numbers you wrote.
+# Turn it on with \`--compute\`.
+
+scope release-decision
+
+observation weekly-revenue
+  Checkout revenue per week.
+  quantity 400000 USD
+
+observation delay-cost
+  Revenue given up by delaying the launch one week.
   quantity 100000 USD
-  asserted-at 2026-03-11
 
-focus blockbuster-revenue
-  Revenue if a launch-now bet pays off.
-  quantity 1000000 USD
-  asserted-at 2026-03-11
+decision release-plan
+  Ship the new checkout flow now, or hold a week for an extended test pass?
 
-focus blockbuster
-  A breakout launch: strong demand, low churn.
-  = blockbuster-revenue - launch-cost
-  asserted-at 2026-03-12
+option ship-now
+  Ship to 100% of traffic today.
 
-focus stumble
-  A rough launch: refunds and churn eat into the upside.
+option hold-week
+  Hold one week and run an extended test pass first.
+
+link ship-now option-of release-plan
+link hold-week option-of release-plan
+
+# --- If we ship now ---
+outcome ship-clean
+  Ships cleanly; a full extra week of checkout revenue.
+  = weekly-revenue
+
+outcome ship-breaks
+  A checkout bug reaches production: refunds, churn, and firefighting.
   quantity -200000 USD
-  asserted-at 2026-03-12
-
-link launch-now leads-to blockbuster
-  probability 0.4
-  asserted-at 2026-03-13
-
-link launch-now leads-to stumble
-  probability 0.6
-  asserted-at 2026-03-13
-
-# --- Option B: staged, region-by-region rollout ---
-
-focus staged-rollout
-  kind option
-  Roll out region by region, fixing as we learn.
-  asserted-at 2026-03-12
-link staged-rollout option-of go-to-market
-  asserted-at 2026-03-12
-
-focus steady-growth
-  Predictable adoption with fewer surprises.
-  quantity 500000 USD
-  asserted-at 2026-03-12
-
-focus slow-start
-  Cautious uptake, but very little downside.
-  quantity 120000 USD
-  asserted-at 2026-03-12
-
-link staged-rollout leads-to steady-growth
-  probability 0.7
-  asserted-at 2026-03-14
-
-link staged-rollout leads-to slow-start
-  probability 0.3
-  asserted-at 2026-03-14
-`,
-
-  'release-bet': `# The whole opt-in compute layer woven into one decision (v0.2):
-# payoffs computed by FORMULAS (Phase 8) over quantities (Phase 7); one outcome's
-# probability borrowed from DERIVED CONFIDENCE (Phase 4) when its edge omits one;
-# options ordered by EXPECTED VALUE (Phase 9); and WHAT-IF (Phase 6) reaching all
-# the way through. As written, holding ranks first (212,250 vs 180,000 USD). Enter
-# What-if and mute "canary-clean": belief in the polished launch falls, its
-# expected value drops below shipping, and the EV ordering flips — ship-now to the top.
-
-scope release-bet
-
-focus release-decision
-  kind decision
-  Ship the new checkout flow now, or hold a week to harden it.
-  asserted-at 2026-03-20
-
-# --- Option A: ship now (explicit probabilities) ---
-
-focus ship-now
-  kind option
-  Ship today and capture the launch window.
-  asserted-at 2026-03-21
-link ship-now option-of release-decision
-  asserted-at 2026-03-21
-
-focus base-revenue
-  Revenue the launch window is worth.
-  quantity 800000 USD
-  asserted-at 2026-03-21
-
-focus ship-clean
-  Ships smoothly; we capture half the available revenue.
-  = base-revenue * 0.5
-  asserted-at 2026-03-22
-
-focus ship-buggy
-  A bug slips through and we burn goodwill plus a hotfix.
-  quantity -150000 USD
-  asserted-at 2026-03-22
 
 link ship-now leads-to ship-clean
-  probability 0.6
-  asserted-at 2026-03-25
-link ship-now leads-to ship-buggy
-  probability 0.4
-  asserted-at 2026-03-25
+  probability 0.75
+link ship-now leads-to ship-breaks
+  probability 0.25
 
-# --- Option B: hold a week (probability from evidence) ---
+# --- If we hold a week ---
+# hold-pays-off's probability is OMITTED on purpose: the engine falls back to the
+# outcome's own derived confidence (from the two observations below) as the
+# probability. That is the one place belief turns into likelihood.
+outcome hold-pays-off
+  The extra pass catches the latent bug; we ship next week with no incident.
+  = weekly-revenue - delay-cost
 
-focus hold-week
-  kind option
-  Hold a week to harden the flow, then ship.
-  asserted-at 2026-03-21
-link hold-week option-of release-decision
-  asserted-at 2026-03-21
-
-focus harden-gain
-  Extra revenue a polished launch is expected to earn.
-  quantity 300000 USD
-  asserted-at 2026-03-22
-
-focus delay-cost
-  What a week of delay costs us.
-  quantity 50000 USD
-  asserted-at 2026-03-22
-
-focus hold-pays-off
-  The extra week pays for itself - a clean, polished launch.
-  = harden-gain - delay-cost
-  asserted-at 2026-03-23
-
-focus hold-stale
-  The week is wasted: nothing improves and a rival moves first.
-  quantity -80000 USD
-  asserted-at 2026-03-23
-
-# Evidence for hold-pays-off. Its leads-to edge states no probability, so its
-# derived confidence (from this evidence) is used as the likelihood.
-focus canary-clean
-  A 5% canary of the hardened flow ran 48h with no regression.
-  kind observation
-  observed-at 2026-03-24
-
-focus load-test-passed
-  The hardened flow held p99 under budget at 3x peak load.
-  kind observation
-  observed-at 2026-03-24
-
-link canary-clean supports hold-pays-off
-  asserted-at 2026-03-25
-link load-test-passed supports hold-pays-off
-  asserted-at 2026-03-25
+outcome hold-wasted
+  The pass finds nothing; a week of revenue lost for no reason.
+  quantity -100000 USD
 
 link hold-week leads-to hold-pays-off
-  asserted-at 2026-03-26
-link hold-week leads-to hold-stale
-  probability 0.1
-  asserted-at 2026-03-26
-`,
+link hold-week leads-to hold-wasted
+  probability 0.15
 
-  'canonical-core': `# The same reasoning as multi-agent-debate, written directly in the canonical
-# core (§3.2) with focus / link / stance records — no readable-action sugar.
+observation flaky-tests
+  Two flaky checkout tests have already surfaced this sprint.
 
-scope payments-latency
+observation similar-bug-last-quarter
+  A near-identical last-minute checkout bug shipped last quarter.
 
-focus latency-spike
-  p99 checkout latency doubled at 14:00 UTC.
-  observed-at 2026-03-01T14:05Z
+link flaky-tests supports hold-pays-off
+  weight 0.8
+link similar-bug-last-quarter supports hold-pays-off
+  weight 0.7
 
-focus cache-eviction
-  Aggressive eviction dropping hot keys under load.
-  observed-at 2026-03-01T14:20Z
+release-manager chooses hold-week
+  because hold-pays-off
+  note The extra week pays for itself when a checkout bug is even moderately likely.`,
+  'threat-model': `# threat-model — a security review written in its own dialect.
+#
+# ThoughtML's core vocabulary is deliberately small. When a domain needs its own
+# words, a \`profile\` declares them — and everything below is checked against that
+# profile, so a word it does not declare still warns. Here an appsec dialect adds
+# \`threat\`/\`control\`/\`weakness\` kinds, \`mitigates\`/\`aggravates\`/\`exposes\`
+# relations, \`likelihood\`/\`severity\` fields, and a \`flags\` posture. Same engine,
+# domain-native words. A control that mitigates a threat is just its attacker.
 
-link cache-hypothesis: cache-eviction causes latency-spike
-  The proposed mechanism: evicted hot keys force slow cold reads.
-  asserted-at 2026-03-01T14:40Z
-
-stance alice suspects cache-hypothesis
-  confidence 0.55
-  asserted-at 2026-03-01T15:00Z
-
-stance bob doubts cache-hypothesis
-  confidence 0.30
-  asserted-at 2026-03-01T15:10Z
-`,
-
-  'nested-scope': `# Nested scopes (Phase 5): members are written *inside* a scope by indentation.
-# Each member inherits the scope's provenance/temporal context (source,
-# observed-at), and a sub-scope can override that context for its own members.
-# Switch the view to "structural" to see scopes drawn as nested boxes.
-scope incident-993
-  source pagerduty
-  observed-at 2026-02-11T09:00Z
-
-  focus latency-spike
-    Checkout p99 latency tripled after the 09:00 rollout.
-
-  focus deploy-1f2c
-    The rollout swapped the cache layer.
-
-  link deploy-1f2c causes latency-spike
-
-  scope mitigation
-    observed-at 2026-02-11T09:45Z
-
-    focus rollback
-      Roll back deploy-1f2c and re-run the canary.
-
-    link rollback prevents latency-spike
-`,
-
-  'profile-dialect': `# A profile (Phase 5) declares a domain dialect — custom kinds, relations,
-# fields, and postures — so strict validation accepts them with no warnings.
-# Here a risk-analysis dialect. Defending against a risk needs no special
-# relation: a mitigation just "opposes" the risk (a core attack relation), and
-# the grounded labelling reinstates whatever the risk threatened. risk,
-# mitigation, aggravates, likelihood, and flags are this dialect's own — remove
-# the profile and each would trip an "unknown …" lint.
-profile risk-analysis
-  kinds risk, mitigation
-  relations aggravates
-  fields likelihood
+profile appsec
+  kinds threat, control, weakness
+  relations mitigates, aggravates, exposes
+  fields likelihood, severity
   postures flags
 
-scope supply-chain
+scope payment-service-review
 
-focus port-strike
-  kind risk
-  likelihood 0.4
-  asserted-at 2026-04-22
+focus sql-injection
+  kind threat
+  Unsanitized order IDs reach the query builder.
+  likelihood medium
+  severity critical
 
-focus just-in-time
-  kind risk
-  likelihood 0.5
-  asserted-at 2026-04-22
+focus credential-stuffing
+  kind threat
+  Reused passwords let attackers replay leaked credentials at scale.
+  likelihood high
+  severity high
 
-focus dual-sourcing
-  kind mitigation
-  asserted-at 2026-04-23
+focus token-theft
+  kind threat
+  A stolen session token grants full account access until it expires.
+  likelihood low
+  severity high
 
-link dual-sourcing opposes port-strike
-  asserted-at 2026-04-24
-link just-in-time aggravates port-strike
-  asserted-at 2026-04-24
+focus no-rate-limit
+  kind weakness
+  The login endpoint enforces no rate limiting.
 
-stance ops flags port-strike
-  confidence 0.3
-  note Low residual risk once dual-sourcing opposes the strike.
-  asserted-at 2026-04-25
-`,
+link no-rate-limit aggravates credential-stuffing
+link no-rate-limit exposes token-theft
 
-  'shared-defs': `# Shared definitions other documents import (Phase 5). Strict-clean on its own:
-# its foci are members of the \`shared\` scope, so nothing is orphaned.
-scope shared
-  asserted-at 2026-05-20
-  focus capacity-budget
-    quantity 1000 req/s
-    asserted-at 2026-05-20
+focus parameterized-queries
+  kind control
+  All database access uses bound parameters.
 
-  focus slo-target
-    p99 latency budget is 200 ms.
-    asserted-at 2026-05-21
-`,
+focus mfa
+  kind control
+  Multi-factor authentication is available on login.
 
-  'imports-demo': `# Imports another document and references its objects by namespace (Phase 5).
-# The playground resolves \`import\` against the other bundled examples, so
-# \`base.capacity-budget\` below points into shared-defs.
-import shared-defs as base
+focus short-token-ttl
+  kind control
+  Session tokens expire after 30 minutes of inactivity.
 
-scope rollout
+focus login-rate-limit
+  kind control
+  Progressive rate limiting on the login endpoint.
 
-focus rollout-plan
-  Ship the rollout to 100% over a week.
-  asserted-at 2026-05-25
+link parameterized-queries mitigates sql-injection
+link mfa mitigates credential-stuffing
+link mfa mitigates token-theft
+link short-token-ttl mitigates token-theft
+link login-rate-limit mitigates credential-stuffing
 
-link rollout-plan depends-on base.capacity-budget
-  asserted-at 2026-05-26
-
-stance ops accepts rollout-plan
-  confidence 0.8
-  asserted-at 2026-05-27
-`,
-
-  'grand-tour': `# grand-tour — one decision that exercises the whole language.
+stance sec-team flags credential-stuffing
+  confidence 0.5 estimated
+  note Highest residual risk: MFA is enrolled on only 60% of accounts and rate limiting is not yet deployed.`,
+  'control-library': `# control-library — a shared, importable library of definitions.
 #
-# It imports a shared budget, declares an SRE dialect (profile), nests its
-# reasoning in scopes that pass down provenance, measures things (quantities),
-# computes a cost and a payoff (formulas), weighs two options by expected value
-# (decision EV), carries graded evidence, an attack, and a mitigation (confidence
-# + argument status), and revises an estimate over time. Try the lenses and the
-# as-of slider; switch to the structural view to see the scopes as nested boxes.
-import shared-defs as base
+# A library holds reusable nodes that other documents pull in by namespace. It has
+# to stand on its own — strict-clean as a single document — so downstream docs can
+# \`import\` it and reference \`namespace.id\`. This one defines the organization's
+# baseline security controls, the program that groups them, and its budget.
+# (See compliance-rollout for the importer that consumes it.)
 
-profile sre
-  kinds risk
+scope baseline-controls
 
-scope capacity-program
-  source platform-review
-  observed-at 2026-03-01T09:00Z
+claim encryption-at-rest
+  All data stores encrypt data at rest with managed keys.
 
-  scope signals
-    focus traffic-now
-      kind observation
-      quantity 850 req/s
-    focus growth-trend
-      kind hypothesis
-      Traffic keeps climbing toward the capacity ceiling.
-    focus seasonal-doubt
-      kind assumption
-      The Q1 surge might be seasonal rather than a real trend.
-    focus load-test
-      kind observation
-      A sustained load test reproduced the growth under steady traffic.
-    link traffic-now supports growth-trend
-    link load-test supports growth-trend
-      weight 0.85
-    link seasonal-doubt undercuts growth-trend
-    link load-test opposes seasonal-doubt
+claim access-reviews
+  Access is reviewed quarterly and revoked on role change.
 
-  scope estimate
-    focus runway-early
-      kind claim
-      asserted-at 2026-02-15T00:00Z
-      We have about six months before we hit the ceiling.
-    focus runway-now
-      kind claim
-      asserted-at 2026-03-01T00:00Z
-      Revised to about three months after the Q1 surge.
-    link runway-now revises runway-early
+claim audit-logging
+  Every privileged action is written to an append-only audit log.
 
-  scope decision
-    focus capacity-decision
-      kind decision
-      How do we stay ahead of the capacity ceiling?
-    link capacity-decision depends-on base.capacity-budget
+claim backup-policy
+  Daily backups with 30-day retention and a tested restore path.
 
-    focus migrate
-      kind option
-    focus shard
-      kind option
-    link migrate option-of capacity-decision
-    link shard option-of capacity-decision
+claim incident-runbook
+  A maintained runbook and on-call rotation for security incidents.
 
-    focus migrate-revenue
-      kind assumption
-      quantity 1300000 USD
-    focus migrate-budget
-      kind assumption
-      quantity 300000 USD
-    focus migrate-ops
-      kind assumption
-      quantity 120000 USD
-    focus migrate-cost
-      First-year migration cost.
-      = migrate-budget + migrate-ops
-    focus migrate-win
-      kind outcome
-      = migrate-revenue - migrate-cost
-    focus migrate-stall
-      kind outcome
-      quantity -200000 USD
-    link migrate leads-to migrate-win
-      probability 0.6
-    link migrate leads-to migrate-stall
-      probability 0.4
+claim controls-baseline
+  The organization's baseline security-control program.
 
-    focus shard-win
-      kind outcome
-      quantity 500000 USD
-    focus shard-strain
-      kind outcome
-      quantity -50000 USD
-    link shard leads-to shard-win
-      probability 0.7
-    link shard leads-to shard-strain
-      probability 0.3
+part-of controls-baseline
+  encryption-at-rest
+  access-reviews
+  audit-logging
+  backup-policy
+  incident-runbook
 
-    team chooses migrate
-      confidence 0.7
+observation audit-budget
+  Annual budget allocated to run the compliance program.
+  quantity 250000 USD
 
-  scope risks
-    focus migration-risk
-      kind risk
-      A hard cutover could cause downtime.
-    focus canary-cutover
-      kind action
-      Roll over a canary slice first, then ramp.
-    link migration-risk opposes migrate
-    link canary-cutover opposes migration-risk
-`,
-
-  'why-harvard': `# why-harvard — the reasoning behind committing to Harvard.
+link audit-budget enables controls-baseline`,
+  'compliance-rollout': `# compliance-rollout — rolling the baseline controls out to a new region.
 #
-# A personal decision, reasoned out: goals up front, what's known linked to
-# those goals with graded evidence (and one honest doubt), two options weighed
-# by expected value, the choice recorded, and the real downside kept on the
-# record with a plan that defends against it. Everything inherits the scope's
-# provenance and date; switch to the structural view to see the four sub-scopes.
-scope college-choice
-  source self-reflection
-  asserted-at 2026-04-01T00:00Z
+# This document \`import\`s the shared control-library under a namespace and refers
+# to its nodes as \`baseline.<id>\`. It is checked as a *project* — the importer
+# plus the library it pulls in — so the cross-document references resolve. The
+# rollout itself is a decision with a gating question, a first action, and
+# explicit dependencies on the imported controls.
 
-  scope what-i-want
-    focus goal-research
-      kind goal
-      Do undergraduate research with leading faculty.
-    focus goal-network
-      kind goal
-      A network that opens doors regardless of field.
-    focus goal-aid
-      kind goal
-      Graduate with as little debt as possible.
+import control-library as baseline
 
-  scope what-i-know
-    focus admit-harvard
-      kind observation
-      observed-at 2026-04-02
-      Admitted to Harvard with a strong aid package.
-    focus aid-offer
-      kind observation
-      observed-at 2026-04-03
-      quantity 78000 USD
-      Annual grant aid offered — grants, not loans.
-    focus faculty-fit
-      kind observation
-      observed-at 2026-04-05
-      Two labs I emailed replied and take undergraduates.
-    focus prestige-signal
-      kind claim
-      asserted-at 2026-04-06
-      The brand helps for the first job and grad-school apps.
-    focus prestige-doubt
-      kind assumption
-      asserted-at 2026-04-08
-      A few years into a career, fit may matter more than prestige.
-    link admit-harvard enables harvard
-      asserted-at 2026-04-09
-    link faculty-fit supports goal-research
-      asserted-at 2026-04-05
-    link aid-offer supports goal-aid
-      asserted-at 2026-04-03
-      weight 0.85
-    link prestige-signal supports goal-network
-      asserted-at 2026-04-06
-    link prestige-doubt undercuts prestige-signal
-      asserted-at 2026-04-08
+scope eu-rollout
 
-  scope the-decision
-    asserted-at 2026-04-10
+goal eu-compliant
+  Bring the new EU region into compliance with the baseline controls.
 
-    focus where-to-go
-      kind decision
-      Which offer do I commit to?
-    focus harvard
-      kind option
-    focus state-honors
-      kind option
-    link harvard option-of where-to-go
-    link state-honors option-of where-to-go
+decision rollout-approach
+  How to roll the baseline controls out to the EU region.
 
-    # Rough five-year "opportunity value", net of cost.
-    focus harvard-thrive
-      kind outcome
-      quantity 600000 USD
-    focus harvard-coast
-      kind outcome
-      quantity 150000 USD
-    link harvard leads-to harvard-thrive
-      probability 0.7
-    link harvard leads-to harvard-coast
-      probability 0.3
+option big-bang
+  Enable every control at once during a single maintenance window.
 
-    focus state-solid
-      kind outcome
-      quantity 400000 USD
-    focus state-flat
-      kind outcome
-      quantity 250000 USD
-    link state-honors leads-to state-solid
-      probability 0.5
-    link state-honors leads-to state-flat
-      probability 0.5
+option phased
+  Enable controls over three weekly phases, riskiest change last.
 
-    link where-to-go depends-on goal-research
-    link where-to-go depends-on goal-aid
+link big-bang option-of rollout-approach
+link phased option-of rollout-approach
+link big-bang enables eu-compliant
+link phased enables eu-compliant
 
-    me chooses harvard
-      confidence 0.75
-      asserted-at 2026-04-15
-      note Faculty access and the aid package clear a bar the state offer can't.
+observation eu-data-residency
+  EU data must stay in-region, which constrains where backups may live.
 
-  scope second-thoughts
-    focus far-from-home
-      kind observation
-      observed-at 2026-04-12
-      It's a five-hour flight from family.
-    focus visit-plan
-      kind action
-      asserted-at 2026-04-16
-      Visit at reading week and over the summer.
-    link far-from-home opposes harvard
-      asserted-at 2026-04-12
-    link visit-plan opposes far-from-home
-      asserted-at 2026-04-16
-`,
+link eu-data-residency opposes big-bang
 
-  'self-audit': `# self-audit — an agent's reasoning that its own structure defeats.
-#
-# This document is diagnostically CLEAN: no errors, no warnings. The form is fine.
-# But the mirror (the audit pass, on in the playground) flags that the agent
-# asserts high confidence in a conclusion its own recorded evidence defeats — it
-# wrote down the counter-observation, then shipped anyway. The tool's job is to
-# show you that disagreement, not to make the call for you. The 0.9 below also
-# declares its basis — assumed — so the mirror surfaces not just how sure the
-# agent is, but on what footing.
+link phased depends-on baseline.encryption-at-rest
+link phased depends-on baseline.audit-logging
+link phased depends-on baseline.backup-policy
 
-focus cache-is-safe
-  kind claim
-  The new cache layer is safe to ship today.
+question restore-tested
+  Has an in-region restore been tested end to end?
+  expects observation
+  status open
 
-focus load-test-passed
-  kind observation
-  Load test at 2x peak traffic passed with no errors.
+action enable-phase-1
+  Turn on encryption-at-rest and audit-logging in the EU region.
 
-focus stale-reads
-  kind observation
-  Staging showed stale reads under cache eviction.
+link enable-phase-1 depends-on baseline.encryption-at-rest
 
-link load-test-passed supports cache-is-safe
-link stale-reads opposes cache-is-safe
-
-ops-agent holds cache-is-safe
-  confidence 0.9 assumed
-  note Shipping — the load test passed.
-`,
+compliance-lead chooses phased
+  because eu-data-residency
+  until restore-tested answered`,
 }
 
-export const DEFAULT_EXAMPLE = 'ai-and-jobs'
+export const DEFAULT_EXAMPLE = 'ship-the-hotfix'
 
-// Parked from the example tray to keep the playground on its spine (v0.1.0).
-// These stay in EXAMPLES — their .thml files ship and `shared-defs` is still
-// resolved as grand-tour's import — they are just not shown as their own pill:
-// the compute demos (whose Decision/Load/Evidence lenses were demoted) and the
-// advanced multi-document demos (profiles / imports / namespaces). Empty this
-// set to surface them all again.
+// Parked from the example tray to keep it approachable: the compute capstones,
+// the profile dialect, the definition-divergence demo, and the import pair.
+// They stay in EXAMPLES (their .thml ships and compliance-rollout still resolves
+// control-library's import) — just not shown as their own pill. Empty this set
+// to surface them all.
 export const ADVANCED_EXAMPLES = new Set([
-  'sensitivity-demo',
-  'capacity-plan',
-  'cost-model',
-  'decision-ev',
-  'release-bet',
-  'nested-scope',
-  'profile-dialect',
-  'shared-defs',
-  'imports-demo',
+  'merge-conflict-beliefs',
+  'cloud-bill',
+  'ship-or-hold',
+  'threat-model',
+  'control-library',
+  'compliance-rollout',
 ])

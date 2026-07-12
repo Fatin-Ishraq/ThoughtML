@@ -109,7 +109,7 @@ thoughtml --as-of-seq 3 doc.thml           # …as of the 3rd recorded event
 transaction order. Either way, links and stances that would dangle once a node
 drops out are cascaded away, so the projected model is always coherent.
 
-The bundled [`estimate-revised.thml`](../appendix/examples.md) is built entirely
+The bundled [`launch-readiness.thml`](../appendix/examples.md) is built entirely
 around this — a launch date that slips twice as evidence arrives.
 
 Our cache document is a single moment in time, so it needs no revision. We now

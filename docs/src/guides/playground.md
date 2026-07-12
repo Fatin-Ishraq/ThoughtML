@@ -43,7 +43,7 @@ display-relevant [mirror](../mirror/index.md) readings **on**, so you always see
   what you said.
 
 This is why a document can look clean in the editor (no diagnostics) yet show a
-conflict — exactly the [`self-audit.thml`](../appendix/examples.md) case.
+conflict — exactly the [`ship-the-hotfix.thml`](../appendix/examples.md) case.
 
 ## Lenses
 
@@ -60,8 +60,8 @@ For documents with [timestamps](../tutorial/time.md), the **Viewer** carries an
 reasoning replays moment by moment: beliefs fade in as of when they were asserted,
 and revised-away or abandoned branches dim — so you can watch a conclusion form (or
 fall apart) as evidence arrived. Try it on
-[`build-tetris.thml`](../appendix/examples.md) or
-[`estimate-revised.thml`](../appendix/examples.md). The same projection is on the
+[`launch-readiness.thml`](../appendix/examples.md) or
+[`launch-readiness.thml`](../appendix/examples.md). The same projection is on the
 CLI as [`--as-of`](cli.md#time-options-as-of-replay).
 
 > **Note.** The playground curates a **spine** of ten examples and the two lenses

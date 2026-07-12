@@ -12,7 +12,7 @@ evidence for and against each, the question that blocks sign-off, the choice and
 its justification. Now it's checkable: did you actually reject the alternatives
 for stated reasons? Is the decision still blocked on an open question?
 
-See [`decision-record.thml`](../appendix/examples.md).
+See [`choose-datastore.thml`](../appendix/examples.md).
 
 ## 2. AI agent reasoning a human (or CI) can audit
 
@@ -35,7 +35,7 @@ their flaws in prose. A ThoughtML version surfaces them: the
 at 0.9, but your own listed risk defeats it" — the exact thing a reviewer is
 trying to notice and often misses.
 
-The canonical demo is [`self-audit.thml`](../appendix/examples.md).
+The canonical demo is [`ship-the-hotfix.thml`](../appendix/examples.md).
 
 ## 4. Incident postmortems / root-cause analysis
 
@@ -45,7 +45,7 @@ on a benchmark. ThoughtML keeps the causal links, the suspicion (with a
 confidence *range*, honestly), and the blockers explicit — and flags impossible
 causal cycles.
 
-See [`incident-742.thml`](../appendix/examples.md).
+See [`triage-742.thml`](../appendix/examples.md).
 
 ## 5. Research and claim mapping with provenance
 
@@ -55,7 +55,7 @@ ThoughtML's [provenance basis](../reference/numbers.md#provenance) and graded
 [weights](../reference/relations.md) make a literature map you can interrogate,
 not just read.
 
-See [`ai-and-jobs.thml`](../appendix/examples.md).
+See [`hiring-panel.thml`](../appendix/examples.md).
 
 ## 6. High-stakes personal decisions
 
@@ -65,7 +65,7 @@ not face. Writing it out as ThoughtML forces the structure into the open and let
 you compare options by [expected value](../mirror/compute.md) without pretending
 the number decides for you.
 
-See [`why-harvard.thml`](../appendix/examples.md).
+See [`ship-or-hold.thml`](../appendix/examples.md).
 
 ## When *not* to reach for it
 

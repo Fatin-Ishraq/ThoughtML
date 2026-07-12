@@ -1,0 +1,41 @@
+# roadmap-priorities — product planning: grouping vs deciding.
+#
+# The three friction points behind the Q3 theme are grouped with `part-of` —
+# structure, not evidence, so listing them never inflates the theme's confidence
+# (using `supports` here would be the classic mistake). The open question of what
+# to build first contains its candidate options as a nested thought-tree.
+
+scope q3-roadmap
+
+claim onboarding-friction
+  New teams hit three distinct friction points before they reach first value.
+
+observation onboarding-drop-off
+  60% of new teams never finish setup.
+
+observation slow-first-import
+  The first data import averages 40 minutes.
+
+observation unclear-next-step
+  New users report not knowing what to do after signup.
+
+part-of onboarding-friction
+  onboarding-drop-off
+  slow-first-import
+  unclear-next-step
+
+question build-first
+  Which fix ships first this quarter?
+  expects option
+  status open
+  option guided-setup
+    A guided setup wizard that walks teams to first value.
+  option faster-import
+    A streaming import that starts returning rows in seconds.
+  option sample-project
+    A one-click sample project to explore before importing real data.
+
+observation import-top-complaint
+  Import speed is the single most common complaint in support tickets.
+
+link import-top-complaint supports faster-import

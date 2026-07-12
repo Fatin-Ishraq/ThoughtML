@@ -1695,16 +1695,18 @@ fn formula_references_count_as_connections() {
 }
 
 #[test]
-fn cost_model_example_evaluates_clean() {
-    let r = parse_formulas(include_str!("../../../examples/cost-model.thml"));
+fn cloud_bill_example_evaluates_clean() {
+    let r = parse_formulas(include_str!("../../../examples/cloud-bill.thml"));
     assert!(!r.diagnostics.has_warnings(), "{:?}", r.diagnostics.items);
     let o = &r.canonical.objects;
-    assert_eq!(computed_of(o, "monthly-compute").unwrap().value, 2160.0);
-    assert_eq!(computed_of(o, "monthly-storage").unwrap().value, 80.0);
-    assert_eq!(computed_of(o, "monthly-total").unwrap().value, 2240.0);
-    let margin = computed_of(o, "gross-margin").unwrap();
-    assert_eq!(margin.value, 0.955);
-    assert_eq!(margin.dimension, "dimensionless");
+    // Line items: unit-price × quantity, with unit-checking (USD/hour × hour = USD).
+    assert_eq!(computed_of(o, "compute-cost").unwrap().value, 2073.6);
+    assert_eq!(computed_of(o, "storage-cost").unwrap().value, 252.0);
+    assert_eq!(computed_of(o, "db-cost").unwrap().value, 345.6);
+    // The total sums the line items; the per-user metric divides through, and the
+    // engine tracks the compound unit that division produces.
+    assert_eq!(computed_of(o, "total-bill").unwrap().value, 3751.2);
+    assert_eq!(computed_of(o, "cost-per-user").unwrap().unit, "USD/user");
 }
 
 // --- Phase 9 (v0.2): decision expected value -------------------------------
@@ -1905,19 +1907,20 @@ link opt leads-to win
 }
 
 #[test]
-fn decision_ev_example_evaluates_clean() {
-    let r = parse_decisions(include_str!("../../../examples/decision-ev.thml"));
+fn ship_or_hold_ranks_options_by_expected_value() {
+    let r = parse_decisions(include_str!("../../../examples/ship-or-hold.thml"));
     assert!(!r.diagnostics.has_warnings(), "{:?}", r.diagnostics.items);
     let o = &r.canonical.objects;
-    // launch-now: 0.4·900000 (computed payoff) + 0.6·(−200000) = 240000.
-    assert_eq!(expected_value_of(o, "launch-now").unwrap().value, 240000.0);
-    // staged-rollout: 0.7·500000 + 0.3·120000 = 386000.
-    assert_eq!(expected_value_of(o, "staged-rollout").unwrap().value, 386000.0);
-    let dec = decision_of(o, "go-to-market").unwrap();
-    // The safer option has the higher EV, so it ranks first — but the mirror
-    // reports the order, it does not declare a winner or a margin.
+    // ship-now: 0.75·400000 + 0.25·(−200000) = 250000.
+    assert_eq!(expected_value_of(o, "ship-now").unwrap().value, 250000.0);
+    // hold-week: 0.953 (derived belief as probability)·300000 + 0.15·(−100000) = 270900.
+    assert_eq!(expected_value_of(o, "hold-week").unwrap().value, 270900.0);
+    let dec = decision_of(o, "release-plan").unwrap();
+    // Both options are ranked (neither silently dropped), higher EV first — but the
+    // mirror reports the order, it does not crown a winner or a margin.
+    assert_eq!(dec.ranked.len(), 2);
     let order: Vec<&str> = dec.ranked.iter().map(|e| e.option.as_str()).collect();
-    assert_eq!(order, vec!["staged-rollout", "launch-now"]);
+    assert_eq!(order, vec!["hold-week", "ship-now"]);
 }
 
 // --- Phase 9 polish (v0.2): what-if recompute, kinds, breakdown, units ------
@@ -2033,22 +2036,22 @@ focus total
 }
 
 #[test]
-fn release_bet_capstone_weaves_the_stack_and_flips() {
+fn ship_or_hold_capstone_weaves_the_stack_and_flips() {
     // The capstone: formula payoffs (§4.8) + a derived-confidence probability
     // (§10.3) + EV ranking (§10.6) + a what-if that flips it (§10.5).
-    let src = include_str!("../../../examples/release-bet.thml");
+    let src = include_str!("../../../examples/ship-or-hold.thml");
     let base = parse_decisions(src);
     assert!(!base.diagnostics.has_warnings(), "{:?}", base.diagnostics.items);
     let o = &base.canonical.objects;
-    assert_eq!(computed_of(o, "ship-clean").unwrap().value, 400000.0); // formula payoff
-    assert_eq!(computed_of(o, "hold-pays-off").unwrap().value, 250000.0);
-    approx(derived_of(o, "hold-pays-off").unwrap(), 0.881); // becomes the probability
-    let dec = decision_of(o, "release-decision").unwrap();
-    assert_eq!(dec.ranked[0].option, "hold-week"); // 212250 vs 180000 as written
+    assert_eq!(computed_of(o, "ship-clean").unwrap().value, 400000.0); // = weekly-revenue
+    assert_eq!(computed_of(o, "hold-pays-off").unwrap().value, 300000.0); // = weekly-revenue - delay-cost
+    approx(derived_of(o, "hold-pays-off").unwrap(), 0.953); // belief becomes the probability
+    let dec = decision_of(o, "release-plan").unwrap();
+    assert_eq!(dec.ranked[0].option, "hold-week"); // 270900 vs 250000 as written
     // Mute one piece of evidence: belief in hold-pays-off falls, its EV drops
     // below shipping, and the EV ordering flips — what-if reaching the EV layer.
-    let muted = parse_compute_overrides(src, &[], &["canary-clean"]);
-    assert_eq!(decision_of(&muted.canonical.objects, "release-decision").unwrap().ranked[0].option, "ship-now");
+    let muted = parse_compute_overrides(src, &[], &["flaky-tests"]);
+    assert_eq!(decision_of(&muted.canonical.objects, "release-plan").unwrap().ranked[0].option, "ship-now");
 }
 
 // --- Conformance (formal track): bundled examples stay strict-clean ---------
@@ -2059,25 +2062,27 @@ fn release_bet_capstone_weaves_the_stack_and_flips() {
 #[test]
 fn bundled_examples_are_strict_clean() {
     let examples: &[(&str, &str)] = &[
-        ("ai-and-jobs", include_str!("../../../examples/ai-and-jobs.thml")),
-        ("incident-742", include_str!("../../../examples/incident-742.thml")),
-        ("multi-agent-debate", include_str!("../../../examples/multi-agent-debate.thml")),
-        ("decision-record", include_str!("../../../examples/decision-record.thml")),
-        ("agent-memory", include_str!("../../../examples/agent-memory.thml")),
-        ("estimate-revised", include_str!("../../../examples/estimate-revised.thml")),
-        ("sensitivity-demo", include_str!("../../../examples/sensitivity-demo.thml")),
-        ("capacity-plan", include_str!("../../../examples/capacity-plan.thml")),
-        ("cost-model", include_str!("../../../examples/cost-model.thml")),
-        ("decision-ev", include_str!("../../../examples/decision-ev.thml")),
-        ("release-bet", include_str!("../../../examples/release-bet.thml")),
-        ("canonical-core", include_str!("../../../examples/canonical-core.thml")),
-        ("nested-scope", include_str!("../../../examples/nested-scope.thml")),
-        ("profile-dialect", include_str!("../../../examples/profile-dialect.thml")),
-        ("why-harvard", include_str!("../../../examples/why-harvard.thml")),
-        ("self-audit", include_str!("../../../examples/self-audit.thml")),
-        // shared-defs is dependency-free, so it is clean as a single document;
-        // imports-demo references `base.*` and is checked as a project below.
-        ("shared-defs", include_str!("../../../examples/shared-defs.thml")),
+        ("ship-the-hotfix", include_str!("../../../examples/ship-the-hotfix.thml")),
+        ("triage-742", include_str!("../../../examples/triage-742.thml")),
+        ("bad-oyster", include_str!("../../../examples/bad-oyster.thml")),
+        ("weekend-plan", include_str!("../../../examples/weekend-plan.thml")),
+        ("pr-feedback", include_str!("../../../examples/pr-feedback.thml")),
+        ("choose-datastore", include_str!("../../../examples/choose-datastore.thml")),
+        ("prod-outage", include_str!("../../../examples/prod-outage.thml")),
+        ("differential-dx", include_str!("../../../examples/differential-dx.thml")),
+        ("hiring-panel", include_str!("../../../examples/hiring-panel.thml")),
+        ("replication-study", include_str!("../../../examples/replication-study.thml")),
+        ("roadmap-priorities", include_str!("../../../examples/roadmap-priorities.thml")),
+        ("launch-readiness", include_str!("../../../examples/launch-readiness.thml")),
+        ("assistant-memory", include_str!("../../../examples/assistant-memory.thml")),
+        ("moderation-decision", include_str!("../../../examples/moderation-decision.thml")),
+        ("merge-conflict-beliefs", include_str!("../../../examples/merge-conflict-beliefs.thml")),
+        ("cloud-bill", include_str!("../../../examples/cloud-bill.thml")),
+        ("ship-or-hold", include_str!("../../../examples/ship-or-hold.thml")),
+        ("threat-model", include_str!("../../../examples/threat-model.thml")),
+        // control-library is dependency-free, so it is clean as a single document;
+        // compliance-rollout imports it (`baseline.*`) and is checked as a project below.
+        ("control-library", include_str!("../../../examples/control-library.thml")),
     ];
     for (name, src) in examples {
         let r = parse_str(src);
@@ -2340,9 +2345,8 @@ fn project(entry: &str, sources: &[(&str, &str)]) -> crate::ParseResult {
     parse_project(entry, &map, Options::default())
 }
 
-const SHARED: &str = include_str!("../../../examples/shared-defs.thml");
-const IMPORTER: &str = include_str!("../../../examples/imports-demo.thml");
-const GRAND: &str = include_str!("../../../examples/grand-tour.thml");
+const SHARED: &str = include_str!("../../../examples/control-library.thml");
+const IMPORTER: &str = include_str!("../../../examples/compliance-rollout.thml");
 
 /// Every computed view on — what the playground runs. The provenance lint stays
 /// opt-in (off), matching the playground, so bundled examples without a basis on
@@ -2362,33 +2366,30 @@ fn full_options() -> Options {
 
 #[test]
 fn import_merges_namespaced_objects() {
-    let r = project(IMPORTER, &[("shared-defs", SHARED)]);
+    let r = project(IMPORTER, &[("control-library", SHARED)]);
     let objs = &r.canonical.objects;
-    assert!(focus(objs, "base.capacity-budget").is_some(), "missing imported focus");
-    assert!(focus(objs, "rollout-plan").is_some(), "missing entry focus");
-    // The imported scope and its membership were namespaced too.
-    assert_eq!(
-        scope_of(objs, "base.shared").includes,
-        vec!["base.capacity-budget", "base.slo-target"]
-    );
+    // Imported nodes carry the `baseline.` namespace; the entry's own nodes don't.
+    assert!(focus(objs, "baseline.encryption-at-rest").is_some(), "missing imported focus");
+    assert!(focus(objs, "baseline.controls-baseline").is_some(), "missing imported collection");
+    assert!(focus(objs, "rollout-approach").is_some(), "missing entry focus");
 }
 
 #[test]
 fn qualified_ref_resolves() {
-    let r = project(IMPORTER, &[("shared-defs", SHARED)]);
+    let r = project(IMPORTER, &[("control-library", SHARED)]);
     assert!(
         !r.diagnostics.has_errors() && !r.diagnostics.has_warnings(),
         "diags: {:?}",
         r.diagnostics.items
     );
-    // The entry's `link … depends-on base.capacity-budget` resolved to the
+    // The entry's `link … depends-on baseline.encryption-at-rest` resolved to the
     // namespaced imported focus.
     let to_import = r
         .canonical
         .objects
         .iter()
-        .any(|o| matches!(o, Object::Link(l) if l.to == "base.capacity-budget"));
-    assert!(to_import, "expected a link to base.capacity-budget");
+        .any(|o| matches!(o, Object::Link(l) if l.to == "baseline.encryption-at-rest"));
+    assert!(to_import, "expected a link to baseline.encryption-at-rest");
 }
 
 #[test]
@@ -2423,26 +2424,22 @@ fn import_cycle_is_detected_and_warns() {
 
 #[test]
 fn project_examples_are_strict_clean() {
-    // Importer examples are clean only when parsed as a project with their
-    // dependency (a single-doc parse leaves the `base.*` refs unresolved).
-    for (name, entry) in [("imports-demo", IMPORTER), ("grand-tour", GRAND)] {
-        let r = project(entry, &[("shared-defs", SHARED)]);
-        assert!(!r.diagnostics.has_errors(), "{name}: errors {:?}", r.diagnostics.items);
-        assert!(!r.diagnostics.has_warnings(), "{name}: warnings {:?}", r.diagnostics.items);
-    }
+    // The importer is clean only when parsed as a project with its dependency
+    // (a single-doc parse leaves the `baseline.*` refs unresolved).
+    let r = project(IMPORTER, &[("control-library", SHARED)]);
+    assert!(!r.diagnostics.has_errors(), "errors {:?}", r.diagnostics.items);
+    assert!(!r.diagnostics.has_warnings(), "warnings {:?}", r.diagnostics.items);
 }
 
 #[test]
-fn grand_tour_computes_under_full_options() {
-    // The showcase must also stay clean with the whole computational stack on,
-    // and its decision EV must rank the migrate option first (chained formula payoff).
+fn compliance_rollout_clean_under_full_options() {
+    // The importer must also stay clean with the whole computational stack on,
+    // checked as a project alongside its imported library.
     let map: std::collections::HashMap<String, String> =
-        [("shared-defs".to_string(), SHARED.to_string())].into_iter().collect();
-    let r = parse_project(GRAND, &map, full_options());
+        [("control-library".to_string(), SHARED.to_string())].into_iter().collect();
+    let r = parse_project(IMPORTER, &map, full_options());
     assert!(!r.diagnostics.has_errors(), "errors: {:?}", r.diagnostics.items);
     assert!(!r.diagnostics.has_warnings(), "warnings: {:?}", r.diagnostics.items);
-    let decision = focus(&r.canonical.objects, "capacity-decision").expect("decision focus");
-    assert_eq!(decision.decision.as_ref().expect("decision EV").ranked[0].option, "migrate");
 }
 
 // --- Phase 5 review: action kind, decision-graph lint, the argument→EV bridge,
@@ -2541,21 +2538,6 @@ fn undercutting_an_inference_weakens_it() {
     approx(derived_of(&undercut.canonical.objects, "claim").unwrap(), 0.622);
 }
 
-#[test]
-fn why_harvard_computes_and_ranks_both_options() {
-    // The showcase decision must stay clean under the full stack, rank harvard
-    // first, and — the fix for the original self-loop bug — rank *both* options
-    // rather than silently dropping the unwired one.
-    let r = parse_str_with(include_str!("../../../examples/why-harvard.thml"), full_options());
-    assert!(!r.diagnostics.has_errors(), "errors: {:?}", r.diagnostics.items);
-    assert!(!r.diagnostics.has_warnings(), "warnings: {:?}", r.diagnostics.items);
-    let d = decision_of(&r.canonical.objects, "where-to-go").expect("decision EV");
-    assert_eq!(d.ranked[0].option, "harvard");
-    assert_eq!(d.ranked.len(), 2);
-    assert_eq!(expected_value_of(&r.canonical.objects, "harvard").unwrap().value, 465000.0);
-    assert_eq!(expected_value_of(&r.canonical.objects, "state-honors").unwrap().value, 325000.0);
-}
-
 // --- Mirror conflict report (§10.7): the engine's second reading -----------
 
 fn parse_audit(src: &str) -> crate::ParseResult {
@@ -2607,17 +2589,32 @@ fn audit_is_opt_in() {
 }
 
 #[test]
-fn self_audit_example_is_clean_in_form_but_conflicted_in_reasoning() {
-    let src = include_str!("../../../examples/self-audit.thml");
+fn ship_the_hotfix_example_is_clean_in_form_but_conflicted_in_reasoning() {
+    let src = include_str!("../../../examples/ship-the-hotfix.thml");
     // Clean form — it belongs in the strict-clean bundle.
     let plain = parse_str(src);
     assert!(!plain.diagnostics.has_errors() && !plain.diagnostics.has_warnings(), "{:?}", plain.diagnostics.items);
-    // But the mirror catches the agent holding a defeated claim at high confidence.
+    // But the mirror catches the on-call holding a defeated claim at high confidence.
     let audited = parse_audit(src);
     let c = conflicts_of(&audited);
     assert_eq!(c.len(), 1, "conflicts: {c:?}");
     assert_eq!(c[0].kind, "confidence-vs-status");
-    assert!(c[0].subjects.contains(&"cache-is-safe".to_string()));
+    assert!(c[0].subjects.contains(&"hotfix-is-safe".to_string()));
+}
+
+#[test]
+fn merge_conflict_example_flags_a_definition_divergence() {
+    // The second mirror conflict: two agents define the same focus two different
+    // ways. Clean in form (divergence rides the audit channel), one divergence
+    // reported — lossless concurrent authoring.
+    let src = include_str!("../../../examples/merge-conflict-beliefs.thml");
+    let plain = parse_str(src);
+    assert!(!plain.diagnostics.has_errors() && !plain.diagnostics.has_warnings(), "{:?}", plain.diagnostics.items);
+    let audited = parse_audit(src);
+    let c = conflicts_of(&audited);
+    assert_eq!(c.len(), 1, "conflicts: {c:?}");
+    assert_eq!(c[0].kind, "definition-divergence");
+    assert!(c[0].subjects.contains(&"root-cause".to_string()));
 }
 
 #[test]

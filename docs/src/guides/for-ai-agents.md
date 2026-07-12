@@ -84,6 +84,6 @@ thoughtml --audit reasoning.thml | jq '.audit.conflicts'
 A non-empty `confidence-vs-status` error is a signal worth a human's attention:
 the agent believed something its own structure defeats.
 
-See [`agent-memory.thml`](../appendix/examples.md) for an agent's evolving memory
-of a user, and [`self-audit.thml`](../appendix/examples.md) for the audit in
+See [`assistant-memory.thml`](../appendix/examples.md) for an agent's evolving memory
+of a user, and [`ship-the-hotfix.thml`](../appendix/examples.md) for the audit in
 action.

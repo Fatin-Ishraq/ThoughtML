@@ -1,7 +1,7 @@
 # 7. The mirror — reading the conflict
 
 Here is our finished document. It's the bundled example
-[`self-audit.thml`](../appendix/examples.md):
+[`ship-the-hotfix.thml`](../appendix/examples.md):
 
 ```thml
 focus cache-is-safe
@@ -29,7 +29,7 @@ ops-agent holds cache-is-safe
 Run it normally:
 
 ```sh
-thoughtml self-audit.thml
+thoughtml ship-the-hotfix.thml
 ```
 
 No errors. No warnings. Every reference resolves, nothing contradicts at the
@@ -41,7 +41,7 @@ fine.
 Now turn on the **mirror** — the opt-in second reading:
 
 ```sh
-thoughtml --audit self-audit.thml
+thoughtml --audit ship-the-hotfix.thml
 ```
 
 The canonical JSON now carries an `audit` section:
@@ -85,7 +85,7 @@ This is the whole philosophy in one example: **a mirror, not an oracle.**
 on:
 
 ```sh
-thoughtml --compute self-audit.thml
+thoughtml --compute ship-the-hotfix.thml
 ```
 
 That adds [derived confidence](../mirror/derived-confidence.md) (how strong each

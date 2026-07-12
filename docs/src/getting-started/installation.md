@@ -40,7 +40,7 @@ Once it's installed, run it on a document — canonical JSON goes to stdout,
 diagnostics to stderr:
 
 ```sh
-thoughtml examples/decision-record.thml
+thoughtml examples/choose-datastore.thml
 ```
 
 See the [CLI reference](../guides/cli.md) for every flag and subcommand.
@@ -60,7 +60,7 @@ From a source checkout you can run without installing — `-p thoughtml` selects
 parser crate:
 
 ```sh
-cargo run -p thoughtml -- examples/incident-742.thml
+cargo run -p thoughtml -- examples/triage-742.thml
 ```
 
 ## Export a standalone view
@@ -69,7 +69,7 @@ Turn any document into a single self-contained interactive HTML file — no serv
 opens in any browser:
 
 ```sh
-thoughtml examples/decision-record.thml --html -o decision-record.html
+thoughtml examples/choose-datastore.thml --html -o datastore-decision.html
 ```
 
 It carries the interactive graph with the model baked in (no wasm). See

@@ -139,7 +139,7 @@ hat, so the browser, the CLI, and the exported file can never disagree.
 | **Playground** | Live editor + reasoning graph (mermaid.live in spirit): a time-driven **Viewer** with replay and Follow-mode storytelling, a node-link **Structural** view, and one-click standalone-HTML export. | [`web`](web) · [live ↗](https://fatin-ishraq.github.io/ThoughtML/playground/) |
 | **The book** | Tutorial, complete language reference, the mirror, and practical guides. | [`docs`](docs) · [live ↗](https://fatin-ishraq.github.io/ThoughtML/) |
 | **`llms.txt`** | The whole language in one file, for the AI that authors it. | [`llms.txt`](llms.txt) |
-| **Example gallery** | 21 worked, strict-clean documents — a decision record, an incident postmortem, a multi-agent debate, a self-audit, and more. | [`examples`](examples) |
+| **Example gallery** | 20 worked, strict-clean documents — an incident triage, a clinical differential, an AI moderation call, a security threat model, a self-auditing hotfix, and more. | [`examples`](examples) |
 
 ## Install & run
 
@@ -164,13 +164,13 @@ Prebuilt binaries for macOS, Linux, and Windows are attached to every
 **Run the toolchain** — the bare `thoughtml <file>` still emits the canonical JSON model:
 
 ```sh
-thoughtml examples/self-audit.thml               # canonical JSON + diagnostics
-thoughtml --audit examples/self-audit.thml       # the mirror: where structure disagrees
+thoughtml examples/ship-the-hotfix.thml               # canonical JSON + diagnostics
+thoughtml --audit examples/ship-the-hotfix.thml       # the mirror: where structure disagrees
 thoughtml check --json doc.thml                  # diagnostics with stable codes + suggested fixes
 thoughtml fmt -w doc.thml                          # format in the one canonical style
 thoughtml explain doc.thml some-claim              # why a node has its confidence / status
 thoughtml diff before.thml after.thml              # a semantic, belief-level diff
-thoughtml --html -o record.html examples/decision-record.thml   # bake to one interactive HTML file
+thoughtml --html -o record.html examples/choose-datastore.thml   # bake to one interactive HTML file
 ```
 
 Full reference: [The CLI ↗](https://fatin-ishraq.github.io/ThoughtML/guides/cli.html).

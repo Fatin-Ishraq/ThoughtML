@@ -1,0 +1,78 @@
+# ship-or-hold — the whole compute layer in one decision.
+#
+# This is the capstone. It weaves together every part of the second reading:
+#   * formula payoffs (`= expr`) that compute an outcome's value from inputs,
+#   * a probability *borrowed from derived confidence* — one `leads-to` omits its
+#     probability, so the engine uses the outcome's own belief (from the evidence
+#     below) as its likelihood: belief becomes probability, once and visibly,
+#   * expected-value ranking over the options, and
+#   * a what-if: mute one piece of evidence and the EV ordering flips.
+# None of it decides for you — it is a second reading of the numbers you wrote.
+# Turn it on with `--compute`.
+
+scope release-decision
+
+observation weekly-revenue
+  Checkout revenue per week.
+  quantity 400000 USD
+
+observation delay-cost
+  Revenue given up by delaying the launch one week.
+  quantity 100000 USD
+
+decision release-plan
+  Ship the new checkout flow now, or hold a week for an extended test pass?
+
+option ship-now
+  Ship to 100% of traffic today.
+
+option hold-week
+  Hold one week and run an extended test pass first.
+
+link ship-now option-of release-plan
+link hold-week option-of release-plan
+
+# --- If we ship now ---
+outcome ship-clean
+  Ships cleanly; a full extra week of checkout revenue.
+  = weekly-revenue
+
+outcome ship-breaks
+  A checkout bug reaches production: refunds, churn, and firefighting.
+  quantity -200000 USD
+
+link ship-now leads-to ship-clean
+  probability 0.75
+link ship-now leads-to ship-breaks
+  probability 0.25
+
+# --- If we hold a week ---
+# hold-pays-off's probability is OMITTED on purpose: the engine falls back to the
+# outcome's own derived confidence (from the two observations below) as the
+# probability. That is the one place belief turns into likelihood.
+outcome hold-pays-off
+  The extra pass catches the latent bug; we ship next week with no incident.
+  = weekly-revenue - delay-cost
+
+outcome hold-wasted
+  The pass finds nothing; a week of revenue lost for no reason.
+  quantity -100000 USD
+
+link hold-week leads-to hold-pays-off
+link hold-week leads-to hold-wasted
+  probability 0.15
+
+observation flaky-tests
+  Two flaky checkout tests have already surfaced this sprint.
+
+observation similar-bug-last-quarter
+  A near-identical last-minute checkout bug shipped last quarter.
+
+link flaky-tests supports hold-pays-off
+  weight 0.8
+link similar-bug-last-quarter supports hold-pays-off
+  weight 0.7
+
+release-manager chooses hold-week
+  because hold-pays-off
+  note The extra week pays for itself when a checkout bug is even moderately likely.

@@ -42,7 +42,7 @@ attack stay `undecided`.
 
 ## Worked example
 
-From the tutorial's [`self-audit.thml`](../appendix/examples.md):
+From the tutorial's [`ship-the-hotfix.thml`](../appendix/examples.md):
 
 ```thml
 link load-test-passed supports cache-is-safe

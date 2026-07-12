@@ -176,19 +176,19 @@ conflicts:
 
 ```sh
 # Canonical JSON + diagnostics
-thoughtml examples/incident-742.thml
+thoughtml examples/triage-742.thml
 
 # The full second reading, compact, to a file
-thoughtml --compute --compact -o out.json examples/why-harvard.thml
+thoughtml --compute --compact -o out.json examples/ship-or-hold.thml
 
 # Just the conflict report
-thoughtml --audit examples/self-audit.thml
+thoughtml --audit examples/ship-the-hotfix.thml
 
 # Replay: what did the document believe as of a date?
-thoughtml --as-of 2026-01-13 examples/build-tetris.thml
+thoughtml --as-of 2026-01-13 examples/launch-readiness.thml
 
 # A standalone interactive viewer — one self-contained HTML file, opens anywhere
-thoughtml --html -o decision-record.html examples/decision-record.thml
+thoughtml --html -o decision-record.html examples/choose-datastore.thml
 
 # Enforce provenance and fail on any warning (good for CI)
 thoughtml --strict --strict-provenance reasoning.thml
@@ -212,5 +212,5 @@ Before installing the binary, you can run via cargo from the repository root
 (`-p thoughtml` selects the parser crate):
 
 ```sh
-cargo run -p thoughtml -- --compute examples/decision-ev.thml
+cargo run -p thoughtml -- --compute examples/ship-or-hold.thml
 ```

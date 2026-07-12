@@ -67,5 +67,5 @@ evidence, rounded to three decimals, e.g.:
 
 In the playground, it shows in the detail panel **beside** your authored
 confidence — two bars, never merged. On the bundled
-[`ai-and-jobs.thml`](../appendix/examples.md), the displacement hypothesis lands
+[`hiring-panel.thml`](../appendix/examples.md), the displacement hypothesis lands
 ≈0.94 while the optimist's rebuttal comes out ≈0.22, several hops deep.

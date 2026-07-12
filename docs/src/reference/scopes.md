@@ -34,7 +34,7 @@ scope college-choice
       Which offer do I commit to?
 ```
 
-The bundled [`why-harvard.thml`](../appendix/examples.md) uses four sub-scopes
+The bundled [`ship-or-hold.thml`](../appendix/examples.md) uses four sub-scopes
 (goals / evidence / decision / second-thoughts) to organize a real decision.
 
 ## Inheritance

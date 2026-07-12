@@ -58,7 +58,7 @@ Maybe the confidence is the honest number and the structure overstates the
 attack. The mirror can't know — *you* do. It just makes the disagreement
 impossible to miss.
 
-The bundled [`self-audit.thml`](../appendix/examples.md) exists precisely to
+The bundled [`ship-the-hotfix.thml`](../appendix/examples.md) exists precisely to
 demonstrate this: clean document, real conflict, no verdict.
 
 ## `definition-divergence`
