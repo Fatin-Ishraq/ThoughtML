@@ -76,6 +76,14 @@ fn parse_lines(lines: &[Line], diags: &mut Diagnostics) -> SurfaceFile {
                 while stack.last().is_some_and(|o| o.indent >= indent) {
                     close_top(&mut stack, &mut roots);
                 }
+                // Inside an evidence bundle, indented lines are members (source ids
+                // with optional weight/basis), not nested headers or fields.
+                if matches!(stack.last().map(|o| &o.rec.header), Some(Header::EvidenceBundle { .. })) {
+                    if let Some(entry) = parse_member(line, diags) {
+                        stack.last_mut().unwrap().rec.block.evidence.push(entry);
+                    }
+                    continue;
+                }
                 if looks_like_header(&line.content) {
                     // A nested child header (only `scope` gives this meaning; see
                     // desugar). A malformed header reports its own error and is
@@ -128,6 +136,9 @@ fn parse_header(line: &Line, diags: &mut Diagnostics) -> Option<Header> {
         "stance" => parse_stance_header(line, &toks, diags),
         "profile" => simple_id_header(line, &toks, diags, |id| Header::Profile { name: id }),
         "import" => parse_import_header(line, &toks, diags),
+        // A built-in relation used as an evidence-bundle header (`supports claim`);
+        // its indented members each desugar to a link into `claim`.
+        r if vocab::is_relation(r) => parse_bundle_header(line, &toks, diags),
         // A built-in kind used as a one-line focus header (`observation foo`,
         // `decision bar`). Pure sugar for `focus foo` + `kind observation`.
         k if vocab::is_kind(k) => {
@@ -153,6 +164,64 @@ fn simple_id_header(
     }
     let id = ident(toks[1], line.number, diags)?;
     Some(build(id))
+}
+
+fn parse_bundle_header(line: &Line, toks: &[&str], diags: &mut Diagnostics) -> Option<Header> {
+    // `<relation> <target>` — the relation is already known (is_relation matched).
+    if toks.len() != 2 {
+        diags.error(
+            line.number,
+            format!("`{}` evidence bundle expects `<relation> <target>`", toks[0]),
+        );
+        return None;
+    }
+    let relation = toks[0].to_string();
+    let target = ident(toks[1], line.number, diags)?;
+    Some(Header::EvidenceBundle { relation, target })
+}
+
+/// Parse one member line of an evidence bundle:
+/// `<source-id> [weight <number>] [measured|estimated|assumed]`.
+fn parse_member(line: &Line, diags: &mut Diagnostics) -> Option<EvidenceEntry> {
+    let toks: Vec<&str> = line.content.split_whitespace().collect();
+    let Some(&first) = toks.first() else {
+        return None; // a blank line never reaches here, but guard defensively
+    };
+    let source = ident(first, line.number, diags)?;
+    let mut weight = None;
+    let mut basis = None;
+    let mut i = 1;
+    while i < toks.len() {
+        match toks[i] {
+            "weight" => match toks.get(i + 1).and_then(|s| s.parse::<f64>().ok()) {
+                Some(v) => {
+                    weight = Some(v);
+                    i += 2;
+                }
+                None => {
+                    diags.warning(line.number, "`weight` in an evidence member needs a number");
+                    i += 1;
+                }
+            },
+            b if vocab::is_basis(b) => {
+                basis = Some(b.to_string());
+                i += 1;
+            }
+            other => {
+                diags.warning(
+                    line.number,
+                    format!("unexpected token `{other}` in evidence member `{source}`"),
+                );
+                i += 1;
+            }
+        }
+    }
+    Some(EvidenceEntry {
+        line: line.number,
+        source,
+        weight,
+        basis,
+    })
 }
 
 fn parse_link_header(line: &Line, toks: &[&str], diags: &mut Diagnostics) -> Option<Header> {
@@ -355,6 +424,12 @@ fn looks_like_header(content: &str) -> bool {
     // are lowercase and reserved, so a capitalised or multi-word body line — the
     // usual prose — is never mistaken for one.
     if vocab::is_kind(first) && toks.len() == 2 {
+        return true;
+    }
+    // An evidence-bundle header: `<relation> <target>` (exactly two tokens). Same
+    // two-token guard keeps ordinary prose out; `!is_known_field` keeps a relation
+    // that doubles as a field name (e.g. `answers <question>`) parsing as a field.
+    if vocab::is_relation(first) && !vocab::is_known_field(first) && toks.len() == 2 {
         return true;
     }
     !vocab::is_known_field(first) && toks.len() >= 2 && vocab::is_posture(toks[1])

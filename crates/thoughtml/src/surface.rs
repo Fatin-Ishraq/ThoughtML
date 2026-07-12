@@ -63,6 +63,13 @@ pub enum Header {
         posture: String,
         form: ActionForm,
     },
+    /// An evidence bundle (`<relation> <target>`): its indented block lists source
+    /// ids, each desugaring to a `link <source> <relation> <target>`. Pure sugar —
+    /// the canonical model still sees only `link` objects.
+    EvidenceBundle {
+        relation: String,
+        target: String,
+    },
     /// A profile declaration (`profile <name>`, Phase 5): its block lists the
     /// custom `kinds`/`relations`/`fields`/`postures` the document's dialect adds.
     Profile {
@@ -104,6 +111,23 @@ pub struct Block {
     /// A `= <expr>` formula line (v0.2, Phase 8), if the block has one.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub formula: Option<String>,
+    /// Members of an `<relation> <target>` evidence bundle: each desugars to a
+    /// `link <source> <relation> <target>`. Empty for every other record.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub evidence: Vec<EvidenceEntry>,
+}
+
+/// One member line of an evidence bundle: a source id and the optional strength
+/// (`weight`) and provenance (`measured`/`estimated`/`assumed`) for its link.
+#[derive(Debug, Clone, Serialize)]
+pub struct EvidenceEntry {
+    /// 1-based source line.
+    pub line: usize,
+    pub source: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub weight: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub basis: Option<String>,
 }
 
 /// A field phrase within a block (§7).

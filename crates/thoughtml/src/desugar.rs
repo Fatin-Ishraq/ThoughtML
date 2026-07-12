@@ -405,6 +405,10 @@ impl<'a> Desugarer<'a> {
             // kind, when present, is authoritative.
             Header::Focus { id } => self.focus_record(id, None, rec),
             Header::TypedFocus { id, kind } => self.focus_record(id, Some(kind), rec),
+            Header::EvidenceBundle { relation, target } => {
+                self.evidence_bundle(rec, relation, target);
+                None
+            }
             Header::Link {
                 alias,
                 from,
@@ -641,18 +645,48 @@ impl<'a> Desugarer<'a> {
         };
         // A `weight` field sets relation strength; a `probability` (Phase 9) is
         // the outcome likelihood on a `leads-to` edge.
-        let (field_weight, probability, basis, fields) = self.split_link_scalars(&rec.block, rec.line);
-        let mut weight = field_weight;
+        let (weight, probability, basis, fields) = self.split_link_scalars(&rec.block, rec.line);
+        self.push_link(
+            id,
+            from,
+            relation,
+            to,
+            weight,
+            probability,
+            basis,
+            rec.block.body.clone(),
+            fields,
+            rec.line,
+        );
+    }
+
+    /// Build and record one `Link` object. Shared by `core_link` (from a `link`
+    /// header) and evidence bundles (one call per member), so id-gen and the
+    /// leads-to / probability warnings never drift between the two paths.
+    #[allow(clippy::too_many_arguments)]
+    fn push_link(
+        &mut self,
+        id: String,
+        from: &str,
+        relation: &str,
+        to: &str,
+        mut weight: Option<f64>,
+        probability: Option<f64>,
+        basis: Option<String>,
+        body: Option<String>,
+        fields: Fields,
+        line: usize,
+    ) {
         if probability.is_some() && relation != "leads-to" {
             self.diags.warning(
-                rec.line,
+                line,
                 format!("`probability` on a `{relation}` link is ignored; it only weights `leads-to` edges (§10.6)"),
             );
         }
         // On a `leads-to` edge, likelihood is carried by `probability`, not weight.
         if weight.is_some() && relation == "leads-to" {
             self.diags.warning(
-                rec.line,
+                line,
                 "a `weight` on a `leads-to` link is ignored; use `probability` (§10.6)",
             );
             weight = None;
@@ -665,13 +699,37 @@ impl<'a> Desugarer<'a> {
             weight,
             probability,
             basis,
-            body: rec.block.body.clone(),
+            body,
             fields,
             superseded_by: None,
             derived_confidence: None,
             leverage: None,
             argument_status: None,
         }));
+    }
+
+    /// Desugar an evidence bundle (`<relation> <target>`): each member becomes a
+    /// plain `link <source> <relation> <target>` carrying its weight/basis.
+    fn evidence_bundle(&mut self, rec: &Record, relation: &str, target: &str) {
+        if rec.block.evidence.is_empty() {
+            self.diags
+                .warning(rec.line, format!("empty evidence bundle `{relation} {target}`"));
+        }
+        for e in &rec.block.evidence {
+            let id = self.idgen.link_id(&e.source, relation, target);
+            self.push_link(
+                id,
+                &e.source,
+                relation,
+                target,
+                e.weight,
+                None,
+                e.basis.clone(),
+                None,
+                Fields::new(),
+                e.line,
+            );
+        }
     }
 
     fn core_stance(

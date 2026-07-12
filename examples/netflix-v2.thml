@@ -55,20 +55,12 @@ scope netflix-case-study
   claim mission-statement
     To entertain the world by providing high-quality content that viewers can watch anytime and anywhere.
 
-  link subscription-streaming supports netflix-inc
-    weight 0.90 assumed
-
-  link original-film-production supports netflix-inc
-    weight 0.85 assumed
-
-  link tv-series-production supports netflix-inc
-    weight 0.85 assumed
-
-  link documentary-production supports netflix-inc
-    weight 0.80 assumed
-
-  link mobile-gaming supports netflix-inc
-    weight 0.75 assumed
+  supports netflix-inc
+    subscription-streaming weight 0.90 assumed
+    original-film-production weight 0.85 assumed
+    tv-series-production weight 0.85 assumed
+    documentary-production weight 0.80 assumed
+    mobile-gaming weight 0.75 assumed
 
   memory physical-rental-era
     During the late 1990s, home entertainment was dominated by physical video rentals.
@@ -94,20 +86,12 @@ scope netflix-case-study
   claim customer-pain-points
     Consumers faced several frustrations with physical rentals.
 
-  link late-fees-problem supports customer-pain-points
-    weight 0.90 assumed
-
-  link limited-availability supports customer-pain-points
-    weight 0.85 assumed
-
-  link long-travel-time supports customer-pain-points
-    weight 0.85 assumed
-
-  link physical-damage supports customer-pain-points
-    weight 0.80 assumed
-
-  link poor-recommendations supports customer-pain-points
-    weight 0.85 assumed
+  supports customer-pain-points
+    late-fees-problem weight 0.90 assumed
+    limited-availability weight 0.85 assumed
+    long-travel-time weight 0.85 assumed
+    physical-damage weight 0.80 assumed
+    poor-recommendations weight 0.85 assumed
 
   observation growth-of-internet
     Growth of the internet.
@@ -130,23 +114,13 @@ scope netflix-case-study
   claim technological-changes
     Several technological developments changed the industry.
 
-  link growth-of-internet supports technological-changes
-    weight 0.90 assumed
-
-  link increasing-broadband supports technological-changes
-    weight 0.90 assumed
-
-  link falling-storage-costs supports technological-changes
-    weight 0.85 assumed
-
-  link improved-video-compression supports technological-changes
-    weight 0.85 assumed
-
-  link rising-smartphone-usage supports technological-changes
-    weight 0.80 assumed
-
-  link smart-tv-expansion supports technological-changes
-    weight 0.80 assumed
+  supports technological-changes
+    growth-of-internet weight 0.90 assumed
+    increasing-broadband weight 0.90 assumed
+    falling-storage-costs weight 0.85 assumed
+    improved-video-compression weight 0.85 assumed
+    rising-smartphone-usage weight 0.80 assumed
+    smart-tv-expansion weight 0.80 assumed
 
   claim streaming-opportunity
     These changes created opportunities for digital streaming services.
@@ -176,17 +150,11 @@ scope netflix-case-study
     observation monthly-subscription
       Monthly subscription pricing.
 
-    link greater-convenience supports dvd-subscription-model
-      weight 0.90 assumed
-
-    link larger-catalog supports dvd-subscription-model
-      weight 0.85 assumed
-
-    link personalized-recommendations supports dvd-subscription-model
-      weight 0.85 assumed
-
-    link monthly-subscription supports dvd-subscription-model
-      weight 0.90 assumed
+    supports dvd-subscription-model
+      greater-convenience weight 0.90 assumed
+      larger-catalog weight 0.85 assumed
+      personalized-recommendations weight 0.85 assumed
+      monthly-subscription weight 0.90 assumed
 
     claim compete-on-experience
       Instead of competing only on price, Netflix competed on customer experience.
@@ -235,11 +203,9 @@ scope netflix-case-study
   observation improved-customer-convenience
     The streaming model improved customer convenience.
 
-  link reduced-shipping-costs supports new-model
-    weight 0.90 assumed
-
-  link improved-customer-convenience supports new-model
-    weight 0.90 assumed
+  supports new-model
+    reduced-shipping-costs weight 0.90 assumed
+    improved-customer-convenience weight 0.90 assumed
 
   link new-model revises original-model
     weight 0.95 assumed
@@ -390,26 +356,16 @@ scope netflix-case-study
     observation dvd-stores-store-hours-only
       DVD rental stores: Store hours only.
 
-    link available-24-7 supports netflix-competitive-advantages
-      weight 0.90 assumed
+    supports netflix-competitive-advantages
+      available-24-7 weight 0.90 assumed
+      personalized-recommendations-excellent weight 0.85 assumed
+      original-content-extensive weight 0.90 assumed
+      global-reach-very-high weight 0.85 assumed
+      instant-access-yes weight 0.90 assumed
 
-    link personalized-recommendations-excellent supports netflix-competitive-advantages
-      weight 0.85 assumed
-
-    link original-content-extensive supports netflix-competitive-advantages
-      weight 0.90 assumed
-
-    link global-reach-very-high supports netflix-competitive-advantages
-      weight 0.85 assumed
-
-    link instant-access-yes supports netflix-competitive-advantages
-      weight 0.90 assumed
-
-    link traditional-tv-limited-schedule opposes netflix-competitive-advantages
-      weight 0.60 assumed
-
-    link dvd-stores-store-hours-only opposes netflix-competitive-advantages
-      weight 0.60 assumed
+    opposes netflix-competitive-advantages
+      traditional-tv-limited-schedule weight 0.60 assumed
+      dvd-stores-store-hours-only weight 0.60 assumed
 
     claim netflix-outcompetes-blockbuster
       Netflix outcompetes Blockbuster.
@@ -493,20 +449,12 @@ scope netflix-case-study
     claim netflix-strengths
       Netflix has significant strengths.
 
-    link strong-global-brand supports netflix-strengths
-      weight 0.90 assumed
-
-    link large-subscriber-base supports netflix-strengths
-      weight 0.90 assumed
-
-    link advanced-algorithms supports netflix-strengths
-      weight 0.85 assumed
-
-    link high-quality-original-content supports netflix-strengths
-      weight 0.90 assumed
-
-    link strong-tech-infrastructure supports netflix-strengths
-      weight 0.85 assumed
+    supports netflix-strengths
+      strong-global-brand weight 0.90 assumed
+      large-subscriber-base weight 0.90 assumed
+      advanced-algorithms weight 0.85 assumed
+      high-quality-original-content weight 0.90 assumed
+      strong-tech-infrastructure weight 0.85 assumed
 
     observation high-production-costs
       High content production costs.
@@ -520,14 +468,10 @@ scope netflix-case-study
     claim netflix-weaknesses
       Netflix has notable weaknesses.
 
-    link high-production-costs supports netflix-weaknesses
-      weight 0.85 assumed
-
-    link dependence-subscription-revenue supports netflix-weaknesses
-      weight 0.80 assumed
-
-    link increasing-competition supports netflix-weaknesses
-      weight 0.85 assumed
+    supports netflix-weaknesses
+      high-production-costs weight 0.85 assumed
+      dependence-subscription-revenue weight 0.80 assumed
+      increasing-competition weight 0.85 assumed
 
     observation expansion-gaming
       Expansion into gaming.
@@ -544,17 +488,11 @@ scope netflix-case-study
     claim netflix-opportunities
       Netflix has significant opportunities.
 
-    link expansion-gaming supports netflix-opportunities
-      weight 0.80 assumed
-
-    link live-entertainment supports netflix-opportunities
-      weight 0.75 assumed
-
-    link emerging-markets supports netflix-opportunities
-      weight 0.85 assumed
-
-    link ai-personalization supports netflix-opportunities
-      weight 0.85 assumed
+    supports netflix-opportunities
+      expansion-gaming weight 0.80 assumed
+      live-entertainment weight 0.75 assumed
+      emerging-markets weight 0.85 assumed
+      ai-personalization weight 0.85 assumed
 
     observation password-sharing
       Password sharing.
@@ -574,20 +512,12 @@ scope netflix-case-study
     claim netflix-threats
       Netflix faces significant threats.
 
-    link password-sharing supports netflix-threats
-      weight 0.80 assumed
-
-    link content-piracy supports netflix-threats
-      weight 0.80 assumed
-
-    link rising-production-costs supports netflix-threats
-      weight 0.85 assumed
-
-    link economic-downturns supports netflix-threats
-      weight 0.75 assumed
-
-    link new-competitors supports netflix-threats
-      weight 0.85 assumed
+    supports netflix-threats
+      password-sharing weight 0.80 assumed
+      content-piracy weight 0.80 assumed
+      rising-production-costs weight 0.85 assumed
+      economic-downturns weight 0.75 assumed
+      new-competitors weight 0.85 assumed
 
   scope challenges
 
@@ -606,17 +536,11 @@ scope netflix-case-study
     claim major-competitors
       Major competitors entered the streaming market.
 
-    link disney-competitor supports major-competitors
-      weight 0.90 assumed
-
-    link amazon-competitor supports major-competitors
-      weight 0.90 assumed
-
-    link warner-bros-competitor supports major-competitors
-      weight 0.85 assumed
-
-    link apple-competitor supports major-competitors
-      weight 0.85 assumed
+    supports major-competitors
+      disney-competitor weight 0.90 assumed
+      amazon-competitor weight 0.90 assumed
+      warner-bros-competitor weight 0.85 assumed
+      apple-competitor weight 0.85 assumed
 
     claim competition-pressure
       Competition increased pressure on pricing and content quality.
@@ -677,35 +601,17 @@ scope netflix-case-study
     claim netflix-success-factors
       Several factors contributed to Netflix's success.
 
-    link customer-focused-innovation supports netflix-success-factors
-      weight 0.90 assumed
-
-    link early-adoption-streaming supports netflix-success-factors
-      weight 0.90 assumed
-
-    link continuous-tech-investment supports netflix-success-factors
-      weight 0.85 assumed
-
-    link strong-recommendation-algorithms supports netflix-success-factors
-      weight 0.85 assumed
-
-    link data-driven-decisions supports netflix-success-factors
-      weight 0.85 assumed
-
-    link global-expansion-success supports netflix-success-factors
-      weight 0.85 assumed
-
-    link exclusive-original-programming supports netflix-success-factors
-      weight 0.90 assumed
-
-    link flexible-subscription-model supports netflix-success-factors
-      weight 0.80 assumed
-
-    link continuous-experimentation supports netflix-success-factors
-      weight 0.85 assumed
-
-    link ability-adapt-quickly supports netflix-success-factors
-      weight 0.90 assumed
+    supports netflix-success-factors
+      customer-focused-innovation weight 0.90 assumed
+      early-adoption-streaming weight 0.90 assumed
+      continuous-tech-investment weight 0.85 assumed
+      strong-recommendation-algorithms weight 0.85 assumed
+      data-driven-decisions weight 0.85 assumed
+      global-expansion-success weight 0.85 assumed
+      exclusive-original-programming weight 0.90 assumed
+      flexible-subscription-model weight 0.80 assumed
+      continuous-experimentation weight 0.85 assumed
+      ability-adapt-quickly weight 0.90 assumed
 
   scope lessons
 
@@ -730,23 +636,13 @@ scope netflix-case-study
     claim business-lessons
       Businesses can learn several important lessons from Netflix.
 
-    link solve-real-problems supports business-lessons
-      weight 0.90 assumed
-
-    link disrupt-yourself supports business-lessons
-      weight 0.90 assumed
-
-    link use-data-responsibly supports business-lessons
-      weight 0.85 assumed
-
-    link invest-long-term supports business-lessons
-      weight 0.90 assumed
-
-    link adapt-quickly supports business-lessons
-      weight 0.90 assumed
-
-    link differentiate-unique-value supports business-lessons
-      weight 0.85 assumed
+    supports business-lessons
+      solve-real-problems weight 0.90 assumed
+      disrupt-yourself weight 0.90 assumed
+      use-data-responsibly weight 0.85 assumed
+      invest-long-term weight 0.90 assumed
+      adapt-quickly weight 0.90 assumed
+      differentiate-unique-value weight 0.85 assumed
 
   scope discussion-questions
 
@@ -806,14 +702,10 @@ scope netflix-case-study
     claim valuable-case-study
       It is a valuable case study in innovation, digital transformation, and strategic management.
 
-    link recognized-changing-preferences supports netflix-significant-transformation
-      weight 0.85 assumed
-
-    link embraced-new-technology supports netflix-significant-transformation
-      weight 0.85 assumed
-
-    link continuously-innovating supports netflix-significant-transformation
-      weight 0.90 assumed
+    supports netflix-significant-transformation
+      recognized-changing-preferences weight 0.85 assumed
+      embraced-new-technology weight 0.85 assumed
+      continuously-innovating weight 0.90 assumed
 
     link netflix-significant-transformation causes evolved-dvd-to-streaming
       weight 0.90 assumed
@@ -824,11 +716,7 @@ scope netflix-case-study
     link evolved-dvd-to-streaming causes influences-entertainment
       weight 0.85 assumed
 
-    link influences-entertainment supports valuable-case-study
-      weight 0.90 assumed
-
-    link netflix-success-factors supports valuable-case-study
-      weight 0.85 assumed
-
-    link business-lessons supports valuable-case-study
-      weight 0.85 assumed
+    supports valuable-case-study
+      influences-entertainment weight 0.90 assumed
+      netflix-success-factors weight 0.85 assumed
+      business-lessons weight 0.85 assumed

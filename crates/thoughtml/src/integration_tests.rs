@@ -607,6 +607,84 @@ fn typed_header_does_not_capture_prose_body() {
     );
 }
 
+fn link_tuple(o: &Object) -> Option<(String, String, String, String, Option<f64>, Option<String>)> {
+    match o {
+        Object::Link(l) => Some((
+            l.id.clone(),
+            l.from.clone(),
+            l.relation.clone(),
+            l.to.clone(),
+            l.weight,
+            l.basis.clone(),
+        )),
+        _ => None,
+    }
+}
+
+#[test]
+fn evidence_bundle_desugars_to_the_same_links_as_longhand() {
+    let bundle = parse_str(
+        "claim t\nobservation a\nobservation b\nobservation c\n\
+         supports t\n  a weight 0.9 assumed\n  b weight 0.85\n  c",
+    );
+    let longhand = parse_str(
+        "claim t\nobservation a\nobservation b\nobservation c\n\
+         link a supports t\n  weight 0.9 assumed\nlink b supports t\n  weight 0.85\nlink c supports t",
+    );
+    assert!(!bundle.diagnostics.has_errors(), "{:?}", bundle.diagnostics.items);
+    let bl: Vec<_> = bundle.canonical.objects.iter().filter_map(link_tuple).collect();
+    let ll: Vec<_> = longhand.canonical.objects.iter().filter_map(link_tuple).collect();
+    assert_eq!(bl, ll, "bundle must desugar to the same links as longhand");
+    // the bare member (`c`) is a normal, full-strength link
+    let c = link(&bundle.canonical.objects, "c-supports-t").unwrap();
+    assert_eq!(c.weight, None);
+    assert_eq!(c.basis, None);
+}
+
+#[test]
+fn evidence_bundle_nested_in_scope_emits_links() {
+    let r = parse_str(
+        "scope s\n  claim conclusion\n  observation e1\n  observation e2\n\
+         \x20 supports conclusion\n    e1 weight 0.9\n    e2",
+    );
+    assert!(!r.diagnostics.has_errors(), "{:?}", r.diagnostics.items);
+    let links: Vec<_> = r
+        .canonical
+        .objects
+        .iter()
+        .filter_map(|x| match x {
+            Object::Link(l) => Some((l.from.as_str(), l.relation.as_str(), l.to.as_str())),
+            _ => None,
+        })
+        .collect();
+    assert!(links.contains(&("e1", "supports", "conclusion")));
+    assert!(links.contains(&("e2", "supports", "conclusion")));
+}
+
+#[test]
+fn evidence_bundle_members_are_strict_clean() {
+    // Members are not fields, so they raise no unknown-field warnings.
+    let r = parse_str("claim t\nobservation a\nsupports t\n  a weight 0.9 assumed");
+    assert!(!r.diagnostics.has_errors(), "{:?}", r.diagnostics.items);
+    assert!(
+        !r.diagnostics.items.iter().any(|d| d.message.contains("unknown field")),
+        "members must not warn as unknown fields: {:?}",
+        r.diagnostics.items,
+    );
+}
+
+#[test]
+fn relation_that_is_also_a_field_stays_a_field() {
+    // `answers <question>` is a field on a stance, not an evidence bundle, even
+    // though `answers` is a relation word.
+    let r = parse_str(
+        "question q\n  What?\n  expects cause\nteam suspects a causes b as s\n  answers q",
+    );
+    assert!(!r.diagnostics.has_errors(), "{:?}", r.diagnostics.items);
+    // no stray bundle-link was created from the `answers q` field line
+    assert!(!r.canonical.objects.iter().any(|o| matches!(o, Object::Link(l) if l.relation == "answers")));
+}
+
 #[test]
 fn explicit_kind_beats_inferred_silently() {
     // An explicit kind is authoritative; a later posture-inferred kind does not
