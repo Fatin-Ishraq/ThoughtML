@@ -90,6 +90,11 @@ It's built for an age where an AI agent can emit this structure at no cost, and 
 human (or another agent, or CI) audits it. The point isn't to *compute the
 answer.* It's to make the reasoning legible enough that its flaws can't hide.
 
+> **Writing ThoughtML with an AI?** [`llms.txt`](llms.txt) is the entire language in
+> one self-contained, source-derived file, written for the agent that authors it —
+> the closed vocabularies, the distinctions that matter, how to read the mirror back,
+> and gold examples. Paste it into a system prompt.
+
 ## What you'd use it for
 
 - **Decision records (ADRs) you can lint** — the options, the evidence, the open
