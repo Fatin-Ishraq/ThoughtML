@@ -2667,3 +2667,95 @@ fn divergent_redefinition_is_kept_not_dropped() {
     assert_eq!(c[0].kind, "definition-divergence");
     assert!(c[0].subjects.contains(&"metric-shift".to_string()));
 }
+
+// --- CLI-backing feature modules: lint, explain, diff, fmt ----------------
+
+/// Parse with the whole compute stack on — what `explain`/`diff` run behind.
+fn compute(src: &str) -> crate::Canonical {
+    parse_str_with(
+        src,
+        Options {
+            derive_confidence: true,
+            argument_status: true,
+            sensitivity: true,
+            formulas: true,
+            decision_ev: true,
+            audit: true,
+            ..Default::default()
+        },
+    )
+    .canonical
+}
+
+#[test]
+fn lint_assigns_stable_codes_and_typo_suggestions() {
+    assert_eq!(
+        crate::lint::code_for("unknown relation `supprts`"),
+        Some("TML102")
+    );
+    let help = crate::lint::help_for("unknown relation `supprts`").expect("suggestion");
+    assert!(help.contains("supports"), "help: {help}");
+    assert_eq!(
+        crate::lint::code_for("focus `x` is not connected to anything"),
+        Some("TML301")
+    );
+    assert_eq!(crate::lint::code_for("some unclassified message"), None);
+}
+
+#[test]
+fn lint_flags_supports_used_as_a_list() {
+    let src = "claim s\n  Summary.\nobservation i1\n  1.\nobservation i2\n  2.\n\
+               observation i3\n  3.\nobservation i4\n  4.\nsupports s\n  i1\n  i2\n  i3\n  i4\n";
+    let lints = crate::lint::supports_as_list(&parse_str(src).canonical);
+    assert_eq!(lints.len(), 1, "lints: {lints:?}");
+    assert!(lints[0].message.contains("part-of"));
+
+    // With genuine counter-evidence it is an argument, not a list — not flagged.
+    let src2 = format!("{src}observation counter\n  No.\nlink counter opposes s\n");
+    assert!(crate::lint::supports_as_list(&parse_str(&src2).canonical).is_empty());
+}
+
+#[test]
+fn explain_traces_a_defeated_node() {
+    let src = "claim c\n  A claim.\nobservation pro\n  For it.\nobservation con\n  Against it.\n\
+               link pro supports c\nlink con opposes c\nanalyst holds c\n  confidence 0.9\n";
+    let canon = compute(src);
+    let text = crate::explain::explain(&canon, "c").expect("c explained");
+    assert!(text.contains("argument status"), "{text}");
+    assert!(text.contains("out"), "{text}");
+    assert!(text.contains("opposes") && text.contains("con"), "{text}");
+    assert!(text.contains("why:"), "{text}");
+    assert!(crate::explain::explain(&canon, "no-such-id").is_none());
+}
+
+#[test]
+fn diff_reports_status_flip_and_new_conflict() {
+    let a = "claim c\n  A claim.\nobservation pro\n  For it.\nlink pro supports c\n\
+             analyst holds c\n  confidence 0.9\n";
+    let b = "claim c\n  A claim.\nobservation pro\n  For it.\nobservation con\n  Against it.\n\
+             link pro supports c\nlink con opposes c\nanalyst holds c\n  confidence 0.9\n";
+    let report = crate::diff::diff(&compute(a), &compute(b));
+    assert!(report.changed);
+    assert!(report.text.contains("con"), "added node: {}", report.text);
+    assert!(report.text.contains("status") && report.text.contains("out"));
+    assert!(report.text.contains("confidence-vs-status"), "{}", report.text);
+
+    let same = crate::diff::diff(&compute(a), &compute(a));
+    assert!(!same.changed);
+    assert!(same.text.contains("no belief-level changes"));
+}
+
+#[test]
+fn fmt_never_changes_the_model() {
+    let src = "scope s\n  observation x\n    Saw x.\n  claim y\n    Believe y.\nlink x supports y\n";
+    let before = parse_str(src).canonical;
+    let mut d = crate::Diagnostics::new();
+    let surface = crate::parser::parse(src, &mut d);
+    let formatted = crate::fmt::format(&surface);
+    let after = parse_str(&formatted).canonical;
+    assert_eq!(
+        serde_json::to_string(&before).unwrap(),
+        serde_json::to_string(&after).unwrap(),
+        "fmt changed the canonical model"
+    );
+}

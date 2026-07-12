@@ -15,6 +15,31 @@ document's *coherence*, not its form, and never fails parsing.
 > and zero warnings** under default options. A test (`bundled_examples_are_strict
 > _clean`) enforces it, so the corpus can't silently rot.
 
+## Codes and machine-readable output
+
+`thoughtml check --json` emits each diagnostic with a **stable code**, its severity,
+line, message, and — where one can be computed — a suggested `help` fix:
+
+```json
+{ "code": "TML102", "severity": "warning", "line": 5,
+  "message": "unknown relation `supprts`",
+  "help": "did you mean `supports`? (relations are a closed set)" }
+```
+
+Codes are grouped so an agent or editor can route on the family:
+
+| Range | Family | Examples |
+|-------|--------|----------|
+| `TML1xx` | vocabulary | `TML101` unknown kind, `TML102` unknown relation, `TML103` unknown posture, `TML104` unknown field |
+| `TML2xx` | references | `TML201` unresolved reference, `TML202` illegal link endpoint |
+| `TML3xx` | graph coherence | `TML301` orphan, `TML302` contradictory stances, `TML303` cycle, `TML304` revision before its target, `TML305` decision-graph |
+| `TML4xx` | numbers | `TML401` missing basis, `TML402` out-of-range clamp |
+| `TML5xx` | lints (opt-in) | `TML501` `supports` used as a list |
+
+For the "unknown &lt;thing&gt;" family the `help` is a nearest-spelling suggestion
+from the relevant closed vocabulary — it catches typos like `supprts` → `supports`.
+Codes are part of the tool's contract and are not renumbered once assigned.
+
 ## Errors
 
 | Message (abbreviated) | Cause |
@@ -68,6 +93,13 @@ document's *coherence*, not its form, and never fails parsing.
 - `cyclic dependency: a → b → a` — a cycle among `causes` / `depends-on` edges.
 - `focus … is not connected to anything` — an **orphan**: nothing links it, no
   stance targets it, no field references it.
+
+**Opinionated lints** (only with `thoughtml check --lint`)
+
+- `focus … gathers N supports links and no counter-evidence` (`TML501`) — a claim
+  used as an enumeration. Evidence relations inflate `derived_confidence`; if these
+  are list items, use [`part-of`](relations.md) instead. Off by default so
+  strict-clean documents are unaffected.
 
 **Decision graph**
 

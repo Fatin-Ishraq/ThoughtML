@@ -1,7 +1,31 @@
 # CLI reference
 
-The reference implementation's command-line tool is `thoughtml`. It reads a
-`.thml` file and emits the canonical object model as JSON.
+The reference implementation's command-line tool is `thoughtml`. With no
+subcommand it parses a `.thml` file and emits the canonical object model as JSON;
+subcommands add the rest of the toolchain — validation, formatting, tracing, and a
+belief-level diff.
+
+```sh
+thoughtml [OPTIONS] <FILE>      # parse + emit the canonical JSON model
+thoughtml check <FILE>          # validate and report diagnostics
+thoughtml fmt <FILE>            # rewrite in the canonical style
+thoughtml explain <FILE> <ID>   # trace a node's derived confidence / status
+thoughtml diff <A> <B>          # semantic (belief-level) diff of two documents
+```
+
+## Install
+
+With a Rust toolchain, install the binary onto your `PATH` (`~/.cargo/bin`):
+
+```sh
+cargo install --path crates/thoughtml     # from the repository root
+thoughtml --help
+```
+
+Re-run the same command after changing the parser to update the installed binary.
+The result is a single self-contained executable with no runtime dependencies.
+
+## Default invocation — parse and emit
 
 ```sh
 thoughtml [OPTIONS] <FILE>
@@ -50,6 +74,103 @@ All off by default; each adds a derived field to the output. See
 | `--acts` | emit `Act` provenance objects for readable actions |
 | `--strict-provenance` | warn on numbers with no `measured`/`estimated`/`assumed` basis |
 | `--compute` | turn on **all** the mirror readings above (except `--acts` / `--strict-provenance`) |
+
+## `thoughtml check` — validate
+
+Parse and report diagnostics without emitting the model — the tight authoring gate.
+
+```sh
+thoughtml check <FILE> [--json] [--lint] [--strict]
+```
+
+| Flag | Effect |
+|------|--------|
+| `--json` | Emit diagnostics as JSON — a stable `code`, `severity`, `line`, `message`, and a suggested `help` fix. Built for editors, CI, and AI agents that self-correct in a loop. |
+| `--lint` | Also run opinionated modeling lints. Today: the **`supports`-used-as-a-list** detector (`TML501`) — a claim with many `supports` edges and no counter-evidence is probably an enumeration that should be [`part-of`](../reference/relations.md), which would otherwise inflate its confidence. |
+| `--strict` | Exit non-zero on any warning, not just errors. |
+
+Diagnostics carry stable **codes** (`TML1xx` vocabulary, `TML2xx` references,
+`TML3xx` graph coherence, `TML4xx` numbers, `TML5xx` lints) and, for the
+"unknown &lt;thing&gt;" family, a nearest-spelling suggestion from the closed
+vocabulary. See [Diagnostics](../reference/diagnostics.md).
+
+```sh
+thoughtml check --json reasoning.thml     # machine-readable, for an agent loop
+thoughtml check --lint --strict doc.thml  # opinionated + fail on any warning (CI)
+```
+
+## `thoughtml fmt` — format
+
+Rewrite a document in the one canonical style: two-space indentation, a blank line
+between records, and a normalized field/body order. `fmt` re-parses its own output
+and refuses to write if the model would change, so formatting is always safe. It
+declines a document with parse errors. (Comments are not yet preserved.)
+
+```sh
+thoughtml fmt <FILE>          # print the formatted document to stdout
+thoughtml fmt -w <FILE>       # rewrite the file in place
+thoughtml fmt --check <FILE>  # exit non-zero if not already formatted (CI)
+```
+
+## `thoughtml explain` — trace a reading
+
+Explain *why* a node reads the way it does: its derived confidence and grounded
+argument status, the evidence for and against it (each edge's weight and
+`leverage`), the stances agents hold on it, and any mirror conflict it is caught in.
+
+```sh
+thoughtml explain <FILE> <ID>
+```
+
+```text
+$ thoughtml explain hiring.thml strong-hire
+strong-hire  (claim)
+  Alex is a strong hire.
+
+  derived confidence : 0.500
+  argument status    : out  (defeated)
+
+  evidence in:
+    opposes    take-home-failed   weight -   leverage -0.231  (source: in)
+    supports   aced-interview     weight -   leverage +0.231  (source: -)
+
+  stances:
+    panel holds  confidence 0.9
+
+  conflicts:
+    [confidence-vs-status] `panel` asserts confidence 0.90 in `strong-hire`, but ... (out)
+
+  why: defeated by attacker(s) that stand: take-home-failed.
+```
+
+## `thoughtml diff` — belief-level diff
+
+Compare two documents *semantically*, not textually: nodes added and removed, and
+for nodes in both, the changes that matter — derived confidence, grounded status
+(`in`/`out`), lifecycle status, supersession, a stance's confidence, a link's
+weight — plus the mirror conflicts that **appeared** or **resolved** between them.
+This is version control for reasoning.
+
+```sh
+thoughtml diff <BEFORE> <AFTER>
+```
+
+```text
+$ thoughtml diff before.thml after.thml
+belief diff: A -> B
+
+added (2):
+  + con  (observation)
+  + con-opposes-c  (link:opposes)
+
+changed (1):
+  ~ c
+      confidence 0.731 -> 0.500
+      status — -> out
+
+conflicts:
+  + [confidence-vs-status] `analyst` asserts confidence 0.90 in `c`, but ... (out)
+```
 
 ## Examples
 

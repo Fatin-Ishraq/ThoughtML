@@ -8,6 +8,28 @@ release — real and usable, but the surface may still move.
 
 ### Added
 
+- **A subcommand CLI — the toolchain, not just a compiler.** `thoughtml` grows
+  git-style subcommands; the bare `thoughtml <file> [--compute/--html/…]` invocation
+  is unchanged and still the default.
+  - **`check`** — validate and report diagnostics without emitting the model.
+    `--json` gives each diagnostic a **stable code** (`TML1xx` vocabulary … `TML5xx`
+    lints), line, and a suggested `help` fix (nearest-spelling for the "unknown
+    &lt;thing&gt;" family — `supprts` → `supports`); `--lint` adds opinionated checks,
+    starting with the **`supports`-used-as-a-list** detector (`TML501`) that catches
+    the enumeration-inflates-confidence smell; `--strict` fails on any warning. The
+    machine-readable stream is what an agent or editor self-corrects against.
+  - **`fmt`** — rewrite a document in one canonical style (two-space indentation,
+    a blank line between records, normalized field/body order). It re-parses its own
+    output and refuses to write if the model would change, so formatting is always
+    safe; `--check` (CI) and `-w` (in place). Comments are not yet preserved.
+  - **`explain <id>`** — trace *why* a node reads the way it does: its derived
+    confidence and grounded status, the evidence for and against it with each edge's
+    `leverage`, the stances on it, the conflict it's caught in, and a one-line "why".
+    Makes the mirror interrogable, not just declarative.
+  - **`diff <a> <b>`** — a **semantic** diff at the belief level, not the text level:
+    nodes added/removed, confidence and status changes (`in`→`out`), supersession,
+    and the conflicts that appeared or resolved between two documents. Version
+    control for reasoning. Install with `cargo install --path crates/thoughtml`.
 - **Concise authoring surface (M1–M2) — less boilerplate, same model.** Pure sugar
   that desugars to the existing canonical model; every prior `.thml` still parses.
   - **Typed headers.** A built-in kind used as the header word — `observation foo`,

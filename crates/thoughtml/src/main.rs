@@ -7,12 +7,36 @@ use std::io::{self, Read, Write};
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
-/// Parse ThoughtML source into the canonical object model.
+/// Parse and analyze ThoughtML documents. With no subcommand, parse a file and
+/// emit the canonical JSON model (the original invocation, unchanged).
 #[derive(Parser, Debug)]
-#[command(name = "thoughtml", version, about)]
+#[command(name = "thoughtml", version, about, args_conflicts_with_subcommands = true)]
 struct Cli {
+    #[command(subcommand)]
+    command: Option<Command>,
+
+    #[command(flatten)]
+    run: RunArgs,
+}
+
+#[derive(clap::Subcommand, Debug)]
+enum Command {
+    /// Validate a document and report diagnostics (text, or `--json` with stable
+    /// codes and suggested fixes); `--lint` adds opinionated modeling checks.
+    Check(CheckArgs),
+    /// Rewrite a document in the one canonical style (indentation, spacing, order).
+    Fmt(FmtArgs),
+    /// Explain why a node has its derived confidence and grounded argument status.
+    Explain(ExplainArgs),
+    /// Show a semantic (belief-level) diff between two documents.
+    Diff(DiffArgs),
+}
+
+/// The default parse/emit invocation (`thoughtml [OPTIONS] <FILE>`).
+#[derive(clap::Args, Debug)]
+struct RunArgs {
     /// Input file (use `-` for stdin).
-    file: PathBuf,
+    file: Option<PathBuf>,
 
     /// Emit the surface AST instead of the canonical object model.
     #[arg(long)]
@@ -89,13 +113,73 @@ struct Cli {
     out: Option<PathBuf>,
 }
 
+#[derive(clap::Args, Debug)]
+struct CheckArgs {
+    /// Input file (use `-` for stdin).
+    file: PathBuf,
+    /// Emit diagnostics as JSON — stable `code`, severity, line, message, `help`.
+    #[arg(long)]
+    json: bool,
+    /// Also run opinionated modeling lints (e.g. `supports` used as a list).
+    #[arg(long)]
+    lint: bool,
+    /// Exit non-zero on any warning, not just errors.
+    #[arg(long)]
+    strict: bool,
+}
+
+#[derive(clap::Args, Debug)]
+struct FmtArgs {
+    /// Input file.
+    file: PathBuf,
+    /// Do not write; exit non-zero if the file is not already formatted.
+    #[arg(long)]
+    check: bool,
+    /// Rewrite the file in place instead of printing to stdout.
+    #[arg(short, long)]
+    write: bool,
+}
+
+#[derive(clap::Args, Debug)]
+struct ExplainArgs {
+    /// Input file (use `-` for stdin).
+    file: PathBuf,
+    /// The id of the node to explain (a focus, question, or link).
+    id: String,
+}
+
+#[derive(clap::Args, Debug)]
+struct DiffArgs {
+    /// The "before" document.
+    a: PathBuf,
+    /// The "after" document.
+    b: PathBuf,
+}
+
 fn main() -> ExitCode {
     let cli = Cli::parse();
+    match cli.command {
+        Some(Command::Check(a)) => run_check(a),
+        Some(Command::Fmt(a)) => run_fmt(a),
+        Some(Command::Explain(a)) => run_explain(a),
+        Some(Command::Diff(a)) => run_diff(a),
+        None => run_default(cli.run),
+    }
+}
 
-    let source = match read_source(&cli.file) {
+/// The original invocation: parse a file and emit its canonical JSON (or HTML).
+fn run_default(cli: RunArgs) -> ExitCode {
+    let Some(file) = cli.file.clone() else {
+        eprintln!(
+            "error: no input file — give a path (`thoughtml doc.thml`) or a subcommand (see `thoughtml --help`)"
+        );
+        return ExitCode::FAILURE;
+    };
+
+    let source = match read_source(&file) {
         Ok(s) => s,
         Err(e) => {
-            eprintln!("error: cannot read {}: {e}", cli.file.display());
+            eprintln!("error: cannot read {}: {e}", file.display());
             return ExitCode::FAILURE;
         }
     };
@@ -123,7 +207,7 @@ fn main() -> ExitCode {
     } else if import_names(&source).is_empty() {
         thoughtml::parse_str_with(&source, opts)
     } else {
-        let sources = collect_sources(&cli.file, &source);
+        let sources = collect_sources(&file, &source);
         thoughtml::parse_project(&source, &sources, opts)
     };
 
@@ -139,7 +223,7 @@ fn main() -> ExitCode {
     let output = if cli.html {
         // title the standalone view after the source file (the canonical model has
         // no document-level name; a flat multi-scope doc has no single root scope).
-        let title = cli.file.file_stem().and_then(|s| s.to_str());
+        let title = file.file_stem().and_then(|s| s.to_str());
         match render_html(&result.canonical, title) {
             Ok(h) => h,
             Err(e) => {
@@ -258,4 +342,178 @@ fn write_output(out: Option<&std::path::Path>, json: &str) -> io::Result<()> {
             writeln!(lock, "{json}")
         }
     }
+}
+
+/// The compute stack the analysis subcommands need so derived readings exist.
+fn compute_opts() -> thoughtml::Options {
+    thoughtml::Options {
+        derive_confidence: true,
+        argument_status: true,
+        sensitivity: true,
+        formulas: true,
+        decision_ev: true,
+        audit: true,
+        ..Default::default()
+    }
+}
+
+/// `thoughtml check` — validate and report diagnostics (text or `--json`).
+fn run_check(args: CheckArgs) -> ExitCode {
+    let source = match read_source(&args.file) {
+        Ok(s) => s,
+        Err(e) => {
+            eprintln!("error: cannot read {}: {e}", args.file.display());
+            return ExitCode::FAILURE;
+        }
+    };
+    let result = thoughtml::parse_str(&source);
+    let mut diags = result.diagnostics.items.clone();
+    if args.lint {
+        diags.extend(thoughtml::lint::supports_as_list(&result.canonical));
+    }
+    diags.sort_by_key(|d| d.line);
+
+    if args.json {
+        let items: Vec<_> = diags.iter().map(thoughtml::lint::DiagnosticJson::of).collect();
+        match serde_json::to_string_pretty(&items) {
+            Ok(j) => println!("{j}"),
+            Err(e) => {
+                eprintln!("error: failed to serialize diagnostics: {e}");
+                return ExitCode::FAILURE;
+            }
+        }
+    } else {
+        for d in &diags {
+            println!("{}", thoughtml::lint::render_line(d));
+            if let Some(h) = thoughtml::lint::help_for(&d.message) {
+                println!("    help: {h}");
+            }
+        }
+        let errs = diags
+            .iter()
+            .filter(|d| d.severity == thoughtml::Severity::Error)
+            .count();
+        let warns = diags
+            .iter()
+            .filter(|d| d.severity == thoughtml::Severity::Warning)
+            .count();
+        if diags.is_empty() {
+            println!("clean — no errors, no warnings.");
+        } else {
+            println!("{errs} error(s), {warns} warning(s).");
+        }
+    }
+
+    let has_err = diags.iter().any(|d| d.severity == thoughtml::Severity::Error);
+    let has_warn = diags.iter().any(|d| d.severity == thoughtml::Severity::Warning);
+    if has_err || (args.strict && has_warn) {
+        ExitCode::FAILURE
+    } else {
+        ExitCode::SUCCESS
+    }
+}
+
+/// `thoughtml fmt` — rewrite a document in the canonical style. Refuses a document
+/// with parse errors, and re-parses its own output to guarantee it did not change
+/// the model before touching anything.
+fn run_fmt(args: FmtArgs) -> ExitCode {
+    let source = match read_source(&args.file) {
+        Ok(s) => s,
+        Err(e) => {
+            eprintln!("error: cannot read {}: {e}", args.file.display());
+            return ExitCode::FAILURE;
+        }
+    };
+    let result = thoughtml::parse_str(&source);
+    if result.diagnostics.has_errors() {
+        let mut ds = result.diagnostics.items.clone();
+        ds.sort_by_key(|d| d.line);
+        for d in &ds {
+            eprintln!("{d}");
+        }
+        eprintln!("error: cannot format a document with parse errors");
+        return ExitCode::FAILURE;
+    }
+    let formatted = thoughtml::fmt::format(&result.surface);
+    let reparsed = thoughtml::parse_str(&formatted);
+    if !canonical_eq(&result.canonical, &reparsed.canonical) {
+        eprintln!("error: internal — formatting would change the model; aborting (please report)");
+        return ExitCode::FAILURE;
+    }
+
+    if args.check {
+        if source == formatted {
+            ExitCode::SUCCESS
+        } else {
+            eprintln!(
+                "{}: not formatted (run `thoughtml fmt -w {}`)",
+                args.file.display(),
+                args.file.display()
+            );
+            ExitCode::FAILURE
+        }
+    } else if args.write {
+        match std::fs::write(&args.file, &formatted) {
+            Ok(()) => ExitCode::SUCCESS,
+            Err(e) => {
+                eprintln!("error: failed to write {}: {e}", args.file.display());
+                ExitCode::FAILURE
+            }
+        }
+    } else {
+        print!("{formatted}");
+        ExitCode::SUCCESS
+    }
+}
+
+fn canonical_eq(a: &thoughtml::Canonical, b: &thoughtml::Canonical) -> bool {
+    matches!(
+        (serde_json::to_string(a), serde_json::to_string(b)),
+        (Ok(x), Ok(y)) if x == y
+    )
+}
+
+/// `thoughtml explain <id>` — trace a node's derived confidence / argument status.
+fn run_explain(args: ExplainArgs) -> ExitCode {
+    let source = match read_source(&args.file) {
+        Ok(s) => s,
+        Err(e) => {
+            eprintln!("error: cannot read {}: {e}", args.file.display());
+            return ExitCode::FAILURE;
+        }
+    };
+    let result = thoughtml::parse_str_with(&source, compute_opts());
+    match thoughtml::explain::explain(&result.canonical, &args.id) {
+        Some(text) => {
+            print!("{text}");
+            ExitCode::SUCCESS
+        }
+        None => {
+            eprintln!("error: no node with id `{}` in {}", args.id, args.file.display());
+            ExitCode::FAILURE
+        }
+    }
+}
+
+/// `thoughtml diff <a> <b>` — a semantic belief-level diff between two documents.
+fn run_diff(args: DiffArgs) -> ExitCode {
+    let sa = match read_source(&args.a) {
+        Ok(s) => s,
+        Err(e) => {
+            eprintln!("error: cannot read {}: {e}", args.a.display());
+            return ExitCode::FAILURE;
+        }
+    };
+    let sb = match read_source(&args.b) {
+        Ok(s) => s,
+        Err(e) => {
+            eprintln!("error: cannot read {}: {e}", args.b.display());
+            return ExitCode::FAILURE;
+        }
+    };
+    let ra = thoughtml::parse_str_with(&sa, compute_opts());
+    let rb = thoughtml::parse_str_with(&sb, compute_opts());
+    let report = thoughtml::diff::diff(&ra.canonical, &rb.canonical);
+    print!("{}", report.text);
+    ExitCode::SUCCESS
 }

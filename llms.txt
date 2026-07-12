@@ -343,7 +343,8 @@ This is the most important operational rule. **A good ThoughtML document is
 author, run the parser, read the diagnostics, fix, repeat until clean.
 
 Run the reference CLI (`thoughtml <file>`); it prints diagnostics with source lines
-and exits nonzero under `--strict` if any warning remains. Useful flags:
+and exits nonzero under `--strict` if any warning remains. Useful flags on the bare
+invocation:
 
 | Flag | What it does |
 |------|--------------|
@@ -355,6 +356,19 @@ and exits nonzero under `--strict` if any warning remains. Useful flags:
 | `--html` | bake a standalone interactive viewer (for humans, not you) |
 | `--ast` | emit the surface AST instead of the canonical model |
 | `--strict-provenance` | also warn on numbers with no basis |
+
+**Subcommands — the rest of the toolchain** (the bare invocation still works):
+
+| Command | What it does |
+|---------|--------------|
+| `thoughtml check <f> --json` | validate → diagnostics as JSON with a **stable code, line, and suggested fix** per issue. *This is your self-correction loop:* emit → `check --json` → apply the `help` fixes → repeat until clean. Add `--lint` for the `supports`-as-a-list smell (`TML501`). |
+| `thoughtml fmt <f>` | rewrite in the one canonical style (`-w` in place, `--check` for CI); it re-parses its output and never changes the model |
+| `thoughtml explain <f> <id>` | trace why a node has its confidence/status — evidence for/against, each edge's leverage, the conflict it's caught in |
+| `thoughtml diff <a> <b>` | a **belief-level** diff: what flipped `in`/`out`, which confidences moved, which conflicts appeared/resolved |
+
+Install the binary with `cargo install --path crates/thoughtml`. Diagnostic codes
+group as `TML1xx` vocabulary, `TML2xx` references, `TML3xx` graph coherence, `TML4xx`
+numbers, `TML5xx` lints.
 
 Warnings you'll actually hit, and the fix:
 - *unknown focus kind / relation / posture / field* → you used a word outside the

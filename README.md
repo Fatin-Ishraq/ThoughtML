@@ -115,14 +115,26 @@ ThoughtML is a *language*; this repo is its **reference implementation** — a
 parser, a wasm build of that same parser, and a browser playground. You don't
 need any Rust to use the language, only to run the implementation.
 
-**Run the parser (CLI)** — from the repository root:
+**Install the CLI** — one self-contained binary onto your `PATH`:
 
 ```sh
-cargo run -p thoughtml -- examples/self-audit.thml             # canonical JSON + diagnostics
-cargo run -p thoughtml -- --compute examples/why-harvard.thml  # the mirror's opt-in readings
-cargo run -p thoughtml -- --strict-provenance doc.thml         # warn on numbers with no basis
-cargo test
+cargo install --path crates/thoughtml     # from the repository root
 ```
+
+**Run it** — the toolchain is a set of git-style subcommands (the bare
+`thoughtml <file>` invocation still emits the canonical JSON model):
+
+```sh
+thoughtml examples/self-audit.thml          # canonical JSON + diagnostics
+thoughtml --compute examples/why-harvard.thml   # the mirror's opt-in readings
+thoughtml check --json doc.thml             # diagnostics with codes + suggested fixes
+thoughtml fmt -w doc.thml                    # format in the one canonical style
+thoughtml explain doc.thml some-claim        # why a node has its confidence / status
+thoughtml diff before.thml after.thml        # a semantic, belief-level diff
+```
+
+Without installing, run any of these via `cargo run -p thoughtml -- …`. Full flag
+and subcommand reference: [The CLI](https://fatin-ishraq.github.io/ThoughtML/guides/cli.html).
 
 **Export a standalone view** — bake a document into one self-contained, interactive
 HTML file that opens in any browser (no server, no wasm):

@@ -38,6 +38,21 @@ A concrete version:
    claim at 0.9 that its own recorded counter-evidence defeats.
 4. A human looks at exactly that one disagreement — not the whole paragraph.
 
+### Self-correcting against machine-readable diagnostics
+
+An agent authoring ThoughtML doesn't have to get it right first try — it can loop
+against the validator. `thoughtml check --json` emits each diagnostic with a stable
+[code](../reference/diagnostics.md#codes-and-machine-readable-output), the offending
+line, and a suggested `help` fix (e.g. `unknown relation` → *did you mean
+`supports`?*). The loop is: emit → `check --json` → apply the suggested fixes →
+repeat until clean. Add `--lint` to catch the `supports`-used-as-a-list smell that
+silently inflates confidence.
+
+For authoring from scratch, the repository's root **`llms.txt`** is a single
+self-contained, source-derived brief on the whole language — closed vocabularies,
+the distinctions that matter, and how to read the mirror back — meant to be pasted
+into a system prompt.
+
 ## Practical tips for generating ThoughtML
 
 - **Declare foci with explicit `kind`s.** It makes the graph readable and lets
