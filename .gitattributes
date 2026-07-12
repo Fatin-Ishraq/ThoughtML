@@ -1,0 +1,5 @@
+# The standalone viewer is a generated single-file bundle — all of the playground's
+# JS and CSS inlined into one HTML file by `npm run build:viewer`, embedded into the
+# CLI via include_str!. It's a build artifact, not hand-written source, so keep it out
+# of GitHub's language statistics (and collapse it in diffs).
+crates/thoughtml/assets/viewer.html linguist-generated=true
