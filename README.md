@@ -22,12 +22,14 @@ disagrees with what you said.
 > **ThoughtML is a mirror, not an oracle.** It shows you the conflict; it does not
 > make the call.
 
-### 📖 [Read the docs → fatin-ishraq.github.io/ThoughtML](https://fatin-ishraq.github.io/ThoughtML/)
+### 📖 [Read the docs → fatin-ishraq.github.io/ThoughtML](https://fatin-ishraq.github.io/ThoughtML/) &nbsp;·&nbsp; ▶ [Try it in your browser → the playground](https://fatin-ishraq.github.io/ThoughtML/playground/)
 
 A guided [tutorial](https://fatin-ishraq.github.io/ThoughtML/tutorial/index.html),
 a complete [language reference](https://fatin-ishraq.github.io/ThoughtML/reference/index.html),
 [the mirror](https://fatin-ishraq.github.io/ThoughtML/mirror/index.html), and
 practical [guides](https://fatin-ishraq.github.io/ThoughtML/guides/use-cases.html).
+The **[playground](https://fatin-ishraq.github.io/ThoughtML/playground/)** runs the
+real parser (compiled to WebAssembly) live in the browser — no install.
 
 ---
 

@@ -4,8 +4,10 @@ The playground is a live editor and graph view — the fastest way to *see* a
 ThoughtML document. It runs the exact same parser as the CLI, compiled to
 WebAssembly, so the two never disagree.
 
-To run it locally, see [Installation](../getting-started/installation.md):
-`npm run wasm && npm run dev`.
+### ▶ [Open the playground → fatin-ishraq.github.io/ThoughtML/playground](https://fatin-ishraq.github.io/ThoughtML/playground/)
+
+No install — it runs entirely in your browser. To run it locally instead, see
+[Installation](../getting-started/installation.md): `npm run wasm && npm run dev`.
 
 > The playground is for **authoring** — live editing and examples. To
 > *share* a finished document as a single self-contained interactive file (no
