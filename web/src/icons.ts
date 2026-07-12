@@ -44,6 +44,7 @@ export const GLYPHS: Record<string, string> = {
   suspects: wrap('<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>'),
   infers: wrap('<path d="M5 12h14"/><path d="M13 6l6 6-6 6"/>'),
   asks: wrap('<circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4"/><path d="M12 17h.01"/>'),
+  question: wrap('<circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2.5-3 4"/><path d="M12 17h.01"/>'),
   holds: wrap('<circle cx="12" cy="5" r="2"/><path d="M12 7v14"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/>'),
   chooses: wrap('<path d="M20 6 9 17l-5-5"/>'),
   rejects: wrap('<path d="M18 6 6 18"/><path d="M6 6l12 12"/>'),

@@ -2,7 +2,8 @@
 // lays a ThoughtML document out the way the design mock does: reasoning
 // *emerges over a time axis* (x = when), with the vertical placement settled by
 // a small force relaxation rather than any fixed lanes. It owns its own
-// play/scrub timeline, narration line, and conflict banner; selection is handed
+// play/scrub timeline and a floating story card that narrates each beat (who,
+// what, the relation that ties it in, and any conflict); selection is handed
 // back to the host (which shows the detail card). Themed entirely through the
 // app's CSS custom properties, so the light/dark toggle is free.
 //
@@ -10,6 +11,7 @@
 // "Readable" was) and the whole standalone `--html` viewer.
 
 import { relationCategory, REL_STYLE, type RelCat, type Theme } from './graph'
+import { glyph } from './icons'
 import { assertedAt, parseTime, type Canonical, type CanonObject, type Value } from './model'
 
 const SVGNS = 'http://www.w3.org/2000/svg'
@@ -67,7 +69,7 @@ interface TNode {
   // dom
   g?: SVGGElement; shape?: SVGRectElement; ring?: SVGRectElement
 }
-interface TEdge { from: string; to: string; cat: RelCat; colorVar: string; arrow: string; dash: boolean; g?: SVGGElement; path?: SVGPathElement
+interface TEdge { from: string; to: string; rel: string; cat: RelCat; colorVar: string; arrow: string; dash: boolean; g?: SVGGElement; path?: SVGPathElement
   // port assignment (filled by layout)
   sa?: Side; sb?: Side; fa?: number; fb?: number }
 interface Tension { target: string; tFrom: number; tTo: number; message: string }
@@ -75,7 +77,24 @@ interface Beat { t: number; text: string }
 // A beat is one distinct event instant: the nodes that *arrive* at time `t`, in
 // document/time order, plus a caption. It's the shared spine — replay advances by
 // beat (even pacing) and the layout columns by beat (collapsed dead time).
-interface TBeat { index: number; t: number; nodeIds: string[]; caption: string }
+// The structured narration for a beat — what the floating story card renders as
+// Follow rides through the document. `link` is the connective tissue: how this
+// moment relates to one already on screen ("supports X", "opposes it", "revises Y"),
+// which is what makes a sequence of nodes read as a story rather than a list.
+interface BeatStory {
+  who: string | null
+  kind: string
+  headline: string
+  handle: string
+  hasSentence: boolean
+  link: { rel: string; target: string } | null
+  confidence: number | null
+  lifecycle: 'superseded' | 'abandoned' | null
+  tension: string | null
+  index: number
+  total: number
+}
+interface TBeat { index: number; t: number; nodeIds: string[]; caption: string; story: BeatStory }
 interface Band { id: string; label: string; y: number }
 interface TimeModel { nodes: TNode[]; edges: TEdge[]; narration: Beat[]; beats: TBeat[]; tension: Tension[]; tMin: number; tMax: number; narrative: boolean; bands: Band[]; worldW: number; bandH: number }
 
@@ -194,13 +213,13 @@ function buildTimeModel(canon: Canonical): TimeModel {
     if (o.type !== 'link') continue
     if (!nodeIds.has(o.from) || !nodeIds.has(o.to)) continue
     const cat = relationCategory(o.relation)
-    edges.push({ from: o.from, to: o.to, cat, colorVar: REL_VAR[cat], arrow: REL_STYLE[cat].arrow, dash: REL_STYLE[cat].line === 'dashed' })
+    edges.push({ from: o.from, to: o.to, rel: o.relation, cat, colorVar: REL_VAR[cat], arrow: REL_STYLE[cat].arrow, dash: REL_STYLE[cat].line === 'dashed' })
   }
   // a reified claim connects to the foci it is about (from → claim → to)
   for (const o of objects) {
     if (o.type === 'link' && referenced.has(o.id)) {
-      if (nodeIds.has(o.from)) edges.push({ from: o.from, to: o.id, cat: 'other', colorVar: REL_VAR.other, arrow: 'triangle', dash: true })
-      if (nodeIds.has(o.to)) edges.push({ from: o.id, to: o.to, cat: relationCategory(o.relation), colorVar: REL_VAR[relationCategory(o.relation)], arrow: REL_STYLE[relationCategory(o.relation)].arrow, dash: REL_STYLE[relationCategory(o.relation)].line === 'dashed' })
+      if (nodeIds.has(o.from)) edges.push({ from: o.from, to: o.id, rel: 'about', cat: 'other', colorVar: REL_VAR.other, arrow: 'triangle', dash: true })
+      if (nodeIds.has(o.to)) edges.push({ from: o.id, to: o.to, rel: o.relation, cat: relationCategory(o.relation), colorVar: REL_VAR[relationCategory(o.relation)], arrow: REL_STYLE[relationCategory(o.relation)].arrow, dash: REL_STYLE[relationCategory(o.relation)].line === 'dashed' })
     }
   }
 
@@ -262,9 +281,60 @@ function buildTimeModel(canon: Canonical): TimeModel {
   }
   const byInstant = new Map<number, TNode[]>()
   for (const n of nodes) { if (n.t === null) continue; const a = byInstant.get(n.t) ?? []; a.push(n); byInstant.set(n.t, a) }
-  const tbeats: TBeat[] = [...byInstant.keys()].sort((a, b) => a - b).map((t, index) => {
+  const sortedInstants = [...byInstant.keys()].sort((a, b) => a - b)
+
+  // The beat each node first appears at; timeless nodes are present from the start.
+  const nodeBeat = new Map<string, number>()
+  sortedInstants.forEach((t, i) => byInstant.get(t)!.forEach((n) => { if (!nodeBeat.has(n.id)) nodeBeat.set(n.id, i) }))
+  for (const n of nodes) if (!nodeBeat.has(n.id)) nodeBeat.set(n.id, 0)
+  const nodeById = new Map<string, TNode>(nodes.map((n) => [n.id, n] as [string, TNode]))
+  const pretty = (id: string): string => id.replace(/-/g, ' ')
+
+  // Connective tissue: the most salient outgoing relation from `lead` to a node
+  // already on screen — attacks and revisions win, they're the turns in the story.
+  const salience = (c: RelCat): number => (c === 'attack' ? 4 : c === 'revise' ? 3 : c === 'support' || c === 'answer' ? 2 : c === 'causal' ? 1 : 0)
+  const linkFor = (leadId: string, beatIndex: number): { rel: string; target: string } | null => {
+    let best: { rel: string; target: string } | null = null
+    let bestScore = -1
+    for (const e of edges) {
+      if (e.from !== leadId || !e.rel || e.rel === 'about') continue
+      if ((nodeBeat.get(e.to) ?? 0) > beatIndex) continue // target not yet revealed
+      const sc = salience(e.cat)
+      if (sc > bestScore) { bestScore = sc; best = { rel: e.rel, target: nodeById.get(e.to)?.label ?? e.to } }
+    }
+    return best
+  }
+  // A confidence-vs-status conflict becomes an alert beat at the moment it
+  // crystallizes — the defeating attacker's arrival — so the mirror's finding lands
+  // as a story beat even when the document is dateless (no tension time-window).
+  const conflictAtBeat = new Map<number, string>()
+  for (const c of canon.audit?.conflicts ?? []) {
+    if (c.kind !== 'confidence-vs-status' || !c.subjects.length) continue
+    const target = c.subjects[c.subjects.length - 1]
+    let bi = nodeBeat.get(target) ?? 0
+    for (const e of edges) if (e.to === target && e.cat === 'attack') bi = Math.max(bi, nodeBeat.get(e.from) ?? bi)
+    conflictAtBeat.set(bi, c.message.replace(/`/g, ''))
+  }
+  const total = sortedInstants.length
+  const tbeats: TBeat[] = sortedInstants.map((t, index) => {
     const ns = byInstant.get(t)!.slice().sort((p, q) => hash(p.id) - hash(q.id))
-    return { index, t, nodeIds: ns.map((n) => n.id), caption: captionFor(ns) }
+    const lead = ns.find((n) => n.author) ?? ns[0]
+    const ten = tension.find((x) => (t >= x.tFrom && t < x.tTo) || x.tFrom === t)
+    const body = lead.note.replace(/\s*\n\s*/g, ' ').trim() // full prose; the card clamps it
+    const story: BeatStory = {
+      who: lead.author,
+      kind: lead.kind,
+      headline: body || pretty(lead.label),
+      handle: lead.label,
+      hasSentence: !!body,
+      link: linkFor(lead.id, index),
+      confidence: lead.confidence,
+      lifecycle: lead.abandoned ? 'abandoned' : lead.supersededAt !== null ? 'superseded' : null,
+      tension: ten ? ten.message : (conflictAtBeat.get(index) ?? null),
+      index,
+      total,
+    }
+    return { index, t, nodeIds: ns.map((n) => n.id), caption: captionFor(ns), story }
   })
 
   return { nodes, edges, narration: beats, beats: tbeats, tension, tMin, tMax, narrative, bands: [], worldW: 0, bandH: 150 }
@@ -520,8 +590,15 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
   const eL = document.createElementNS(SVGNS, 'g')
   const nL = document.createElementNS(SVGNS, 'g')
   vp.append(bandL, eL, nL); svg.appendChild(vp)
-  const narr = document.createElement('div'); narr.className = 'tv-narr'
-  const banner = document.createElement('div'); banner.className = 'tv-banner'
+  // The floating story card — the narration surface that rides each beat during
+  // Follow/replay, so the document reads as a story without opening the sidebar.
+  const story = document.createElement('div'); story.className = 'tv-story'
+  story.innerHTML =
+    '<div class="tv-story-kick"><span class="tv-story-glyph"></span><span class="tv-story-who"></span></div>' +
+    '<div class="tv-story-head"></div>' +
+    '<div class="tv-story-meta"></div>' +
+    '<div class="tv-story-warn"></div>' +
+    '<div class="tv-story-progress"><span class="tv-story-fill"></span></div>'
   const bar = document.createElement('div'); bar.className = 'tv-bar'
   bar.innerHTML =
     '<div class="tv-bar-row">' +
@@ -535,7 +612,7 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
     '</div>' +
     '<div class="tv-track"><input class="tv-range" type="range" min="0" max="1000" value="1000" step="1" aria-label="time" /><div class="tv-ticks"></div></div>' +
     '<div class="tv-ends"><span class="tv-start"></span><span class="tv-end"></span></div>'
-  root.append(svg, narr, banner, bar)
+  root.append(svg, story, bar)
   container.appendChild(root)
 
   const clockEl = bar.querySelector('.tv-clock') as HTMLElement
@@ -547,6 +624,12 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
   const ticksEl = bar.querySelector('.tv-ticks') as HTMLElement
   const startEl = bar.querySelector('.tv-start') as HTMLElement
   const endEl = bar.querySelector('.tv-end') as HTMLElement
+  const storyGlyph = story.querySelector('.tv-story-glyph') as HTMLElement
+  const storyWho = story.querySelector('.tv-story-who') as HTMLElement
+  const storyHead = story.querySelector('.tv-story-head') as HTMLElement
+  const storyMeta = story.querySelector('.tv-story-meta') as HTMLElement
+  const storyWarn = story.querySelector('.tv-story-warn') as HTMLElement
+  const storyFill = story.querySelector('.tv-story-fill') as HTMLElement
 
   let model: TimeModel = { nodes: [], edges: [], narration: [], beats: [], tension: [], tMin: 0, tMax: 1, narrative: false, bands: [], worldW: 0, bandH: 150 }
   let byId = new Map<string, TNode>()
@@ -606,18 +689,18 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
     if (!ids.length) return null
     const primary = ids.map((id) => byId.get(id)).filter((n): n is TNode => !!n)
     if (!primary.length) return null
-    const ext = new Set(ids)
-    for (const e of model.edges) { if (ext.has(e.from)) ext.add(e.to); if (ext.has(e.to)) ext.add(e.from) }
-    // centre on the primary nodes; size from primary ∪ neighbours
+    // Bounding box of the beat's own nodes — we zoom in on *this* moment.
     let cMinX = Infinity, cMinY = Infinity, cMaxX = -Infinity, cMaxY = -Infinity
     for (const n of primary) { cMinX = Math.min(cMinX, n.x); cMinY = Math.min(cMinY, n.y); cMaxX = Math.max(cMaxX, n.x + NODE_W); cMaxY = Math.max(cMaxY, n.y + NODE_H) }
-    let uMinX = cMinX, uMinY = cMinY, uMaxX = cMaxX, uMaxY = cMaxY
-    for (const id of ext) { const n = byId.get(id); if (!n) continue; uMinX = Math.min(uMinX, n.x); uMinY = Math.min(uMinY, n.y); uMaxX = Math.max(uMaxX, n.x + NODE_W); uMaxY = Math.max(uMaxY, n.y + NODE_H) }
     const W = svg.clientWidth || 1000, Hh = svg.clientHeight || 700
-    const padX = 130, topRoom = 96, botRoom = 124
-    const bw = (uMaxX - uMinX) || 1, bh = (uMaxY - uMinY) || 1
+    const padX = 80, topRoom = 120, botRoom = 128 // leaves the story card clear at the top
+    // Size to the beat's nodes plus a context margin, so neighbours are *hinted*
+    // (they fall around the edges) rather than shrunk to fit — this keeps the tour
+    // zoomed in on the moment instead of pulling back to the whole graph.
+    const bw = (cMaxX - cMinX) + NODE_W * 0.8
+    const bh = (cMaxY - cMinY) + NODE_H * 2.4
     let k = Math.min((W - padX * 2) / bw, (Hh - topRoom - botRoom) / bh)
-    k = Math.max(0.7, Math.min(1.05, k))
+    k = Math.max(0.85, Math.min(1.2, k))
     const cx = (cMinX + cMaxX) / 2, cy = (cMinY + cMaxY) / 2
     return { k, x: W / 2 - cx * k, y: topRoom + (Hh - topRoom - botRoom) / 2 - cy * k }
   }
@@ -630,6 +713,38 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
     emphaTimer = window.setTimeout(() => { for (const id of ids) byId.get(id)?.g?.classList.remove('tv-arrive') }, 1100)
   }
 
+  function chip(kind: string, text: string): HTMLElement {
+    const c = document.createElement('span'); c.className = `tv-chip tv-chip-${kind}`; c.textContent = text; return c
+  }
+  // Fill the floating story card from a beat's structured narration (or hide it
+  // when there is no active beat). Runs on every step / scrub / play / follow.
+  function renderStory(beat: TBeat | null) {
+    if (!beat) { story.classList.remove('on', 'alert'); return }
+    const s = beat.story
+    storyGlyph.innerHTML = glyph(s.kind)
+    const kick: string[] = []
+    if (s.who) kick.push(s.who)
+    kick.push(s.kind)
+    if (!model.narrative) kick.push(fmtDate(beat.t))
+    storyWho.textContent = kick.join('  ·  ')
+    storyHead.textContent = s.headline
+    storyMeta.replaceChildren()
+    if (s.hasSentence) storyMeta.appendChild(chip('handle', s.handle))
+    if (s.link) {
+      const c = chip('rel', `${s.link.rel} ${s.link.target}`)
+      c.style.setProperty('--chip', `var(${REL_VAR[relationCategory(s.link.rel)]})`)
+      storyMeta.appendChild(c)
+    }
+    if (s.confidence !== null) storyMeta.appendChild(chip('conf', `conf ${s.confidence.toFixed(2)}`))
+    if (s.lifecycle) storyMeta.appendChild(chip('life', s.lifecycle === 'abandoned' ? 'dead end' : 'revised later'))
+    storyWarn.textContent = s.tension ?? ''
+    story.classList.toggle('alert', !!s.tension)
+    storyFill.style.width = s.total > 1 ? `${(s.index / (s.total - 1)) * 100}%` : '100%'
+    story.classList.add('on')
+    // re-trigger the content fade on each beat change
+    storyHead.classList.remove('tv-beat-in'); void storyHead.getBoundingClientRect(); storyHead.classList.add('tv-beat-in')
+  }
+
   // Move the tour to beat i: reveal up to its instant, caption it, emphasise the
   // arrivals, and (in follow mode) glide the camera to frame them.
   function setBeat(i: number, opts: { emphasis?: boolean; camera?: boolean } = {}) {
@@ -639,7 +754,7 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
     const beat = model.beats[beatIdx]
     applyAsOf(beat.t)
     rangeEl.value = String(beatIdx) // the slider is beat-indexed (even spacing)
-    narr.textContent = beat.caption
+    renderStory(beat)
     if (emphasis) emphasize(beat.nodeIds)
     if (camera && followMode) { const f = frameOf(beat.nodeIds); if (f) animateTo(f.k, f.x, f.y) }
   }
@@ -737,14 +852,7 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
       e.g.style.opacity = vis ? (e.cat === 'other' ? '0.5' : '1') : '0'
       e.g.style.pointerEvents = vis ? '' : 'none'
     }
-    // banner
-    const active = t === null ? model.tension : model.tension.filter((x) => t >= x.tFrom && t < x.tTo)
-    if (active.length) { banner.classList.add('on'); banner.textContent = '⚠ ' + active[0].message }
-    else banner.classList.remove('on')
-    // narration
-    let text = ''
-    for (const bt of model.narration) { if (t === null || bt.t <= t) text = bt.text }
-    narr.textContent = text
+    // Conflict alerting and narration now ride the story card (per beat, in setBeat).
     clockEl.textContent = model.narrative ? '' : t === null ? clk(model.tMax) : clk(t)
     // the slider fill tracks the beat index (even spacing), not raw clock time, so
     // the dense years aren't crushed into a sliver of the bar
@@ -821,6 +929,7 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
     renderGraph()
     setBar()
     beatIdx = -1 // a fresh document starts the tour unstarted (all shown)
+    renderStory(null)
     applyAsOf(model.tMax)
     pendingFit = true // if the pane isn't sized yet, the observer re-fits once it is
     fit()

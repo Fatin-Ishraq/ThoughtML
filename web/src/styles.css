@@ -285,29 +285,72 @@ a { color: inherit; }
 @keyframes tv-fade-in { from { opacity: 0; } to { opacity: 1; } }
 
 /* narration — an elegant, boxless serif line floating over the stage */
-.tv-narr {
-  position: absolute; top: 20px; left: 50%; transform: translateX(-50%); z-index: 5;
-  max-width: 620px; text-align: center; padding: 0 20px;
-  font-family: var(--serif); font-style: italic; font-size: 15.5px; letter-spacing: 0.2px;
-  color: var(--text-dim); pointer-events: none;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  text-shadow: 0 1px 16px var(--bg-canvas), 0 1px 16px var(--bg-canvas);
-  transition: opacity 0.3s ease;
+/* The floating story card — the narration surface during Follow/replay. Rides each
+   beat: who + kind + when, the sentence, and the relation that ties it to the story
+   (the connective tissue). Folds in the old conflict banner via the `.alert` state. */
+.tv-story {
+  position: absolute; top: 102px; left: 50%; z-index: 6; /* below the corner toolbars */
+  width: min(540px, calc(100% - 40px));
+  padding: 13px 18px 15px;
+  background: color-mix(in srgb, var(--bg-panel) 84%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border-strong) 34%, transparent);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(16px) saturate(1.15);
+  pointer-events: none; overflow: hidden;
+  opacity: 0; transform: translateX(-50%) translateY(-8px);
+  transition: opacity 0.34s ease, transform 0.34s ease, border-color 0.34s ease, box-shadow 0.34s ease;
 }
-.tv-narr:empty { display: none; }
-/* conflict banner — a glowing alert pill, pops in when a tension is live */
-.tv-banner {
-  position: absolute; top: 56px; left: 50%; transform: translateX(-50%); z-index: 6;
-  display: none; align-items: center; gap: 8px; max-width: 580px;
-  padding: 8px 16px 8px 14px; font-size: 12.5px; line-height: 1.4; color: var(--text);
-  background: color-mix(in srgb, var(--error) 16%, var(--bg-panel));
-  border: 1px solid color-mix(in srgb, var(--error) 42%, transparent);
-  border-radius: var(--r-pill);
-  box-shadow: 0 8px 28px color-mix(in srgb, var(--error) 26%, transparent);
-  backdrop-filter: blur(12px) saturate(1.2);
+.tv-story.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+.tv-story.alert {
+  border-color: color-mix(in srgb, var(--error) 50%, transparent);
+  box-shadow: 0 12px 36px color-mix(in srgb, var(--error) 24%, transparent);
 }
-.tv-banner.on { display: flex; animation: tv-pop 0.3s cubic-bezier(0.2, 0.7, 0.2, 1); }
-@keyframes tv-pop { from { opacity: 0; transform: translateX(-50%) translateY(-7px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+.tv-story-kick {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;
+  color: var(--text-dim); margin-bottom: 7px;
+}
+.tv-story-glyph { display: inline-flex; flex: none; }
+.tv-story-glyph svg { width: 14px; height: 14px; stroke: currentColor; }
+.tv-story-who { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tv-story-head {
+  font-family: var(--serif); font-size: 17px; line-height: 1.36; color: var(--text);
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.tv-story-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin-top: 10px; }
+.tv-story-meta:empty { display: none; }
+.tv-chip {
+  font: 600 11px var(--mono); letter-spacing: 0.2px;
+  padding: 2.5px 8px; border-radius: var(--r-pill); white-space: nowrap;
+  border: 1px solid transparent;
+}
+.tv-chip-handle { color: var(--text-dim); background: color-mix(in srgb, var(--text) 8%, transparent); }
+.tv-chip-rel {
+  color: var(--chip, var(--c-link));
+  background: color-mix(in srgb, var(--chip, var(--c-link)) 15%, transparent);
+  border-color: color-mix(in srgb, var(--chip, var(--c-link)) 34%, transparent);
+}
+.tv-chip-conf { color: var(--accent); background: color-mix(in srgb, var(--accent) 13%, transparent); }
+.tv-chip-life { color: var(--text-dim); background: color-mix(in srgb, var(--text) 6%, transparent); font-style: italic; }
+.tv-story-warn {
+  position: relative; margin-top: 9px; padding-left: 18px;
+  font-size: 12px; line-height: 1.4; color: color-mix(in srgb, var(--error) 85%, var(--text));
+}
+.tv-story-warn::before { content: '\26A0'; position: absolute; left: 0; top: 0; }
+.tv-story-warn:empty { display: none; }
+.tv-story-progress {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 2px;
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+}
+.tv-story-fill {
+  display: block; height: 100%; width: 0;
+  background: color-mix(in srgb, var(--accent) 80%, transparent);
+  transition: width 0.42s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.tv-story.alert .tv-story-fill { background: color-mix(in srgb, var(--error) 80%, transparent); }
+.tv-beat-in { animation: tv-beat-in 0.4s cubic-bezier(0.2, 0.7, 0.2, 1); }
+@keyframes tv-beat-in { from { opacity: 0.2; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
 /* time bar — the bottom-centre centrepiece, same flat glass as the dock */
 .tv-bar {
