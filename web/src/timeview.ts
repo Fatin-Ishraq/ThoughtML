@@ -719,7 +719,9 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
   // Fill the floating story card from a beat's structured narration (or hide it
   // when there is no active beat). Runs on every step / scrub / play / follow.
   function renderStory(beat: TBeat | null) {
-    if (!beat) { story.classList.remove('on', 'alert'); return }
+    // The card is the *narration* surface: only shown while Follow is on, so it
+    // never sits over the graph when you're just exploring or scrubbing.
+    if (!beat || !followMode) { story.classList.remove('on', 'alert'); return }
     const s = beat.story
     storyGlyph.innerHTML = glyph(s.kind)
     const kick: string[] = []
@@ -1022,8 +1024,13 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
     followMode = !followMode
     followEl.classList.toggle('on', followMode)
     followEl.setAttribute('aria-pressed', String(followMode))
-    if (followMode) { if (beatIdx < 0) setBeat(0); else { const f = frameOf(model.beats[beatIdx]?.nodeIds ?? []); if (f) animateTo(f.k, f.x, f.y) } }
-    else fit() // back to the overview
+    if (followMode) {
+      if (beatIdx < 0) setBeat(0)
+      else { renderStory(model.beats[beatIdx] ?? null); const f = frameOf(model.beats[beatIdx]?.nodeIds ?? []); if (f) animateTo(f.k, f.x, f.y) }
+    } else {
+      renderStory(null) // hide the story card and return to the overview
+      fit()
+    }
   })
   rangeEl.addEventListener('input', () => {
     stopPlay(); cancelAnim()
