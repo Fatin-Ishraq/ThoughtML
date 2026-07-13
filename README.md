@@ -153,20 +153,16 @@ hat, so the browser, the CLI, and the exported file can never disagree.
 You don't need any Rust to *use* the language — only to run the reference
 implementation.
 
-**Install the CLI.** The quickest way, on any platform with Node:
+**Install the CLI** — pick your ecosystem; all three ship the *same* binary, no Rust required:
 
 ```sh
-npm install -g thoughtml
-```
-
-Or, if you have a Rust toolchain:
-
-```sh
-cargo install --git https://github.com/Fatin-Ishraq/ThoughtML thoughtml
+pip install thoughtml          # Python
+npm install -g thoughtml       # Node
+cargo install thoughtml        # Rust
 ```
 
 Prebuilt binaries for macOS, Linux, and Windows are attached to every
-[release](https://github.com/Fatin-Ishraq/ThoughtML/releases). (A `pip install` is on the way.)
+[release](https://github.com/Fatin-Ishraq/ThoughtML/releases).
 
 **Run the toolchain** — the bare `thoughtml <file>` still emits the canonical JSON model:
 

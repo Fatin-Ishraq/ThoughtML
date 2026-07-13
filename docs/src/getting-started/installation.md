@@ -17,19 +17,26 @@ There are two ways to run it:
 The CLI is one self-contained binary named `thoughtml`. Pick whichever fits — none
 of them require you to know any Rust:
 
-**npm** — the quickest, on any platform with [Node.js](https://nodejs.org) (14+):
+**pip** — if you have [Python](https://python.org) (3.8+):
+
+```sh
+pip install thoughtml
+```
+
+**npm** — on any platform with [Node.js](https://nodejs.org) (14+):
 
 ```sh
 npm install -g thoughtml
 ```
 
-This downloads the prebuilt binary for your platform and puts `thoughtml` on your
-`PATH`. (`npx thoughtml <file>` works too, without a global install.)
+Both download the prebuilt binary for your platform and put `thoughtml` on your
+`PATH` — no Python or Node code runs, and no compiler is needed. (`npx thoughtml
+<file>` works too, without a global install.)
 
 **Cargo** — if you have a Rust toolchain ([rustup.rs](https://rustup.rs)):
 
 ```sh
-cargo install --git https://github.com/Fatin-Ishraq/ThoughtML thoughtml
+cargo install thoughtml
 ```
 
 **Prebuilt binary** — download the archive for macOS, Linux, or Windows from the
