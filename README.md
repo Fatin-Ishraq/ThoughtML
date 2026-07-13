@@ -22,6 +22,10 @@
   <a href="CHANGELOG.md"><img alt="version" src="https://img.shields.io/badge/version-0.2.0-blueviolet" /></a>
 </p>
 
+<p align="center">
+  <img src="assets/example-graph.svg" width="840" alt="A ThoughtML reasoning graph: a passing test suite supports 'hotfix-is-safe' while a failing canary opposes it — and the mirror flags that it's held at 0.90 confidence though its own recorded evidence defeats it." />
+</p>
+
 ---
 
 Prose is good at *stating* a conclusion and terrible at *showing its shape*. You can
@@ -130,6 +134,10 @@ the answer.* It's to make reasoning legible enough that its flaws can't hide.
 ThoughtML is a *language*; this repo is its **reference implementation**. One parser is
 the single source of truth — everything else is that same parser wearing a different
 hat, so the browser, the CLI, and the exported file can never disagree.
+
+<p align="center">
+  <img src="assets/pipeline.svg" width="840" alt="ThoughtML pipeline: .thml source parses to a surface AST, desugars to a canonical model, and emits canonical JSON — then a second, mirror reading surfaces conflicts." />
+</p>
 
 | Piece | What it is | |
 |---|---|---|

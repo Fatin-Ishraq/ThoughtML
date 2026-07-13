@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 470" role="img" aria-label="How ThoughtML reads your reasoning: source to surface AST to canonical model to JSON, with a second mirror reading that surfaces conflicts.">
+  <defs>
+    <marker id="arw" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#8a857d" />
+    </marker>
+    <marker id="arwb" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#5cb0ff" />
+    </marker>
+    <style>
+      .box { fill: #1f1c19; stroke: #4a453f; stroke-width: 1.5; }
+      .t   { fill: #f5f4f2; font-family: Inter, system-ui, sans-serif; font-size: 21px; font-weight: 600; }
+      .s   { fill: #928d85; font-family: Inter, system-ui, sans-serif; font-size: 14px; }
+      .lab { fill: #b4b0aa; font-family: Inter, system-ui, sans-serif; font-size: 14px; letter-spacing: 1px; }
+      .edge { stroke: #8a857d; stroke-width: 2; fill: none; }
+      .mirror { stroke: #5cb0ff; stroke-width: 2; fill: none; stroke-dasharray: 6 5; }
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="1040" height="470" rx="16" fill="#161412" />
+  <rect x="1" y="1" width="1038" height="468" rx="15" fill="none" stroke="#3c3833" stroke-width="2" />
+
+  <!-- header -->
+  <text x="40" y="52" class="t" font-size="24">How ThoughtML reads your reasoning</text>
+  <text x="40" y="80" class="s" font-size="15">One parser, two readings — the same model, output as data and audited for contradictions.</text>
+
+  <!-- main pipeline -->
+  <g transform="translate(0,118)">
+    <rect class="box" x="40"  y="0" width="196" height="78" rx="12" />
+    <text x="138" y="34" text-anchor="middle" class="t">.thml source</text>
+    <text x="138" y="58" text-anchor="middle" class="s">what you write</text>
+
+    <rect class="box" x="292" y="0" width="196" height="78" rx="12" />
+    <text x="390" y="34" text-anchor="middle" class="t">surface AST</text>
+    <text x="390" y="58" text-anchor="middle" class="s">exactly what you typed</text>
+
+    <rect class="box" x="544" y="0" width="196" height="78" rx="12" />
+    <text x="642" y="34" text-anchor="middle" class="t">canonical model</text>
+    <text x="642" y="58" text-anchor="middle" class="s">a typed, dated graph</text>
+
+    <rect class="box" x="796" y="0" width="204" height="78" rx="12" />
+    <text x="898" y="34" text-anchor="middle" class="t">canonical JSON</text>
+    <text x="898" y="58" text-anchor="middle" class="s">the first reading</text>
+
+    <!-- arrows -->
+    <line class="edge" x1="236" y1="39" x2="286" y2="39" marker-end="url(#arw)" />
+    <line class="edge" x1="488" y1="39" x2="538" y2="39" marker-end="url(#arw)" />
+    <line class="edge" x1="740" y1="39" x2="790" y2="39" marker-end="url(#arw)" />
+    <text x="261" y="26" text-anchor="middle" class="lab" font-size="12.5">parse</text>
+    <text x="513" y="26" text-anchor="middle" class="lab" font-size="12.5">desugar</text>
+    <text x="765" y="26" text-anchor="middle" class="lab" font-size="12.5">emit</text>
+  </g>
+
+  <!-- second reading: the mirror -->
+  <g transform="translate(0,300)">
+    <!-- branch down from canonical model -->
+    <path class="mirror" d="M642,-104 L642,0 L708,0" marker-end="url(#arwb)" />
+    <text x="600" y="-44" text-anchor="end" class="lab" fill="#5cb0ff" font-size="12.5">second reading</text>
+
+    <rect class="box" x="720" y="-30" width="280" height="86" rx="12" stroke="#5cb0ff" />
+    <text x="860" y="4" text-anchor="middle" class="t" fill="#5cb0ff">the mirror</text>
+    <text x="860" y="30" text-anchor="middle" class="s">where your structure disagrees</text>
+    <text x="860" y="47" text-anchor="middle" class="s">with what you said — conflicts, on demand</text>
+  </g>
+
+  <text x="40" y="452" class="s" font-size="14.5">A mirror, not an oracle: it shows you the conflict; it does not make the call.</text>
+</svg>

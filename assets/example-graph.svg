@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 520" role="img" aria-label="A reasoning graph: a passing test suite supports 'hotfix is safe', a failing canary opposes it; the mirror flags that it is held at 0.90 confidence while its own evidence defeats it.">
+  <defs>
+    <marker id="pos" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7.5" markerHeight="7.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6ccf8e"/></marker>
+    <marker id="neg" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7.5" markerHeight="7.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#ff6b6b"/></marker>
+    <style>
+      .box { fill:#1f1c19; stroke:#4a453f; stroke-width:1.5; }
+      .id  { fill:#f5f4f2; font-family:'SFMono-Regular',Consolas,monospace; font-size:20px; font-weight:600; }
+      .k   { fill:#928d85; font-family:Inter,system-ui,sans-serif; font-size:13.5px; letter-spacing:0.5px; }
+      .el  { font-family:Inter,system-ui,sans-serif; font-size:13.5px; font-weight:600; letter-spacing:0.5px; }
+      .cap { fill:#928d85; font-family:Inter,system-ui,sans-serif; font-size:14.5px; }
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="1040" height="520" rx="16" fill="#161412"/>
+  <rect x="1" y="1" width="1038" height="518" rx="15" fill="none" stroke="#3c3833" stroke-width="2"/>
+
+  <text x="40" y="50" fill="#f5f4f2" font-family="Inter, system-ui, sans-serif" font-size="22" font-weight="600">A document with zero errors — and one conflict it can't see about itself</text>
+
+  <!-- evidence nodes -->
+  <g>
+    <rect class="box" x="96" y="92" width="270" height="76" rx="12"/>
+    <rect x="96" y="92" width="5" height="76" rx="2.5" fill="#5cb0ff"/>
+    <text x="120" y="126" class="id">suite-is-green</text>
+    <text x="120" y="150" class="k">OBSERVATION · the tests passed</text>
+
+    <rect class="box" x="674" y="92" width="270" height="76" rx="12"/>
+    <rect x="674" y="92" width="5" height="76" rx="2.5" fill="#5cb0ff"/>
+    <text x="698" y="126" class="id">canary-errored</text>
+    <text x="698" y="150" class="k">OBSERVATION · 500s in prod</text>
+  </g>
+
+  <!-- edges -->
+  <path d="M231,168 C231,230 360,250 435,296" fill="none" stroke="#6ccf8e" stroke-width="2.5" marker-end="url(#pos)"/>
+  <text x="250" y="250" class="el" fill="#6ccf8e">supports</text>
+  <path d="M809,168 C809,230 680,250 605,296" fill="none" stroke="#ff6b6b" stroke-width="2.5" marker-end="url(#neg)"/>
+  <text x="726" y="250" class="el" fill="#ff6b6b" text-anchor="end">opposes</text>
+
+  <!-- the defeated claim -->
+  <rect x="385" y="300" width="270" height="86" rx="12" fill="#241a1a" stroke="#ff6b6b" stroke-width="2.5"/>
+  <text x="410" y="336" class="id">hotfix-is-safe</text>
+  <text x="410" y="361" class="k">CLAIM · oncall holds it at 0.90</text>
+  <circle cx="646" cy="311" r="15" fill="#ff6b6b"/>
+  <text x="646" y="316" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="17" font-weight="800" fill="#161412">!</text>
+
+  <!-- mirror callout -->
+  <rect x="300" y="416" width="440" height="74" rx="12" fill="#12233a" stroke="#5cb0ff" stroke-width="1.75"/>
+  <text x="324" y="447" class="el" fill="#5cb0ff" font-size="15">⚑ confidence-vs-status</text>
+  <text x="324" y="471" class="cap" fill="#c9d6e5">Held at 0.90, but its own <tspan font-weight="600" fill="#f5f4f2">canary-errored</tspan> evidence defeats it.</text>
+</svg>
