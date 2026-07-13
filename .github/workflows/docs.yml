@@ -64,6 +64,10 @@ jobs:
           cp -r docs/book/. _site/
           mkdir -p _site/playground
           cp -r web/dist/. _site/playground/
+          # --- SEO: social card, robots.txt, and a generated sitemap ---
+          cp assets/social-card.svg _site/social-card.svg
+          printf 'User-agent: *\nAllow: /\nSitemap: https://fatin-ishraq.github.io/ThoughtML/sitemap.xml\n' > _site/robots.txt
+          python3 scripts/gen-sitemap.py _site https://fatin-ishraq.github.io/ThoughtML
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
