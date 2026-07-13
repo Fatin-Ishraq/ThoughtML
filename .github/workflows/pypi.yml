@@ -1,0 +1,61 @@
+name: Publish to PyPI
+
+# Publish ThoughtML's platform wheels to PyPI via Trusted Publishing (OIDC) — no
+# stored token. The wheels repackage the binaries cargo-dist already attached to
+# the GitHub Release (see packaging/pypi/build_wheels.py), so this never compiles.
+# Runs automatically when a release is published, or on demand for a given version.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to build & publish (e.g. 0.3.0)"
+        required: true
+        default: "0.3.0"
+
+permissions:
+  contents: read
+
+jobs:
+  pypi:
+    name: Build wheels and publish
+    runs-on: ubuntu-latest
+    # Must match the environment configured on the PyPI trusted-publisher.
+    environment: pypi
+    permissions:
+      id-token: write # required for PyPI Trusted Publishing (OIDC)
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # A release event carries the tag (strip the leading `v`); a manual run
+      # carries the version input directly.
+      - name: Resolve version
+        id: v
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "version=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            tag="${{ github.event.release.tag_name }}"
+            echo "version=${tag#v}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build platform wheels from the release binaries
+        run: python packaging/pypi/build_wheels.py --version "${{ steps.v.outputs.version }}"
+
+      - name: Check the wheels
+        run: |
+          python -m pip install --upgrade twine
+          python -m twine check packaging/pypi/build/dist/*
+
+      # Trusted Publishing: no username/password, no token — GitHub's OIDC identity
+      # is exchanged for a short-lived PyPI credential, scoped to this repo+workflow.
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: packaging/pypi/build/dist
