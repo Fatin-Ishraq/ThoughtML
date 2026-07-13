@@ -7,6 +7,11 @@ use std::io::{self, Read, Write};
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
+/// The complete language, embedded into the binary so the tool can teach itself:
+/// the same `llms.txt` the site serves and the packages bundle. One source, three
+/// shapes — the full dump, a single section, or a one-screen tour.
+const GUIDE: &str = include_str!("../llms.txt");
+
 /// Parse and analyze ThoughtML documents. With no subcommand, parse a file and
 /// emit the canonical JSON model (the original invocation, unchanged).
 #[derive(Parser, Debug)]
@@ -30,6 +35,10 @@ enum Command {
     Explain(ExplainArgs),
     /// Show a semantic (belief-level) diff between two documents.
     Diff(DiffArgs),
+    /// Print the language itself — the whole spec travels inside the binary.
+    /// No args: a one-screen tour. A topic (`guide relations`): one section.
+    /// `--full`: the complete, source-derived spec, ready to paste into an AI.
+    Guide(GuideArgs),
 }
 
 /// The default parse/emit invocation (`thoughtml [OPTIONS] <FILE>`).
@@ -156,6 +165,17 @@ struct DiffArgs {
     b: PathBuf,
 }
 
+#[derive(clap::Args, Debug)]
+struct GuideArgs {
+    /// A section to look up — a keyword (`relations`, `kinds`, `mirror`, `time`,
+    /// `syntax`, `examples`, …) or a section number (`6`). Omit for the tour.
+    topic: Option<String>,
+    /// Print the complete spec (every section) — meant to be piped into an AI:
+    /// `thoughtml guide --full | pbcopy`. Ignores any topic.
+    #[arg(long)]
+    full: bool,
+}
+
 fn main() -> ExitCode {
     let cli = Cli::parse();
     match cli.command {
@@ -163,6 +183,7 @@ fn main() -> ExitCode {
         Some(Command::Fmt(a)) => run_fmt(a),
         Some(Command::Explain(a)) => run_explain(a),
         Some(Command::Diff(a)) => run_diff(a),
+        Some(Command::Guide(a)) => run_guide(a),
         None => run_default(cli.run),
     }
 }
@@ -516,4 +537,173 @@ fn run_diff(args: DiffArgs) -> ExitCode {
     let report = thoughtml::diff::diff(&ra.canonical, &rb.canonical);
     print!("{}", report.text);
     ExitCode::SUCCESS
+}
+
+// ---------------------------------------------------------------------------
+// `thoughtml guide` — the language, embedded. `llms.txt` is a flat file of
+// `## N. Title` sections; we view it three ways (full / one section / a tour)
+// without re-authoring anything, so the CLI, the site, and the AI-ready dump
+// are literally the same bytes and can never drift.
+// ---------------------------------------------------------------------------
+
+/// One `## N. Title` section of the embedded guide: number, title, and the full
+/// text (header line included; trailing `---` / blank separators trimmed off).
+struct GuideSection {
+    num: u32,
+    text: String,
+}
+
+/// Split the embedded guide into its numbered `## N. …` sections, in order.
+fn guide_sections() -> Vec<GuideSection> {
+    let lines: Vec<&str> = GUIDE.lines().collect();
+    // The header lines that open each section (`## 6. Relations — …`).
+    let starts: Vec<usize> = lines
+        .iter()
+        .enumerate()
+        .filter(|(_, l)| section_number(l).is_some())
+        .map(|(i, _)| i)
+        .collect();
+
+    let mut sections = Vec::new();
+    for (k, &start) in starts.iter().enumerate() {
+        let end = starts.get(k + 1).copied().unwrap_or(lines.len());
+        let num = section_number(lines[start]).unwrap();
+        // Body runs to just before the next header; drop the trailing `---`
+        // separator and any blank lines so each section prints clean.
+        let mut body_end = end;
+        while body_end > start + 1 && matches!(lines[body_end - 1].trim(), "" | "---") {
+            body_end -= 1;
+        }
+        sections.push(GuideSection {
+            num,
+            text: lines[start..body_end].join("\n"),
+        });
+    }
+    sections
+}
+
+/// The section number of a `## N. …` header line, if it is one.
+fn section_number(line: &str) -> Option<u32> {
+    line.strip_prefix("## ")?
+        .split('.')
+        .next()?
+        .trim()
+        .parse()
+        .ok()
+}
+
+/// Resolve a user topic to a section number: a bare number, or a keyword alias.
+fn guide_topic_to_num(topic: &str) -> Option<u32> {
+    let t = topic.trim().to_ascii_lowercase();
+    if let Ok(n) = t.parse::<u32>() {
+        return Some(n);
+    }
+    let n = match t.as_str() {
+        "model" | "start" | "intro" | "overview" => 1,
+        "syntax" | "grammar" => 2,
+        "records" | "headers" | "header" => 3,
+        "linkable" | "targets" => 4,
+        "kinds" | "kind" | "foci" | "focus" => 5,
+        "relations" | "relation" | "links" | "link" | "edges" | "edge" => 6,
+        "stances" | "stance" | "postures" | "posture" => 7,
+        "merging" | "merge" | "ids" | "id" => 8,
+        "scopes" | "scope" | "nesting" | "trees" | "tree" | "imports" | "import" | "project" => 9,
+        "numbers" | "number" | "provenance" | "evidence" | "math" | "formulas" | "formula"
+        | "units" | "bundles" | "bundle" => 10,
+        "time" | "temporal" | "when" | "as-of" => 11,
+        "strict" | "contract" | "check" | "diagnostics" => 12,
+        "mirror" | "audit" | "reading" | "conflicts" | "conflict" | "compute" | "derived"
+        | "status" | "ev" | "confidence" => 13,
+        "checklist" | "rules" => 14,
+        "examples" | "example" | "gold" => 15,
+        "quick" | "reference" | "cheatsheet" | "ref" => 16,
+        _ => return None,
+    };
+    Some(n)
+}
+
+/// The topic menu — printed after the tour and on an unknown topic.
+const GUIDE_MENU: &str = "\
+Topics — `thoughtml guide <topic>`:
+  syntax      records     kinds       relations   stances
+  merging     scopes      numbers     time        mirror
+  checklist   examples    reference     (or a number, e.g. `guide 6`)
+
+  thoughtml guide --full     the complete spec — paste into an AI
+  Full book: https://fatin-ishraq.github.io/ThoughtML/";
+
+/// `thoughtml guide [TOPIC] [--full]` — print the language from the binary.
+fn run_guide(args: GuideArgs) -> ExitCode {
+    // `--full`: the whole embedded spec, verbatim (the AI firehose).
+    if args.full {
+        print!("{GUIDE}");
+        if !GUIDE.ends_with('\n') {
+            println!();
+        }
+        return ExitCode::SUCCESS;
+    }
+
+    let sections = guide_sections();
+
+    // A topic: resolve to one section and print only that.
+    if let Some(topic) = args.topic.as_deref() {
+        match guide_topic_to_num(topic).and_then(|n| sections.iter().find(|s| s.num == n)) {
+            Some(s) => {
+                println!("{}", s.text);
+                ExitCode::SUCCESS
+            }
+            None => {
+                eprintln!("error: unknown guide topic `{topic}`.\n");
+                eprintln!("{GUIDE_MENU}");
+                ExitCode::FAILURE
+            }
+        }
+    } else {
+        // No args: the one-screen tour — the 60-second model (§1) and the quick
+        // reference (§16), then the menu. Enough to start; the rest is a topic away.
+        for n in [1, 16] {
+            if let Some(s) = sections.iter().find(|s| s.num == n) {
+                println!("{}\n", s.text);
+            }
+        }
+        println!("{GUIDE_MENU}");
+        ExitCode::SUCCESS
+    }
+}
+
+#[cfg(test)]
+mod guide_tests {
+    use super::*;
+
+    #[test]
+    fn parses_all_sixteen_sections_in_order() {
+        let s = guide_sections();
+        assert_eq!(s.len(), 16, "expected 16 numbered sections in llms.txt");
+        let nums: Vec<u32> = s.iter().map(|s| s.num).collect();
+        assert_eq!(nums, (1..=16).collect::<Vec<_>>());
+    }
+
+    #[test]
+    fn every_menu_keyword_resolves_to_a_real_section() {
+        let sections = guide_sections();
+        // Each keyword the menu advertises must land on an existing section.
+        for kw in [
+            "syntax", "records", "kinds", "relations", "stances", "merging", "scopes", "numbers",
+            "time", "mirror", "checklist", "examples", "reference",
+        ] {
+            let n = guide_topic_to_num(kw).unwrap_or_else(|| panic!("`{kw}` did not resolve"));
+            assert!(sections.iter().any(|s| s.num == n), "`{kw}` -> §{n} missing");
+        }
+        assert_eq!(guide_topic_to_num("6"), Some(6));
+        assert_eq!(guide_topic_to_num("nonsense"), None);
+    }
+
+    #[test]
+    fn a_section_contains_its_own_header_and_nothing_extra() {
+        let sections = guide_sections();
+        let relations = sections.iter().find(|s| s.num == 6).unwrap();
+        assert!(relations.text.starts_with("## 6."));
+        // A single section must not bleed into the next one.
+        assert!(!relations.text.contains("## 7."));
+    }
 }

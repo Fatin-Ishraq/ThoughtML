@@ -10,7 +10,6 @@
 <p align="center">
   <a href="https://fatin-ishraq.github.io/ThoughtML/">📖 Book</a> &nbsp;·&nbsp;
   <a href="https://fatin-ishraq.github.io/ThoughtML/playground/">▶ Playground</a> &nbsp;·&nbsp;
-  <a href="llms.txt">🤖 llms.txt</a> &nbsp;·&nbsp;
   <a href="examples">📁 Examples</a>
 </p>
 
@@ -19,7 +18,7 @@
   <a href="https://fatin-ishraq.github.io/ThoughtML/playground/"><img alt="playground" src="https://img.shields.io/badge/playground-try%20it%20live-8957e5" /></a>
   <a href="https://github.com/Fatin-Ishraq/ThoughtML/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/Fatin-Ishraq/ThoughtML/actions/workflows/ci.yml/badge.svg" /></a>
   <a href="LICENSE"><img alt="license: MIT" src="https://img.shields.io/badge/license-MIT-green" /></a>
-  <a href="CHANGELOG.md"><img alt="version" src="https://img.shields.io/badge/version-0.2.0-blueviolet" /></a>
+  <a href="CHANGELOG.md"><img alt="version" src="https://img.shields.io/badge/version-0.3.0-blueviolet" /></a>
 </p>
 
 <p align="center">
@@ -103,10 +102,10 @@ form that's explicit enough to check; a human, another agent, or CI reads it bac
 catches where the confidence betrays the structure. The point was never to *compute
 the answer.* It's to make reasoning legible enough that its flaws can't hide.
 
-> **Writing ThoughtML with an AI?** [`llms.txt`](llms.txt) is the entire language in
-> one self-contained, source-derived file, written for the agent that authors it — the
-> closed vocabularies, the distinctions that matter, how to read the mirror back, and
-> gold examples. Paste it into a system prompt and the agent writes valid ThoughtML.
+> **Writing ThoughtML with an AI?** The whole language travels *inside the tool*. Run
+> `thoughtml guide --full` for the complete, source-derived spec (or read
+> [`llms.txt`](crates/thoughtml/llms.txt)) and paste it into a system prompt. `thoughtml
+> guide` alone prints a one-screen tour; `thoughtml guide <topic>` looks up one section.
 
 ## The concepts
 
@@ -146,7 +145,7 @@ hat, so the browser, the CLI, and the exported file can never disagree.
 | **wasm build** | The *same* parser compiled for the web, so the playground and the CLI can't drift. | [`crates/thoughtml-wasm`](crates/thoughtml-wasm) |
 | **Playground** | Live editor + reasoning graph (mermaid.live in spirit): a time-driven **Viewer** with replay and Follow-mode storytelling, a node-link **Structural** view, and one-click standalone-HTML export. | [`web`](web) · [live ↗](https://fatin-ishraq.github.io/ThoughtML/playground/) |
 | **The book** | Tutorial, complete language reference, the mirror, and practical guides. | [`docs`](docs) · [live ↗](https://fatin-ishraq.github.io/ThoughtML/) |
-| **`llms.txt`** | The whole language in one file, for the AI that authors it. | [`llms.txt`](llms.txt) |
+| **`llms.txt`** | The whole language in one file — embedded in the binary, so `thoughtml guide --full` prints it too. | [`llms.txt`](crates/thoughtml/llms.txt) |
 | **Example gallery** | 20 worked, strict-clean documents — an incident triage, a clinical differential, an AI moderation call, a security threat model, a self-auditing hotfix, and more. | [`examples`](examples) |
 
 ## Install & run
@@ -172,6 +171,7 @@ Prebuilt binaries for macOS, Linux, and Windows are attached to every
 **Run the toolchain** — the bare `thoughtml <file>` still emits the canonical JSON model:
 
 ```sh
+thoughtml guide                                       # the language itself, one screen (--full for all of it)
 thoughtml examples/ship-the-hotfix.thml               # canonical JSON + diagnostics
 thoughtml --audit examples/ship-the-hotfix.thml       # the mirror: where structure disagrees
 thoughtml check --json doc.thml                  # diagnostics with stable codes + suggested fixes
@@ -209,12 +209,13 @@ More in [Use cases ↗](https://fatin-ishraq.github.io/ThoughtML/guides/use-case
 
 ## Status
 
-**v0.2.0** — the toolchain release. Since the 0.1.0 subtraction (a mirror, not an oracle),
-`thoughtml` has grown a real toolchain — `check` / `fmt` / `explain` / `diff` — plus a
-valid-time memory overhaul (lifecycle, thought-trees, as-of replay), a second conflict type,
-and the standalone `--html` viewer. The full trail is in [CHANGELOG.md](CHANGELOG.md); the
-language as it stands today is in the [book](https://fatin-ishraq.github.io/ThoughtML/). The
-surface may still move — hence 0.x, not 1.0.
+**v0.3.0** — the self-describing release. `thoughtml guide` now embeds the whole language
+*inside the binary* — a one-screen tour, a section lookup, or `--full` for the complete,
+source-derived spec to hand an AI — so an agent that runs `cargo install` can learn ThoughtML
+with no website and no network. It builds on the 0.2.0 toolchain (`check` / `fmt` / `explain`
+/ `diff`, the valid-time memory overhaul, and the standalone `--html` viewer). The full trail
+is in [CHANGELOG.md](CHANGELOG.md); the language as it stands today is in the
+[book](https://fatin-ishraq.github.io/ThoughtML/). The surface may still move — hence 0.x, not 1.0.
 
 ## Contributing
 

@@ -2099,6 +2099,76 @@ fn bundled_examples_are_strict_clean() {
     }
 }
 
+/// Coverage: the shipped corpus must contain a worked instance of EVERY core
+/// closed-set construct — so "`thoughtml guide` / llms.txt teaches the whole
+/// language" stays a *fact*, not a hope, as the corpus evolves. Introspects the
+/// canonical model (post-desugar), so bundle headers (`part-of`) and desugared
+/// edges (`blocks`, from `until … answered`) count as coverage. Custom profile
+/// words (threat-model's `appsec` dialect) are intentionally NOT required here —
+/// this pins the core vocabulary the guide claims is exhaustive. If this fails,
+/// either add an example that uses the missing construct or stop teaching it.
+#[test]
+fn corpus_covers_every_core_construct() {
+    let corpus: &[&str] = &[
+        include_str!("../../../examples/ship-the-hotfix.thml"),
+        include_str!("../../../examples/triage-742.thml"),
+        include_str!("../../../examples/bad-oyster.thml"),
+        include_str!("../../../examples/weekend-plan.thml"),
+        include_str!("../../../examples/pr-feedback.thml"),
+        include_str!("../../../examples/choose-datastore.thml"),
+        include_str!("../../../examples/prod-outage.thml"),
+        include_str!("../../../examples/differential-dx.thml"),
+        include_str!("../../../examples/hiring-panel.thml"),
+        include_str!("../../../examples/replication-study.thml"),
+        include_str!("../../../examples/roadmap-priorities.thml"),
+        include_str!("../../../examples/launch-readiness.thml"),
+        include_str!("../../../examples/assistant-memory.thml"),
+        include_str!("../../../examples/moderation-decision.thml"),
+        include_str!("../../../examples/merge-conflict-beliefs.thml"),
+        include_str!("../../../examples/cloud-bill.thml"),
+        include_str!("../../../examples/ship-or-hold.thml"),
+        include_str!("../../../examples/threat-model.thml"),
+        include_str!("../../../examples/control-library.thml"),
+        // Parsed standalone here only to harvest its vocabulary (it's the sole
+        // `depends-on` user); its `baseline.*` refs are checked as a project elsewhere.
+        include_str!("../../../examples/compliance-rollout.thml"),
+    ];
+    use std::collections::BTreeSet;
+    let mut kinds = BTreeSet::new();
+    let mut relations = BTreeSet::new();
+    let mut postures = BTreeSet::new();
+    for src in corpus {
+        for o in &parse_str(src).canonical.objects {
+            match o {
+                Object::Focus(f) => {
+                    if let Some(k) = &f.kind {
+                        kinds.insert(k.clone());
+                    }
+                }
+                Object::Link(l) => {
+                    relations.insert(l.relation.clone());
+                }
+                Object::Stance(s) => {
+                    postures.insert(s.posture.clone());
+                }
+                _ => {}
+            }
+        }
+    }
+    let missing = |have: &BTreeSet<String>, want: &[&str]| -> Vec<String> {
+        want.iter()
+            .filter(|w| !have.contains(**w))
+            .map(|w| w.to_string())
+            .collect()
+    };
+    let m_kinds = missing(&kinds, crate::vocab::KINDS);
+    let m_rels = missing(&relations, crate::vocab::RELATIONS);
+    let m_posts = missing(&postures, crate::vocab::POSTURES);
+    assert!(m_kinds.is_empty(), "no corpus example uses these kinds: {m_kinds:?}");
+    assert!(m_rels.is_empty(), "no corpus example uses these relations: {m_rels:?}");
+    assert!(m_posts.is_empty(), "no corpus example uses these postures: {m_posts:?}");
+}
+
 // --- Nested scopes & inheritance (Phase 5, Stage 2) -----------------------
 
 fn scope_of<'a>(objs: &'a [Object], id: &str) -> &'a crate::canonical::Scope {

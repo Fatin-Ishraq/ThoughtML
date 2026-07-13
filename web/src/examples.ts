@@ -404,7 +404,18 @@ question build-first
 observation import-top-complaint
   Import speed is the single most common complaint in support tickets.
 
-link import-top-complaint supports faster-import`,
+link import-top-complaint supports faster-import
+
+# A stated assumption that constrains the call, and the option the PM is weighing
+# first. \`considers\` puts an option on the table; \`assumption\` records what we're
+# taking as given — the streaming rewrite is the heaviest lift under one squad.
+assumption one-squad-only
+  Only one engineering squad is free for roadmap work this quarter.
+
+link one-squad-only opposes faster-import
+
+pm considers guided-setup
+  note Lowest-lift of the three — worth weighing first given the capacity constraint.`,
   'launch-readiness': `# launch-readiness — a belief that changes as the evidence lands.
 #
 # The go/no-go readiness call is asserted, then revised twice over three days as

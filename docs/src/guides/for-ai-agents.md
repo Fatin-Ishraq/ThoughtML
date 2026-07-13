@@ -48,10 +48,13 @@ line, and a suggested `help` fix (e.g. `unknown relation` → *did you mean
 repeat until clean. Add `--lint` to catch the `supports`-used-as-a-list smell that
 silently inflates confidence.
 
-For authoring from scratch, the repository's root **`llms.txt`** is a single
-self-contained, source-derived brief on the whole language — closed vocabularies,
-the distinctions that matter, and how to read the mirror back — meant to be pasted
-into a system prompt.
+For authoring from scratch, the whole language travels *inside the tool*: run
+`thoughtml guide --full` for a single self-contained, source-derived brief — closed
+vocabularies, the distinctions that matter, and how to read the mirror back — meant to
+be pasted into a system prompt. (`thoughtml guide` alone prints a one-screen tour, and
+`thoughtml guide <topic>` looks up a single section.) It's the same
+[`llms.txt`](https://fatin-ishraq.github.io/ThoughtML/llms.txt) the site serves and the
+packages embed — one source, so the CLI, the site, and the dump can never disagree.
 
 ## Practical tips for generating ThoughtML
 

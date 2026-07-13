@@ -2,7 +2,7 @@
 name = "thoughtml"
 version.workspace = true
 edition.workspace = true
-description = "A plain-text language for reasoning you can check — reference parser and CLI toolchain (check, fmt, explain, diff, and the mirror)."
+description = "A plain-text language for reasoning you can check — reference parser and CLI toolchain (check, fmt, explain, diff, and the mirror). Run `thoughtml guide` for the whole language, embedded in the binary."
 license.workspace = true
 repository.workspace = true
 homepage = "https://fatin-ishraq.github.io/ThoughtML/"

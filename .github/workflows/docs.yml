@@ -68,6 +68,9 @@ jobs:
           #     Google Search Console site-verification file ---
           cp assets/social-card.png _site/social-card.png
           cp assets/social-card.svg _site/social-card.svg
+          # The canonical language brief, served at the site root (/llms.txt) — the
+          # same bytes the binary embeds via `thoughtml guide`.
+          cp crates/thoughtml/llms.txt _site/llms.txt
           cp google0358dcbaac28de38.html _site/google0358dcbaac28de38.html
           printf 'User-agent: *\nAllow: /\nSitemap: https://fatin-ishraq.github.io/ThoughtML/sitemap.xml\n' > _site/robots.txt
           python3 scripts/gen-sitemap.py _site https://fatin-ishraq.github.io/ThoughtML

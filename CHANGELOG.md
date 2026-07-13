@@ -4,6 +4,37 @@ All notable changes to ThoughtML are recorded here. The project follows
 [Semantic Versioning](https://semver.org). **v0.1.0** is the first public
 release — real and usable, but the surface may still move.
 
+## [0.3.0] — 2026-07-13
+
+### Added
+
+- **`thoughtml guide` — the language travels inside the binary.** The whole spec is
+  embedded (`include_str!`) so a tool you just `cargo install`ed can teach itself, with no
+  website and no network. Three shapes over one source (`crates/thoughtml/llms.txt`):
+  - `thoughtml guide` — a one-screen tour (the 60-second model + a quick reference + a topic menu).
+  - `thoughtml guide <topic>` — one section, by keyword (`relations`, `kinds`, `mirror`,
+    `time`, `formulas`, …) or number.
+  - `thoughtml guide --full` — the complete, source-derived spec, meant to be piped into an
+    AI (`thoughtml guide --full | pbcopy`).
+  The same file is served on the site at `/llms.txt` and bundled in the crate and npm
+  packages, so the CLI, the site, and the AI-ready dump can never disagree.
+
+### Changed
+
+- **`llms.txt` rewritten and re-verified against parser source.** Now carries the exact
+  compute mechanics (derived-confidence propagation, grounded argument status, decision
+  expected value), the full diagnostic-code table (`TML101`–`TML501`), formulas and units,
+  imports, and a **concept → example index** mapping every one of the 20 corpus documents to
+  the construct it demonstrates. Moved from the repo root into the crate so it publishes with
+  the package.
+
+### Internal
+
+- A conformance test (`corpus_covers_every_core_construct`) asserts every core kind, relation,
+  and posture has a worked instance in the example corpus — so "the guide teaches the whole
+  language" is enforced, not assumed. (`roadmap-priorities` gained an `assumption` and a
+  `considers` to close the last two gaps.)
+
 ## [0.2.0] — 2026-07-13
 
 ### Added
