@@ -66,6 +66,7 @@ jobs:
           cp -r web/dist/. _site/playground/
           # --- SEO: social card, robots.txt, a generated sitemap, and the
           #     Google Search Console site-verification file ---
+          cp assets/social-card.png _site/social-card.png
           cp assets/social-card.svg _site/social-card.svg
           cp google0358dcbaac28de38.html _site/google0358dcbaac28de38.html
           printf 'User-agent: *\nAllow: /\nSitemap: https://fatin-ishraq.github.io/ThoughtML/sitemap.xml\n' > _site/robots.txt
