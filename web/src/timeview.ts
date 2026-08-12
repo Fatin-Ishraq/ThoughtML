@@ -13,6 +13,7 @@
 import { relationCategory, REL_STYLE, type RelCat, type Theme } from './graph'
 import { glyph } from './icons'
 import { assertedAt, parseTime, type Canonical, type CanonObject, type Value } from './model'
+import { nodeVisual, shapePort, svgNodeShape, type ShapeSide } from './node-visuals'
 
 const SVGNS = 'http://www.w3.org/2000/svg'
 
@@ -67,11 +68,14 @@ interface TNode {
   // runtime
   visible: boolean
   // dom
-  g?: SVGGElement; shape?: SVGRectElement; ring?: SVGRectElement
+  g?: SVGGElement; shape?: SVGElement; ring?: SVGElement
 }
+interface Point { x: number; y: number }
 interface TEdge { from: string; to: string; rel: string; cat: RelCat; colorVar: string; arrow: string; dash: boolean; g?: SVGGElement; path?: SVGPathElement
   // port assignment (filled by layout)
-  sa?: Side; sb?: Side; fa?: number; fb?: number }
+  sa?: Side; sb?: Side; fa?: number; fb?: number
+  // routed polyline, retained so Fit to view also includes edge detours
+  route?: Point[] }
 interface Tension { target: string; tFrom: number; tTo: number; message: string }
 interface Beat { t: number; text: string }
 // A beat is one distinct event instant: the nodes that *arrive* at time `t`, in
@@ -98,7 +102,7 @@ interface TBeat { index: number; t: number; nodeIds: string[]; caption: string; 
 interface Band { id: string; label: string; y: number }
 interface TimeModel { nodes: TNode[]; edges: TEdge[]; narration: Beat[]; beats: TBeat[]; tension: Tension[]; tMin: number; tMax: number; narrative: boolean; bands: Band[]; worldW: number; bandH: number }
 
-type Side = 'L' | 'R' | 'T' | 'B'
+type Side = ShapeSide
 
 function confMidpoint(v: Value | undefined): number | null {
   if (!v) return null
@@ -342,9 +346,20 @@ function buildTimeModel(canon: Canonical): TimeModel {
 
 // --- lane-less layout: x = time (pinned), y = emergent force relaxation ---
 const PAD = 150
-const NODE_W = 162
-const NODE_H = 54
+const NODE_W = 176
+const NODE_H = 68
 const TOP_Y = 60
+const NODE_GAP = 52
+
+function enforceHorizontalGaps(groups: Iterable<TNode[]>): void {
+  for (const group of groups) {
+    const ordered = [...group].sort((a, b) => a.x - b.x)
+    for (let i = 1; i < ordered.length; i++) {
+      const minX = ordered[i - 1].x + NODE_W + NODE_GAP
+      if (ordered[i].x < minX) ordered[i].x = minX
+    }
+  }
+}
 
 // Serpentine layout for the "strip" case: a long, single-lane document (e.g. a
 // life story with no scopes) whose events would otherwise stretch into one
@@ -358,7 +373,9 @@ function layoutSerpentine(model: TimeModel): { worldW: number; worldH: number } 
   const beatOf = new Map<string, number>()
   beats.forEach((b) => b.nodeIds.forEach((id) => beatOf.set(id, b.index)))
   const nBeats = Math.max(1, beats.length)
-  const colsPerRow = Math.max(8, Math.min(nBeats, Math.round(Math.sqrt(nBeats * 2.2))))
+  // Aim for the stage's typical widescreen aspect rather than keeping eight
+  // columns at all costs. Five readable columns beat eleven microscopic ones.
+  const colsPerRow = Math.max(4, Math.min(nBeats, Math.round(Math.sqrt(nBeats * 2.2))))
   const place = (i: number) => {
     const row = Math.floor(i / colsPerRow)
     let col = i % colsPerRow
@@ -366,6 +383,7 @@ function layoutSerpentine(model: TimeModel): { worldW: number; worldH: number } 
     return { x: PAD + col * COL_W, rowY: TOP_Y + row * ROW_H + ROW_H / 2 }
   }
   const rowYOf = new Float64Array(nodes.length)
+  const rowOf = new Int32Array(nodes.length)
   const perBeat = new Map<number, number>()
   nodes.forEach((n, i) => {
     const bi = beatOf.get(n.id) ?? 0
@@ -376,6 +394,7 @@ function layoutSerpentine(model: TimeModel): { worldW: number; worldH: number } 
     n.y = rowY + ((k % 5) - 2) * (NODE_H + 16) + ((hash(n.id) % 30) - 15)
     n.vx = 0; n.vy = 0
     rowYOf[i] = rowY
+    rowOf[i] = Math.floor(bi / colsPerRow)
   })
 
   const idx = new Map(nodes.map((n, i) => [n.id, i]))
@@ -420,6 +439,10 @@ function layoutSerpentine(model: TimeModel): { worldW: number; worldH: number } 
     }
   }
 
+  const rows = new Map<number, TNode[]>()
+  nodes.forEach((n, i) => { const row = rows.get(rowOf[i]) ?? []; row.push(n); rows.set(rowOf[i], row) })
+  enforceHorizontalGaps(rows.values())
+
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
   for (const n of nodes) { minX = Math.min(minX, n.x); minY = Math.min(minY, n.y); maxX = Math.max(maxX, n.x + NODE_W); maxY = Math.max(maxY, n.y + NODE_H) }
   const dx0 = PAD - (Number.isFinite(minX) ? minX : 0)
@@ -440,7 +463,7 @@ function layout(model: TimeModel): { worldW: number; worldH: number } {
   // A long single-lane document (no scopes, many events) becomes an unreadable
   // horizontal strip under the swimlane layout — wrap it serpentine instead.
   const distinctBands = new Set(nodes.map((n) => n.band ?? '·ungrouped'))
-  if (nodes.length > 16 && distinctBands.size <= 1) return layoutSerpentine(model)
+  if (nodes.length > 8 && distinctBands.size <= 1) return layoutSerpentine(model)
 
   // --- bands: one horizontal lane per enclosing scope, ordered by first time ---
   const UNGROUPED = '·ungrouped'
@@ -461,7 +484,7 @@ function layout(model: TimeModel): { worldW: number; worldH: number } {
   // x: within each lane, place records left→right in time order with an even gap —
   // a clean swimlane that fills the width. The slider still reveals by real time,
   // so a doc whose timestamps bunch up no longer collapses into a single column.
-  const STEP = NODE_W + 30
+  const STEP = NODE_W + NODE_GAP
   const perBand = new Map<string, TNode[]>()
   for (const n of nodes) { const b = n.band ?? UNGROUPED; const a = perBand.get(b) ?? []; a.push(n); perBand.set(b, a) }
   for (const arr of perBand.values()) {
@@ -513,6 +536,11 @@ function layout(model: TimeModel): { worldW: number; worldH: number } {
     }
   }
 
+  // The force pass may pull related neighbours closer than an arrowhead and
+  // routing stub can physically fit. Restore a hard corridor between adjacent
+  // nodes before ports are assigned.
+  enforceHorizontalGaps(perBand.values())
+
   // normalise x to the stage origin; y already lives in band coordinates
   let minX = Infinity
   for (const n of nodes) minX = Math.min(minX, n.x)
@@ -560,21 +588,141 @@ function assignPorts(model: TimeModel): void {
 }
 
 function portPoint(n: TNode, side: Side, f: number): { x: number; y: number } {
-  if (side === 'L') return { x: n.x, y: n.y + NODE_H * f }
-  if (side === 'R') return { x: n.x + NODE_W, y: n.y + NODE_H * f }
-  if (side === 'T') return { x: n.x + NODE_W * f, y: n.y }
-  return { x: n.x + NODE_W * f, y: n.y + NODE_H }
+  return shapePort(n.kind, n.x, n.y, NODE_W, NODE_H, side, f)
 }
 function ctrlOff(side: Side, d: number): { x: number; y: number } {
-  const o = Math.min(80, Math.max(32, d * 0.35))
+  // Never let short-edge handles overshoot one another; that creates a tiny
+  // loop between neighbouring shapes instead of a calm, readable connector.
+  const o = Math.max(6, Math.min(80, d * 0.35))
   return side === 'L' ? { x: -o, y: 0 } : side === 'R' ? { x: o, y: 0 } : side === 'T' ? { x: 0, y: -o } : { x: 0, y: o }
 }
-function edgePath(e: TEdge, byId: Map<string, TNode>): string {
+interface Segment { a: Point; b: Point }
+interface RouteCandidate { points: Point[]; direct?: boolean }
+
+const EDGE_CLEAR = 12
+const EDGE_STUB = 18
+const pointKey = (p: Point) => `${p.x.toFixed(2)},${p.y.toFixed(2)}`
+const distance = (a: Point, b: Point) => Math.hypot(b.x - a.x, b.y - a.y)
+const sideVector = (side: Side): Point => side === 'L' ? { x: -1, y: 0 } : side === 'R' ? { x: 1, y: 0 } : side === 'T' ? { x: 0, y: -1 } : { x: 0, y: 1 }
+const offsetPoint = (p: Point, v: Point, amount: number): Point => ({ x: p.x + v.x * amount, y: p.y + v.y * amount })
+
+function simplifyRoute(points: Point[]): Point[] {
+  const unique = points.filter((p, i) => i === 0 || pointKey(p) !== pointKey(points[i - 1]))
+  return unique.filter((p, i) => {
+    if (i === 0 || i === unique.length - 1) return true
+    const a = unique[i - 1], b = unique[i + 1]
+    return !((Math.abs(a.x - p.x) < 0.01 && Math.abs(p.x - b.x) < 0.01) || (Math.abs(a.y - p.y) < 0.01 && Math.abs(p.y - b.y) < 0.01))
+  })
+}
+
+function segmentsOf(points: Point[]): Segment[] {
+  const segments: Segment[] = []
+  for (let i = 1; i < points.length; i++) segments.push({ a: points[i - 1], b: points[i] })
+  return segments
+}
+
+function pointInBox(p: Point, box: { x1: number; y1: number; x2: number; y2: number }): boolean {
+  return p.x >= box.x1 && p.x <= box.x2 && p.y >= box.y1 && p.y <= box.y2
+}
+
+function orient(a: Point, b: Point, c: Point): number {
+  return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x)
+}
+
+function segmentsCross(a: Point, b: Point, c: Point, d: Point): boolean {
+  const o1 = orient(a, b, c), o2 = orient(a, b, d), o3 = orient(c, d, a), o4 = orient(c, d, b)
+  return ((o1 > 0 && o2 < 0) || (o1 < 0 && o2 > 0)) && ((o3 > 0 && o4 < 0) || (o3 < 0 && o4 > 0))
+}
+
+function segmentHitsBox(seg: Segment, box: { x1: number; y1: number; x2: number; y2: number }): boolean {
+  if (pointInBox(seg.a, box) || pointInBox(seg.b, box)) return true
+  const tl = { x: box.x1, y: box.y1 }, tr = { x: box.x2, y: box.y1 }
+  const br = { x: box.x2, y: box.y2 }, bl = { x: box.x1, y: box.y2 }
+  return segmentsCross(seg.a, seg.b, tl, tr) || segmentsCross(seg.a, seg.b, tr, br) ||
+    segmentsCross(seg.a, seg.b, br, bl) || segmentsCross(seg.a, seg.b, bl, tl)
+}
+
+function routePath(points: Point[], radius = 11): string {
+  const p = simplifyRoute(points)
+  if (p.length < 2) return ''
+  let d = `M${p[0].x},${p[0].y}`
+  for (let i = 1; i < p.length - 1; i++) {
+    const prev = p[i - 1], cur = p[i], next = p[i + 1]
+    const r = Math.min(radius, distance(prev, cur) / 2, distance(cur, next) / 2)
+    const before = { x: cur.x + (prev.x - cur.x) / distance(cur, prev) * r, y: cur.y + (prev.y - cur.y) / distance(cur, prev) * r }
+    const after = { x: cur.x + (next.x - cur.x) / distance(cur, next) * r, y: cur.y + (next.y - cur.y) / distance(cur, next) * r }
+    d += ` L${before.x},${before.y} Q${cur.x},${cur.y} ${after.x},${after.y}`
+  }
+  const last = p[p.length - 1]
+  return `${d} L${last.x},${last.y}`
+}
+
+/**
+ * Route one edge around node boxes. The short direct curve remains the first
+ * choice; orthogonal candidates above, below, left, right, and through open
+ * gaps are scored when that curve would cross a node. Previously routed lines
+ * are part of the score, so dense diagrams prefer a slightly longer clean lane
+ * over piling multiple connectors onto the same crossing.
+ */
+function edgePath(e: TEdge, byId: Map<string, TNode>, nodes: TNode[], routed: Segment[]): string {
   const a = byId.get(e.from)!, b = byId.get(e.to)!
-  const p1 = portPoint(a, e.sa ?? 'R', e.fa ?? 0.5), p2 = portPoint(b, e.sb ?? 'L', e.fb ?? 0.5)
-  const d = Math.hypot(p2.x - p1.x, p2.y - p1.y)
-  const o1 = ctrlOff(e.sa ?? 'R', d), o2 = ctrlOff(e.sb ?? 'L', d)
-  return `M${p1.x},${p1.y} C${p1.x + o1.x},${p1.y + o1.y} ${p2.x + o2.x},${p2.y + o2.y} ${p2.x},${p2.y}`
+  const sa = e.sa ?? 'R', sb = e.sb ?? 'L'
+  const p1 = portPoint(a, sa, e.fa ?? 0.5), p2 = portPoint(b, sb, e.fb ?? 0.5)
+  const s = offsetPoint(p1, sideVector(sa), EDGE_STUB)
+  const t = offsetPoint(p2, sideVector(sb), EDGE_STUB)
+  const obstacles = nodes.filter((n) => n !== a && n !== b).map((n) => ({
+    x1: n.x - EDGE_CLEAR, y1: n.y - EDGE_CLEAR,
+    x2: n.x + NODE_W + EDGE_CLEAR, y2: n.y + NODE_H + EDGE_CLEAR,
+  }))
+  const minX = Math.min(...nodes.map((n) => n.x)) - EDGE_CLEAR * 2
+  const maxX = Math.max(...nodes.map((n) => n.x + NODE_W)) + EDGE_CLEAR * 2
+  const minY = Math.min(...nodes.map((n) => n.y)) - EDGE_CLEAR * 2
+  const maxY = Math.max(...nodes.map((n) => n.y + NODE_H)) + EDGE_CLEAR * 2
+  const xCorridors = new Set<number>([(s.x + t.x) / 2, minX, maxX])
+  const yCorridors = new Set<number>([(s.y + t.y) / 2, minY, maxY])
+  const sortedX = [...obstacles.flatMap((o) => [o.x1, o.x2])].sort((x, y) => x - y)
+  const sortedY = [...obstacles.flatMap((o) => [o.y1, o.y2])].sort((x, y) => x - y)
+  for (let i = 1; i < sortedX.length; i++) if (sortedX[i] - sortedX[i - 1] > EDGE_CLEAR * 2) xCorridors.add((sortedX[i] + sortedX[i - 1]) / 2)
+  for (let i = 1; i < sortedY.length; i++) if (sortedY[i] - sortedY[i - 1] > EDGE_CLEAR * 2) yCorridors.add((sortedY[i] + sortedY[i - 1]) / 2)
+
+  const candidates: RouteCandidate[] = [{ points: [p1, p2], direct: true }]
+  for (const x of xCorridors) candidates.push({ points: [p1, s, { x, y: s.y }, { x, y: t.y }, t, p2] })
+  for (const y of yCorridors) candidates.push({ points: [p1, s, { x: s.x, y }, { x: t.x, y }, t, p2] })
+
+  const score = (candidate: RouteCandidate): number => {
+    const points = simplifyRoute(candidate.points)
+    const segments = segmentsOf(points)
+    let value = segments.reduce((sum, seg) => sum + distance(seg.a, seg.b), 0) + Math.max(0, points.length - 2) * 12
+    for (const seg of segments) for (const obstacle of obstacles) if (segmentHitsBox(seg, obstacle)) value += 100000
+    for (const seg of segments) for (const prior of routed) {
+      // Crossings are undesirable, but the background halo keeps them legible;
+      // a single crossing should not force a connector around the whole stage.
+      if (segmentsCross(seg.a, seg.b, prior.a, prior.b)) value += 220
+      const collinear = Math.abs(orient(seg.a, seg.b, prior.a)) < 0.01 && Math.abs(orient(seg.a, seg.b, prior.b)) < 0.01
+      if (collinear) value += 260
+    }
+    return value
+  }
+  const best = candidates.reduce((winner, candidate) => score(candidate) < score(winner) ? candidate : winner)
+  const points = simplifyRoute(best.points)
+  if (best.direct) {
+    const d = distance(p1, p2), o1 = ctrlOff(sa, d), o2 = ctrlOff(sb, d)
+    // Sample the cubic for crossing pressure on the edges routed after it.
+    let prev = p1
+    for (let i = 1; i <= 12; i++) {
+      const u = i / 12, v = 1 - u
+      const next = {
+        x: v * v * v * p1.x + 3 * v * v * u * (p1.x + o1.x) + 3 * v * u * u * (p2.x + o2.x) + u * u * u * p2.x,
+        y: v * v * v * p1.y + 3 * v * v * u * (p1.y + o1.y) + 3 * v * u * u * (p2.y + o2.y) + u * u * u * p2.y,
+      }
+      routed.push({ a: prev, b: next }); prev = next
+    }
+    e.route = [p1, p2]
+    return `M${p1.x},${p1.y} C${p1.x + o1.x},${p1.y + o1.y} ${p2.x + o2.x},${p2.y + o2.y} ${p2.x},${p2.y}`
+  }
+  e.route = points
+  routed.push(...segmentsOf(points))
+  return routePath(points)
 }
 
 // --- the renderer ---------------------------------------------------------
@@ -648,6 +796,45 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
     const e = document.createElementNS(SVGNS, tag)
     for (const k in attrs) e.setAttribute(k, String(attrs[k]))
     return e
+  }
+  const measureCanvas = document.createElement('canvas')
+  const measureCtx = measureCanvas.getContext('2d')
+  const measureNodeText = (text: string, meta = false): number => {
+    if (!measureCtx) return text.length * (meta ? 5.7 : 6.8)
+    measureCtx.font = meta
+      ? '500 10px system-ui, -apple-system, sans-serif'
+      : '600 12px system-ui, -apple-system, sans-serif'
+    return measureCtx.measureText(text).width
+  }
+  const truncateText = (text: string, maxWidth: number, meta = false): string => {
+    if (measureNodeText(text, meta) <= maxWidth) return text
+    let end = text.length
+    while (end > 1 && measureNodeText(`${text.slice(0, end).trimEnd()}…`, meta) > maxWidth) end--
+    return `${text.slice(0, Math.max(1, end)).trimEnd()}…`
+  }
+  const wrapNodeText = (text: string, maxWidth: number, maxLines = 2): string[] => {
+    let rest = text.trim()
+    if (!rest) return ['']
+    const lines: string[] = []
+    while (rest && lines.length < maxLines) {
+      if (measureNodeText(rest) <= maxWidth) {
+        lines.push(rest)
+        break
+      }
+      if (lines.length === maxLines - 1) {
+        lines.push(truncateText(rest, maxWidth))
+        break
+      }
+      let cut = 1
+      while (cut < rest.length && measureNodeText(rest.slice(0, cut + 1)) <= maxWidth) cut++
+      const fitted = rest.slice(0, cut)
+      const breaks = [' ', '-', '/', '_'].map((sep) => fitted.lastIndexOf(sep))
+      const natural = Math.max(...breaks)
+      const take = natural >= Math.floor(cut * 0.55) ? natural + 1 : cut
+      lines.push(rest.slice(0, take).trim())
+      rest = rest.slice(take).trim()
+    }
+    return lines
   }
   const fmtDate = (ms: number) => new Date(ms).toISOString().slice(0, 10)
 
@@ -766,8 +953,9 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
     const defs = document.createElementNS(SVGNS, 'defs')
     const cats: RelCat[] = ['support', 'attack', 'causal', 'enable', 'depend', 'revise', 'answer', 'lead', 'option', 'member', 'other']
     for (const c of cats) {
-      const m = EL('marker', { id: `tv-mk-${c}`, markerWidth: 9, markerHeight: 9, refX: 7, refY: 4, orient: 'auto' })
       const arrow = REL_STYLE[c].arrow
+      const refX = arrow === 'tee' ? 2 : arrow === 'circle' ? 7 : 8
+      const m = EL('marker', { id: `tv-mk-${c}`, markerWidth: 9, markerHeight: 9, refX, refY: 4, orient: 'auto', markerUnits: 'userSpaceOnUse' })
       let shape: SVGElement
       if (arrow === 'tee') shape = EL('path', { d: 'M0,2 L2,2 L2,6 L0,6 z' })
       else if (arrow === 'vee') shape = EL('path', { d: 'M0,1 L8,4 L0,7', fill: 'none', 'stroke-width': 1.4 })
@@ -796,28 +984,84 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
       }
     }
     // edges
+    const routed: Segment[] = []
     for (const e of model.edges) {
       const g = EL('g', { class: 'tv-edge' })
-      const p = EL('path', { d: edgePath(e, byId), fill: 'none', 'marker-end': `url(#tv-mk-${e.cat})`, 'stroke-width': e.cat === 'support' || e.cat === 'enable' ? 1.8 : 1.5, style: `stroke:var(${e.colorVar})` })
+      const d = edgePath(e, byId, model.nodes, routed)
+      const width = e.cat === 'support' || e.cat === 'enable' ? 1.8 : 1.5
+      const halo = EL('path', { d, fill: 'none', class: 'tv-edge-halo', 'stroke-width': width + 4.5 })
+      const p = EL('path', { d, fill: 'none', 'marker-end': `url(#tv-mk-${e.cat})`, 'stroke-width': width, style: `stroke:var(${e.colorVar})` })
       if (e.dash) p.setAttribute('stroke-dasharray', '5 4')
       if (e.cat === 'other') p.setAttribute('opacity', '0.5')
-      g.appendChild(p); e.g = g; e.path = p; eL.appendChild(g)
+      g.append(halo, p); e.g = g; e.path = p; eL.appendChild(g)
     }
     // nodes
     for (const n of model.nodes) {
-      const g = EL('g', { 'data-id': n.id, class: 'tv-node' })
-      const shape = EL('rect', { x: n.x, y: n.y, width: NODE_W, height: NODE_H, rx: 11, style: `fill:color-mix(in srgb, var(${n.colorVar}) 15%, var(--bg-panel));stroke:var(${n.colorVar})`, 'stroke-width': 1.4 })
+      const visual = nodeVisual(n.kind)
+      const g = EL('g', {
+        'data-id': n.id,
+        class: `tv-node tv-kind-${visual.kind}`,
+        role: 'button',
+        tabindex: 0,
+        'aria-label': `${visual.label}: ${n.label}`,
+      })
+      const title = EL('title', {})
+      title.textContent = `${visual.label}: ${n.label}`
+      g.appendChild(title)
+
+      const shapeDef = svgNodeShape(n.kind, n.x, n.y, NODE_W, NODE_H)
+      const shape = EL(shapeDef.tag, {
+        ...shapeDef.attrs,
+        class: 'tv-node-shape',
+        style: `fill:color-mix(in srgb, var(${n.colorVar}) 15%, var(--bg-panel));stroke:var(${n.colorVar})`,
+        'stroke-width': 1.4,
+        'stroke-linejoin': 'round',
+      })
       g.appendChild(shape)
-      g.appendChild(EL('circle', { cx: n.x + 13, cy: n.y + 14, r: 3.2, style: `fill:var(${n.colorVar})` }))
-      const t = EL('text', { x: n.x + NODE_W / 2, y: n.y + (n.author ? 22 : 30), 'text-anchor': 'middle', class: 'tv-nt' })
-      t.textContent = n.label; g.appendChild(t)
-      if (n.author) {
-        const a = EL('text', { x: n.x + NODE_W / 2, y: n.y + 38, 'text-anchor': 'middle', class: 'tv-na' })
-        a.textContent = n.author; g.appendChild(a)
-      }
-      const ring = EL('rect', { x: n.x - 3, y: n.y - 3, width: NODE_W + 6, height: NODE_H + 6, rx: 13, fill: 'none', class: 'tv-ring', style: 'stroke:var(--error)', 'stroke-width': 1.7, opacity: 0 })
+
+      const textWidth = NODE_W * visual.textWidth
+      const lines = wrapNodeText(n.label, textWidth)
+      const firstY = n.y + (lines.length > 1 ? 23 : 30)
+      const t = EL('text', {
+        x: n.x + NODE_W / 2,
+        y: firstY,
+        'text-anchor': 'middle',
+        class: 'tv-nt',
+      })
+      lines.forEach((line, index) => {
+        const span = EL('tspan', {
+          x: n.x + NODE_W / 2,
+          y: firstY + index * 14,
+        })
+        span.textContent = line
+        t.appendChild(span)
+      })
+      g.appendChild(t)
+
+      const metaText = n.author ? `${n.kind} · ${n.author}` : n.kind
+      const meta = EL('text', {
+        x: n.x + NODE_W / 2,
+        y: n.y + NODE_H - 9,
+        'text-anchor': 'middle',
+        class: 'tv-nm',
+      })
+      meta.textContent = truncateText(metaText, textWidth, true)
+      g.appendChild(meta)
+
+      const ringDef = svgNodeShape(n.kind, n.x - 3, n.y - 3, NODE_W + 6, NODE_H + 6)
+      const ring = EL(ringDef.tag, {
+        ...ringDef.attrs,
+        fill: 'none',
+        class: 'tv-ring',
+        style: 'stroke:var(--error)',
+        'stroke-width': 1.7,
+        'stroke-linejoin': 'round',
+        opacity: 0,
+      })
       g.appendChild(ring)
-      n.g = g; n.shape = shape; n.ring = ring
+      n.g = g
+      n.shape = shape
+      n.ring = ring
       nL.appendChild(g)
     }
   }
@@ -911,6 +1155,9 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
     const Hh = svg.clientHeight || container.clientHeight || 700
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
     for (const n of model.nodes) { minX = Math.min(minX, n.x); minY = Math.min(minY, n.y); maxX = Math.max(maxX, n.x + NODE_W); maxY = Math.max(maxY, n.y + NODE_H) }
+    for (const e of model.edges) for (const p of e.route ?? []) {
+      minX = Math.min(minX, p.x); minY = Math.min(minY, p.y); maxX = Math.max(maxX, p.x); maxY = Math.max(maxY, p.y)
+    }
     if (!Number.isFinite(minX)) { minX = 0; minY = 0; maxX = W; maxY = Hh }
     const bw = (maxX - minX) || 1, bh = (maxY - minY) || 1
     const padX = 90, topRoom = 100, botRoom = 108 // leave room for narration + bar
@@ -981,6 +1228,13 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
     if (!focusId) hover(ge ? ge.getAttribute('data-id') : null)
   })
   svg.addEventListener('pointerup', () => endDrag(true))
+  svg.addEventListener('keydown', (ev) => {
+    const ge = (ev.target as Element).closest?.('g[data-id]') as SVGGElement | null
+    if (!ge || (ev.key !== 'Enter' && ev.key !== ' ')) return
+    ev.preventDefault()
+    ev.stopPropagation()
+    selectNode(ge.getAttribute('data-id'))
+  })
   // releases / cancels outside the SVG must still clear the drag
   window.addEventListener('pointerup', () => { if (drag) endDrag(false) })
   window.addEventListener('pointercancel', () => endDrag(false))

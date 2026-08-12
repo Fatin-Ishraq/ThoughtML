@@ -271,11 +271,14 @@ a { color: inherit; }
 .tv-svg { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: grab; }
 .timeview.dragging .tv-svg { cursor: grabbing; }
 .tv-node { cursor: pointer; transition: opacity 0.4s ease; }
-.tv-node rect { transition: stroke-width 0.18s ease; }
-.tv-node:hover rect:first-of-type { stroke-width: 2.4; }
+.tv-node .tv-node-shape { transition: stroke-width 0.18s ease; }
+.tv-node:hover .tv-node-shape, .tv-node:focus .tv-node-shape { stroke-width: 2.4; }
+.tv-node:focus { outline: none; }
 .tv-edge { transition: opacity 0.45s ease; }
+.tv-edge path { stroke-linecap: round; stroke-linejoin: round; }
+.tv-edge-halo { stroke: var(--bg-canvas); opacity: 0.88; pointer-events: none; }
 .tv-nt { font-family: var(--sans); font-weight: 600; font-size: 12px; fill: var(--text); }
-.tv-na { font-family: var(--sans); font-size: 10px; fill: var(--text-faint); }
+.tv-nm { font-family: var(--sans); font-weight: 600; font-size: 9.5px; letter-spacing: 0.25px; text-transform: lowercase; fill: var(--text-faint); }
 /* tension ring: pulses while a conflict is live in the current as-of window */
 .tv-ring { opacity: 0; }
 .tv-node.tv-tension .tv-ring { animation: tv-pulse 1.4s ease-in-out infinite; }
@@ -390,7 +393,7 @@ a { color: inherit; }
 }
 /* "just arrived" emphasis — a scale-in + stroke flash as a beat lands */
 .tv-node.tv-arrive { transform-box: fill-box; transform-origin: center; animation: tv-arrive 0.7s cubic-bezier(0.2, 0.8, 0.2, 1); }
-.tv-node.tv-arrive rect:first-of-type { animation: tv-arrive-stroke 1s ease-out; }
+.tv-node.tv-arrive .tv-node-shape { animation: tv-arrive-stroke 1s ease-out; }
 @keyframes tv-arrive { 0% { transform: scale(0.55); } 55% { transform: scale(1.13); } 100% { transform: scale(1); } }
 @keyframes tv-arrive-stroke { 0% { stroke-width: 3.6; } 100% { stroke-width: 1.4; } }
 .tv-track { position: relative; width: 100%; display: flex; align-items: center; }
@@ -561,6 +564,7 @@ a { color: inherit; }
 .legend-title { font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.6px; font-size: 10px; margin-bottom: 7px; }
 .legend-row { display: flex; align-items: center; gap: 8px; padding: 2px 0; color: var(--text-dim); }
 .legend-swatch { width: 11px; height: 11px; border-radius: 3px; flex: 0 0 auto; }
+.legend-shape { flex: 0 0 auto; overflow: visible; }
 .legend-edge { flex: 0 0 auto; }
 
 /* data drawer */

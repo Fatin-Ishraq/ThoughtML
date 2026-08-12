@@ -8,6 +8,7 @@
 import cytoscape, { type Core, type ElementDefinition } from 'cytoscape'
 import dagre from 'cytoscape-dagre'
 import { assertedAt, formatValue, type Canonical, type CanonObject, type Value } from './model'
+import { cytoscapeShapeStyle, FOCUS_VISUALS } from './node-visuals'
 
 cytoscape.use(dagre)
 
@@ -277,6 +278,10 @@ function buildElements(canon: Canonical, mode: ViewMode): ElementDefinition[] {
 
 function buildStyle(p: Palette): any[] {
   const nodeKind = (k: keyof Palette) => ({ selector: `node.${k}`, style: { 'background-color': p[k] as string, 'border-color': p[k] as string } })
+  const focusShapes = FOCUS_VISUALS.map((visual) => ({
+    selector: `node.kind-${visual.kind}`,
+    style: cytoscapeShapeStyle(visual.kind),
+  }))
   // Relation-aware edges + reified-link tints, generated from REL_STYLE.
   const cats = Object.keys(REL_STYLE) as RelCat[]
   const relEdge = cats.map((c) => {
@@ -295,7 +300,8 @@ function buildStyle(p: Palette): any[] {
         'text-valign': 'center',
         'text-halign': 'center',
         'text-wrap': 'wrap',
-        'text-max-width': '150px',
+        'text-overflow-wrap': 'anywhere',
+        'text-max-width': '160px',
         'line-height': 1.3,
         width: 'label',
         height: 'label',
@@ -311,23 +317,15 @@ function buildStyle(p: Palette): any[] {
     nodeKind('link'),
     nodeKind('stance'),
     nodeKind('agent'),
-    { selector: 'node.question', style: { 'background-color': p.question, 'border-color': p.question, shape: 'round-diamond', 'text-max-width': '110px' } },
+    { selector: 'node.question', style: { 'background-color': p.question, 'border-color': p.question, ...cytoscapeShapeStyle('question') } },
     { selector: 'node.scope', style: { 'background-color': p.scope, 'border-color': p.scope, shape: 'round-rectangle', 'font-weight': 700, 'background-opacity': p.nodeOpacity * 0.55 } },
     // A scope holding members (structural mode) draws as a compound box: label
     // at the top, padded, faint fill so the nested nodes read clearly. Only
     // matches when the scope actually has children, so leaf scopes are untouched.
     { selector: 'node.scope:parent', style: { 'text-valign': 'top', 'text-halign': 'center', padding: 18, 'background-opacity': 0.08, 'border-opacity': 0.7 } },
-    // Focus kind → shape (v0.2). Colour stays `focus`; shape encodes the kind,
-    // so type reads by colour and reasoning-category reads by silhouette.
-    { selector: 'node.kind-observation', style: { shape: 'round-rectangle' } },
-    { selector: 'node.kind-claim', style: { shape: 'ellipse' } },
-    { selector: 'node.kind-hypothesis', style: { shape: 'round-hexagon' } },
-    { selector: 'node.kind-option', style: { shape: 'round-tag' } },
-    { selector: 'node.kind-decision', style: { shape: 'round-diamond' } },
-    { selector: 'node.kind-goal', style: { shape: 'round-pentagon' } },
-    { selector: 'node.kind-memory', style: { shape: 'barrel' } },
-    { selector: 'node.kind-assumption', style: { shape: 'cut-rectangle' } },
-    { selector: 'node.kind-outcome', style: { shape: 'rhomboid' } },
+    // Focus kind → shape. This mapping is shared with the SVG Viewer and the
+    // legend; colour still carries object type while silhouette carries meaning.
+    ...focusShapes,
     { selector: 'node.missing', style: { 'background-color': p.missing, 'border-color': p.missing, 'border-style': 'dashed' } },
     { selector: 'node.agent', style: { 'background-color': p.agent, 'border-color': p.agent, shape: 'ellipse' } },
     // confidence → border thickness on stance nodes
@@ -367,7 +365,11 @@ function buildStyle(p: Palette): any[] {
         'target-arrow-color': p.edge,
         'target-arrow-shape': 'triangle',
         'arrow-scale': 0.9,
-        'curve-style': 'bezier',
+        'curve-style': 'round-taxi',
+        'taxi-direction': 'auto',
+        'taxi-turn': '50%',
+        'taxi-turn-min-distance': 18,
+        'edge-distances': 'intersection',
         'font-size': 9,
         'font-family': 'ui-monospace, monospace',
         color: p.edgeText,

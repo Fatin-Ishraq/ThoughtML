@@ -4,6 +4,7 @@
 // one legend rather than each maintaining its own.
 
 import { legendItems, relationLegend, type Theme } from './graph'
+import { FOCUS_VISUALS, QUESTION_VISUAL, shapeSampleSvg } from './node-visuals'
 
 /** Fill `container` with the legend: node types, then the relation vocabulary
  *  (each row a coloured edge sample ending in the relation's arrowhead). */
@@ -16,8 +17,13 @@ export function buildLegend(container: HTMLElement, theme: Theme): void {
       rows.map((r) => `<div class="legend-row">${r}</div>`).join('')
     container.appendChild(wrap)
   }
-  section('Node types', legendItems(theme).map(({ label, color }) =>
+  const nodeTypes = legendItems(theme)
+  const focusColor = nodeTypes.find((item) => item.label === 'Focus')?.color ?? 'var(--c-focus)'
+  const questionColor = nodeTypes.find((item) => item.label === 'Question')?.color ?? 'var(--c-question)'
+  section('Node types', nodeTypes.map(({ label, color }) =>
     `<span class="legend-swatch" style="background:${color}"></span>${label}`))
+  section('Focus shapes', [...FOCUS_VISUALS, QUESTION_VISUAL].map((visual) =>
+    `${shapeSampleSvg(visual.kind, visual.kind === 'question' ? questionColor : focusColor)}<span>${visual.label}</span>`))
   section('Links', relationLegend(theme).map(({ label, color, arrow, line }) =>
     `${relSample(color, arrow, line)}<span>${label}</span>`))
 }
