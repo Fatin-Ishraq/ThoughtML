@@ -19,8 +19,16 @@ pub fn diff(a: &Canonical, b: &Canonical) -> DiffReport {
     let am = index(a);
     let bm = index(b);
 
-    let mut added: Vec<&str> = bm.keys().filter(|k| !am.contains_key(*k)).copied().collect();
-    let mut removed: Vec<&str> = am.keys().filter(|k| !bm.contains_key(*k)).copied().collect();
+    let mut added: Vec<&str> = bm
+        .keys()
+        .filter(|k| !am.contains_key(*k))
+        .copied()
+        .collect();
+    let mut removed: Vec<&str> = am
+        .keys()
+        .filter(|k| !bm.contains_key(*k))
+        .copied()
+        .collect();
     added.sort_unstable();
     removed.sort_unstable();
 
@@ -36,8 +44,11 @@ pub fn diff(a: &Canonical, b: &Canonical) -> DiffReport {
 
     let (gone, appeared) = conflict_delta(a, b);
 
-    let changed =
-        !added.is_empty() || !removed.is_empty() || !changes.is_empty() || !gone.is_empty() || !appeared.is_empty();
+    let changed = !added.is_empty()
+        || !removed.is_empty()
+        || !changes.is_empty()
+        || !gone.is_empty()
+        || !appeared.is_empty();
 
     let mut out = String::new();
     out.push_str("belief diff: A -> B\n");
@@ -98,10 +109,30 @@ fn compare(a: &Object, b: &Object) -> Vec<String> {
     }
     match (a, b) {
         (Object::Focus(x), Object::Focus(y)) => {
-            diff_opt_f64(&mut d, "confidence", x.derived_confidence, y.derived_confidence);
-            diff_opt_str(&mut d, "status", x.argument_status.as_deref(), y.argument_status.as_deref());
-            diff_opt_str(&mut d, "lifecycle", x.status.as_deref(), y.status.as_deref());
-            diff_opt_str(&mut d, "superseded_by", x.superseded_by.as_deref(), y.superseded_by.as_deref());
+            diff_opt_f64(
+                &mut d,
+                "confidence",
+                x.derived_confidence,
+                y.derived_confidence,
+            );
+            diff_opt_str(
+                &mut d,
+                "status",
+                x.argument_status.as_deref(),
+                y.argument_status.as_deref(),
+            );
+            diff_opt_str(
+                &mut d,
+                "lifecycle",
+                x.status.as_deref(),
+                y.status.as_deref(),
+            );
+            diff_opt_str(
+                &mut d,
+                "superseded_by",
+                x.superseded_by.as_deref(),
+                y.superseded_by.as_deref(),
+            );
             if x.body != y.body {
                 d.push("body changed".into());
             }
@@ -111,8 +142,18 @@ fn compare(a: &Object, b: &Object) -> Vec<String> {
                 d.push(format!("relation {} -> {}", x.relation, y.relation));
             }
             diff_opt_f64(&mut d, "weight", x.weight, y.weight);
-            diff_opt_f64(&mut d, "confidence", x.derived_confidence, y.derived_confidence);
-            diff_opt_str(&mut d, "status", x.argument_status.as_deref(), y.argument_status.as_deref());
+            diff_opt_f64(
+                &mut d,
+                "confidence",
+                x.derived_confidence,
+                y.derived_confidence,
+            );
+            diff_opt_str(
+                &mut d,
+                "status",
+                x.argument_status.as_deref(),
+                y.argument_status.as_deref(),
+            );
         }
         (Object::Stance(x), Object::Stance(y)) => {
             let cx = x.confidence.as_ref().and_then(conf_num);
@@ -129,9 +170,7 @@ fn compare(a: &Object, b: &Object) -> Vec<String> {
 
 fn diff_opt_f64(d: &mut Vec<String>, label: &str, a: Option<f64>, b: Option<f64>) {
     match (a, b) {
-        (Some(x), Some(y)) if (x - y).abs() > 0.0005 => {
-            d.push(format!("{label} {x:.3} -> {y:.3}"))
-        }
+        (Some(x), Some(y)) if (x - y).abs() > 0.0005 => d.push(format!("{label} {x:.3} -> {y:.3}")),
         (None, Some(y)) => d.push(format!("{label} — -> {y:.3}")),
         (Some(x), None) => d.push(format!("{label} {x:.3} -> —")),
         _ => {}
@@ -150,16 +189,27 @@ fn diff_opt_str(d: &mut Vec<String>, label: &str, a: Option<&str>, b: Option<&st
 
 /// Conflicts present in `a` but not `b` (resolved), and in `b` but not `a`
 /// (appeared), keyed by kind + sorted subjects so order does not matter.
-fn conflict_delta<'a>(a: &'a Canonical, b: &'a Canonical) -> (Vec<&'a Conflict>, Vec<&'a Conflict>) {
+fn conflict_delta<'a>(
+    a: &'a Canonical,
+    b: &'a Canonical,
+) -> (Vec<&'a Conflict>, Vec<&'a Conflict>) {
     let key = |c: &Conflict| {
         let mut subs = c.subjects.clone();
         subs.sort();
         format!("{}|{}", c.kind, subs.join(","))
     };
-    let akeys: std::collections::BTreeSet<String> =
-        a.audit.iter().flat_map(|au| au.conflicts.iter()).map(&key).collect();
-    let bkeys: std::collections::BTreeSet<String> =
-        b.audit.iter().flat_map(|au| au.conflicts.iter()).map(&key).collect();
+    let akeys: std::collections::BTreeSet<String> = a
+        .audit
+        .iter()
+        .flat_map(|au| au.conflicts.iter())
+        .map(&key)
+        .collect();
+    let bkeys: std::collections::BTreeSet<String> = b
+        .audit
+        .iter()
+        .flat_map(|au| au.conflicts.iter())
+        .map(&key)
+        .collect();
 
     let gone = a
         .audit

@@ -140,7 +140,10 @@ fn action_args(form: &ActionForm) -> Vec<Value> {
             Value::Ref(to.clone()),
         ],
         ActionForm::Infers { target, from } => {
-            let mut args = vec![Value::Ref(target.clone()), Value::Symbol("from".to_string())];
+            let mut args = vec![
+                Value::Ref(target.clone()),
+                Value::Symbol("from".to_string()),
+            ];
             args.extend(from.iter().map(|s| Value::Ref(s.clone())));
             args
         }
@@ -450,7 +453,10 @@ impl<'a> Desugarer<'a> {
         }
         match (&rec.header, container) {
             (Header::Scope { .. }, _) => {}
-            (Header::Focus { .. } | Header::TypedFocus { .. } | Header::Question { .. }, Some(idx)) => {
+            (
+                Header::Focus { .. } | Header::TypedFocus { .. } | Header::Question { .. },
+                Some(idx),
+            ) => {
                 let defaults: Vec<(String, Value)> = object_fields(&self.objects[idx])
                     .map(|f| {
                         f.0.iter()
@@ -663,7 +669,10 @@ impl<'a> Desugarer<'a> {
     /// Build and record one `Link` object. Shared by `core_link` (from a `link`
     /// header) and evidence bundles (one call per member), so id-gen and the
     /// leads-to / probability warnings never drift between the two paths.
-    #[allow(clippy::too_many_arguments)]
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "one constructor keeps shared link validation identical across headers and evidence bundles"
+    )]
     fn push_link(
         &mut self,
         id: String,
@@ -712,8 +721,10 @@ impl<'a> Desugarer<'a> {
     /// plain `link <source> <relation> <target>` carrying its weight/basis.
     fn evidence_bundle(&mut self, rec: &Record, relation: &str, target: &str) {
         if rec.block.evidence.is_empty() {
-            self.diags
-                .warning(rec.line, format!("empty evidence bundle `{relation} {target}`"));
+            self.diags.warning(
+                rec.line,
+                format!("empty evidence bundle `{relation} {target}`"),
+            );
         }
         for e in &rec.block.evidence {
             let id = self.idgen.link_id(&e.source, relation, target);
@@ -771,9 +782,7 @@ impl<'a> Desugarer<'a> {
                 to,
                 alias,
             } => self.action_suspects(rec, agent, from, relation, to, alias.as_deref()),
-            ActionForm::Infers { target, from } => {
-                self.action_infers(rec, agent, target, from)
-            }
+            ActionForm::Infers { target, from } => self.action_infers(rec, agent, target, from),
         }
     }
 
@@ -781,7 +790,15 @@ impl<'a> Desugarer<'a> {
         let creates_focus = FOCUS_CREATING.contains(&posture);
         if creates_focus {
             let kind = posture_kind(posture).map(str::to_string);
-            self.ensure_focus(target, kind, false, None, None, rec.block.body.clone(), Fields::new());
+            self.ensure_focus(
+                target,
+                kind,
+                false,
+                None,
+                None,
+                rec.block.body.clone(),
+                Fields::new(),
+            );
         }
 
         let stance_id = self.idgen.stance_id(agent, posture, target);
@@ -812,7 +829,9 @@ impl<'a> Desugarer<'a> {
             None
         };
         if let Some(body) = body_field {
-            stance_fields.0.insert(0, ("note".to_string(), Value::Text(body)));
+            stance_fields
+                .0
+                .insert(0, ("note".to_string(), Value::Text(body)));
         }
 
         self.objects.push(Object::Stance(Stance {
@@ -884,7 +903,9 @@ impl<'a> Desugarer<'a> {
             }
         }
         if let Some(body) = rec.block.body.clone() {
-            stance_fields.0.insert(0, ("note".to_string(), Value::Text(body)));
+            stance_fields
+                .0
+                .insert(0, ("note".to_string(), Value::Text(body)));
         }
 
         self.objects.push(Object::Stance(Stance {
@@ -969,8 +990,7 @@ impl<'a> Desugarer<'a> {
     /// `until REF [STATUS]` -> `REF blocks <blocked>` link, status preserved.
     fn expand_until(&mut self, f: &Field, blocked: &str) {
         let Some(blocker) = f.first_arg() else {
-            self.diags
-                .warning(f.line, "`until` requires a reference");
+            self.diags.warning(f.line, "`until` requires a reference");
             return;
         };
         let id = self.idgen.link_id(blocker, "blocks", blocked);
@@ -1002,13 +1022,20 @@ impl<'a> Desugarer<'a> {
 
     /// Validate a 0..1 field (`weight`, `probability`): a number, clamped with a
     /// warning if outside the interval, or an error if not a number at all.
-    fn unit_interval(&mut self, f: &Field, line: usize, name: &str) -> (Option<f64>, Option<String>) {
+    fn unit_interval(
+        &mut self,
+        f: &Field,
+        line: usize,
+        name: &str,
+    ) -> (Option<f64>, Option<String>) {
         let (value, basis) = value_and_basis(f);
         let num = match value {
             Value::Number(n) => {
                 if !(0.0..=1.0).contains(&n) {
-                    self.diags
-                        .warning(f.line.max(line), format!("{name} should be in 0..1; clamping"));
+                    self.diags.warning(
+                        f.line.max(line),
+                        format!("{name} should be in 0..1; clamping"),
+                    );
                     Some(n.clamp(0.0, 1.0))
                 } else {
                     Some(n)
@@ -1078,6 +1105,10 @@ impl<'a> Desugarer<'a> {
     /// a posture-*inferred* kind is soft and a later posture may refine it
     /// silently (e.g. `considers X` → option, then `chooses X` → decision). Only
     /// two *explicit* kinds that disagree warn.
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "the helper keeps every focus-definition field in one atomic merge operation"
+    )]
     fn ensure_focus(
         &mut self,
         id: &str,
@@ -1097,7 +1128,11 @@ impl<'a> Desugarer<'a> {
                 // mention that *agrees* (or is empty) is a no-op — but one that
                 // *diverges* is KEPT (Phase A: never silently drop) and recorded
                 // as an alternative, which the audit reports as `definition-divergence`.
-                let mut divergence = DivergentDef { body: None, quantity: None, formula: None };
+                let mut divergence = DivergentDef {
+                    body: None,
+                    quantity: None,
+                    formula: None,
+                };
                 let mut diverged = false;
                 if focus.body.is_none() {
                     focus.body = body;
@@ -1131,14 +1166,16 @@ impl<'a> Desugarer<'a> {
                         focus.kind = new;
                         now_explicit = explicit;
                     }
-                    (Some(existing), Some(new)) if existing != new => match (was_explicit, explicit) {
-                        (true, true) => conflict = Some((existing, new)),
-                        (true, false) => {} // explicit stays authoritative
-                        (false, _) => {
-                            focus.kind = Some(new); // inferred refines / explicit overrides
-                            now_explicit = explicit;
+                    (Some(existing), Some(new)) if existing != new => {
+                        match (was_explicit, explicit) {
+                            (true, true) => conflict = Some((existing, new)),
+                            (true, false) => {} // explicit stays authoritative
+                            (false, _) => {
+                                focus.kind = Some(new); // inferred refines / explicit overrides
+                                now_explicit = explicit;
+                            }
                         }
-                    },
+                    }
                     _ => {}
                 }
                 for (k, v) in fields.0 {
@@ -1279,8 +1316,7 @@ impl<'a> Desugarer<'a> {
 
     fn reserve_explicit(&mut self, id: &str, line: usize) {
         if !self.idgen.reserve(id) {
-            self.diags
-                .warning(line, format!("duplicate id `{id}`"));
+            self.diags.warning(line, format!("duplicate id `{id}`"));
         }
     }
 

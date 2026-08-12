@@ -164,7 +164,8 @@ mod tests {
 
     #[test]
     fn is_idempotent() {
-        let src = "scope s\n  observation x\n    Saw x.\n  claim y\n    Believe y.\nlink x supports y\n";
+        let src =
+            "scope s\n  observation x\n    Saw x.\n  claim y\n    Believe y.\nlink x supports y\n";
         let once = fmt(src);
         let twice = fmt(&once);
         assert_eq!(once, twice);

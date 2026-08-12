@@ -13,7 +13,9 @@ pub enum LineKind {
     /// A top-level header: zero indentation, not blank/comment.
     Header,
     /// An indented block line, carrying its indentation width in spaces.
-    Block { indent: usize },
+    Block {
+        indent: usize,
+    },
 }
 
 /// A classified source line.
@@ -42,7 +44,10 @@ pub fn classify(source: &str, diags: &mut Diagnostics) -> Vec<Line> {
         let raw = raw.to_string();
 
         // Leading whitespace run.
-        let indent_str: String = raw.chars().take_while(|c| *c == ' ' || *c == '\t').collect();
+        let indent_str: String = raw
+            .chars()
+            .take_while(|c| *c == ' ' || *c == '\t')
+            .collect();
         let rest = &raw[indent_str.len()..];
         let trimmed = rest.trim_end();
 

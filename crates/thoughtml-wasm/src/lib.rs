@@ -63,7 +63,11 @@ pub fn parse(src: &str) -> String {
 #[wasm_bindgen]
 pub fn parse_project(entry: &str, sources_json: &str) -> String {
     let sources: HashMap<String, String> = serde_json::from_str(sources_json).unwrap_or_default();
-    render(&thoughtml::parse_project(entry, &sources, playground_opts()))
+    render(&thoughtml::parse_project(
+        entry,
+        &sources,
+        playground_opts(),
+    ))
 }
 
 /// The parser crate version.

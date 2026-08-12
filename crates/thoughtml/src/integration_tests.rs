@@ -246,7 +246,11 @@ fn complete_example_canonical_shape() {
     assert_eq!(blk.relation, "blocks");
     assert_eq!(blk.to, "rollback-decision");
     assert_eq!(
-        blk.fields.0.iter().find(|(k, _)| k == "status").map(|(_, v)| v),
+        blk.fields
+            .0
+            .iter()
+            .find(|(k, _)| k == "status")
+            .map(|(_, v)| v),
         Some(&Value::Symbol("answered".to_string()))
     );
 }
@@ -354,7 +358,10 @@ fn crlf_line_endings() {
     let r = parse_str("scope x\r\nfocus y\r\n  Body text.\r\n");
     assert!(!r.diagnostics.has_errors(), "{:?}", r.diagnostics.items);
     assert_eq!(r.canonical.objects.len(), 2);
-    assert_eq!(focus(&r.canonical.objects, "y").unwrap().body.as_deref(), Some("Body text."));
+    assert_eq!(
+        focus(&r.canonical.objects, "y").unwrap().body.as_deref(),
+        Some("Body text.")
+    );
 }
 
 #[test]
@@ -564,7 +571,11 @@ fn typed_header_desugars_to_focus_plus_kind() {
     // `observation foo` is exact sugar for `focus foo` + `kind observation`.
     let typed = parse_str("observation internet-speeds\n  Internet speeds improved.");
     let plain = parse_str("focus internet-speeds\n  kind observation\n  Internet speeds improved.");
-    assert!(!typed.diagnostics.has_errors(), "{:?}", typed.diagnostics.items);
+    assert!(
+        !typed.diagnostics.has_errors(),
+        "{:?}",
+        typed.diagnostics.items
+    );
     let (to, po) = (&typed.canonical.objects, &plain.canonical.objects);
     assert_eq!(focus_kind(to, "internet-speeds"), Some("observation"));
     assert_eq!(
@@ -607,7 +618,9 @@ fn typed_header_does_not_capture_prose_body() {
     );
 }
 
-fn link_tuple(o: &Object) -> Option<(String, String, String, String, Option<f64>, Option<String>)> {
+type LinkTuple = (String, String, String, String, Option<f64>, Option<String>);
+
+fn link_tuple(o: &Object) -> Option<LinkTuple> {
     match o {
         Object::Link(l) => Some((
             l.id.clone(),
@@ -631,9 +644,23 @@ fn evidence_bundle_desugars_to_the_same_links_as_longhand() {
         "claim t\nobservation a\nobservation b\nobservation c\n\
          link a supports t\n  weight 0.9 assumed\nlink b supports t\n  weight 0.85\nlink c supports t",
     );
-    assert!(!bundle.diagnostics.has_errors(), "{:?}", bundle.diagnostics.items);
-    let bl: Vec<_> = bundle.canonical.objects.iter().filter_map(link_tuple).collect();
-    let ll: Vec<_> = longhand.canonical.objects.iter().filter_map(link_tuple).collect();
+    assert!(
+        !bundle.diagnostics.has_errors(),
+        "{:?}",
+        bundle.diagnostics.items
+    );
+    let bl: Vec<_> = bundle
+        .canonical
+        .objects
+        .iter()
+        .filter_map(link_tuple)
+        .collect();
+    let ll: Vec<_> = longhand
+        .canonical
+        .objects
+        .iter()
+        .filter_map(link_tuple)
+        .collect();
     assert_eq!(bl, ll, "bundle must desugar to the same links as longhand");
     // the bare member (`c`) is a normal, full-strength link
     let c = link(&bundle.canonical.objects, "c-supports-t").unwrap();
@@ -667,7 +694,10 @@ fn evidence_bundle_members_are_strict_clean() {
     let r = parse_str("claim t\nobservation a\nsupports t\n  a weight 0.9 assumed");
     assert!(!r.diagnostics.has_errors(), "{:?}", r.diagnostics.items);
     assert!(
-        !r.diagnostics.items.iter().any(|d| d.message.contains("unknown field")),
+        !r.diagnostics
+            .items
+            .iter()
+            .any(|d| d.message.contains("unknown field")),
         "members must not warn as unknown fields: {:?}",
         r.diagnostics.items,
     );
@@ -682,7 +712,11 @@ fn relation_that_is_also_a_field_stays_a_field() {
     );
     assert!(!r.diagnostics.has_errors(), "{:?}", r.diagnostics.items);
     // no stray bundle-link was created from the `answers q` field line
-    assert!(!r.canonical.objects.iter().any(|o| matches!(o, Object::Link(l) if l.relation == "answers")));
+    assert!(!r
+        .canonical
+        .objects
+        .iter()
+        .any(|o| matches!(o, Object::Link(l) if l.relation == "answers")));
 }
 
 #[test]
@@ -694,8 +728,15 @@ focus risk-appetite
   kind assumption
 team noticed risk-appetite";
     let r = parse_str(src);
-    assert_eq!(focus_kind(&r.canonical.objects, "risk-appetite"), Some("assumption"));
-    assert!(!r.diagnostics.items.iter().any(|d| d.message.contains("redeclared")));
+    assert_eq!(
+        focus_kind(&r.canonical.objects, "risk-appetite"),
+        Some("assumption")
+    );
+    assert!(!r
+        .diagnostics
+        .items
+        .iter()
+        .any(|d| d.message.contains("redeclared")));
 }
 
 #[test]
@@ -704,7 +745,11 @@ fn inferred_kind_refines_silently() {
     let src = "team considers plan-a\nteam chooses plan-a";
     let r = parse_str(src);
     assert_eq!(focus_kind(&r.canonical.objects, "plan-a"), Some("decision"));
-    assert!(!r.diagnostics.items.iter().any(|d| d.message.contains("redeclared")));
+    assert!(!r
+        .diagnostics
+        .items
+        .iter()
+        .any(|d| d.message.contains("redeclared")));
 }
 
 #[test]
@@ -727,8 +772,15 @@ focus x
 #[test]
 fn unknown_kind_warns_but_is_kept() {
     let r = parse_str("focus x\n  kind wishful-thinking");
-    assert_eq!(focus_kind(&r.canonical.objects, "x"), Some("wishful-thinking"));
-    assert!(r.diagnostics.items.iter().any(|d| d.message.contains("unknown focus kind")));
+    assert_eq!(
+        focus_kind(&r.canonical.objects, "x"),
+        Some("wishful-thinking")
+    );
+    assert!(r
+        .diagnostics
+        .items
+        .iter()
+        .any(|d| d.message.contains("unknown focus kind")));
 }
 
 #[test]
@@ -741,35 +793,61 @@ question q
   about a, b";
     let r = parse_str(src);
     assert!(!r.diagnostics.has_errors(), "{:?}", r.diagnostics.items);
-    let q = r.canonical.objects.iter().find_map(|o| match o {
-        Object::Question(q) if q.id == "q" => Some(q),
-        _ => None,
-    }).unwrap();
+    let q = r
+        .canonical
+        .objects
+        .iter()
+        .find_map(|o| match o {
+            Object::Question(q) if q.id == "q" => Some(q),
+            _ => None,
+        })
+        .unwrap();
     assert_eq!(q.asks_about, vec!["a".to_string(), "b".to_string()]);
 }
 
 #[test]
 fn about_unresolved_warns() {
     let r = parse_str("question q\n  What about it?\n  about ghost");
-    assert!(r.diagnostics.items.iter().any(|d| d.message.contains("about unresolved reference")));
+    assert!(r
+        .diagnostics
+        .items
+        .iter()
+        .any(|d| d.message.contains("about unresolved reference")));
 }
 
 #[test]
 fn acts_are_opt_in() {
     let src = "team noticed metric-shift\n  Activation rose.";
     let off = parse_str(src);
-    assert!(!off.canonical.objects.iter().any(|o| matches!(o, Object::Act(_))));
+    assert!(!off
+        .canonical
+        .objects
+        .iter()
+        .any(|o| matches!(o, Object::Act(_))));
 
-    let on = parse_str_with(src, Options { emit_acts: true, ..Options::default() });
-    let act = on.canonical.objects.iter().find_map(|o| match o {
-        Object::Act(a) => Some(a),
-        _ => None,
-    }).expect("an Act should be emitted");
+    let on = parse_str_with(
+        src,
+        Options {
+            emit_acts: true,
+            ..Options::default()
+        },
+    );
+    let act = on
+        .canonical
+        .objects
+        .iter()
+        .find_map(|o| match o {
+            Object::Act(a) => Some(a),
+            _ => None,
+        })
+        .expect("an Act should be emitted");
     assert_eq!(act.verb, "noticed");
     assert_eq!(act.agent.as_deref(), Some("team"));
     // expands_to records the focus + stance the action produced.
     assert!(act.expands_to.contains(&"metric-shift".to_string()));
-    assert!(act.expands_to.contains(&"team-noticed-metric-shift".to_string()));
+    assert!(act
+        .expands_to
+        .contains(&"team-noticed-metric-shift".to_string()));
 }
 
 #[test]
@@ -817,7 +895,11 @@ fn inline_basis_on_confidence() {
 fn inline_basis_on_quantity() {
     let r = parse_str("focus a\n  quantity 30 GB measured");
     assert!(!r.diagnostics.has_errors(), "{:?}", r.diagnostics.items);
-    let q = focus(&r.canonical.objects, "a").unwrap().quantity.as_ref().unwrap();
+    let q = focus(&r.canonical.objects, "a")
+        .unwrap()
+        .quantity
+        .as_ref()
+        .unwrap();
     assert_eq!((q.value, q.unit.as_str()), (30.0, "GB"));
     assert_eq!(q.basis.as_deref(), Some("measured"));
 }
@@ -837,13 +919,26 @@ fn provenance_lint_is_opt_in() {
     // Default: a number without a basis is silent — non-breaking.
     assert!(!parse_str(src).diagnostics.has_warnings());
     // Opt-in: it warns, naming the missing basis.
-    let strict = parse_str_with(src, Options { strict_provenance: true, ..Options::default() });
+    let strict = parse_str_with(
+        src,
+        Options {
+            strict_provenance: true,
+            ..Options::default()
+        },
+    );
     assert!(strict.diagnostics.has_warnings());
-    assert!(strict.diagnostics.items.iter().any(|d| d.message.contains("basis")));
+    assert!(strict
+        .diagnostics
+        .items
+        .iter()
+        .any(|d| d.message.contains("basis")));
     // With a basis declared, the opt-in lint is satisfied.
     let ok = parse_str_with(
         "focus claim\nalice holds claim\n  confidence 0.9 estimated",
-        Options { strict_provenance: true, ..Options::default() },
+        Options {
+            strict_provenance: true,
+            ..Options::default()
+        },
     );
     assert!(!ok.diagnostics.has_warnings(), "{:?}", ok.diagnostics.items);
 }
@@ -851,25 +946,42 @@ fn provenance_lint_is_opt_in() {
 #[test]
 fn suspects_and_infers_carry_weight() {
     let r1 = parse_str("team suspects a causes b\n  weight 0.4");
-    let lk = r1.canonical.objects.iter().find_map(|o| match o {
-        Object::Link(l) => Some(l),
-        _ => None,
-    }).unwrap();
+    let lk = r1
+        .canonical
+        .objects
+        .iter()
+        .find_map(|o| match o {
+            Object::Link(l) => Some(l),
+            _ => None,
+        })
+        .unwrap();
     assert_eq!(lk.weight, Some(0.4));
 
     let r2 = parse_str("assistant infers c from d, e\n  weight 0.7");
-    let weights: Vec<Option<f64>> = r2.canonical.objects.iter().filter_map(|o| match o {
-        Object::Link(l) => Some(l.weight),
-        _ => None,
-    }).collect();
+    let weights: Vec<Option<f64>> = r2
+        .canonical
+        .objects
+        .iter()
+        .filter_map(|o| match o {
+            Object::Link(l) => Some(l.weight),
+            _ => None,
+        })
+        .collect();
     assert_eq!(weights, vec![Some(0.7), Some(0.7)]);
 }
 
 #[test]
 fn weight_out_of_range_warns_and_clamps() {
     let r = parse_str("focus a\nfocus b\nlink a supports b\n  weight 1.4");
-    assert_eq!(link(&r.canonical.objects, "a-supports-b").unwrap().weight, Some(1.0));
-    assert!(r.diagnostics.items.iter().any(|d| d.message.contains("weight should be in 0..1")));
+    assert_eq!(
+        link(&r.canonical.objects, "a-supports-b").unwrap().weight,
+        Some(1.0)
+    );
+    assert!(r
+        .diagnostics
+        .items
+        .iter()
+        .any(|d| d.message.contains("weight should be in 0..1")));
 }
 
 #[test]
@@ -981,8 +1093,16 @@ alice holds x
 bob holds x
   confidence 0.8
   asserted-at 2026-01-01";
-    let tl = parse_str(src).canonical.timeline.expect("a timeline should be derived");
-    assert_eq!(tl.events.len(), 2, "two dated stances on the spine: {:?}", tl.events);
+    let tl = parse_str(src)
+        .canonical
+        .timeline
+        .expect("a timeline should be derived");
+    assert_eq!(
+        tl.events.len(),
+        2,
+        "two dated stances on the spine: {:?}",
+        tl.events
+    );
     // Valid-time order: bob (Jan) before alice (Mar)…
     assert_eq!(tl.events[0].at, "2026-01-01");
     assert_eq!(tl.events[0].agent.as_deref(), Some("bob"));
@@ -1025,7 +1145,10 @@ analyst revises estimate
         .objects
         .iter()
         .any(|o| matches!(o, Object::Stance(s) if s.id == "analyst-revises-estimate"));
-    assert!(!has_revision, "the later revision is excluded as of January");
+    assert!(
+        !has_revision,
+        "the later revision is excluded as of January"
+    );
     // …so the original belief is live, not superseded.
     assert!(
         superseded_by(&jan.canonical.objects, "analyst-holds-estimate").is_none(),
@@ -1049,7 +1172,11 @@ fn as_of_transaction_keeps_a_prefix_of_the_ledger() {
             _ => "?",
         })
         .collect();
-    assert_eq!(ids, vec!["a", "b"], "only the first two records survive: {ids:?}");
+    assert_eq!(
+        ids,
+        vec!["a", "b"],
+        "only the first two records survive: {ids:?}"
+    );
 }
 
 #[test]
@@ -1215,7 +1342,10 @@ team suspects cause causes effect as hyp
 focus downstream
 link hyp supports downstream";
     let r = parse_derived(src);
-    approx(derived_of(&r.canonical.objects, "downstream").unwrap(), 0.622); // logistic(0.5)
+    approx(
+        derived_of(&r.canonical.objects, "downstream").unwrap(),
+        0.622,
+    ); // logistic(0.5)
 }
 
 #[test]
@@ -1419,9 +1549,15 @@ link s3 supports sole
 #[test]
 fn sensitivity_is_opt_in() {
     let src = "focus e\nfocus c\nlink e supports c";
-    assert_eq!(leverage_of(&parse_str(src).canonical.objects, "e-supports-c"), None);
+    assert_eq!(
+        leverage_of(&parse_str(src).canonical.objects, "e-supports-c"),
+        None
+    );
     // Even with derived confidence on, leverage stays off until asked for.
-    assert_eq!(leverage_of(&parse_derived(src).canonical.objects, "e-supports-c"), None);
+    assert_eq!(
+        leverage_of(&parse_derived(src).canonical.objects, "e-supports-c"),
+        None
+    );
     assert!(leverage_of(&parse_sensitivity(src).canonical.objects, "e-supports-c").is_some());
 }
 
@@ -1437,7 +1573,10 @@ link b undercuts claim";
     let base = parse_overrides(src, &[], &[]);
     approx(derived_of(&base.canonical.objects, "claim").unwrap(), 0.5);
     let muted = parse_overrides(src, &["b-undercuts-claim"], &[]);
-    approx(derived_of(&muted.canonical.objects, "claim").unwrap(), 0.731);
+    approx(
+        derived_of(&muted.canonical.objects, "claim").unwrap(),
+        0.731,
+    );
 }
 
 #[test]
@@ -1450,7 +1589,10 @@ focus claim
 link a supports claim
 link b undercuts claim";
     let muted = parse_overrides(src, &[], &["b"]);
-    approx(derived_of(&muted.canonical.objects, "claim").unwrap(), 0.731);
+    approx(
+        derived_of(&muted.canonical.objects, "claim").unwrap(),
+        0.731,
+    );
 }
 
 #[test]
@@ -1470,7 +1612,10 @@ fn quantity_of<'a>(objs: &'a [Object], id: &str) -> Option<&'a crate::canonical:
 }
 
 fn no_quantity_warning(r: &crate::ParseResult) -> bool {
-    !r.diagnostics.items.iter().any(|d| d.message.contains("quantity"))
+    !r.diagnostics
+        .items
+        .iter()
+        .any(|d| d.message.contains("quantity"))
 }
 
 #[test]
@@ -1500,7 +1645,10 @@ fn quantity_count_and_rate_are_opaque() {
     let r = parse_str("focus load\n  quantity 4500 req/s\nfocus team-size\n  quantity 12 people");
     let o = &r.canonical.objects;
     assert_eq!(quantity_of(o, "load").unwrap().dimension, "rate");
-    assert_eq!(quantity_of(o, "team-size").unwrap().dimension, "count:people");
+    assert_eq!(
+        quantity_of(o, "team-size").unwrap().dimension,
+        "count:people"
+    );
 }
 
 #[test]
@@ -1536,7 +1684,11 @@ fn malformed_quantity_warns_and_is_dropped() {
     // No unit, and too many tokens — both warn, neither yields a quantity.
     let r1 = parse_str("focus x\n  quantity 200");
     assert!(quantity_of(&r1.canonical.objects, "x").is_none());
-    assert!(r1.diagnostics.items.iter().any(|d| d.message.contains("quantity")));
+    assert!(r1
+        .diagnostics
+        .items
+        .iter()
+        .any(|d| d.message.contains("quantity")));
     let r2 = parse_str("focus y\n  quantity 200 ms extra");
     assert!(quantity_of(&r2.canonical.objects, "y").is_none());
     assert!(r2.diagnostics.has_warnings());
@@ -1550,7 +1702,11 @@ fn quantity_merges_onto_posture_introduced_focus() {
     let q = quantity_of(&r.canonical.objects, "disk-usage").unwrap();
     assert_eq!(q.unit, "GB");
     assert_eq!(
-        r.canonical.objects.iter().filter(|o| matches!(o, Object::Focus(f) if f.id == "disk-usage")).count(),
+        r.canonical
+            .objects
+            .iter()
+            .filter(|o| matches!(o, Object::Focus(f) if f.id == "disk-usage"))
+            .count(),
         1,
         "focus must be deduped, carrying the merged quantity"
     );
@@ -1634,7 +1790,11 @@ focus bad
   = a + b";
     let r = parse_formulas(src);
     assert!(computed_of(&r.canonical.objects, "bad").is_none());
-    assert!(r.diagnostics.items.iter().any(|d| d.message.contains("different dimensions")));
+    assert!(r
+        .diagnostics
+        .items
+        .iter()
+        .any(|d| d.message.contains("different dimensions")));
 }
 
 #[test]
@@ -1664,7 +1824,11 @@ focus a
 focus b
   = a + 1";
     let r = parse_formulas(src);
-    assert!(r.diagnostics.items.iter().any(|d| d.message.contains("cycle")));
+    assert!(r
+        .diagnostics
+        .items
+        .iter()
+        .any(|d| d.message.contains("cycle")));
     assert!(computed_of(&r.canonical.objects, "a").is_none());
     assert!(computed_of(&r.canonical.objects, "b").is_none());
 }
@@ -1673,7 +1837,11 @@ focus b
 fn formula_unknown_reference_warns() {
     let r = parse_formulas("focus t\n  = ghost + 1");
     assert!(computed_of(&r.canonical.objects, "t").is_none());
-    assert!(r.diagnostics.items.iter().any(|d| d.message.contains("ghost")));
+    assert!(r
+        .diagnostics
+        .items
+        .iter()
+        .any(|d| d.message.contains("ghost")));
 }
 
 #[test]
@@ -1691,7 +1859,11 @@ fn formula_references_count_as_connections() {
     // Even with formulas off, a formula ref keeps its inputs from being orphans,
     // and a formula focus is itself connected.
     let r = parse_str("focus a\n  quantity 1 USD\nfocus b\n  = a + 1");
-    assert!(!r.diagnostics.items.iter().any(|d| d.message.contains("not connected")));
+    assert!(!r
+        .diagnostics
+        .items
+        .iter()
+        .any(|d| d.message.contains("not connected")));
 }
 
 #[test]
@@ -1725,7 +1897,10 @@ fn parse_decisions(src: &str) -> crate::ParseResult {
     )
 }
 
-fn expected_value_of<'a>(objs: &'a [Object], id: &str) -> Option<&'a crate::canonical::ExpectedValue> {
+fn expected_value_of<'a>(
+    objs: &'a [Object],
+    id: &str,
+) -> Option<&'a crate::canonical::ExpectedValue> {
     focus(objs, id).and_then(|f| f.expected_value.as_ref())
 }
 
@@ -1815,7 +1990,12 @@ focus opt
 link opt leads-to jackpot
   probability 1.0";
     let r = parse_decisions(src);
-    assert_eq!(expected_value_of(&r.canonical.objects, "opt").unwrap().value, 1500.0);
+    assert_eq!(
+        expected_value_of(&r.canonical.objects, "opt")
+            .unwrap()
+            .value,
+        1500.0
+    );
 }
 
 #[test]
@@ -1832,7 +2012,12 @@ focus opt
 link opt leads-to good-outcome";
     let r = parse_decisions(src);
     // 0.731 · 100 = 73.1.
-    approx(expected_value_of(&r.canonical.objects, "opt").unwrap().value, 73.1);
+    approx(
+        expected_value_of(&r.canonical.objects, "opt")
+            .unwrap()
+            .value,
+        73.1,
+    );
 }
 
 #[test]
@@ -1850,7 +2035,11 @@ link opt leads-to latency
   probability 0.5";
     let r = parse_decisions(src);
     assert!(expected_value_of(&r.canonical.objects, "opt").is_none());
-    assert!(r.diagnostics.items.iter().any(|d| d.message.contains("mixes outcome dimensions")));
+    assert!(r
+        .diagnostics
+        .items
+        .iter()
+        .any(|d| d.message.contains("mixes outcome dimensions")));
 }
 
 #[test]
@@ -1864,7 +2053,11 @@ link opt leads-to no-payoff
   probability 1.0";
     let r = parse_decisions(src);
     assert!(expected_value_of(&r.canonical.objects, "opt").is_none());
-    assert!(r.diagnostics.items.iter().any(|d| d.message.contains("payoff")));
+    assert!(r
+        .diagnostics
+        .items
+        .iter()
+        .any(|d| d.message.contains("payoff")));
 }
 
 #[test]
@@ -1882,15 +2075,28 @@ link opt leads-to o2
   probability 0.6";
     let r = parse_decisions(src);
     // Still computes (0.7·100 + 0.6·100 = 130), but flags the impossible mass.
-    assert_eq!(expected_value_of(&r.canonical.objects, "opt").unwrap().value, 130.0);
-    assert!(r.diagnostics.items.iter().any(|d| d.message.contains("sum to") && d.message.contains("> 1")));
+    assert_eq!(
+        expected_value_of(&r.canonical.objects, "opt")
+            .unwrap()
+            .value,
+        130.0
+    );
+    assert!(r
+        .diagnostics
+        .items
+        .iter()
+        .any(|d| d.message.contains("sum to") && d.message.contains("> 1")));
 }
 
 #[test]
 fn probability_on_non_leads_to_link_warns() {
     // `probability` only makes sense on a `leads-to` edge; elsewhere it's ignored.
     let r = parse_str("focus a\nfocus b\nlink a supports b\n  probability 0.5");
-    assert!(r.diagnostics.items.iter().any(|d| d.message.contains("probability") && d.message.contains("ignored")));
+    assert!(r
+        .diagnostics
+        .items
+        .iter()
+        .any(|d| d.message.contains("probability") && d.message.contains("ignored")));
 }
 
 #[test]
@@ -1941,10 +2147,20 @@ link opt leads-to good
 link opt leads-to bad
   probability 0.5";
     let base = parse_compute_overrides(src, &[], &[]);
-    assert_eq!(expected_value_of(&base.canonical.objects, "opt").unwrap().value, 300.0);
+    assert_eq!(
+        expected_value_of(&base.canonical.objects, "opt")
+            .unwrap()
+            .value,
+        300.0
+    );
     let muted = parse_compute_overrides(src, &[], &["bad"]);
     // Only the `good` outcome remains: 0.5 · 1000 = 500.
-    assert_eq!(expected_value_of(&muted.canonical.objects, "opt").unwrap().value, 500.0);
+    assert_eq!(
+        expected_value_of(&muted.canonical.objects, "opt")
+            .unwrap()
+            .value,
+        500.0
+    );
 }
 
 #[test]
@@ -1957,10 +2173,17 @@ focus b
 focus sum
   = a + b";
     let base = parse_compute_overrides(src, &[], &[]);
-    assert_eq!(computed_of(&base.canonical.objects, "sum").unwrap().value, 150.0);
+    assert_eq!(
+        computed_of(&base.canonical.objects, "sum").unwrap().value,
+        150.0
+    );
     let muted = parse_compute_overrides(src, &[], &["a"]);
     assert!(computed_of(&muted.canonical.objects, "sum").is_none());
-    assert!(muted.diagnostics.items.iter().any(|d| d.message.contains("muted")));
+    assert!(muted
+        .diagnostics
+        .items
+        .iter()
+        .any(|d| d.message.contains("muted")));
 }
 
 #[test]
@@ -1987,14 +2210,24 @@ focus o
 focus result
   kind observation
 link o leads-to result";
-    assert_eq!(focus_kind(&parse_str(src).canonical.objects, "result"), Some("observation"));
+    assert_eq!(
+        focus_kind(&parse_str(src).canonical.objects, "result"),
+        Some("observation")
+    );
 }
 
 #[test]
 fn weight_on_leads_to_warns_and_is_dropped() {
     let r = parse_str("focus o\nfocus res\nlink o leads-to res\n  weight 0.5");
-    assert!(r.diagnostics.items.iter().any(|d| d.message.contains("leads-to") && d.message.contains("ignored")));
-    assert_eq!(link(&r.canonical.objects, "o-leads-to-res").unwrap().weight, None);
+    assert!(r
+        .diagnostics
+        .items
+        .iter()
+        .any(|d| d.message.contains("leads-to") && d.message.contains("ignored")));
+    assert_eq!(
+        link(&r.canonical.objects, "o-leads-to-res").unwrap().weight,
+        None
+    );
 }
 
 #[test]
@@ -2017,7 +2250,10 @@ link opt leads-to lose
     assert_eq!(ev.probability_mass, 1.0);
     assert_eq!(ev.terms.len(), 2);
     let win = ev.terms.iter().find(|t| t.outcome == "win").unwrap();
-    assert_eq!((win.probability, win.payoff, win.contribution), (0.7, 1000.0, 700.0));
+    assert_eq!(
+        (win.probability, win.payoff, win.contribution),
+        (0.7, 1000.0, 700.0)
+    );
 }
 
 #[test]
@@ -2032,7 +2268,10 @@ focus total
   = a + b";
     let r = parse_formulas(src);
     let q = computed_of(&r.canonical.objects, "total").unwrap();
-    assert_eq!((q.value, q.unit.as_str(), q.dimension.as_str()), (8.0, "GB", "information"));
+    assert_eq!(
+        (q.value, q.unit.as_str(), q.dimension.as_str()),
+        (8.0, "GB", "information")
+    );
 }
 
 #[test]
@@ -2041,17 +2280,27 @@ fn ship_or_hold_capstone_weaves_the_stack_and_flips() {
     // (§10.3) + EV ranking (§10.6) + a what-if that flips it (§10.5).
     let src = include_str!("../../../examples/ship-or-hold.thml");
     let base = parse_decisions(src);
-    assert!(!base.diagnostics.has_warnings(), "{:?}", base.diagnostics.items);
+    assert!(
+        !base.diagnostics.has_warnings(),
+        "{:?}",
+        base.diagnostics.items
+    );
     let o = &base.canonical.objects;
     assert_eq!(computed_of(o, "ship-clean").unwrap().value, 400000.0); // = weekly-revenue
     assert_eq!(computed_of(o, "hold-pays-off").unwrap().value, 300000.0); // = weekly-revenue - delay-cost
     approx(derived_of(o, "hold-pays-off").unwrap(), 0.953); // belief becomes the probability
     let dec = decision_of(o, "release-plan").unwrap();
     assert_eq!(dec.ranked[0].option, "hold-week"); // 270900 vs 250000 as written
-    // Mute one piece of evidence: belief in hold-pays-off falls, its EV drops
-    // below shipping, and the EV ordering flips — what-if reaching the EV layer.
+                                                   // Mute one piece of evidence: belief in hold-pays-off falls, its EV drops
+                                                   // below shipping, and the EV ordering flips — what-if reaching the EV layer.
     let muted = parse_compute_overrides(src, &[], &["flaky-tests"]);
-    assert_eq!(decision_of(&muted.canonical.objects, "release-plan").unwrap().ranked[0].option, "ship-now");
+    assert_eq!(
+        decision_of(&muted.canonical.objects, "release-plan")
+            .unwrap()
+            .ranked[0]
+            .option,
+        "ship-now"
+    );
 }
 
 // --- Conformance (formal track): bundled examples stay strict-clean ---------
@@ -2062,27 +2311,84 @@ fn ship_or_hold_capstone_weaves_the_stack_and_flips() {
 #[test]
 fn bundled_examples_are_strict_clean() {
     let examples: &[(&str, &str)] = &[
-        ("ship-the-hotfix", include_str!("../../../examples/ship-the-hotfix.thml")),
-        ("triage-742", include_str!("../../../examples/triage-742.thml")),
-        ("bad-oyster", include_str!("../../../examples/bad-oyster.thml")),
-        ("weekend-plan", include_str!("../../../examples/weekend-plan.thml")),
-        ("pr-feedback", include_str!("../../../examples/pr-feedback.thml")),
-        ("choose-datastore", include_str!("../../../examples/choose-datastore.thml")),
-        ("prod-outage", include_str!("../../../examples/prod-outage.thml")),
-        ("differential-dx", include_str!("../../../examples/differential-dx.thml")),
-        ("hiring-panel", include_str!("../../../examples/hiring-panel.thml")),
-        ("replication-study", include_str!("../../../examples/replication-study.thml")),
-        ("roadmap-priorities", include_str!("../../../examples/roadmap-priorities.thml")),
-        ("launch-readiness", include_str!("../../../examples/launch-readiness.thml")),
-        ("assistant-memory", include_str!("../../../examples/assistant-memory.thml")),
-        ("moderation-decision", include_str!("../../../examples/moderation-decision.thml")),
-        ("merge-conflict-beliefs", include_str!("../../../examples/merge-conflict-beliefs.thml")),
-        ("cloud-bill", include_str!("../../../examples/cloud-bill.thml")),
-        ("ship-or-hold", include_str!("../../../examples/ship-or-hold.thml")),
-        ("threat-model", include_str!("../../../examples/threat-model.thml")),
+        (
+            "ship-the-hotfix",
+            include_str!("../../../examples/ship-the-hotfix.thml"),
+        ),
+        (
+            "triage-742",
+            include_str!("../../../examples/triage-742.thml"),
+        ),
+        (
+            "bad-oyster",
+            include_str!("../../../examples/bad-oyster.thml"),
+        ),
+        (
+            "weekend-plan",
+            include_str!("../../../examples/weekend-plan.thml"),
+        ),
+        (
+            "pr-feedback",
+            include_str!("../../../examples/pr-feedback.thml"),
+        ),
+        (
+            "choose-datastore",
+            include_str!("../../../examples/choose-datastore.thml"),
+        ),
+        (
+            "prod-outage",
+            include_str!("../../../examples/prod-outage.thml"),
+        ),
+        (
+            "differential-dx",
+            include_str!("../../../examples/differential-dx.thml"),
+        ),
+        (
+            "hiring-panel",
+            include_str!("../../../examples/hiring-panel.thml"),
+        ),
+        (
+            "replication-study",
+            include_str!("../../../examples/replication-study.thml"),
+        ),
+        (
+            "roadmap-priorities",
+            include_str!("../../../examples/roadmap-priorities.thml"),
+        ),
+        (
+            "launch-readiness",
+            include_str!("../../../examples/launch-readiness.thml"),
+        ),
+        (
+            "assistant-memory",
+            include_str!("../../../examples/assistant-memory.thml"),
+        ),
+        (
+            "moderation-decision",
+            include_str!("../../../examples/moderation-decision.thml"),
+        ),
+        (
+            "merge-conflict-beliefs",
+            include_str!("../../../examples/merge-conflict-beliefs.thml"),
+        ),
+        (
+            "cloud-bill",
+            include_str!("../../../examples/cloud-bill.thml"),
+        ),
+        (
+            "ship-or-hold",
+            include_str!("../../../examples/ship-or-hold.thml"),
+        ),
+        (
+            "threat-model",
+            include_str!("../../../examples/threat-model.thml"),
+        ),
         // control-library is dependency-free, so it is clean as a single document;
         // compliance-rollout imports it (`baseline.*`) and is checked as a project below.
-        ("control-library", include_str!("../../../examples/control-library.thml")),
+        (
+            "control-library",
+            include_str!("../../../examples/control-library.thml"),
+        ),
     ];
     for (name, src) in examples {
         let r = parse_str(src);
@@ -2164,9 +2470,18 @@ fn corpus_covers_every_core_construct() {
     let m_kinds = missing(&kinds, crate::vocab::KINDS);
     let m_rels = missing(&relations, crate::vocab::RELATIONS);
     let m_posts = missing(&postures, crate::vocab::POSTURES);
-    assert!(m_kinds.is_empty(), "no corpus example uses these kinds: {m_kinds:?}");
-    assert!(m_rels.is_empty(), "no corpus example uses these relations: {m_rels:?}");
-    assert!(m_posts.is_empty(), "no corpus example uses these postures: {m_posts:?}");
+    assert!(
+        m_kinds.is_empty(),
+        "no corpus example uses these kinds: {m_kinds:?}"
+    );
+    assert!(
+        m_rels.is_empty(),
+        "no corpus example uses these relations: {m_rels:?}"
+    );
+    assert!(
+        m_posts.is_empty(),
+        "no corpus example uses these postures: {m_posts:?}"
+    );
 }
 
 // --- Nested scopes & inheritance (Phase 5, Stage 2) -----------------------
@@ -2298,8 +2613,12 @@ focus debate
         vec!["option-a".to_string(), "option-b".to_string()]
     );
     // Members inherit the parent's source + observed-at (member-wins if set).
-    assert!(matches!(focus_field(objs, "option-a", "source"), Some(Value::Ref(s)) if s == "pagerduty"));
-    assert!(matches!(focus_field(objs, "option-b", "observed-at"), Some(Value::Time(t)) if t == "2026-02-11T09:00Z"));
+    assert!(
+        matches!(focus_field(objs, "option-a", "source"), Some(Value::Ref(s)) if s == "pagerduty")
+    );
+    assert!(
+        matches!(focus_field(objs, "option-b", "observed-at"), Some(Value::Time(t)) if t == "2026-02-11T09:00Z")
+    );
 }
 
 #[test]
@@ -2328,9 +2647,15 @@ link approach-a opposes approach-b";
         .expect("approach-a present");
     assert_eq!(a.status.as_deref(), Some("abandoned"));
     // The drop-reason is retained, not dropped…
-    assert!(focus_field(objs, "approach-a", "note").is_some(), "abandonment reason kept");
+    assert!(
+        focus_field(objs, "approach-a", "note").is_some(),
+        "abandonment reason kept"
+    );
     // …and the status was lifted off the free-form fields onto the typed slot.
-    assert!(focus_field(objs, "approach-a", "status").is_none(), "status promoted off fields");
+    assert!(
+        focus_field(objs, "approach-a", "status").is_none(),
+        "status promoted off fields"
+    );
     let b = objs
         .iter()
         .find_map(|o| match o {
@@ -2365,15 +2690,31 @@ fn unknown_relation_warns_without_profile() {
 #[test]
 fn unknown_field_and_posture_warn_without_profile() {
     let r = parse_str("focus x\n  likelihood 0.5\nstance ops flags x");
-    let msgs: Vec<&str> = r.diagnostics.items.iter().map(|d| d.message.as_str()).collect();
-    assert!(msgs.iter().any(|m| m.contains("unknown field `likelihood`")), "diags: {msgs:?}");
-    assert!(msgs.iter().any(|m| m.contains("unknown posture `flags`")), "diags: {msgs:?}");
+    let msgs: Vec<&str> = r
+        .diagnostics
+        .items
+        .iter()
+        .map(|d| d.message.as_str())
+        .collect();
+    assert!(
+        msgs.iter()
+            .any(|m| m.contains("unknown field `likelihood`")),
+        "diags: {msgs:?}"
+    );
+    assert!(
+        msgs.iter().any(|m| m.contains("unknown posture `flags`")),
+        "diags: {msgs:?}"
+    );
 }
 
 #[test]
 fn profile_allows_custom_relation() {
     let r = parse_str("profile p\n  relations correlates\nfocus a\nfocus b\nlink a correlates b");
-    assert!(!r.diagnostics.has_warnings(), "warnings: {:?}", r.diagnostics.items);
+    assert!(
+        !r.diagnostics.has_warnings(),
+        "warnings: {:?}",
+        r.diagnostics.items
+    );
 }
 
 #[test]
@@ -2381,7 +2722,11 @@ fn profile_allows_custom_kind_field_and_posture() {
     let src = "profile p\n  kinds risk\n  fields likelihood\n  postures flags\n\
 focus x\n  kind risk\n  likelihood 0.5\nstance ops flags x";
     let r = parse_str(src);
-    assert!(!r.diagnostics.has_warnings(), "warnings: {:?}", r.diagnostics.items);
+    assert!(
+        !r.diagnostics.has_warnings(),
+        "warnings: {:?}",
+        r.diagnostics.items
+    );
     assert_eq!(focus_kind(&r.canonical.objects, "x"), Some("risk"));
 }
 
@@ -2439,9 +2784,18 @@ fn import_merges_namespaced_objects() {
     let r = project(IMPORTER, &[("control-library", SHARED)]);
     let objs = &r.canonical.objects;
     // Imported nodes carry the `baseline.` namespace; the entry's own nodes don't.
-    assert!(focus(objs, "baseline.encryption-at-rest").is_some(), "missing imported focus");
-    assert!(focus(objs, "baseline.controls-baseline").is_some(), "missing imported collection");
-    assert!(focus(objs, "rollout-approach").is_some(), "missing entry focus");
+    assert!(
+        focus(objs, "baseline.encryption-at-rest").is_some(),
+        "missing imported focus"
+    );
+    assert!(
+        focus(objs, "baseline.controls-baseline").is_some(),
+        "missing imported collection"
+    );
+    assert!(
+        focus(objs, "rollout-approach").is_some(),
+        "missing entry focus"
+    );
 }
 
 #[test]
@@ -2467,14 +2821,20 @@ fn importer_alone_has_unresolved_refs() {
     // Single-document parse can't resolve `base.*`, so it is not strict-clean —
     // which is exactly why importers are checked as a project.
     let r = parse_str(IMPORTER);
-    assert!(r.diagnostics.has_warnings(), "expected unresolved-ref warnings");
+    assert!(
+        r.diagnostics.has_warnings(),
+        "expected unresolved-ref warnings"
+    );
 }
 
 #[test]
 fn unknown_import_warns() {
     let r = project("import nope as n", &[]);
     assert!(
-        r.diagnostics.items.iter().any(|d| d.message.contains("unknown import `nope`")),
+        r.diagnostics
+            .items
+            .iter()
+            .any(|d| d.message.contains("unknown import `nope`")),
         "diags: {:?}",
         r.diagnostics.items
     );
@@ -2486,7 +2846,10 @@ fn import_cycle_is_detected_and_warns() {
     let b = "import a as a\nfocus b-thing\n  A b.";
     let r = project(a, &[("a", a), ("b", b)]);
     assert!(
-        r.diagnostics.items.iter().any(|d| d.message.contains("import cycle")),
+        r.diagnostics
+            .items
+            .iter()
+            .any(|d| d.message.contains("import cycle")),
         "diags: {:?}",
         r.diagnostics.items
     );
@@ -2497,8 +2860,16 @@ fn project_examples_are_strict_clean() {
     // The importer is clean only when parsed as a project with its dependency
     // (a single-doc parse leaves the `baseline.*` refs unresolved).
     let r = project(IMPORTER, &[("control-library", SHARED)]);
-    assert!(!r.diagnostics.has_errors(), "errors {:?}", r.diagnostics.items);
-    assert!(!r.diagnostics.has_warnings(), "warnings {:?}", r.diagnostics.items);
+    assert!(
+        !r.diagnostics.has_errors(),
+        "errors {:?}",
+        r.diagnostics.items
+    );
+    assert!(
+        !r.diagnostics.has_warnings(),
+        "warnings {:?}",
+        r.diagnostics.items
+    );
 }
 
 #[test]
@@ -2506,10 +2877,20 @@ fn compliance_rollout_clean_under_full_options() {
     // The importer must also stay clean with the whole computational stack on,
     // checked as a project alongside its imported library.
     let map: std::collections::HashMap<String, String> =
-        [("control-library".to_string(), SHARED.to_string())].into_iter().collect();
+        [("control-library".to_string(), SHARED.to_string())]
+            .into_iter()
+            .collect();
     let r = parse_project(IMPORTER, &map, full_options());
-    assert!(!r.diagnostics.has_errors(), "errors: {:?}", r.diagnostics.items);
-    assert!(!r.diagnostics.has_warnings(), "warnings: {:?}", r.diagnostics.items);
+    assert!(
+        !r.diagnostics.has_errors(),
+        "errors: {:?}",
+        r.diagnostics.items
+    );
+    assert!(
+        !r.diagnostics.has_warnings(),
+        "warnings: {:?}",
+        r.diagnostics.items
+    );
 }
 
 // --- Phase 5 review: action kind, decision-graph lint, the argument→EV bridge,
@@ -2518,16 +2899,28 @@ fn compliance_rollout_clean_under_full_options() {
 #[test]
 fn action_is_a_valid_kind() {
     // A thing you *do* (plan / intervention / mitigation) has its own kind now.
-    let r = parse_str("focus visit-plan\n  kind action\n  A plan.\nfocus g\nlink visit-plan supports g");
-    assert!(!r.diagnostics.has_warnings(), "diags: {:?}", r.diagnostics.items);
-    assert_eq!(focus_kind(&r.canonical.objects, "visit-plan"), Some("action"));
+    let r = parse_str(
+        "focus visit-plan\n  kind action\n  A plan.\nfocus g\nlink visit-plan supports g",
+    );
+    assert!(
+        !r.diagnostics.has_warnings(),
+        "diags: {:?}",
+        r.diagnostics.items
+    );
+    assert_eq!(
+        focus_kind(&r.canonical.objects, "visit-plan"),
+        Some("action")
+    );
 }
 
 #[test]
 fn leads_to_self_loop_warns() {
     let r = parse_str("focus x\nlink x leads-to x");
     assert!(
-        r.diagnostics.items.iter().any(|d| d.message.contains("points outcome `x` at itself")),
+        r.diagnostics
+            .items
+            .iter()
+            .any(|d| d.message.contains("points outcome `x` at itself")),
         "diags: {:?}",
         r.diagnostics.items
     );
@@ -2552,8 +2945,11 @@ link opt-a leads-to win
   probability 0.5";
     let r = parse_str(src);
     assert!(
-        r.diagnostics.items.iter().any(|d| d.message.contains("option `opt-b`")
-            && d.message.contains("expected-value ranking")),
+        r.diagnostics
+            .items
+            .iter()
+            .any(|d| d.message.contains("option `opt-b`")
+                && d.message.contains("expected-value ranking")),
         "diags: {:?}",
         r.diagnostics.items
     );
@@ -2573,7 +2969,11 @@ focus opt-b
 link opt-a option-of d
 link opt-b option-of d";
     let r = parse_str(src);
-    assert!(!r.diagnostics.has_warnings(), "diags: {:?}", r.diagnostics.items);
+    assert!(
+        !r.diagnostics.has_warnings(),
+        "diags: {:?}",
+        r.diagnostics.items
+    );
 }
 
 #[test]
@@ -2600,22 +3000,38 @@ fn undercutting_an_inference_weakens_it() {
     // `undercuts` aimed at a *link* attacks the inference, halving that support's
     // weight (default 0.5) — something `opposes` (a node rebuttal) cannot do.
     let plain = parse_derived("focus premise\nfocus claim\nlink premise supports claim");
-    approx(derived_of(&plain.canonical.objects, "claim").unwrap(), 0.731);
+    approx(
+        derived_of(&plain.canonical.objects, "claim").unwrap(),
+        0.731,
+    );
     let undercut = parse_derived(
         "focus premise\nfocus claim\nfocus doubt\nlink inference: premise supports claim\nlink doubt undercuts inference",
     );
     // weight 0.5 · health 0.5 = 0.25 → logistic(2·0.25) = 0.622 < 0.731.
-    approx(derived_of(&undercut.canonical.objects, "claim").unwrap(), 0.622);
+    approx(
+        derived_of(&undercut.canonical.objects, "claim").unwrap(),
+        0.622,
+    );
 }
 
 // --- Mirror conflict report (§10.7): the engine's second reading -----------
 
 fn parse_audit(src: &str) -> crate::ParseResult {
-    parse_str_with(src, Options { audit: true, ..Options::default() })
+    parse_str_with(
+        src,
+        Options {
+            audit: true,
+            ..Options::default()
+        },
+    )
 }
 
 fn conflicts_of(r: &crate::ParseResult) -> &[crate::canonical::Conflict] {
-    r.canonical.audit.as_ref().map(|a| a.conflicts.as_slice()).unwrap_or(&[])
+    r.canonical
+        .audit
+        .as_ref()
+        .map(|a| a.conflicts.as_slice())
+        .unwrap_or(&[])
 }
 
 #[test]
@@ -2629,7 +3045,11 @@ link rebuttal opposes claim
 ops-agent holds claim
   confidence 0.9";
     let r = parse_audit(src);
-    assert!(!r.diagnostics.has_warnings(), "should be clean: {:?}", r.diagnostics.items);
+    assert!(
+        !r.diagnostics.has_warnings(),
+        "should be clean: {:?}",
+        r.diagnostics.items
+    );
     let c = conflicts_of(&r);
     assert_eq!(c.len(), 1, "conflicts: {c:?}");
     assert_eq!(c[0].kind, "confidence-vs-status");
@@ -2648,7 +3068,10 @@ link rebuttal opposes claim
 link counter opposes rebuttal
 ops-agent holds claim
   confidence 0.9";
-    assert!(conflicts_of(&parse_audit(src)).is_empty(), "expected no conflicts");
+    assert!(
+        conflicts_of(&parse_audit(src)).is_empty(),
+        "expected no conflicts"
+    );
 }
 
 #[test]
@@ -2663,7 +3086,11 @@ fn ship_the_hotfix_example_is_clean_in_form_but_conflicted_in_reasoning() {
     let src = include_str!("../../../examples/ship-the-hotfix.thml");
     // Clean form — it belongs in the strict-clean bundle.
     let plain = parse_str(src);
-    assert!(!plain.diagnostics.has_errors() && !plain.diagnostics.has_warnings(), "{:?}", plain.diagnostics.items);
+    assert!(
+        !plain.diagnostics.has_errors() && !plain.diagnostics.has_warnings(),
+        "{:?}",
+        plain.diagnostics.items
+    );
     // But the mirror catches the on-call holding a defeated claim at high confidence.
     let audited = parse_audit(src);
     let c = conflicts_of(&audited);
@@ -2679,7 +3106,11 @@ fn merge_conflict_example_flags_a_definition_divergence() {
     // reported — lossless concurrent authoring.
     let src = include_str!("../../../examples/merge-conflict-beliefs.thml");
     let plain = parse_str(src);
-    assert!(!plain.diagnostics.has_errors() && !plain.diagnostics.has_warnings(), "{:?}", plain.diagnostics.items);
+    assert!(
+        !plain.diagnostics.has_errors() && !plain.diagnostics.has_warnings(),
+        "{:?}",
+        plain.diagnostics.items
+    );
     let audited = parse_audit(src);
     let c = conflicts_of(&audited);
     assert_eq!(c.len(), 1, "conflicts: {c:?}");
@@ -2715,9 +3146,16 @@ fn divergent_redefinition_is_kept_not_dropped() {
         })
         .expect("focus `metric-shift` present");
     assert!(focus.body.is_some(), "first body kept");
-    assert_eq!(focus.divergent.len(), 1, "the divergent definition is retained");
+    assert_eq!(
+        focus.divergent.len(),
+        1,
+        "the divergent definition is retained"
+    );
     assert!(focus.divergent[0].body.is_some());
-    assert_ne!(focus.body, focus.divergent[0].body, "the two definitions differ");
+    assert_ne!(
+        focus.body, focus.divergent[0].body,
+        "the two definitions differ"
+    );
 
     // The mirror surfaces it under --audit.
     let audited = parse_audit(src);
@@ -2797,7 +3235,11 @@ fn diff_reports_status_flip_and_new_conflict() {
     assert!(report.changed);
     assert!(report.text.contains("con"), "added node: {}", report.text);
     assert!(report.text.contains("status") && report.text.contains("out"));
-    assert!(report.text.contains("confidence-vs-status"), "{}", report.text);
+    assert!(
+        report.text.contains("confidence-vs-status"),
+        "{}",
+        report.text
+    );
 
     let same = crate::diff::diff(&compute(a), &compute(a));
     assert!(!same.changed);
@@ -2806,7 +3248,8 @@ fn diff_reports_status_flip_and_new_conflict() {
 
 #[test]
 fn fmt_never_changes_the_model() {
-    let src = "scope s\n  observation x\n    Saw x.\n  claim y\n    Believe y.\nlink x supports y\n";
+    let src =
+        "scope s\n  observation x\n    Saw x.\n  claim y\n    Believe y.\nlink x supports y\n";
     let before = parse_str(src).canonical;
     let mut d = crate::Diagnostics::new();
     let surface = crate::parser::parse(src, &mut d);

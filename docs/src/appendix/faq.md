@@ -59,7 +59,7 @@ result. See [ThoughtML for AI agents](../guides/for-ai-agents.md).
 
 ### Is the syntax stable?
 
-It's **v0.1.0** — real and usable, but the surface may still move (hence 0.x).
+It's **v0.3.0** — real and usable, but the surface may still move (hence 0.x).
 Breaking changes will be recorded in the
 [CHANGELOG](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/CHANGELOG.md).
 

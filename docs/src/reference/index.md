@@ -1,6 +1,6 @@
 # Language Reference
 
-This is the authoritative description of ThoughtML as of **v0.1.0**. It is
+This is the authoritative description of ThoughtML as of **v0.3.0**. It is
 derived from the reference parser; where this book and the parser disagree, the
 parser is correct.
 

@@ -38,6 +38,10 @@ impl Serialize for Fields {
 /// objects so creation order (and thus the §14 canonical shape) is preserved.
 #[derive(Debug, Clone, Serialize)]
 #[serde(tag = "type", rename_all = "lowercase")]
+#[expect(
+    clippy::large_enum_variant,
+    reason = "boxing Focus would break the public canonical-model API for a layout-only optimization"
+)]
 pub enum Object {
     Focus(Focus),
     Question(Question),

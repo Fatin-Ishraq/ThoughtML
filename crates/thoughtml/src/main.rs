@@ -15,7 +15,12 @@ const GUIDE: &str = include_str!("../llms.txt");
 /// Parse and analyze ThoughtML documents. With no subcommand, parse a file and
 /// emit the canonical JSON model (the original invocation, unchanged).
 #[derive(Parser, Debug)]
-#[command(name = "thoughtml", version, about, args_conflicts_with_subcommands = true)]
+#[command(
+    name = "thoughtml",
+    version,
+    about,
+    args_conflicts_with_subcommands = true
+)]
 struct Cli {
     #[command(subcommand)]
     command: Option<Command>,
@@ -395,7 +400,10 @@ fn run_check(args: CheckArgs) -> ExitCode {
     diags.sort_by_key(|d| d.line);
 
     if args.json {
-        let items: Vec<_> = diags.iter().map(thoughtml::lint::DiagnosticJson::of).collect();
+        let items: Vec<_> = diags
+            .iter()
+            .map(thoughtml::lint::DiagnosticJson::of)
+            .collect();
         match serde_json::to_string_pretty(&items) {
             Ok(j) => println!("{j}"),
             Err(e) => {
@@ -425,8 +433,12 @@ fn run_check(args: CheckArgs) -> ExitCode {
         }
     }
 
-    let has_err = diags.iter().any(|d| d.severity == thoughtml::Severity::Error);
-    let has_warn = diags.iter().any(|d| d.severity == thoughtml::Severity::Warning);
+    let has_err = diags
+        .iter()
+        .any(|d| d.severity == thoughtml::Severity::Error);
+    let has_warn = diags
+        .iter()
+        .any(|d| d.severity == thoughtml::Severity::Warning);
     if has_err || (args.strict && has_warn) {
         ExitCode::FAILURE
     } else {
@@ -510,7 +522,11 @@ fn run_explain(args: ExplainArgs) -> ExitCode {
             ExitCode::SUCCESS
         }
         None => {
-            eprintln!("error: no node with id `{}` in {}", args.id, args.file.display());
+            eprintln!(
+                "error: no node with id `{}` in {}",
+                args.id,
+                args.file.display()
+            );
             ExitCode::FAILURE
         }
     }
@@ -688,11 +704,25 @@ mod guide_tests {
         let sections = guide_sections();
         // Each keyword the menu advertises must land on an existing section.
         for kw in [
-            "syntax", "records", "kinds", "relations", "stances", "merging", "scopes", "numbers",
-            "time", "mirror", "checklist", "examples", "reference",
+            "syntax",
+            "records",
+            "kinds",
+            "relations",
+            "stances",
+            "merging",
+            "scopes",
+            "numbers",
+            "time",
+            "mirror",
+            "checklist",
+            "examples",
+            "reference",
         ] {
             let n = guide_topic_to_num(kw).unwrap_or_else(|| panic!("`{kw}` did not resolve"));
-            assert!(sections.iter().any(|s| s.num == n), "`{kw}` -> §{n} missing");
+            assert!(
+                sections.iter().any(|s| s.num == n),
+                "`{kw}` -> §{n} missing"
+            );
         }
         assert_eq!(guide_topic_to_num("6"), Some(6));
         assert_eq!(guide_topic_to_num("nonsense"), None);

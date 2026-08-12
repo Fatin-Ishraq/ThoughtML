@@ -20,10 +20,12 @@ const args = [
   '--target', 'web',
   '--out-dir', '../../web/src/wasm',
   '--out-name', 'thoughtml_wasm',
+  '--no-pack',
   '--release',
 ]
 
-const child = spawn('wasm-pack', args, { stdio: 'inherit', env, shell: true })
+const wasmPack = process.platform === 'win32' ? 'wasm-pack.exe' : 'wasm-pack'
+const child = spawn(wasmPack, args, { stdio: 'inherit', env })
 child.on('exit', (code) => process.exit(code ?? 1))
 child.on('error', (err) => {
   console.error(`failed to launch wasm-pack: ${err.message}`)

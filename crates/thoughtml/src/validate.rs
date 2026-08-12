@@ -165,7 +165,10 @@ fn check_decision_graph(canon: &Canonical, diags: &mut Diagnostics) {
                 if l.from == l.to {
                     diags.warning(
                         0,
-                        format!("`leads-to` edge `{}` points outcome `{}` at itself", l.id, l.to),
+                        format!(
+                            "`leads-to` edge `{}` points outcome `{}` at itself",
+                            l.id, l.to
+                        ),
                     );
                 }
                 has_outcomes.insert(l.from.as_str());
@@ -178,7 +181,10 @@ fn check_decision_graph(canon: &Canonical, diags: &mut Diagnostics) {
     for obj in &canon.objects {
         if let Object::Link(l) = obj {
             if l.relation == "option-of" {
-                options_of.entry(l.to.as_str()).or_default().push(l.from.as_str());
+                options_of
+                    .entry(l.to.as_str())
+                    .or_default()
+                    .push(l.from.as_str());
             }
         }
     }
@@ -310,10 +316,7 @@ fn dfs_cycle<'a>(
                     if reported.insert(key) {
                         let mut path = cycle;
                         path.push(next);
-                        diags.warning(
-                            0,
-                            format!("cyclic dependency: {}", path.join(" → ")),
-                        );
+                        diags.warning(0, format!("cyclic dependency: {}", path.join(" → ")));
                     }
                 }
                 Color::Black => {}
@@ -382,10 +385,7 @@ fn check_orphans(canon: &Canonical, diags: &mut Diagnostics) {
     for obj in &canon.objects {
         if let Object::Focus(f) = obj {
             if !referenced.contains(&f.id) {
-                diags.warning(
-                    0,
-                    format!("focus `{}` is not connected to anything", f.id),
-                );
+                diags.warning(0, format!("focus `{}` is not connected to anything", f.id));
             }
         }
     }

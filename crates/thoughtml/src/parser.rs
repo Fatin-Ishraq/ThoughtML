@@ -78,7 +78,10 @@ fn parse_lines(lines: &[Line], diags: &mut Diagnostics) -> SurfaceFile {
                 }
                 // Inside an evidence bundle, indented lines are members (source ids
                 // with optional weight/basis), not nested headers or fields.
-                if matches!(stack.last().map(|o| &o.rec.header), Some(Header::EvidenceBundle { .. })) {
+                if matches!(
+                    stack.last().map(|o| &o.rec.header),
+                    Some(Header::EvidenceBundle { .. })
+                ) {
                     if let Some(entry) = parse_member(line, diags) {
                         stack.last_mut().unwrap().rec.block.evidence.push(entry);
                     }
@@ -171,7 +174,10 @@ fn parse_bundle_header(line: &Line, toks: &[&str], diags: &mut Diagnostics) -> O
     if toks.len() != 2 {
         diags.error(
             line.number,
-            format!("`{}` evidence bundle expects `<relation> <target>`", toks[0]),
+            format!(
+                "`{}` evidence bundle expects `<relation> <target>`",
+                toks[0]
+            ),
         );
         return None;
     }
@@ -391,10 +397,7 @@ fn parse_infers(line: &Line, rest: &[&str], diags: &mut Diagnostics) -> Option<A
         diags.error(line.number, "`infers` requires at least one source id");
         return None;
     }
-    Some(ActionForm::Infers {
-        target,
-        from: out,
-    })
+    Some(ActionForm::Infers { target, from: out })
 }
 
 // --- Block line parsing ---------------------------------------------------
@@ -555,9 +558,17 @@ mod tests {
     fn parses_link_header_with_and_without_alias() {
         let f = parse_ok("link deploy-cause: deploy-change causes metric-shift\nlink dashboard-bug undercuts deploy-cause");
         match &f.records[0].header {
-            Header::Link { alias, from, relation, to } => {
+            Header::Link {
+                alias,
+                from,
+                relation,
+                to,
+            } => {
                 assert_eq!(alias.as_deref(), Some("deploy-cause"));
-                assert_eq!((from.as_str(), relation.as_str(), to.as_str()), ("deploy-change", "causes", "metric-shift"));
+                assert_eq!(
+                    (from.as_str(), relation.as_str(), to.as_str()),
+                    ("deploy-change", "causes", "metric-shift")
+                );
             }
             _ => panic!(),
         }
@@ -571,7 +582,10 @@ mod tests {
     fn body_then_field() {
         let f = parse_ok("team chooses investigate-sampling\n  Investigate sampling change first.\n  because cause-of-metric-shift");
         let b = &f.records[0].block;
-        assert_eq!(b.body.as_deref(), Some("Investigate sampling change first."));
+        assert_eq!(
+            b.body.as_deref(),
+            Some("Investigate sampling change first.")
+        );
         assert_eq!(b.fields[0].name, "because");
     }
 

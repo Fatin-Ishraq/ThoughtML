@@ -178,7 +178,13 @@ pub fn signature_dimension(sig: &Signature) -> String {
         }
     }
     sig.iter()
-        .map(|(k, e)| if *e == 1 { k.clone() } else { format!("{k}^{e}") })
+        .map(|(k, e)| {
+            if *e == 1 {
+                k.clone()
+            } else {
+                format!("{k}^{e}")
+            }
+        })
         .collect::<Vec<_>>()
         .join("·")
 }
@@ -190,11 +196,21 @@ pub fn signature_dimension(sig: &Signature) -> String {
 /// `8 GB`); for any other signature it leaves the value in base units (factor 1).
 pub fn pick_display(sig: &Signature, magnitude: f64) -> (f64, String) {
     const INFO: &[(&str, f64)] = &[
-        ("PB", 1e15), ("TB", 1e12), ("GB", 1e9), ("MB", 1e6), ("KB", 1e3), ("B", 1.0),
+        ("PB", 1e15),
+        ("TB", 1e12),
+        ("GB", 1e9),
+        ("MB", 1e6),
+        ("KB", 1e3),
+        ("B", 1.0),
     ];
     const TIME: &[(&str, f64)] = &[
-        ("d", 86_400.0), ("h", 3600.0), ("min", 60.0), ("s", 1.0),
-        ("ms", 1e-3), ("us", 1e-6), ("ns", 1e-9),
+        ("d", 86_400.0),
+        ("h", 3600.0),
+        ("min", 60.0),
+        ("s", 1.0),
+        ("ms", 1e-3),
+        ("us", 1e-6),
+        ("ns", 1e-9),
     ];
     let ladder = if is_single(sig, "information") {
         INFO
@@ -224,15 +240,27 @@ mod tests {
     #[test]
     fn physical_dimensions_convert() {
         assert_eq!(classify_unit("ms"), ("time".into(), Some(1e-3), "s".into()));
-        assert_eq!(classify_unit("GB"), ("information".into(), Some(1e9), "B".into()));
+        assert_eq!(
+            classify_unit("GB"),
+            ("information".into(), Some(1e9), "B".into())
+        );
         assert_eq!(classify_unit("%"), ("ratio".into(), Some(0.01), "1".into()));
     }
 
     #[test]
     fn currency_count_and_rate_are_opaque() {
-        assert_eq!(classify_unit("USD"), ("currency:USD".into(), None, "USD".into()));
-        assert_eq!(classify_unit("users"), ("count:users".into(), None, "users".into()));
-        assert_eq!(classify_unit("req/s"), ("rate".into(), None, "req/s".into()));
+        assert_eq!(
+            classify_unit("USD"),
+            ("currency:USD".into(), None, "USD".into())
+        );
+        assert_eq!(
+            classify_unit("users"),
+            ("count:users".into(), None, "users".into())
+        );
+        assert_eq!(
+            classify_unit("req/s"),
+            ("rate".into(), None, "req/s".into())
+        );
     }
 
     #[test]

@@ -6,11 +6,17 @@ on:
 
 jobs:
   parser:
-    name: Reference parser (cargo test)
+    name: Reference parser (fmt + Clippy + test)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - name: Formatting
+        run: cargo fmt --all -- --check
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets --all-features -- -D warnings
       - name: Test
         # Run from the workspace root; -p thoughtml selects the parser crate.
         run: cargo test -p thoughtml --all-features

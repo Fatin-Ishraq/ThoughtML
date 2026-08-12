@@ -62,10 +62,7 @@ pub fn parse_number(s: &str) -> Option<f64> {
     if body.is_empty() {
         return None;
     }
-    if !body
-        .chars()
-        .all(|c| c.is_ascii_digit() || c == '.')
-    {
+    if !body.chars().all(|c| c.is_ascii_digit() || c == '.') {
         return None;
     }
     if body.matches('.').count() > 1 {

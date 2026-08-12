@@ -52,6 +52,10 @@ impl Overrides {
 /// (§10.4), and per-evidence `leverage` (§10.5). `overrides` perturbs the
 /// evidence/attack graphs for what-if recompute; pass `&Overrides::default()` for
 /// the authored document.
+#[expect(
+    clippy::too_many_arguments,
+    reason = "this public low-level API preserves the independent, documented compute switches"
+)]
 pub fn derive(
     canon: &mut Canonical,
     derive_confidence: bool,
@@ -133,10 +137,7 @@ fn compute_supersession(canon: &mut Canonical, diags: &mut Diagnostics) {
             if nk < ok {
                 diags.warning(
                     0,
-                    format!(
-                        "`{}` revises `{}` but is asserted earlier",
-                        l.from, l.to
-                    ),
+                    format!("`{}` revises `{}` but is asserted earlier", l.from, l.to),
                 );
             }
         }
@@ -168,7 +169,9 @@ fn compute_timeline(canon: &Canonical, diags: &mut Diagnostics) -> Option<Timeli
     // The spine: one event per dated record, keyed by valid-time for sorting.
     let mut events: Vec<(i64, TimelineEvent)> = Vec::new();
     for (i, o) in canon.objects.iter().enumerate() {
-        let Some(fields) = obj_fields(o) else { continue };
+        let Some(fields) = obj_fields(o) else {
+            continue;
+        };
         // Valid-time span: every timestamp counts (both ends of a `valid-during`).
         for (name, value) in &fields.0 {
             let Value::Time(raw) = value else { continue };
@@ -232,11 +235,8 @@ fn primary_instant(fields: &Fields) -> Option<String> {
     field_time(fields, "asserted-at")
         .or_else(|| field_time(fields, "observed-at"))
         .or_else(|| {
-            field_time(fields, "valid-during").map(|s| {
-                s.split_once("..")
-                    .map(|(a, _)| a.to_string())
-                    .unwrap_or(s)
-            })
+            field_time(fields, "valid-during")
+                .map(|s| s.split_once("..").map(|(a, _)| a.to_string()).unwrap_or(s))
         })
 }
 
@@ -406,7 +406,8 @@ fn build_evidence(canon: &Canonical, overrides: &Overrides) -> Vec<Evidence> {
     let mut health: HashMap<String, f64> = HashMap::new();
     for o in &canon.objects {
         if let Object::Link(l) = o {
-            if overrides.drops(l) || l.relation != "undercuts" || !link_ids.contains(l.to.as_str()) {
+            if overrides.drops(l) || l.relation != "undercuts" || !link_ids.contains(l.to.as_str())
+            {
                 continue;
             }
             let w = l.weight.unwrap_or(DEFAULT_WEIGHT);
@@ -462,7 +463,10 @@ fn propagate(
     for (i, e) in evs.iter().enumerate() {
         *indeg.entry(e.to.clone()).or_insert(0) += 1;
         indeg.entry(e.from.clone()).or_insert(0);
-        out_adj.entry(e.from.clone()).or_default().push(e.to.clone());
+        out_adj
+            .entry(e.from.clone())
+            .or_default()
+            .push(e.to.clone());
         incoming.entry(e.to.clone()).or_default().push(i);
     }
 
@@ -476,8 +480,7 @@ fn propagate(
     // Kahn's topological sweep; sources resolve before the claims they back.
     let mut derived: HashMap<String, f64> = HashMap::new();
     let mut processed: usize = 0;
-    let mut queue: VecDeque<String> =
-        nodes.iter().filter(|id| indeg[*id] == 0).cloned().collect();
+    let mut queue: VecDeque<String> = nodes.iter().filter(|id| indeg[*id] == 0).cloned().collect();
     let mut done: HashMap<String, bool> = HashMap::new();
     while let Some(n) = queue.pop_front() {
         done.insert(n.clone(), true);
@@ -515,7 +518,12 @@ fn propagate(
 /// The declaration order of every object id — the deterministic spine both
 /// `propagate` and the sensitivity ablation share.
 fn declaration_order(canon: &Canonical) -> Vec<String> {
-    canon.objects.iter().map(obj_id).map(str::to_string).collect()
+    canon
+        .objects
+        .iter()
+        .map(obj_id)
+        .map(str::to_string)
+        .collect()
 }
 
 /// Compute a `derived_confidence` for every focus/link that is the target of
@@ -684,7 +692,10 @@ fn compute_formulas(canon: &mut Canonical, overrides: &Overrides, diags: &mut Di
         if !done.contains(&p.id) {
             diags.warning(
                 0,
-                format!("formula on `{}` is part of a dependency cycle; not computed", p.id),
+                format!(
+                    "formula on `{}` is part of a dependency cycle; not computed",
+                    p.id
+                ),
             );
         }
     }
@@ -712,9 +723,9 @@ fn compute_formulas(canon: &mut Canonical, overrides: &Overrides, diags: &mut Di
         match outcome {
             Ok((value, sig)) => {
                 values.insert(id.clone(), (value, sig.clone())); // dependents see the base value
-                // Present in a human-friendly unit (8 GB, not 8e9 B); the stored
-                // dimension stays canonical, so a computed value reads like an
-                // authored one (§4.7).
+                                                                 // Present in a human-friendly unit (8 GB, not 8e9 B); the stored
+                                                                 // dimension stays canonical, so a computed value reads like an
+                                                                 // authored one (§4.7).
                 let (factor, unit) = units::pick_display(&sig, value.abs());
                 let q = Quantity {
                     value: round3(value / factor),
@@ -875,15 +886,22 @@ fn compute_decisions(canon: &mut Canonical, overrides: &Overrides, diags: &mut D
         }
         let Some(sig) = a.sig.clone() else { continue };
         if a.all_authored && a.prob_total > 1.001 {
-            diags.warning(0, format!(
-                "option `{opt}` outcome probabilities sum to {:.3} (> 1)",
-                a.prob_total
-            ));
+            diags.warning(
+                0,
+                format!(
+                    "option `{opt}` outcome probabilities sum to {:.3} (> 1)",
+                    a.prob_total
+                ),
+            );
         }
         let downside_base = a.downside.unwrap_or(0.0);
         option_ev.insert(opt.clone(), (a.sum, sig.clone(), downside_base));
         // Render in a unit suited to the option's largest magnitude.
-        let mag = a.terms.iter().map(|(_, _, p)| p.abs()).fold(a.sum.abs(), f64::max);
+        let mag = a
+            .terms
+            .iter()
+            .map(|(_, _, p)| p.abs())
+            .fold(a.sum.abs(), f64::max);
         let (factor, unit) = units::pick_display(&sig, mag);
         let terms = a
             .terms
@@ -932,7 +950,11 @@ fn compute_decisions(canon: &mut Canonical, overrides: &Overrides, diags: &mut D
         // `(id, ev_value, signature, downside)`, all in base units.
         let mut entries: Vec<(String, f64, Signature, f64)> = options_of[dec]
             .iter()
-            .filter_map(|opt| option_ev.get(opt).map(|(v, s, d)| (opt.clone(), *v, s.clone(), *d)))
+            .filter_map(|opt| {
+                option_ev
+                    .get(opt)
+                    .map(|(v, s, d)| (opt.clone(), *v, s.clone(), *d))
+            })
             .collect();
         if entries.is_empty() {
             continue;
@@ -940,15 +962,19 @@ fn compute_decisions(canon: &mut Canonical, overrides: &Overrides, diags: &mut D
         // Options must be comparable — same dimension — to be ranked together.
         let first = entries[0].2.clone();
         if entries.iter().any(|(_, _, s, _)| *s != first) {
-            diags.warning(0, format!(
-                "decision `{dec}` compares options of different dimensions; not ranked"
-            ));
+            diags.warning(
+                0,
+                format!("decision `{dec}` compares options of different dimensions; not ranked"),
+            );
             continue;
         }
         // Highest EV first; a stable sort keeps `option-of` order on ties.
         entries.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
         // One display unit across the ranking, from the largest option magnitude.
-        let mag = entries.iter().map(|(_, v, _, _)| v.abs()).fold(0.0_f64, f64::max);
+        let mag = entries
+            .iter()
+            .map(|(_, v, _, _)| v.abs())
+            .fold(0.0_f64, f64::max);
         let (factor, unit) = units::pick_display(&first, mag);
         let ranked: Vec<OptionEV> = entries
             .iter()
@@ -998,11 +1024,7 @@ fn node_confidence(
 /// How much a source is believed: its own derived confidence if it has one
 /// (transitive propagation), else the authored confidence on it, else 1.0 —
 /// an unqualified assertion counts as given.
-fn believedness(
-    id: &str,
-    derived: &HashMap<String, f64>,
-    authored: &HashMap<String, f64>,
-) -> f64 {
+fn believedness(id: &str, derived: &HashMap<String, f64>, authored: &HashMap<String, f64>) -> f64 {
     derived
         .get(id)
         .or_else(|| authored.get(id))
@@ -1092,7 +1114,10 @@ fn compute_status(canon: &mut Canonical, overrides: &Overrides) {
                 continue;
             }
             if is_attack(&l.relation) {
-                attackers.entry(l.to.clone()).or_default().push(l.from.clone());
+                attackers
+                    .entry(l.to.clone())
+                    .or_default()
+                    .push(l.from.clone());
                 participates.insert(l.from.clone());
                 participates.insert(l.to.clone());
             }
@@ -1111,8 +1136,10 @@ fn compute_status(canon: &mut Canonical, overrides: &Overrides) {
         .map(str::to_string)
         .collect();
 
-    let mut label: HashMap<String, Label> =
-        order.iter().map(|n| (n.clone(), Label::Undecided)).collect();
+    let mut label: HashMap<String, Label> = order
+        .iter()
+        .map(|n| (n.clone(), Label::Undecided))
+        .collect();
     let no_attackers: Vec<String> = Vec::new();
     loop {
         let mut changed = false;
@@ -1272,8 +1299,16 @@ fn time_key(s: &str) -> Option<i64> {
     let year = digit(0)? * 1000 + digit(1)? * 100 + digit(2)? * 10 + digit(3)?;
     // A missing month/day means "the whole month/year"; resolve to its first day
     // so the key lands at the start of the interval the stamp denotes.
-    let month = if b.get(4) == Some(&b'-') { two(5).clamp(1, 12) } else { 1 };
-    let day = if b.get(7) == Some(&b'-') { two(8).clamp(1, 31) } else { 1 };
+    let month = if b.get(4) == Some(&b'-') {
+        two(5).clamp(1, 12)
+    } else {
+        1
+    };
+    let day = if b.get(7) == Some(&b'-') {
+        two(8).clamp(1, 31)
+    } else {
+        1
+    };
     let hour = if b.get(10) == Some(&b'T') { two(11) } else { 0 };
     let min = if b.get(13) == Some(&b':') { two(14) } else { 0 };
     let sec = if b.get(16) == Some(&b':') { two(17) } else { 0 };
@@ -1317,7 +1352,11 @@ fn zone_offset_secs(s: &str) -> Option<i64> {
         return None;
     }
     let hh = digits[0] * 10 + digits[1];
-    let mm = if digits.len() >= 4 { digits[2] * 10 + digits[3] } else { 0 };
+    let mm = if digits.len() >= 4 {
+        digits[2] * 10 + digits[3]
+    } else {
+        0
+    };
     Some(sign * (hh * 3_600 + mm * 60))
 }
 
@@ -1364,10 +1403,14 @@ fn assertion_time(o: &Object) -> Option<String> {
 }
 
 fn field_time(fields: &Fields, name: &str) -> Option<String> {
-    fields.0.iter().find(|(k, _)| k == name).and_then(|(_, v)| match v {
-        Value::Time(t) => Some(t.clone()),
-        _ => None,
-    })
+    fields
+        .0
+        .iter()
+        .find(|(k, _)| k == name)
+        .and_then(|(_, v)| match v {
+            Value::Time(t) => Some(t.clone()),
+            _ => None,
+        })
 }
 
 #[cfg(test)]
@@ -1400,7 +1443,10 @@ mod tests {
         let east = time_key("2026-01-01T00:00+05:00").unwrap();
         let utc = time_key("2026-01-01T00:00Z").unwrap();
         let west = time_key("2026-01-01T00:00-05:00").unwrap();
-        assert!(east < utc && utc < west, "east {east} utc {utc} west {west}");
+        assert!(
+            east < utc && utc < west,
+            "east {east} utc {utc} west {west}"
+        );
 
         // The offset must carry across a day boundary: 02:00+05:00 is 21:00 the
         // previous day in UTC, so it precedes 23:00Z on that earlier day.

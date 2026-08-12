@@ -91,11 +91,7 @@ pub fn parse_str_with(source: &str, opts: Options) -> ParseResult {
 /// Parse with explicit options and a what-if perturbation of the evidence/attack
 /// graphs (§10.5). The playground's what-if mode disables nodes/links and
 /// re-derives through this; the CLI never perturbs.
-pub fn parse_str_with_overrides(
-    source: &str,
-    opts: Options,
-    overrides: &Overrides,
-) -> ParseResult {
+pub fn parse_str_with_overrides(source: &str, opts: Options, overrides: &Overrides) -> ParseResult {
     let mut diagnostics = Diagnostics::new();
     let surface = parser::parse(source, &mut diagnostics);
     let mut canonical = desugar::desugar(&surface, opts.emit_acts, &mut diagnostics);

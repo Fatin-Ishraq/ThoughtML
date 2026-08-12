@@ -100,9 +100,7 @@ fn tokenize(src: &str) -> Result<Vec<Token>, String> {
                 while i < chars.len() {
                     if is_ident_char(chars[i]) {
                         i += 1;
-                    } else if chars[i] == '-'
-                        && i + 1 < chars.len()
-                        && is_ident_char(chars[i + 1])
+                    } else if chars[i] == '-' && i + 1 < chars.len() && is_ident_char(chars[i + 1])
                     {
                         i += 1; // a hyphen inside an id (kebab-case)
                     } else {
@@ -277,6 +275,8 @@ pub fn parse(src: &str) -> Result<Formula, String> {
 
 // --- Evaluation -----------------------------------------------------------
 
+type QuantityResolver<'a> = dyn Fn(&str) -> Result<(f64, Signature), String> + 'a;
+
 fn merge(a: &Signature, b: &Signature, sub: bool) -> Signature {
     let mut out = a.clone();
     for (k, e) in b {
@@ -291,18 +291,12 @@ impl Formula {
     /// Evaluate to a base-unit magnitude and dimensional signature. `resolve`
     /// supplies a referenced focus's `(base_value, signature)` or an error
     /// explaining why it can't be used (unknown, or has no quantity).
-    pub fn eval(
-        &self,
-        resolve: &dyn Fn(&str) -> Result<(f64, Signature), String>,
-    ) -> Result<(f64, Signature), String> {
+    pub fn eval(&self, resolve: &QuantityResolver<'_>) -> Result<(f64, Signature), String> {
         eval(&self.expr, resolve)
     }
 }
 
-fn eval(
-    e: &Expr,
-    resolve: &dyn Fn(&str) -> Result<(f64, Signature), String>,
-) -> Result<(f64, Signature), String> {
+fn eval(e: &Expr, resolve: &QuantityResolver<'_>) -> Result<(f64, Signature), String> {
     match e {
         Expr::Num(n) => Ok((*n, Signature::new())),
         Expr::Quantity(n, u) => Ok(units::to_base(*n, u)),
@@ -380,7 +374,10 @@ pub fn referenced_ids(src: &str) -> Vec<String> {
     for (i, t) in toks.iter().enumerate() {
         let Token::Ident(name) = t else { continue };
         // A unit sits right after a number.
-        if matches!(i.checked_sub(1).and_then(|j| toks.get(j)), Some(Token::Num(_))) {
+        if matches!(
+            i.checked_sub(1).and_then(|j| toks.get(j)),
+            Some(Token::Num(_))
+        ) {
             continue;
         }
         // A function name is followed by `(`.
@@ -442,7 +439,10 @@ mod tests {
     fn rate_times_count_cancels_units() {
         let (v, u) = eval_str(
             "cost-per-instance * instances",
-            &[("cost-per-instance", 180.0, "USD/instance"), ("instances", 12.0, "instance")],
+            &[
+                ("cost-per-instance", 180.0, "USD/instance"),
+                ("instances", 12.0, "instance"),
+            ],
         )
         .unwrap();
         assert_eq!((v, u.as_str()), (2160.0, "USD"));
@@ -475,7 +475,11 @@ mod tests {
 
     #[test]
     fn min_max_functions() {
-        let (v, _) = eval_str("max(a, b)", &[("a", 3.0, "instance"), ("b", 7.0, "instance")]).unwrap();
+        let (v, _) = eval_str(
+            "max(a, b)",
+            &[("a", 3.0, "instance"), ("b", 7.0, "instance")],
+        )
+        .unwrap();
         assert_eq!(v, 7.0);
     }
 

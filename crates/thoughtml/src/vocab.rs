@@ -3,8 +3,9 @@
 /// Record keywords that begin a core/scope/question header (§6). A header whose
 /// first token is one of these is parsed as that record kind; anything else is
 /// an action header (`agent action-form`).
-pub const RECORD_KEYWORDS: &[&str] =
-    &["scope", "question", "focus", "link", "stance", "profile", "import"];
+pub const RECORD_KEYWORDS: &[&str] = &[
+    "scope", "question", "focus", "link", "stance", "profile", "import",
+];
 
 /// Core postures (§12.1) usable as readable action verbs.
 pub const POSTURES: &[&str] = &[

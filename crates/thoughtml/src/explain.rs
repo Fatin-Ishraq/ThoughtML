@@ -26,7 +26,10 @@ pub fn explain(canon: &Canonical, id: &str) -> Option<String> {
         out.push_str(&format!("  derived confidence : {dc:.3}\n"));
     }
     if let Some(st) = argument_status(obj) {
-        out.push_str(&format!("  argument status    : {st}  ({})\n", status_gloss(st)));
+        out.push_str(&format!(
+            "  argument status    : {st}  ({})\n",
+            status_gloss(st)
+        ));
     }
     if let Object::Focus(f) = obj {
         if let Some(s) = &f.status {
@@ -85,10 +88,7 @@ pub fn explain(canon: &Canonical, id: &str) -> Option<String> {
                 .as_ref()
                 .map(conf_str)
                 .unwrap_or_else(|| "-".into());
-            out.push_str(&format!(
-                "    {} {}  confidence {c}\n",
-                s.agent, s.posture
-            ));
+            out.push_str(&format!("    {} {}  confidence {c}\n", s.agent, s.posture));
         }
     }
 

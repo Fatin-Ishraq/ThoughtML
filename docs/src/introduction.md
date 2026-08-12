@@ -68,9 +68,9 @@ answer*. It's to make the reasoning legible enough that its flaws can't hide.
 
 ## A note on stability
 
-This documentation describes **v0.1.0**, the first public release. The language
-is real and usable, but its surface may still move (hence 0.x, not 1.0). Where a
-feature is *opt-in* or *advanced*, this book says so plainly.
+This documentation describes **v0.3.0**, the current public release. The
+language is real and usable, but its surface may still move (hence 0.x, not
+1.0). Where a feature is *opt-in* or *advanced*, this book says so plainly.
 
 > **The single source of truth is the reference parser** in
 > `crates/thoughtml`. Everything in this book is derived from it. If
