@@ -15,6 +15,9 @@
     <!-- The document's display title (its file name). `thml … --html` fills this;
          left empty in dev, where the title falls back to the root scope's id. -->
     <script type="text/plain" id="thoughtml-title"></script>
+    <!-- Filled only by `thoughtml stream`; a baked offline viewer leaves it
+         empty and therefore never opens a network connection. -->
+    <script type="application/json" id="thoughtml-stream-config"></script>
 
     <main class="split viewer-split">
       <section class="pane graph-pane">
@@ -39,6 +42,29 @@
           <div class="doc-sub" id="doc-sub">a reasoning timeline</div>
         </div>
 
+        <button class="stream-status" id="stream-status" type="button" hidden aria-expanded="false" aria-controls="stream-panel">
+          <span class="stream-dot"></span><span id="stream-status-text">Connecting</span>
+        </button>
+
+        <aside class="stream-panel" id="stream-panel" hidden>
+          <div class="stream-panel-head">
+            <div><strong>Live session</strong><span id="stream-updated"></span></div>
+            <button class="stream-panel-close" id="stream-panel-close" type="button" aria-label="Close live session panel">×</button>
+          </div>
+          <div class="stream-section">
+            <div class="stream-section-title">Watching</div>
+            <div class="stream-files" id="stream-files"></div>
+          </div>
+          <div class="stream-section" id="stream-diagnostics-section" hidden>
+            <div class="stream-section-title">Diagnostics</div>
+            <div class="stream-diagnostics" id="stream-diagnostics"></div>
+          </div>
+          <div class="stream-section">
+            <div class="stream-section-title">Activity</div>
+            <div class="stream-activity" id="stream-activity"></div>
+          </div>
+        </aside>
+
         <div class="cluster dock">
           <button class="icon-btn" id="theme" title="Toggle light / dark"></button>
           <button class="icon-btn" id="fit" title="Fit to view"></button>
@@ -50,7 +76,7 @@
         </div>
 
         <div class="legend" id="legend" hidden></div>
-        <div class="empty-state" id="empty-state" hidden>No model — bake one with <code>thml &lt;doc&gt;.thml --compute --html</code>.</div>
+        <div class="empty-state" id="empty-state" hidden>No model — bake one with <code>thoughtml &lt;doc&gt;.thml --html</code>.</div>
       </section>
 
       <section class="pane detail-pane collapsed" id="detail">

@@ -10,10 +10,25 @@ import { createTimeView } from './timeview'
 import { buildLegend } from './legend'
 import { renderDetail, kindOf, labelOf } from './detail'
 import { setIcon, glyph } from './icons'
-import type { Canonical } from './model'
+import type { Canonical, Diagnostic } from './model'
 import type { Theme } from './graph'
 
 const LS = { theme: 'thoughtml:theme' }
+
+interface StreamConfig { snapshot: string; events: string }
+interface StreamActivity { sequence: number; at_ms: number; kind: string; summary: string; detail?: string }
+interface StreamSnapshot {
+  schema_version: number
+  sequence: number
+  title: string
+  source_state: 'valid' | 'invalid'
+  showing_last_valid: boolean
+  updated_at_ms: number
+  canonical: Canonical | null
+  diagnostics: Diagnostic[]
+  watched_files: string[]
+  activity: StreamActivity[]
+}
 
 function el<T extends HTMLElement = HTMLElement>(sel: string): T {
   const node = document.querySelector(sel)
@@ -52,6 +67,17 @@ async function loadModel(): Promise<Canonical | null> {
   return null
 }
 
+function streamConfig(): StreamConfig | null {
+  const raw = document.getElementById('thoughtml-stream-config')?.textContent?.trim()
+  if (!raw) return null
+  try {
+    const value = JSON.parse(raw)
+    return typeof value?.snapshot === 'string' && typeof value?.events === 'string' ? value as StreamConfig : null
+  } catch {
+    return null
+  }
+}
+
 /** The document's display title: its first scope's id, falling back to "viewer". */
 function docTitle(canon: Canonical): string {
   const scopes = canon.objects.filter((o) => o.type === 'scope')
@@ -75,16 +101,13 @@ async function boot(): Promise<void> {
   setIcon(el('#zoom-in'), 'plus')
   setIcon(el('#zoom-out'), 'minus')
 
-  const canon = await loadModel()
-  if (!canon || canon.objects.length === 0) {
-    el('#empty-state').hidden = false
-    return
-  }
+  const live = streamConfig()
+  let canon = await loadModel()
 
   // prefer the title baked by the CLI (the source file name); fall back to the
   // document's root scope when developing against a dev fixture.
   const bakedTitle = document.getElementById('thoughtml-title')?.textContent?.trim()
-  const title = bakedTitle || docTitle(canon)
+  const title = bakedTitle || (canon ? docTitle(canon) : 'viewer')
   el('#doc-title').textContent = title
   document.title = `${title} — ThoughtML`
 
@@ -101,28 +124,31 @@ async function boot(): Promise<void> {
   const detailId = el('#detail-id')
   let selectedId: string | null = null
 
-  function showDetail(id: string) {
+  function showDetail(id: string, syncView = true) {
+    if (!canon) return
     selectedId = id
     detailPane.classList.remove('collapsed')
-    const kind = kindOf(canon!, id)
-    const obj = canon!.objects.find((o) => o.id === id)
+    const kind = kindOf(canon, id)
+    const obj = canon.objects.find((o) => o.id === id)
     const gname = obj?.type === 'focus' ? obj.kind : obj?.type === 'stance' ? obj.posture : ''
     detailBadge.className = `detail-badge k-${kind}`
     detailBadge.innerHTML = `${gname ? glyph(gname) : ''}<span>${kind}</span>`
     detailId.textContent = labelOf(id)
-    renderDetail(detailBody, canon!, id, navigateTo)
-    view.select(id)
-    window.setTimeout(() => view.centerOn(id), 60)
+    renderDetail(detailBody, canon, id, navigateTo)
+    if (syncView) {
+      view.select(id)
+      window.setTimeout(() => view.centerOn(id), 60)
+    }
   }
-  function closeDetail() {
+  function closeDetail(syncView = true) {
     selectedId = null
     detailPane.classList.add('collapsed')
-    view.select(null)
+    if (syncView) view.select(null)
   }
   function navigateTo(id: string) { showDetail(id) }
 
-  view.onSelect((info) => { if (info) showDetail(info.id); else closeDetail() })
-  el('#detail-close').addEventListener('click', closeDetail)
+  view.onSelect((info) => { if (info) showDetail(info.id, false); else closeDetail(false) })
+  el('#detail-close').addEventListener('click', () => closeDetail())
 
   // ---- controls + zoom ----
   el('#fit').addEventListener('click', () => view.fit())
@@ -147,9 +173,114 @@ async function boot(): Promise<void> {
   })
   window.addEventListener('resize', () => view.fit())
 
-  // ---- render ----
-  view.render(canon)
-  void selectedId
+  // ---- initial render ----
+  if (canon && canon.objects.length > 0) view.render(canon)
+  else el('#empty-state').hidden = false
+
+  // ---- optional live session ----
+  if (live) {
+    const status = el<HTMLButtonElement>('#stream-status')
+    const statusText = el('#stream-status-text')
+    const panel = el('#stream-panel')
+    const closePanel = el<HTMLButtonElement>('#stream-panel-close')
+    status.hidden = false
+    let latestSequence = 0
+    let latestSourceState: 'valid' | 'invalid' = 'valid'
+
+    const openPanel = (open: boolean) => {
+      panel.hidden = !open
+      status.setAttribute('aria-expanded', String(open))
+    }
+    status.addEventListener('click', () => openPanel(panel.hidden))
+    closePanel.addEventListener('click', () => openPanel(false))
+
+    const connectionState = (state: 'online' | 'invalid' | 'offline') => {
+      status.className = `stream-status ${state}`
+      if (state === 'offline') statusText.textContent = 'Reconnecting'
+    }
+
+    const renderStreamPanel = (snapshot: StreamSnapshot) => {
+      el('#stream-updated').textContent = `Revision ${snapshot.sequence} · ${new Date(snapshot.updated_at_ms).toLocaleTimeString()}`
+      const files = el('#stream-files')
+      files.replaceChildren(...snapshot.watched_files.map((name) => {
+        const code = document.createElement('code'); code.textContent = name; return code
+      }))
+
+      const diagnosticsSection = el('#stream-diagnostics-section')
+      const diagnostics = el('#stream-diagnostics')
+      diagnosticsSection.hidden = snapshot.diagnostics.length === 0
+      diagnostics.replaceChildren(...snapshot.diagnostics.map((diag) => {
+        const row = document.createElement('div')
+        row.className = `stream-diagnostic ${diag.severity}`
+        const where = diag.line ? `line ${diag.line}` : diag.severity
+        const label = document.createElement('span'); label.textContent = where
+        const message = document.createElement('p'); message.textContent = diag.message
+        row.append(label, message)
+        return row
+      }))
+
+      const activity = el('#stream-activity')
+      activity.replaceChildren(...[...snapshot.activity].reverse().map((item) => {
+        const row = document.createElement(item.detail ? 'details' : 'div')
+        row.className = `stream-activity-item ${item.kind}`
+        const heading = document.createElement(item.detail ? 'summary' : 'div')
+        const dot = document.createElement('i')
+        const copy = document.createElement('span'); copy.textContent = item.summary
+        const time = document.createElement('time'); time.textContent = new Date(item.at_ms).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+        heading.append(dot, copy, time); row.append(heading)
+        if (item.detail) {
+          const pre = document.createElement('pre'); pre.textContent = item.detail; row.append(pre)
+        }
+        return row
+      }))
+    }
+
+    const applySnapshot = (snapshot: StreamSnapshot) => {
+      if (snapshot.schema_version !== 1 || snapshot.sequence <= latestSequence) return
+      latestSequence = snapshot.sequence
+      latestSourceState = snapshot.source_state
+      statusText.textContent = snapshot.source_state === 'valid'
+        ? `Live · revision ${snapshot.sequence}`
+        : `Edit has errors · revision ${snapshot.sequence}`
+      connectionState(snapshot.source_state === 'valid' ? 'online' : 'invalid')
+      el('#doc-sub').textContent = snapshot.source_state === 'valid'
+        ? `live reasoning · revision ${snapshot.sequence}`
+        : snapshot.showing_last_valid ? 'latest edit has errors · showing last valid graph' : 'latest edit has errors'
+      renderStreamPanel(snapshot)
+
+      if (snapshot.canonical && snapshot.canonical.objects.length > 0) {
+        const first = !canon || canon.objects.length === 0
+        const graphChanged = snapshot.source_state === 'valid' && snapshot.activity.at(-1)?.kind !== 'unchanged'
+        canon = snapshot.canonical
+        el('#empty-state').hidden = true
+        if (first) view.render(canon)
+        else if (graphChanged) view.update(canon)
+        if (selectedId && !canon.objects.some((o) => o.id === selectedId)) closeDetail()
+        else if (selectedId) renderDetail(detailBody, canon, selectedId, navigateTo)
+      } else if (!canon) {
+        const empty = el('#empty-state')
+        empty.textContent = 'Waiting for the first valid ThoughtML revision.'
+        empty.hidden = false
+      }
+    }
+
+    try {
+      const response = await fetch(live.snapshot, { cache: 'no-store' })
+      if (!response.ok) throw new Error(`snapshot request failed (${response.status})`)
+      applySnapshot(await response.json() as StreamSnapshot)
+    } catch {
+      connectionState('offline')
+    }
+
+    const events = new EventSource(live.events)
+    events.addEventListener('open', () => {
+      if (status.classList.contains('offline')) connectionState(latestSourceState === 'valid' ? 'online' : 'invalid')
+    })
+    events.addEventListener('snapshot', (event) => {
+      try { applySnapshot(JSON.parse((event as MessageEvent).data) as StreamSnapshot) } catch { /* wait for the next complete snapshot */ }
+    })
+    events.addEventListener('error', () => connectionState('offline'))
+  }
 }
 
 boot().catch((err) => {

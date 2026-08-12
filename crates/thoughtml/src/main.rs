@@ -7,6 +7,8 @@ use std::io::{self, Read, Write};
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
+mod stream;
+
 /// The complete language, embedded into the binary so the tool can teach itself:
 /// the same `llms.txt` the site serves and the packages bundle. One source, three
 /// shapes — the full dump, a single section, or a one-screen tour.
@@ -44,6 +46,9 @@ enum Command {
     /// No args: a one-screen tour. A topic (`guide relations`): one section.
     /// `--full`: the complete, source-derived spec, ready to paste into an AI.
     Guide(GuideArgs),
+    /// Host a live, read-only reasoning view from this computer and refresh it
+    /// whenever the entry document or one of its imports changes.
+    Stream(stream::StreamArgs),
 }
 
 /// The default parse/emit invocation (`thoughtml [OPTIONS] <FILE>`).
@@ -189,6 +194,7 @@ fn main() -> ExitCode {
         Some(Command::Explain(a)) => run_explain(a),
         Some(Command::Diff(a)) => run_diff(a),
         Some(Command::Guide(a)) => run_guide(a),
+        Some(Command::Stream(a)) => stream::run(a),
         None => run_default(cli.run),
     }
 }

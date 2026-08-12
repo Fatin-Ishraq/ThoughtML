@@ -141,7 +141,7 @@ hat, so the browser, the CLI, and the exported file can never disagree.
 | Piece | What it is | |
 |---|---|---|
 | **Reference parser** | Rust: source → surface AST → canonical objects → JSON, with diagnostics. The source of truth for the language. | [`crates/thoughtml`](crates/thoughtml) |
-| **CLI toolchain** | The parser as git-style subcommands — `check`, `fmt`, `explain`, `diff` — plus the mirror (`--audit`), the compute layer (`--compute`), as-of replay (`--as-of`), and standalone HTML export (`--html`). | same crate |
+| **CLI toolchain** | The parser as git-style subcommands — `check`, `fmt`, `explain`, `diff`, `stream` — plus the mirror (`--audit`), the compute layer (`--compute`), as-of replay (`--as-of`), and standalone HTML export (`--html`). | same crate |
 | **wasm build** | The *same* parser compiled for the web, so the playground and the CLI can't drift. | [`crates/thoughtml-wasm`](crates/thoughtml-wasm) |
 | **Playground** | Live editor + reasoning graph (mermaid.live in spirit): a time-driven **Viewer** with replay and Follow-mode storytelling, a node-link **Structural** view, and one-click standalone-HTML export. | [`web`](web) · [live ↗](https://fatin-ishraq.github.io/ThoughtML/playground/) |
 | **The book** | Tutorial, complete language reference, the mirror, and practical guides. | [`docs`](docs) · [live ↗](https://fatin-ishraq.github.io/ThoughtML/) |
@@ -175,7 +175,14 @@ thoughtml fmt -w doc.thml                          # format in the one canonical
 thoughtml explain doc.thml some-claim              # why a node has its confidence / status
 thoughtml diff before.thml after.thml              # a semantic, belief-level diff
 thoughtml --html -o record.html examples/choose-datastore.thml   # bake to one interactive HTML file
+thoughtml stream doc.thml                          # host a live view on this computer
 ```
+
+`thoughtml stream` watches the entry document and its imported files, recompiles
+locally after settled edits, and gives you a live read-only link. It binds to
+`127.0.0.1` by default; add `--lan` to share with devices on a trusted local
+network. It uploads nothing, requires no account, and works only while that
+computer and command are running. Use `--json` for agent-friendly startup output.
 
 Full reference: [The CLI ↗](https://fatin-ishraq.github.io/ThoughtML/guides/cli.html).
 Prefer not to install? Run any of it via `cargo run -p thoughtml -- …`, or just open the

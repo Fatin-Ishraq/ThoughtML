@@ -19,6 +19,7 @@ const SVGNS = 'http://www.w3.org/2000/svg'
 
 export interface TimeViewHandle {
   render(canon: Canonical): void
+  update(canon: Canonical): void
   applyAsOf(t: number | null): void
   select(id: string | null): boolean
   onSelect(cb: (info: { id: string; kind: string } | null) => void): void
@@ -1172,7 +1173,9 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
     setView(k, x, y)
   }
 
-  function render(canon: Canonical) {
+  function renderModel(canon: Canonical, preserveView: boolean) {
+    const previousView = { ...T }
+    const previousFocus = focusId
     model = buildTimeModel(canon)
     layout(model)
     renderGraph()
@@ -1180,9 +1183,18 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
     beatIdx = -1 // a fresh document starts the tour unstarted (all shown)
     renderStory(null)
     applyAsOf(model.tMax)
-    pendingFit = true // if the pane isn't sized yet, the observer re-fits once it is
-    fit()
+    if (preserveView) {
+      setView(previousView.k, previousView.x, previousView.y)
+      if (previousFocus && byId.has(previousFocus)) selectNode(previousFocus)
+      else if (previousFocus) selectNode(null)
+    } else {
+      pendingFit = true // if the pane isn't sized yet, the observer re-fits once it is
+      fit()
+    }
   }
+
+  function render(canon: Canonical) { renderModel(canon, false) }
+  function update(canon: Canonical) { renderModel(canon, true) }
 
   // one-shot: the first time the stage has a real size, fit to it (the initial
   // render can run before layout gives the pane its width).
@@ -1304,6 +1316,7 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
 
   return {
     render,
+    update,
     applyAsOf,
     select: (id) => { selectNode(id); return id === null || byId.has(id) },
     onSelect: (cb) => { selectCb = cb },

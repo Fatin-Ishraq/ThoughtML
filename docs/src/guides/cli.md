@@ -11,6 +11,7 @@ thoughtml check <FILE>          # validate and report diagnostics
 thoughtml fmt <FILE>            # rewrite in the canonical style
 thoughtml explain <FILE> <ID>   # trace a node's derived confidence / status
 thoughtml diff <A> <B>          # semantic (belief-level) diff of two documents
+thoughtml stream <FILE>         # host a live view from this computer
 ```
 
 ## Install
@@ -172,6 +173,46 @@ conflicts:
   + [confidence-vs-status] `analyst` asserts confidence 0.90 in `c`, but ... (out)
 ```
 
+## `thoughtml stream` — computer-hosted live view
+
+Watch an entry document and its transitive sibling imports, compile the complete
+project locally after each settled edit, and host a read-only live viewer:
+
+```sh
+thoughtml stream investigation.thml
+```
+
+The safe default binds to `127.0.0.1` and is viewable only on the editing
+computer. Share it with another device on the same network explicitly:
+
+```sh
+thoughtml stream investigation.thml --lan
+```
+
+`--lan` does not create an internet tunnel or upload anything. The link works
+only while the command and host computer are running, and the operating system's
+firewall may ask whether to allow the listener. Anyone who can reach the computer
+and obtains the link can read the compiled model, so use trusted networks.
+
+The watcher coalesces rapid writes, recompiles the full project locally, and
+pushes versioned canonical snapshots over Server-Sent Events. When the newest
+edit is invalid, the browser receives its diagnostics while retaining the last
+valid graph. Existing offline commands never open a network connection.
+
+Useful options:
+
+| Flag | Effect |
+|------|--------|
+| `--lan` | Listen on all interfaces and advertise a detected LAN address. |
+| `--host <IP>` | Bind an explicit interface instead of the loopback default. |
+| `--advertise-host <HOST>` | Override the hostname printed in the viewer URL. |
+| `--port <N>` | Pick a port; `0` (default) selects a free one. |
+| `--json` | Print one startup JSON object for an agent or script; ongoing logs use stderr. |
+| `--debounce-ms <N>` | Set the quiet period after edits (default: 400 ms). |
+| `--strict-provenance` | Include strict number-provenance diagnostics. |
+
+See [Live streaming](streaming.md) for the protocol and agent workflow.
+
 ## Examples
 
 ```sh
@@ -189,6 +230,9 @@ thoughtml --as-of 2026-01-13 examples/launch-readiness.thml
 
 # A standalone interactive viewer — one self-contained HTML file, opens anywhere
 thoughtml --html -o decision-record.html examples/choose-datastore.thml
+
+# A live view hosted by this computer until Ctrl+C
+thoughtml stream examples/ship-or-hold.thml
 
 # Enforce provenance and fail on any warning (good for CI)
 thoughtml --strict --strict-provenance reasoning.thml

@@ -48,6 +48,7 @@
 - [CLI reference](guides/cli.md)
 - [Using the playground](guides/playground.md)
 - [The standalone viewer](guides/viewer.md)
+- [Live streaming](guides/streaming.md)
 
 # Appendix
 

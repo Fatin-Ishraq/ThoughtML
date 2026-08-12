@@ -425,6 +425,7 @@ exits nonzero under `--strict` if any warning remains. Useful flags on the bare 
 | `thoughtml fmt <f>` | rewrite in the one canonical style (`-w` in place, `--check` for CI); re-parses its own output and never changes the model |
 | `thoughtml explain <f> <id>` | trace why a node has its confidence/status — evidence for/against, each edge's leverage, the conflict it's caught in |
 | `thoughtml diff <a> <b>` | a **belief-level** diff: what flipped `in`/`out`, which confidences moved, which conflicts appeared/resolved |
+| `thoughtml stream <f> [--json]` | host a live read-only view from the editing computer; watches the entry and imports, keeps the last valid graph during errors. Loopback-only by default; `--lan` shares on a trusted local network |
 
 Install with `cargo install thoughtml` (or `npm install -g thoughtml`).
 
