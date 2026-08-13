@@ -190,10 +190,13 @@ Full reference: [The CLI ↗](https://fatin-ishraq.github.io/ThoughtML/guides/cl
 Prefer not to install? Run any of it via `cargo run -p thoughtml -- …`, or just open the
 [playground](https://fatin-ishraq.github.io/ThoughtML/playground/).
 
-The playground also opens multi-file projects: edit sibling imports in tabs,
-jump from diagnostics or graph nodes to their source file, and try the included
-six-file Snake repository example. The complete project recompiles into one
-graph without uploading the selected `.thml` files.
+The playground is also a local multi-file editor: open a real `.thoughtml/`
+directory, edit sibling imports in persistent tabs, save back to disk, search
+the project, and jump from diagnostics or graph nodes to compiler-provided
+source locations. It detects external agent edits and protects conflicts rather
+than silently overwriting them. Compilation runs in a worker and produces one
+unified graph without uploading the selected `.thml` files. The included
+six-file Snake project is a ready-made example.
 
 **Hack on the playground locally:**
 

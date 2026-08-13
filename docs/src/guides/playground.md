@@ -34,9 +34,25 @@ No install — it runs entirely in your browser. To run it locally instead, see
 
 ## Multi-file projects
 
-The playground treats a group of sibling `.thml` files as one project. The file
-marked **entry** owns the import declarations; imported nodes are referenced by
-their namespace, exactly as in the native CLI:
+The playground treats one directory of sibling `.thml` files as a project. A
+repository can keep that directory at `.thoughtml/` so reasoning stays separate
+from product source:
+
+```text
+snake-game/
+├── src/
+├── tests/
+└── .thoughtml/
+    ├── project.thml
+    ├── product.thml
+    ├── architecture.thml
+    ├── gameplay.thml
+    ├── quality.thml
+    └── release.thml
+```
+
+The file marked **entry** owns the import declarations; imported nodes are
+referenced by their namespace, exactly as in the native CLI:
 
 ```thml
 import quality as quality
@@ -44,17 +60,39 @@ import quality as quality
 link quality.core-rules-are-stable supports ship-v1
 ```
 
-- **Open** selects one or more local `.thml` files. `project.thml` becomes the
-  entry when present; otherwise the first selected filename does.
+- **Open folder** connects the editor to a real directory when the browser
+  supports directory access. **Open files** remains the portable fallback.
 - **New** creates a sibling file and inserts its import into the entry file.
-- **Set entry** makes the active tab the project root when it is not named
-  `project.thml`.
-- **Download** saves the active browser copy as a `.thml` file.
-- Every edit is persisted in browser storage and recompiles the complete import
-  closure after a short debounce.
+- **Rename** updates import module names across the project while preserving
+  aliases, so qualified references do not need to change.
+- **Delete** reports dependent files before staging a removal. A project entry
+  must be changed before it can be deleted.
+- **Entry** makes the active tab the project root.
+- **Save** writes the active file; **Save all** writes every dirty file and
+  finishes staged renames/deletions. Without writable handles, these actions
+  download a file or complete project ZIP instead.
+- Dirty marks, open tabs, browser recovery state, cursor positions, per-file
+  undo history, and scroll positions are kept separately for each file.
+- `Ctrl+S` saves one file, `Ctrl+Shift+S` saves the project, `Ctrl+P` opens a
+  file switcher, and `Ctrl+Shift+F` searches every project file.
+- The sidebar reports missing imports, cycles, and files outside the entry's
+  transitive import closure.
 - Clicking a file-qualified diagnostic switches tabs and moves to its line.
 - Clicking an authored graph node exposes its defining file and line in the
-  detail header; that source chip navigates back to the editor.
+  detail header; that source chip navigates back to the editor. These locations
+  come from the Rust compiler, including links generated from readable syntax.
+
+Compilation runs in a Web Worker after a short debounce. The editor therefore
+stays responsive and keeps showing the last valid graph while a newer project
+version is compiling. The compiler still validates the complete transitive
+import closure; the worker and stale-result cancellation avoid blocking or
+displaying an older compilation after a newer edit.
+
+When a connected directory changes outside the browser, **Refresh** compares it
+with the last saved baseline. Clean files reload directly. If both the browser
+and an external tool or AI agent changed the same file, the playground asks
+whether to use disk, keep the editor version, or download both. It never silently
+overwrites both sides of a conflict.
 
 Press **Snake demo** for a real six-file repository example covering product
 goals, architecture, gameplay, quality, and release reasoning. The same project
@@ -64,9 +102,14 @@ ships under `examples/snake-project/` and is native-CLI valid:
 thoughtml --strict --strict-provenance examples/snake-project/project.thml
 ```
 
-The browser workspace does not upload the selected files. Browser edits are
-local workspace copies until they are downloaded; the CLI remains the direct
-filesystem workflow for agents working inside a repository.
+The browser workspace does not upload selected files. Directory permission is
+granted by the user and scoped by the browser; a remembered handle is reused
+only while that permission remains granted. The CLI remains the direct
+filesystem workflow for agents working inside a repository:
+
+```sh
+thoughtml --strict --strict-provenance .thoughtml/project.thml
+```
 
 ## The mirror is on by default
 
