@@ -182,7 +182,9 @@ thoughtml stream doc.thml                          # host a live view on this co
 locally after settled edits, and gives you a live read-only link. It binds to
 `127.0.0.1` by default; add `--lan` to share with devices on a trusted local
 network. It uploads nothing, requires no account, and works only while that
-computer and command are running. Use `--json` for agent-friendly startup output.
+computer and command are running. Private links use secure random tokens; use
+`thoughtml stream status` and `thoughtml stream stop`, or `--json --events` for
+an agent-friendly lifecycle.
 
 Full reference: [The CLI ↗](https://fatin-ishraq.github.io/ThoughtML/guides/cli.html).
 Prefer not to install? Run any of it via `cargo run -p thoughtml -- …`, or just open the

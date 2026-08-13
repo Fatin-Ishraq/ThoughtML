@@ -24,6 +24,10 @@ impl fmt::Display for Severity {
 /// A single diagnostic message tied to a 1-based source line.
 #[derive(Debug, Clone, Serialize)]
 pub struct Diagnostic {
+    /// Source document within a multi-file project. Single-document parses leave
+    /// this empty so the long-standing JSON shape remains unchanged.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source: Option<String>,
     pub severity: Severity,
     /// 1-based source line number, or 0 when not line-specific.
     pub line: usize,
@@ -33,6 +37,7 @@ pub struct Diagnostic {
 impl Diagnostic {
     pub fn error(line: usize, message: impl Into<String>) -> Self {
         Diagnostic {
+            source: None,
             severity: Severity::Error,
             line,
             message: message.into(),
@@ -41,19 +46,40 @@ impl Diagnostic {
 
     pub fn warning(line: usize, message: impl Into<String>) -> Self {
         Diagnostic {
+            source: None,
             severity: Severity::Warning,
             line,
             message: message.into(),
+        }
+    }
+
+    pub(crate) fn set_source_if_empty(&mut self, source: &str) {
+        if self.source.is_none() {
+            self.source = Some(source.to_string());
         }
     }
 }
 
 impl fmt::Display for Diagnostic {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let source = self.source.as_deref().map(|s| format!("{s}:"));
         if self.line > 0 {
-            write!(f, "{}:{}: {}", self.line, self.severity, self.message)
+            write!(
+                f,
+                "{}{}:{}: {}",
+                source.as_deref().unwrap_or_default(),
+                self.line,
+                self.severity,
+                self.message
+            )
         } else {
-            write!(f, "{}: {}", self.severity, self.message)
+            write!(
+                f,
+                "{}{}: {}",
+                source.as_deref().unwrap_or_default(),
+                self.severity,
+                self.message
+            )
         }
     }
 }
@@ -87,5 +113,11 @@ impl Diagnostics {
 
     pub fn extend(&mut self, other: Diagnostics) {
         self.items.extend(other.items);
+    }
+
+    pub(crate) fn tag_since(&mut self, start: usize, source: &str) {
+        for diagnostic in &mut self.items[start..] {
+            diagnostic.set_source_if_empty(source);
+        }
     }
 }

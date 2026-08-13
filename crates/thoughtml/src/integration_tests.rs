@@ -2838,6 +2838,23 @@ fn unknown_import_warns() {
         "diags: {:?}",
         r.diagnostics.items
     );
+    assert_eq!(r.diagnostics.items[0].source.as_deref(), Some("entry"));
+}
+
+#[test]
+fn project_diagnostics_identify_the_source_document() {
+    let r = project(
+        "import broken as b\nclaim root\n  Root.",
+        &[("broken", "\tclaim bad\n  Tabs are invalid.")],
+    );
+    assert!(
+        r.diagnostics
+            .items
+            .iter()
+            .any(|diagnostic| diagnostic.source.as_deref() == Some("broken")),
+        "diags: {:?}",
+        r.diagnostics.items
+    );
 }
 
 #[test]

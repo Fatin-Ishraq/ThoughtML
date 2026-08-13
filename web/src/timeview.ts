@@ -19,7 +19,7 @@ const SVGNS = 'http://www.w3.org/2000/svg'
 
 export interface TimeViewHandle {
   render(canon: Canonical): void
-  update(canon: Canonical): void
+  update(canon: Canonical, changedIds?: { added?: string[]; modified?: string[] }): void
   applyAsOf(t: number | null): void
   select(id: string | null): boolean
   onSelect(cb: (info: { id: string; kind: string } | null) => void): void
@@ -1173,16 +1173,25 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
     setView(k, x, y)
   }
 
-  function renderModel(canon: Canonical, preserveView: boolean) {
+  function renderModel(canon: Canonical, preserveView: boolean, changedIds: { added?: string[]; modified?: string[] } = {}) {
     const previousView = { ...T }
     const previousFocus = focusId
+    const previousAsOf = asOf
+    const wasAtLatest = asOf === null || asOf >= model.tMax
     model = buildTimeModel(canon)
     layout(model)
     renderGraph()
     setBar()
     beatIdx = -1 // a fresh document starts the tour unstarted (all shown)
     renderStory(null)
-    applyAsOf(model.tMax)
+    applyAsOf(preserveView && !wasAtLatest && previousAsOf !== null ? Math.min(previousAsOf, model.tMax) : model.tMax)
+    const added = new Set(changedIds.added ?? [])
+    const modified = new Set(changedIds.modified ?? [])
+    for (const node of model.nodes) {
+      if (!node.g) continue
+      if (added.has(node.id)) node.g.classList.add('tv-live-added')
+      else if (modified.has(node.id)) node.g.classList.add('tv-live-modified')
+    }
     if (preserveView) {
       setView(previousView.k, previousView.x, previousView.y)
       if (previousFocus && byId.has(previousFocus)) selectNode(previousFocus)
@@ -1194,7 +1203,7 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
   }
 
   function render(canon: Canonical) { renderModel(canon, false) }
-  function update(canon: Canonical) { renderModel(canon, true) }
+  function update(canon: Canonical, changedIds?: { added?: string[]; modified?: string[] }) { renderModel(canon, true, changedIds) }
 
   // one-shot: the first time the stage has a real size, fit to it (the initial
   // render can run before layout gives the pane its width).

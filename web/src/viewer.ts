@@ -16,7 +16,15 @@ import type { Theme } from './graph'
 const LS = { theme: 'thoughtml:theme' }
 
 interface StreamConfig { snapshot: string; events: string }
-interface StreamActivity { sequence: number; at_ms: number; kind: string; summary: string; detail?: string }
+interface StreamChanges {
+  added: string[]
+  removed: string[]
+  modified: string[]
+  conflicts_appeared: number
+  conflicts_resolved: number
+  files: string[]
+}
+interface StreamActivity { sequence: number; at_ms: number; kind: string; summary: string; detail?: string; changes?: StreamChanges }
 interface StreamSnapshot {
   schema_version: number
   sequence: number
@@ -28,6 +36,7 @@ interface StreamSnapshot {
   diagnostics: Diagnostic[]
   watched_files: string[]
   activity: StreamActivity[]
+  connected_viewers: number
 }
 
 function el<T extends HTMLElement = HTMLElement>(sel: string): T {
@@ -186,6 +195,7 @@ async function boot(): Promise<void> {
     status.hidden = false
     let latestSequence = 0
     let latestSourceState: 'valid' | 'invalid' = 'valid'
+    let latestSnapshot: StreamSnapshot | null = null
 
     const openPanel = (open: boolean) => {
       panel.hidden = !open
@@ -194,13 +204,16 @@ async function boot(): Promise<void> {
     status.addEventListener('click', () => openPanel(panel.hidden))
     closePanel.addEventListener('click', () => openPanel(false))
 
-    const connectionState = (state: 'online' | 'invalid' | 'offline') => {
+    let ended = false
+    const connectionState = (state: 'online' | 'invalid' | 'offline' | 'ended') => {
       status.className = `stream-status ${state}`
       if (state === 'offline') statusText.textContent = 'Reconnecting'
+      if (state === 'ended') statusText.textContent = 'Session ended'
     }
 
     const renderStreamPanel = (snapshot: StreamSnapshot) => {
-      el('#stream-updated').textContent = `Revision ${snapshot.sequence} · ${new Date(snapshot.updated_at_ms).toLocaleTimeString()}`
+      const viewers = `${snapshot.connected_viewers} viewer${snapshot.connected_viewers === 1 ? '' : 's'}`
+      el('#stream-updated').textContent = `Revision ${snapshot.sequence} · ${viewers} · ${new Date(snapshot.updated_at_ms).toLocaleTimeString()}`
       const files = el('#stream-files')
       files.replaceChildren(...snapshot.watched_files.map((name) => {
         const code = document.createElement('code'); code.textContent = name; return code
@@ -212,7 +225,7 @@ async function boot(): Promise<void> {
       diagnostics.replaceChildren(...snapshot.diagnostics.map((diag) => {
         const row = document.createElement('div')
         row.className = `stream-diagnostic ${diag.severity}`
-        const where = diag.line ? `line ${diag.line}` : diag.severity
+        const where = [diag.source, diag.line ? `line ${diag.line}` : null].filter(Boolean).join(':') || diag.severity
         const label = document.createElement('span'); label.textContent = where
         const message = document.createElement('p'); message.textContent = diag.message
         row.append(label, message)
@@ -236,11 +249,20 @@ async function boot(): Promise<void> {
     }
 
     const applySnapshot = (snapshot: StreamSnapshot) => {
-      if (snapshot.schema_version !== 1 || snapshot.sequence <= latestSequence) return
+      if (snapshot.schema_version !== 1 || snapshot.sequence < latestSequence) return
+      if (snapshot.sequence === latestSequence) {
+        if (latestSnapshot && snapshot.connected_viewers !== latestSnapshot.connected_viewers) {
+          latestSnapshot.connected_viewers = snapshot.connected_viewers
+          renderStreamPanel(latestSnapshot)
+        }
+        return
+      }
       latestSequence = snapshot.sequence
       latestSourceState = snapshot.source_state
+      latestSnapshot = snapshot
+      const latest = snapshot.activity.at(-1)
       statusText.textContent = snapshot.source_state === 'valid'
-        ? `Live · revision ${snapshot.sequence}`
+        ? latest?.kind === 'revision' ? `Live · ${latest.summary}` : `Live · revision ${snapshot.sequence}`
         : `Edit has errors · revision ${snapshot.sequence}`
       connectionState(snapshot.source_state === 'valid' ? 'online' : 'invalid')
       el('#doc-sub').textContent = snapshot.source_state === 'valid'
@@ -250,11 +272,11 @@ async function boot(): Promise<void> {
 
       if (snapshot.canonical && snapshot.canonical.objects.length > 0) {
         const first = !canon || canon.objects.length === 0
-        const graphChanged = snapshot.source_state === 'valid' && snapshot.activity.at(-1)?.kind !== 'unchanged'
+        const graphChanged = snapshot.source_state === 'valid' && latest?.kind !== 'unchanged'
         canon = snapshot.canonical
         el('#empty-state').hidden = true
         if (first) view.render(canon)
-        else if (graphChanged) view.update(canon)
+        else if (graphChanged) view.update(canon, latest?.changes)
         if (selectedId && !canon.objects.some((o) => o.id === selectedId)) closeDetail()
         else if (selectedId) renderDetail(detailBody, canon, selectedId, navigateTo)
       } else if (!canon) {
@@ -274,12 +296,27 @@ async function boot(): Promise<void> {
 
     const events = new EventSource(live.events)
     events.addEventListener('open', () => {
-      if (status.classList.contains('offline')) connectionState(latestSourceState === 'valid' ? 'online' : 'invalid')
+      if (!ended && status.classList.contains('offline')) connectionState(latestSourceState === 'valid' ? 'online' : 'invalid')
     })
     events.addEventListener('snapshot', (event) => {
       try { applySnapshot(JSON.parse((event as MessageEvent).data) as StreamSnapshot) } catch { /* wait for the next complete snapshot */ }
     })
-    events.addEventListener('error', () => connectionState('offline'))
+    events.addEventListener('presence', (event) => {
+      try {
+        const presence = JSON.parse((event as MessageEvent).data) as { connected_viewers?: number }
+        if (latestSnapshot && typeof presence.connected_viewers === 'number') {
+          latestSnapshot.connected_viewers = presence.connected_viewers
+          renderStreamPanel(latestSnapshot)
+        }
+      } catch { /* presence is informational; a later snapshot will refresh it */ }
+    })
+    events.addEventListener('ended', () => {
+      ended = true
+      events.close()
+      connectionState('ended')
+      el('#doc-sub').textContent = 'live session ended · final graph remains available'
+    })
+    events.addEventListener('error', () => { if (!ended) connectionState('offline') })
   }
 }
 

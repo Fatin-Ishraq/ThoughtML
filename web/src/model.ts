@@ -7,6 +7,7 @@
 
 export type Severity = 'error' | 'warning'
 export interface Diagnostic {
+  source?: string
   severity: Severity
   /** 1-based source line; 0 means not line-specific. */
   line: number

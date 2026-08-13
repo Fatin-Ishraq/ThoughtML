@@ -197,7 +197,17 @@ and obtains the link can read the compiled model, so use trusted networks.
 The watcher coalesces rapid writes, recompiles the full project locally, and
 pushes versioned canonical snapshots over Server-Sent Events. When the newest
 edit is invalid, the browser receives its diagnostics while retaining the last
-valid graph. Existing offline commands never open a network connection.
+valid graph. Each diagnostic identifies its source file. Existing offline
+commands never open a network connection.
+
+Manage detached sessions locally:
+
+```sh
+thoughtml stream status             # list live and stale records
+thoughtml stream status --json      # machine-readable session inventory
+thoughtml stream stop <SESSION>     # id or unambiguous prefix
+thoughtml stream stop               # stop every recorded live session
+```
 
 Useful options:
 
@@ -208,6 +218,7 @@ Useful options:
 | `--advertise-host <HOST>` | Override the hostname printed in the viewer URL. |
 | `--port <N>` | Pick a port; `0` (default) selects a free one. |
 | `--json` | Print one startup JSON object for an agent or script; ongoing logs use stderr. |
+| `--events` | With `--json`, emit runtime lifecycle events as JSON Lines on stderr. |
 | `--debounce-ms <N>` | Set the quiet period after edits (default: 400 ms). |
 | `--strict-provenance` | Include strict number-provenance diagnostics. |
 

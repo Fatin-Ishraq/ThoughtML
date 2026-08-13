@@ -13,6 +13,11 @@ use std::collections::BTreeMap;
 pub struct DiffReport {
     pub text: String,
     pub changed: bool,
+    pub added_ids: Vec<String>,
+    pub removed_ids: Vec<String>,
+    pub modified_ids: Vec<String>,
+    pub conflicts_appeared: usize,
+    pub conflicts_resolved: usize,
 }
 
 pub fn diff(a: &Canonical, b: &Canonical) -> DiffReport {
@@ -88,7 +93,15 @@ pub fn diff(a: &Canonical, b: &Canonical) -> DiffReport {
         out.push_str("\nno belief-level changes.\n");
     }
 
-    DiffReport { text: out, changed }
+    DiffReport {
+        text: out,
+        changed,
+        added_ids: added.into_iter().map(str::to_string).collect(),
+        removed_ids: removed.into_iter().map(str::to_string).collect(),
+        modified_ids: changes.into_iter().map(|(id, _)| id).collect(),
+        conflicts_appeared: appeared.len(),
+        conflicts_resolved: gone.len(),
+    }
 }
 
 fn index(c: &Canonical) -> BTreeMap<&str, &Object> {

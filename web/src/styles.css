@@ -210,12 +210,15 @@ a { color: inherit; }
 }
 .stream-status[hidden] { display: none; }
 .stream-status:hover { color: var(--text); border-color: var(--border-strong); }
+.stream-status > span:last-child { max-width: min(360px, 48vw); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .stream-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-faint); box-shadow: 0 0 0 3px color-mix(in srgb, var(--text-faint) 13%, transparent); }
 .stream-status.online .stream-dot { background: var(--ok); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 14%, transparent); animation: stream-pulse 2.4s ease-out infinite; }
 .stream-status.invalid { color: var(--warning); }
 .stream-status.invalid .stream-dot { background: var(--warning); box-shadow: 0 0 0 3px color-mix(in srgb, var(--warning) 14%, transparent); }
 .stream-status.offline { color: var(--error); }
 .stream-status.offline .stream-dot { background: var(--error); box-shadow: 0 0 0 3px color-mix(in srgb, var(--error) 14%, transparent); }
+.stream-status.ended { color: var(--text-faint); }
+.stream-status.ended .stream-dot { background: var(--text-faint); box-shadow: none; }
 @keyframes stream-pulse { 65%, 100% { box-shadow: 0 0 0 7px transparent; } }
 
 .stream-panel {
@@ -237,7 +240,7 @@ a { color: inherit; }
 .stream-files { display: flex; flex-wrap: wrap; gap: 5px; }
 .stream-files code { padding: 3px 7px; border: 1px solid var(--border); border-radius: var(--r-pill); color: var(--text-dim); background: var(--bg-elev); font: 10.5px var(--mono); }
 .stream-diagnostics { display: flex; flex-direction: column; gap: 7px; }
-.stream-diagnostic { display: grid; grid-template-columns: 52px 1fr; gap: 8px; align-items: baseline; }
+.stream-diagnostic { display: grid; grid-template-columns: minmax(72px, 112px) 1fr; gap: 8px; align-items: baseline; }
 .stream-diagnostic span { color: var(--text-faint); font: 10px var(--mono); }
 .stream-diagnostic p { margin: 0; color: var(--text-dim); font-size: 11.5px; line-height: 1.4; }
 .stream-diagnostic.error p { color: color-mix(in srgb, var(--error) 82%, var(--text)); }
@@ -339,6 +342,19 @@ details.stream-activity-item > summary { cursor: pointer; }
 .tv-ring { opacity: 0; }
 .tv-node.tv-tension .tv-ring { animation: tv-pulse 1.4s ease-in-out infinite; }
 @keyframes tv-pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.95; } }
+.tv-node.tv-live-added .tv-node-shape { animation: tv-live-added 2.8s ease-out; }
+.tv-node.tv-live-modified .tv-node-shape { animation: tv-live-modified 2.8s ease-out; }
+@keyframes tv-live-added {
+  0% { stroke-width: 4.5; filter: drop-shadow(0 0 10px color-mix(in srgb, var(--ok) 72%, transparent)); }
+  100% { stroke-width: 1.4; filter: none; }
+}
+@keyframes tv-live-modified {
+  0% { stroke-width: 4; filter: drop-shadow(0 0 9px color-mix(in srgb, var(--accent) 68%, transparent)); }
+  100% { stroke-width: 1.4; filter: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tv-node.tv-live-added .tv-node-shape, .tv-node.tv-live-modified .tv-node-shape { animation: none; stroke-width: 2.5; }
+}
 /* a soft entrance for the whole stage on load */
 .timeview { animation: tv-fade-in 0.5s ease; }
 @keyframes tv-fade-in { from { opacity: 0; } to { opacity: 1; } }

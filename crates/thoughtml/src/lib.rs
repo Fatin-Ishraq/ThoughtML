@@ -151,12 +151,14 @@ pub fn parse_str_as_of(source: &str, opts: Options, cut: AsOf) -> ParseResult {
 /// the CLI reads sibling files, the playground passes its bundled examples.
 pub fn parse_project(entry: &str, sources: &HashMap<String, String>, opts: Options) -> ParseResult {
     let mut diagnostics = Diagnostics::new();
+    let entry_diag_start = diagnostics.items.len();
     let surface = parser::parse(entry, &mut diagnostics);
+    diagnostics.tag_since(entry_diag_start, "entry");
     let mut objects = Vec::new();
     let mut visiting = HashSet::new();
     resolve_doc(
         &surface,
-        "",
+        ("", "entry"),
         sources,
         opts,
         &mut objects,
@@ -194,30 +196,38 @@ pub fn parse_project(entry: &str, sources: &HashMap<String, String>, opts: Optio
 /// `{prefix}{ns}.`.
 fn resolve_doc(
     surface: &SurfaceFile,
-    prefix: &str,
+    location: (&str, &str),
     sources: &HashMap<String, String>,
     opts: Options,
     out: &mut Vec<canonical::Object>,
     visiting: &mut HashSet<String>,
     diags: &mut Diagnostics,
 ) {
+    let (prefix, source_name) = location;
     for rec in &surface.records {
         let surface::Header::Import { name, ns } = &rec.header else {
             continue;
         };
         if visiting.contains(name) {
+            let start = diags.items.len();
             diags.warning(rec.line, format!("import cycle through `{name}`; skipped"));
+            diags.tag_since(start, source_name);
             continue;
         }
         let Some(src) = sources.get(name) else {
+            let start = diags.items.len();
             diags.warning(rec.line, format!("unknown import `{name}`"));
+            diags.tag_since(start, source_name);
             continue;
         };
         visiting.insert(name.clone());
+        let parse_start = diags.items.len();
         let child = parser::parse(src, diags);
+        diags.tag_since(parse_start, name);
+        let child_prefix = format!("{prefix}{ns}.");
         resolve_doc(
             &child,
-            &format!("{prefix}{ns}."),
+            (&child_prefix, name),
             sources,
             opts,
             out,
@@ -226,7 +236,9 @@ fn resolve_doc(
         );
         visiting.remove(name);
     }
+    let desugar_start = diags.items.len();
     let mut objs = desugar::desugar(surface, opts.emit_acts, diags).objects;
+    diags.tag_since(desugar_start, source_name);
     if !prefix.is_empty() {
         prefix_objects(&mut objs, prefix);
     }
