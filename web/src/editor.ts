@@ -123,8 +123,13 @@ function themeExtensions(theme: Theme) {
 
 export interface EditorHandle {
   view: EditorView
+  activeFile(): string
   getValue(): string
-  setValue(text: string): void
+  reset(file: string, text: string): void
+  openFile(file: string, text: string): void
+  replaceFile(file: string, text: string): void
+  renameFile(from: string, to: string): void
+  removeFile(file: string): void
   setDiagnostics(diags: Diagnostic[]): void
   setTheme(theme: Theme): void
   gotoLine(line: number): void
@@ -132,31 +137,39 @@ export interface EditorHandle {
 
 export function createEditor(
   parent: HTMLElement,
+  initialFile: string,
   doc: string,
-  onChange: (value: string) => void,
+  onChange: (file: string, value: string) => void,
   initialTheme: Theme,
 ): EditorHandle {
   const themeComp = new Compartment()
+  const states = new Map<string, EditorState>()
+  const scrollPositions = new Map<string, number>()
+  let currentFile = initialFile
+  let currentTheme = initialTheme
+  let suppressChanges = false
+
+  const makeState = (text: string) => EditorState.create({
+    doc: text,
+    extensions: [
+      lineNumbers(),
+      lintGutter(),
+      highlightActiveLine(),
+      highlightActiveLineGutter(),
+      history(),
+      keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
+      thoughtmlLanguage,
+      themeComp.of(themeExtensions(currentTheme)),
+      EditorView.lineWrapping,
+      EditorView.updateListener.of((u) => {
+        if (u.docChanged && !suppressChanges) onChange(currentFile, u.state.doc.toString())
+      }),
+    ],
+  })
 
   const view = new EditorView({
     parent,
-    state: EditorState.create({
-      doc,
-      extensions: [
-        lineNumbers(),
-        lintGutter(),
-        highlightActiveLine(),
-        highlightActiveLineGutter(),
-        history(),
-        keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
-        thoughtmlLanguage,
-        themeComp.of(themeExtensions(initialTheme)),
-        EditorView.lineWrapping,
-        EditorView.updateListener.of((u) => {
-          if (u.docChanged) onChange(u.state.doc.toString())
-        }),
-      ],
-    }),
+    state: makeState(doc),
   })
 
   function gotoLine(line: number) {
@@ -167,9 +180,40 @@ export function createEditor(
     view.focus()
   }
 
-  function setValue(text: string) {
+  function replaceActive(text: string) {
     if (text === view.state.doc.toString()) return
-    view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: text } })
+    suppressChanges = true
+    try {
+      view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: text } })
+    } finally {
+      suppressChanges = false
+    }
+  }
+
+  function openFile(file: string, text: string) {
+    if (file === currentFile) {
+      replaceActive(text)
+      return
+    }
+    states.set(currentFile, view.state)
+    scrollPositions.set(currentFile, view.scrollDOM.scrollTop)
+    currentFile = file
+    const state = states.get(file)
+    view.setState(state && state.doc.toString() === text ? state : makeState(text))
+    view.dispatch({ effects: themeComp.reconfigure(themeExtensions(currentTheme)) })
+    window.requestAnimationFrame(() => {
+      view.scrollDOM.scrollTop = scrollPositions.get(file) ?? 0
+    })
+  }
+
+  function replaceFile(file: string, text: string) {
+    if (file === currentFile) {
+      replaceActive(text)
+      return
+    }
+    const previous = states.get(file)
+    if (previous?.doc.toString() === text) return
+    states.set(file, makeState(text))
   }
 
   function applyDiagnostics(diags: Diagnostic[]) {
@@ -184,10 +228,38 @@ export function createEditor(
 
   return {
     view,
+    activeFile: () => currentFile,
     getValue: () => view.state.doc.toString(),
-    setValue,
+    reset: (file, text) => {
+      states.clear()
+      scrollPositions.clear()
+      currentFile = file
+      view.setState(makeState(text))
+    },
+    openFile,
+    replaceFile,
+    renameFile: (from, to) => {
+      const state = states.get(from)
+      if (state) {
+        states.delete(from)
+        states.set(to, state)
+      }
+      const scroll = scrollPositions.get(from)
+      if (scroll !== undefined) {
+        scrollPositions.delete(from)
+        scrollPositions.set(to, scroll)
+      }
+      if (currentFile === from) currentFile = to
+    },
+    removeFile: (file) => {
+      states.delete(file)
+      scrollPositions.delete(file)
+    },
     setDiagnostics: applyDiagnostics,
-    setTheme: (theme: Theme) => view.dispatch({ effects: themeComp.reconfigure(themeExtensions(theme)) }),
+    setTheme: (theme: Theme) => {
+      currentTheme = theme
+      view.dispatch({ effects: themeComp.reconfigure(themeExtensions(theme)) })
+    },
     gotoLine,
   }
 }

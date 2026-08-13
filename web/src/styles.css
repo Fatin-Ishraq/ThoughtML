@@ -283,21 +283,32 @@ details.stream-activity-item > summary { cursor: pointer; }
 .cm-scroller { font-family: var(--mono); font-size: 13px; line-height: 1.65; }
 
 /* multi-file project workspace */
-.workspace-head { gap: 9px; padding-right: 8px; }
+.workspace-head { gap: 8px; min-height: 42px; height: auto; padding: 6px 8px; flex-wrap: wrap; }
+#workspace-name { max-width: 115px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .workspace-entry {
   min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   color: var(--text-faint); font: 10.5px var(--mono);
 }
-.workspace-actions { display: flex; gap: 4px; margin-left: auto; }
-.workspace-actions button, .file-tab, .project-file, .detail-source {
+.workspace-status {
+  padding: 3px 6px; border: 1px solid var(--border); border-radius: var(--r-pill);
+  color: var(--text-faint); font-size: 9px; white-space: nowrap;
+}
+.workspace-status.dirty { color: var(--warning); border-color: color-mix(in srgb, var(--warning) 45%, var(--border)); }
+.workspace-status.directory { color: var(--ok); }
+.workspace-actions {
+  display: flex; gap: 4px; flex: 1 0 100%; min-width: 0; overflow-x: auto; padding-bottom: 1px;
+  scrollbar-width: thin;
+}
+.workspace-actions button, .file-tab, .project-file, .project-import, .project-problem, .detail-source {
   border: 1px solid var(--border); color: var(--text-dim); background: var(--bg-elev);
   font: 600 10.5px var(--sans); cursor: pointer; transition: color 0.15s, border-color 0.15s, background 0.15s;
 }
-.workspace-actions button { padding: 4px 7px; border-radius: var(--r-sm); }
-.workspace-actions button:hover, .file-tab:hover, .project-file:hover, .detail-source:hover { color: var(--text); border-color: var(--border-strong); }
+.workspace-actions button { flex: none; padding: 4px 7px; border-radius: var(--r-sm); }
+.workspace-actions button:hover, .file-tab:hover, .project-file:hover, .project-import:hover, .project-problem:hover, .detail-source:hover { color: var(--text); border-color: var(--border-strong); }
+.workspace-actions button:disabled { opacity: 0.42; cursor: default; }
 .workspace-body { display: flex; flex: 1 1 auto; min-height: 0; }
 .project-files {
-  flex: 0 0 128px; min-width: 0; overflow: auto; padding: 8px 7px;
+  flex: 0 0 144px; min-width: 0; overflow: auto; padding: 8px 7px;
   border-right: 1px solid var(--border); background: color-mix(in srgb, var(--bg-panel) 93%, var(--bg-canvas));
 }
 .project-files-head { display: flex; justify-content: space-between; padding: 3px 6px 8px; color: var(--text-faint); font-size: 9px; font-weight: 700; letter-spacing: 0.7px; text-transform: uppercase; }
@@ -307,21 +318,67 @@ details.stream-activity-item > summary { cursor: pointer; }
   border-color: transparent; border-radius: var(--r-sm); text-align: left; background: transparent;
 }
 .project-file::before { content: '◇'; flex: none; color: var(--accent); font-size: 9px; }
+.project-file.dirty::before { content: '●'; color: var(--warning); }
+.project-file.orphan::before { content: '○'; color: var(--text-faint); }
 .project-file span:first-of-type { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--mono); font-weight: 500; }
 .project-file small { flex: none; margin-left: auto; color: var(--text-faint); font-size: 8px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; }
 .project-file.active { color: var(--text); background: var(--accent-dim); border-color: color-mix(in srgb, var(--accent) 22%, transparent); }
 .project-file.has-error::before { content: '●'; color: var(--error); }
 .project-file.has-warning::before { content: '●'; color: var(--warning); }
+.project-section { margin-top: 13px; padding-top: 8px; border-top: 1px solid var(--border); }
+.project-import, .project-problem {
+  display: block; width: 100%; padding: 5px 6px; border-color: transparent; border-radius: var(--r-sm);
+  overflow: hidden; text-align: left; text-overflow: ellipsis; white-space: nowrap; background: transparent;
+}
+.project-import { color: var(--text-faint); font-family: var(--mono); font-weight: 500; }
+.project-import::before { content: '↳ '; color: var(--accent); }
+.project-problems { display: flex; flex-direction: column; gap: 3px; }
+.project-problem { color: var(--warning); font-size: 9.5px; white-space: normal; }
+.project-problem.error { color: var(--error); }
 .workspace-editor { display: flex; flex: 1 1 auto; min-width: 0; min-height: 0; flex-direction: column; }
 .file-tabs { display: flex; flex: 0 0 31px; min-width: 0; overflow-x: auto; border-bottom: 1px solid var(--border); scrollbar-width: thin; }
-.file-tab { flex: 0 0 auto; max-width: 150px; overflow: hidden; padding: 0 11px; border: 0; border-right: 1px solid var(--border); border-radius: 0; text-overflow: ellipsis; white-space: nowrap; background: transparent; font-family: var(--mono); font-weight: 500; }
+.file-tab { display: flex; align-items: center; gap: 6px; flex: 0 0 auto; max-width: 170px; overflow: hidden; padding: 0 7px 0 11px; border: 0; border-right: 1px solid var(--border); border-radius: 0; white-space: nowrap; background: transparent; font-family: var(--mono); font-weight: 500; }
+.file-tab-label { overflow: hidden; text-overflow: ellipsis; }
+.file-tab.dirty .file-tab-label::after { content: ' ●'; color: var(--warning); font-size: 7px; }
+.file-tab-close { padding: 1px 3px; border: 0; border-radius: 3px; color: var(--text-faint); background: transparent; cursor: pointer; }
+.file-tab-close:hover { color: var(--text); background: var(--accent-dim); }
 .file-tab.active { color: var(--text); background: var(--bg-panel); box-shadow: inset 0 -2px var(--accent); }
+.editor-statusbar {
+  display: flex; justify-content: space-between; flex: 0 0 24px; padding: 4px 9px;
+  border-top: 1px solid var(--border); color: var(--text-faint); font: 9.5px var(--mono); background: var(--bg-panel);
+}
+#compile-status.compiling { color: var(--accent); }
+#compile-status.stale { color: var(--warning); }
+#compile-status.error { color: var(--error); }
 .detail-source { margin-left: auto; padding: 4px 7px; border-radius: var(--r-pill); color: var(--accent); font-family: var(--mono); }
 .detail-source + .detail-close { margin-left: 0; }
 
+.workspace-dialog {
+  width: min(560px, calc(100vw - 30px)); padding: 0; border: 1px solid var(--border-strong);
+  border-radius: var(--r-lg); color: var(--text); background: var(--bg-panel); box-shadow: var(--shadow-lg);
+}
+.workspace-dialog::backdrop { background: rgba(7, 9, 12, 0.68); backdrop-filter: blur(3px); }
+.workspace-dialog form { margin: 0; padding: 20px; }
+.dialog-kicker { margin: 0 0 6px; color: var(--warning); font-size: 10px; font-weight: 700; letter-spacing: 0.7px; text-transform: uppercase; }
+.workspace-dialog h2 { margin: 0 0 8px; font-size: 18px; }
+.workspace-dialog p { color: var(--text-dim); line-height: 1.55; }
+.dialog-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 7px; margin-top: 18px; }
+.dialog-actions button, .palette-head button {
+  padding: 7px 10px; border: 1px solid var(--border); border-radius: var(--r-sm); color: var(--text); background: var(--bg-elev); cursor: pointer;
+}
+.palette-dialog form { padding: 0; }
+.palette-head { display: flex; padding: 10px; border-bottom: 1px solid var(--border); }
+.palette-head input { flex: 1; min-width: 0; padding: 9px 11px; border: 1px solid var(--border); border-radius: var(--r-sm); color: var(--text); background: var(--bg-canvas); outline: none; }
+.palette-head input:focus { border-color: var(--accent); }
+.palette-head button { margin-left: 7px; }
+.palette-results { max-height: 55vh; overflow: auto; padding: 7px; }
+.palette-result { display: grid; grid-template-columns: 120px 38px minmax(0, 1fr); gap: 8px; width: 100%; padding: 7px 8px; border: 0; border-radius: var(--r-sm); color: var(--text-dim); background: transparent; text-align: left; cursor: pointer; }
+.palette-result:hover, .palette-result.active { color: var(--text); background: var(--accent-dim); }
+.palette-result-file, .palette-result-line { color: var(--accent); font: 10px var(--mono); overflow: hidden; text-overflow: ellipsis; }
+.palette-result-preview { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 11px var(--mono); }
+
 @media (max-width: 980px) {
   .project-files { flex-basis: 104px; }
-  .workspace-actions #download-file { display: none; }
   .workspace-actions button { padding-inline: 5px; font-size: 10px; }
 }
 

@@ -76,14 +76,22 @@
     <main class="split">
       <section class="pane editor-pane">
         <div class="pane-head workspace-head">
-          <span class="pane-title">Project</span>
+          <span class="pane-title" id="workspace-name">Project</span>
           <span class="workspace-entry" id="workspace-entry">untitled.thml</span>
+          <span class="workspace-status" id="workspace-status">local draft</span>
           <div class="workspace-actions">
             <button type="button" id="snake-project" title="Load the six-file Snake project">Snake demo</button>
-            <button type="button" id="open-project" title="Open one or more sibling .thml files">Open</button>
+            <button type="button" id="open-folder" title="Open a real ThoughtML project directory">Open folder</button>
+            <button type="button" id="open-project" title="Open one or more sibling .thml files">Open files</button>
             <button type="button" id="new-file" title="Create and import a new ThoughtML file">New</button>
-            <button type="button" id="set-entry" title="Compile the project from the active file">Set entry</button>
-            <button type="button" id="download-file" title="Download the active ThoughtML file">Download</button>
+            <button type="button" id="rename-file" title="Rename the active file and update imports">Rename</button>
+            <button type="button" id="delete-file" title="Delete the active file">Delete</button>
+            <button type="button" id="set-entry" title="Compile the project from the active file">Entry</button>
+            <button type="button" id="search-project" title="Search all files (Ctrl+Shift+F)">Search</button>
+            <button type="button" id="refresh-project" title="Check for edits made outside the browser">Refresh</button>
+            <button type="button" id="save-file" title="Save active file (Ctrl+S)">Save</button>
+            <button type="button" id="save-all" title="Save every modified file (Ctrl+Shift+S)">Save all</button>
+            <button type="button" id="download-project" title="Download the complete project as a ZIP">Export</button>
           </div>
           <input id="project-file-input" type="file" accept=".thml,text/plain" multiple hidden />
         </div>
@@ -91,10 +99,22 @@
           <aside class="project-files" aria-label="Project files">
             <div class="project-files-head"><span>Files</span><span id="project-file-count"></span></div>
             <div class="project-file-list" id="project-files"></div>
+            <div class="project-section" id="project-import-section">
+              <div class="project-files-head"><span>Imports</span></div>
+              <div class="project-file-list" id="project-imports"></div>
+            </div>
+            <div class="project-section" id="project-problem-section" hidden>
+              <div class="project-files-head"><span>Project issues</span></div>
+              <div class="project-problems" id="project-problems"></div>
+            </div>
           </aside>
           <div class="workspace-editor">
             <div class="file-tabs" id="file-tabs" role="tablist" aria-label="Open ThoughtML files"></div>
             <div id="editor" class="editor"></div>
+            <div class="editor-statusbar">
+              <span id="active-file-status">saved</span>
+              <span id="compile-status">ready</span>
+            </div>
           </div>
         </div>
         <div class="examples-tray" id="examples-tray">
@@ -182,6 +202,30 @@
         <div class="detail-body" id="detail-body"></div>
       </section>
     </main>
+
+    <dialog class="workspace-dialog conflict-dialog" id="conflict-dialog">
+      <form method="dialog">
+        <p class="dialog-kicker">External edit detected</p>
+        <h2 id="conflict-title">This file changed on disk</h2>
+        <p id="conflict-message"></p>
+        <div class="dialog-actions">
+          <button value="disk">Use disk</button>
+          <button value="editor">Keep editor</button>
+          <button value="both">Download both</button>
+          <button value="cancel">Later</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog class="workspace-dialog palette-dialog" id="project-palette">
+      <form method="dialog">
+        <div class="palette-head">
+          <input id="palette-query" type="search" autocomplete="off" placeholder="Search every ThoughtML file…" />
+          <button value="cancel" aria-label="Close">×</button>
+        </div>
+        <div class="palette-results" id="palette-results"></div>
+      </form>
+    </dialog>
 
     <div class="toast" id="toast" hidden></div>
 

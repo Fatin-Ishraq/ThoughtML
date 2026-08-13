@@ -9,7 +9,8 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "build:viewer": "vite build --config vite.viewer.config.ts",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node --experimental-strip-types --test tests/*.test.ts"
   },
   "dependencies": {
     "@codemirror/commands": "^6.6.0",
@@ -20,7 +21,8 @@
     "@lezer/highlight": "^1.2.0",
     "cytoscape": "^3.30.0",
     "cytoscape-dagre": "^2.5.0",
-    "dagre": "^0.8.5"
+    "dagre": "^0.8.5",
+    "fflate": "^0.8.3"
   },
   "devDependencies": {
     "@types/cytoscape": "^3.21.0",
