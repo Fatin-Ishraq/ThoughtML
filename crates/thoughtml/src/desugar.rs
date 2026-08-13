@@ -96,6 +96,16 @@ fn value_and_basis(f: &Field) -> (Value, Option<String>) {
 }
 
 pub fn desugar(file: &SurfaceFile, emit_acts: bool, diags: &mut Diagnostics) -> Canonical {
+    desugar_with_origins(file, emit_acts, diags).0
+}
+
+/// Desugar while retaining a source line parallel to every canonical object.
+/// The project compiler attaches the correct document name after namespacing.
+pub(crate) fn desugar_with_origins(
+    file: &SurfaceFile,
+    emit_acts: bool,
+    diags: &mut Diagnostics,
+) -> (Canonical, Vec<usize>) {
     // Fold any `profile` declarations into the allowed vocabulary, then lint the
     // whole surface tree against it at exact source lines (Phase 5) — so a
     // profile-declared kind/relation/field/posture is accepted, before desugaring.
@@ -108,15 +118,18 @@ pub fn desugar(file: &SurfaceFile, emit_acts: bool, diags: &mut Diagnostics) -> 
     }
     d.infer_decision_kinds();
     // `timeline` and any `superseded_by` links are filled in by the derive pass.
-    Canonical {
-        objects: d.objects,
-        timeline: None,
-        audit: None,
-    }
+    (
+        Canonical {
+            objects: d.objects,
+            timeline: None,
+            audit: None,
+        },
+        d.origins,
+    )
 }
 
 /// Extract the canonical id of any object (used to record `Act.expands_to`).
-fn object_id(o: &Object) -> String {
+pub(crate) fn object_id(o: &Object) -> String {
     match o {
         Object::Focus(x) => x.id.clone(),
         Object::Question(x) => x.id.clone(),
@@ -316,6 +329,8 @@ fn lint_vocabulary(records: &[Record], allowed: &AllowedVocab, diags: &mut Diagn
 
 struct Desugarer<'a> {
     objects: Vec<Object>,
+    /// One source line per object in `objects`.
+    origins: Vec<usize>,
     idgen: IdGen,
     /// Maps a focus id to its index in `objects` for dedup/merge.
     focus_index: HashMap<String, usize>,
@@ -330,12 +345,18 @@ impl<'a> Desugarer<'a> {
     fn new(diags: &'a mut Diagnostics, emit_acts: bool) -> Self {
         Desugarer {
             objects: Vec::new(),
+            origins: Vec::new(),
             idgen: IdGen::new(),
             focus_index: HashMap::new(),
             explicit_kind: HashSet::new(),
             emit_acts,
             diags,
         }
+    }
+
+    fn push_object(&mut self, object: Object, line: usize) {
+        self.objects.push(object);
+        self.origins.push(line);
     }
 
     /// Desugar a focus record. `header_kind` is `Some` for the typed-header form
@@ -374,6 +395,7 @@ impl<'a> Desugarer<'a> {
             rec.block.formula.clone(),
             rec.block.body.clone(),
             fields,
+            rec.line,
         );
         let idx = self.focus_index.get(id).copied();
         if let (Some(s), Some(i)) = (status, idx) {
@@ -438,7 +460,7 @@ impl<'a> Desugarer<'a> {
                 let start = self.objects.len();
                 self.action(rec, agent, posture, form);
                 if self.emit_acts {
-                    self.emit_act(agent, posture, form, start);
+                    self.emit_act(agent, posture, form, start, rec.line);
                 }
                 None
             }
@@ -483,17 +505,27 @@ impl<'a> Desugarer<'a> {
     /// Record an authored action as an `Act` (§4.6), capturing the canonical
     /// objects it produced in `expands_to`. Opt-in (default off) so the base
     /// canonical output stays stable.
-    fn emit_act(&mut self, agent: &str, posture: &str, form: &ActionForm, start: usize) {
+    fn emit_act(
+        &mut self,
+        agent: &str,
+        posture: &str,
+        form: &ActionForm,
+        start: usize,
+        line: usize,
+    ) {
         let expands_to: Vec<String> = self.objects[start..].iter().map(object_id).collect();
         let id = self.idgen.generate(&format!("{agent}-{posture}-act"));
-        self.objects.push(Object::Act(Act {
-            id,
-            agent: Some(agent.to_string()),
-            verb: posture.to_string(),
-            args: action_args(form),
-            expands_to,
-            fields: Fields::new(),
-        }));
+        self.push_object(
+            Object::Act(Act {
+                id,
+                agent: Some(agent.to_string()),
+                verb: posture.to_string(),
+                args: action_args(form),
+                expands_to,
+                fields: Fields::new(),
+            }),
+            line,
+        );
     }
 
     // --- Core headers (already canonical) --------------------------------
@@ -510,11 +542,14 @@ impl<'a> Desugarer<'a> {
             .collect();
 
         let scope_idx = self.objects.len();
-        self.objects.push(Object::Scope(Scope {
-            id: id.to_string(),
-            includes: Vec::new(),
-            fields,
-        }));
+        self.push_object(
+            Object::Scope(Scope {
+                id: id.to_string(),
+                includes: Vec::new(),
+                fields,
+            }),
+            rec.line,
+        );
 
         let includes = self.contain(&rec.children, &defaults);
         if let Object::Scope(s) = &mut self.objects[scope_idx] {
@@ -580,7 +615,7 @@ impl<'a> Desugarer<'a> {
             };
             target.extend(value_list(&f.value));
         }
-        self.objects.push(Object::Profile(p));
+        self.push_object(Object::Profile(p), rec.line);
     }
 
     fn question(&mut self, rec: &Record, id: &str) {
@@ -622,16 +657,19 @@ impl<'a> Desugarer<'a> {
                 "question should include body text or an `expects` field",
             );
         }
-        self.objects.push(Object::Question(Question {
-            id: id.to_string(),
-            body: rec.block.body.clone(),
-            asks_about,
-            expects,
-            status,
-            fields,
-            includes: Vec::new(),
-            superseded_by: None,
-        }));
+        self.push_object(
+            Object::Question(Question {
+                id: id.to_string(),
+                body: rec.block.body.clone(),
+                asks_about,
+                expects,
+                status,
+                fields,
+                includes: Vec::new(),
+                superseded_by: None,
+            }),
+            rec.line,
+        );
     }
 
     fn core_link(
@@ -700,21 +738,24 @@ impl<'a> Desugarer<'a> {
             );
             weight = None;
         }
-        self.objects.push(Object::Link(Link {
-            id,
-            from: from.to_string(),
-            relation: relation.to_string(),
-            to: to.to_string(),
-            weight,
-            probability,
-            basis,
-            body,
-            fields,
-            superseded_by: None,
-            derived_confidence: None,
-            leverage: None,
-            argument_status: None,
-        }));
+        self.push_object(
+            Object::Link(Link {
+                id,
+                from: from.to_string(),
+                relation: relation.to_string(),
+                to: to.to_string(),
+                weight,
+                probability,
+                basis,
+                body,
+                fields,
+                superseded_by: None,
+                derived_confidence: None,
+                leverage: None,
+                argument_status: None,
+            }),
+            line,
+        );
     }
 
     /// Desugar an evidence bundle (`<relation> <target>`): each member becomes a
@@ -759,16 +800,19 @@ impl<'a> Desugarer<'a> {
             None => self.idgen.stance_id(agent, posture, target),
         };
         let (confidence, basis, fields) = self.split_confidence(&rec.block, rec.line);
-        self.objects.push(Object::Stance(Stance {
-            id,
-            agent: agent.to_string(),
-            posture: posture.to_string(),
-            target: target.to_string(),
-            confidence,
-            basis,
-            fields,
-            superseded_by: None,
-        }));
+        self.push_object(
+            Object::Stance(Stance {
+                id,
+                agent: agent.to_string(),
+                posture: posture.to_string(),
+                target: target.to_string(),
+                confidence,
+                basis,
+                fields,
+                superseded_by: None,
+            }),
+            rec.line,
+        );
     }
 
     // --- Readable action headers (§8) ------------------------------------
@@ -798,6 +842,7 @@ impl<'a> Desugarer<'a> {
                 None,
                 rec.block.body.clone(),
                 Fields::new(),
+                rec.line,
             );
         }
 
@@ -834,16 +879,19 @@ impl<'a> Desugarer<'a> {
                 .insert(0, ("note".to_string(), Value::Text(body)));
         }
 
-        self.objects.push(Object::Stance(Stance {
-            id: stance_id,
-            agent: agent.to_string(),
-            posture: posture.to_string(),
-            target: target.to_string(),
-            confidence,
-            basis: conf_basis,
-            fields: stance_fields,
-            superseded_by: None,
-        }));
+        self.push_object(
+            Object::Stance(Stance {
+                id: stance_id,
+                agent: agent.to_string(),
+                posture: posture.to_string(),
+                target: target.to_string(),
+                confidence,
+                basis: conf_basis,
+                fields: stance_fields,
+                superseded_by: None,
+            }),
+            rec.line,
+        );
     }
 
     fn action_suspects(
@@ -855,8 +903,8 @@ impl<'a> Desugarer<'a> {
         to: &str,
         alias: Option<&str>,
     ) {
-        self.ensure_focus(from, None, false, None, None, None, Fields::new());
-        self.ensure_focus(to, None, false, None, None, None, Fields::new());
+        self.ensure_focus(from, None, false, None, None, None, Fields::new(), rec.line);
+        self.ensure_focus(to, None, false, None, None, None, Fields::new(), rec.line);
 
         let link_id = match alias {
             Some(a) => {
@@ -866,21 +914,24 @@ impl<'a> Desugarer<'a> {
             None => self.idgen.link_id(from, relation, to),
         };
         let link_weight = self.read_weight(&rec.block, rec.line);
-        self.objects.push(Object::Link(Link {
-            id: link_id.clone(),
-            from: from.to_string(),
-            relation: relation.to_string(),
-            to: to.to_string(),
-            weight: link_weight,
-            probability: None,
-            basis: None,
-            body: None,
-            fields: Fields::new(),
-            superseded_by: None,
-            derived_confidence: None,
-            leverage: None,
-            argument_status: None,
-        }));
+        self.push_object(
+            Object::Link(Link {
+                id: link_id.clone(),
+                from: from.to_string(),
+                relation: relation.to_string(),
+                to: to.to_string(),
+                weight: link_weight,
+                probability: None,
+                basis: None,
+                body: None,
+                fields: Fields::new(),
+                superseded_by: None,
+                derived_confidence: None,
+                leverage: None,
+                argument_status: None,
+            }),
+            rec.line,
+        );
 
         let stance_id = self.idgen.stance_id(agent, "suspects", &link_id);
         let mut confidence = None;
@@ -908,16 +959,19 @@ impl<'a> Desugarer<'a> {
                 .insert(0, ("note".to_string(), Value::Text(body)));
         }
 
-        self.objects.push(Object::Stance(Stance {
-            id: stance_id,
-            agent: agent.to_string(),
-            posture: "suspects".to_string(),
-            target: link_id,
-            confidence,
-            basis: conf_basis,
-            fields: stance_fields,
-            superseded_by: None,
-        }));
+        self.push_object(
+            Object::Stance(Stance {
+                id: stance_id,
+                agent: agent.to_string(),
+                posture: "suspects".to_string(),
+                target: link_id,
+                confidence,
+                basis: conf_basis,
+                fields: stance_fields,
+                superseded_by: None,
+            }),
+            rec.line,
+        );
     }
 
     fn action_infers(&mut self, rec: &Record, agent: &str, target: &str, sources: &[String]) {
@@ -929,27 +983,31 @@ impl<'a> Desugarer<'a> {
             None,
             rec.block.body.clone(),
             Fields::new(),
+            rec.line,
         );
 
         // One `supports` link per source (§8.3); a `weight` applies to all.
         let link_weight = self.read_weight(&rec.block, rec.line);
         for src in sources {
             let id = self.idgen.link_id(src, "supports", target);
-            self.objects.push(Object::Link(Link {
-                id,
-                from: src.clone(),
-                relation: "supports".to_string(),
-                to: target.to_string(),
-                weight: link_weight,
-                probability: None,
-                basis: None,
-                body: None,
-                fields: Fields::new(),
-                superseded_by: None,
-                derived_confidence: None,
-                leverage: None,
-                argument_status: None,
-            }));
+            self.push_object(
+                Object::Link(Link {
+                    id,
+                    from: src.clone(),
+                    relation: "supports".to_string(),
+                    to: target.to_string(),
+                    weight: link_weight,
+                    probability: None,
+                    basis: None,
+                    body: None,
+                    fields: Fields::new(),
+                    superseded_by: None,
+                    derived_confidence: None,
+                    leverage: None,
+                    argument_status: None,
+                }),
+                rec.line,
+            );
         }
 
         let stance_id = self.idgen.stance_id(agent, "infers", target);
@@ -973,16 +1031,19 @@ impl<'a> Desugarer<'a> {
             }
         }
 
-        self.objects.push(Object::Stance(Stance {
-            id: stance_id,
-            agent: agent.to_string(),
-            posture: "infers".to_string(),
-            target: target.to_string(),
-            confidence,
-            basis: conf_basis,
-            fields: stance_fields,
-            superseded_by: None,
-        }));
+        self.push_object(
+            Object::Stance(Stance {
+                id: stance_id,
+                agent: agent.to_string(),
+                posture: "infers".to_string(),
+                target: target.to_string(),
+                confidence,
+                basis: conf_basis,
+                fields: stance_fields,
+                superseded_by: None,
+            }),
+            rec.line,
+        );
     }
 
     // --- Helpers ----------------------------------------------------------
@@ -998,21 +1059,24 @@ impl<'a> Desugarer<'a> {
         if let Some(status) = f.args.get(1) {
             fields.push("status", Value::Symbol(status.clone()));
         }
-        self.objects.push(Object::Link(Link {
-            id,
-            from: blocker.to_string(),
-            relation: "blocks".to_string(),
-            to: blocked.to_string(),
-            weight: None,
-            probability: None,
-            basis: None,
-            body: None,
-            fields,
-            superseded_by: None,
-            derived_confidence: None,
-            leverage: None,
-            argument_status: None,
-        }));
+        self.push_object(
+            Object::Link(Link {
+                id,
+                from: blocker.to_string(),
+                relation: "blocks".to_string(),
+                to: blocked.to_string(),
+                weight: None,
+                probability: None,
+                basis: None,
+                body: None,
+                fields,
+                superseded_by: None,
+                derived_confidence: None,
+                leverage: None,
+                argument_status: None,
+            }),
+            f.line,
+        );
     }
 
     /// Validate a `weight` field as a number in 0..1 (clamp + warn if outside).
@@ -1118,6 +1182,7 @@ impl<'a> Desugarer<'a> {
         formula: Option<String>,
         body: Option<String>,
         fields: Fields,
+        line: usize,
     ) {
         if let Some(&idx) = self.focus_index.get(id) {
             let was_explicit = self.explicit_kind.contains(id);
@@ -1204,23 +1269,26 @@ impl<'a> Desugarer<'a> {
             self.explicit_kind.insert(id.to_string());
         }
         self.focus_index.insert(id.to_string(), self.objects.len());
-        self.objects.push(Object::Focus(Focus {
-            id: id.to_string(),
-            kind,
-            quantity,
-            formula,
-            computed_quantity: None,
-            body,
-            status: None,
-            fields,
-            includes: Vec::new(),
-            superseded_by: None,
-            derived_confidence: None,
-            argument_status: None,
-            expected_value: None,
-            decision: None,
-            divergent: Vec::new(),
-        }));
+        self.push_object(
+            Object::Focus(Focus {
+                id: id.to_string(),
+                kind,
+                quantity,
+                formula,
+                computed_quantity: None,
+                body,
+                status: None,
+                fields,
+                includes: Vec::new(),
+                superseded_by: None,
+                derived_confidence: None,
+                argument_status: None,
+                expected_value: None,
+                decision: None,
+                divergent: Vec::new(),
+            }),
+            line,
+        );
     }
 
     /// Infer the decision-EV kinds (v0.2, Phase 9): the `to` of a `leads-to` edge

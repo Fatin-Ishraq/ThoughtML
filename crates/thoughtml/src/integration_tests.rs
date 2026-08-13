@@ -2930,6 +2930,57 @@ fn snake_workspace_compiles_as_one_clean_six_file_project() {
 }
 
 #[test]
+fn project_source_map_tracks_entry_imports_and_generated_objects() {
+    let imported = r#"claim conclusion
+  Imported conclusion.
+
+supports conclusion
+  evidence 0.8 measured
+
+agent chooses launch
+  until blocker pending
+"#;
+    let result = project(
+        "import quality as q\n\nclaim root\n  Entry root.\n",
+        &[("quality", imported)],
+    );
+
+    assert_eq!(
+        result.source_map.objects.get("root"),
+        Some(&crate::SourceLocation {
+            source: "entry".to_string(),
+            line: 3,
+        })
+    );
+    assert_eq!(
+        result.source_map.objects.get("q.conclusion"),
+        Some(&crate::SourceLocation {
+            source: "quality".to_string(),
+            line: 1,
+        })
+    );
+
+    let evidence_link = result
+        .canonical
+        .objects
+        .iter()
+        .find(|object| matches!(object, Object::Link(link) if link.from == "q.evidence" && link.to == "q.conclusion"))
+        .map(super::desugar::object_id)
+        .expect("evidence bundle link");
+    assert_eq!(result.source_map.objects[&evidence_link].line, 5);
+
+    let until_link = result
+        .canonical
+        .objects
+        .iter()
+        .find(|object| matches!(object, Object::Link(link) if link.from == "q.blocker" && link.relation == "blocks"))
+        .map(super::desugar::object_id)
+        .expect("until-generated link");
+    assert_eq!(result.source_map.objects[&until_link].line, 8);
+    assert_eq!(result.source_map.objects[&until_link].source, "quality");
+}
+
+#[test]
 fn compliance_rollout_clean_under_full_options() {
     // The importer must also stay clean with the whole computational stack on,
     // checked as a project alongside its imported library.

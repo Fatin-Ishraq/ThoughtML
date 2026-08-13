@@ -24,6 +24,7 @@ pub mod lex;
 pub mod lines;
 pub mod lint;
 pub mod parser;
+pub mod source_map;
 pub mod surface;
 pub mod units;
 pub mod validate;
@@ -32,6 +33,7 @@ pub mod vocab;
 pub use canonical::Canonical;
 pub use derive::{AsOf, Overrides};
 pub use diagnostics::{Diagnostic, Diagnostics, Severity};
+pub use source_map::{SourceLocation, SourceMap};
 pub use surface::SurfaceFile;
 
 use std::collections::{HashMap, HashSet};
@@ -44,6 +46,8 @@ pub struct ParseResult {
     pub canonical: Canonical,
     /// All diagnostics gathered across parsing, desugaring, and validation.
     pub diagnostics: Diagnostics,
+    /// Editor-facing source locations, kept outside the canonical schema.
+    pub source_map: SourceMap,
 }
 
 /// Options controlling parsing/desugaring.
@@ -94,7 +98,9 @@ pub fn parse_str_with(source: &str, opts: Options) -> ParseResult {
 pub fn parse_str_with_overrides(source: &str, opts: Options, overrides: &Overrides) -> ParseResult {
     let mut diagnostics = Diagnostics::new();
     let surface = parser::parse(source, &mut diagnostics);
-    let mut canonical = desugar::desugar(&surface, opts.emit_acts, &mut diagnostics);
+    let (mut canonical, origins) =
+        desugar::desugar_with_origins(&surface, opts.emit_acts, &mut diagnostics);
+    let source_map = source_map_for(&canonical.objects, &origins, "entry");
     validate::validate(&canonical, opts.strict_provenance, &mut diagnostics);
     derive::derive(
         &mut canonical,
@@ -111,6 +117,7 @@ pub fn parse_str_with_overrides(source: &str, opts: Options, overrides: &Overrid
         surface,
         canonical,
         diagnostics,
+        source_map,
     }
 }
 
@@ -123,7 +130,9 @@ pub fn parse_str_with_overrides(source: &str, opts: Options, overrides: &Overrid
 pub fn parse_str_as_of(source: &str, opts: Options, cut: AsOf) -> ParseResult {
     let mut diagnostics = Diagnostics::new();
     let surface = parser::parse(source, &mut diagnostics);
-    let mut canonical = desugar::desugar(&surface, opts.emit_acts, &mut diagnostics);
+    let (mut canonical, origins) =
+        desugar::desugar_with_origins(&surface, opts.emit_acts, &mut diagnostics);
+    let source_map = source_map_for(&canonical.objects, &origins, "entry");
     derive::filter_as_of(&mut canonical, cut);
     derive::derive(
         &mut canonical,
@@ -140,6 +149,7 @@ pub fn parse_str_as_of(source: &str, opts: Options, cut: AsOf) -> ParseResult {
         surface,
         canonical,
         diagnostics,
+        source_map,
     }
 }
 
@@ -155,6 +165,7 @@ pub fn parse_project(entry: &str, sources: &HashMap<String, String>, opts: Optio
     let surface = parser::parse(entry, &mut diagnostics);
     diagnostics.tag_since(entry_diag_start, "entry");
     let mut objects = Vec::new();
+    let mut source_map = SourceMap::default();
     let mut visiting = HashSet::new();
     resolve_doc(
         &surface,
@@ -162,6 +173,7 @@ pub fn parse_project(entry: &str, sources: &HashMap<String, String>, opts: Optio
         sources,
         opts,
         &mut objects,
+        &mut source_map,
         &mut visiting,
         &mut diagnostics,
     );
@@ -187,6 +199,7 @@ pub fn parse_project(entry: &str, sources: &HashMap<String, String>, opts: Optio
         surface,
         canonical,
         diagnostics,
+        source_map,
     }
 }
 
@@ -194,12 +207,17 @@ pub fn parse_project(entry: &str, sources: &HashMap<String, String>, opts: Optio
 /// document it imports. `prefix` namespaces this document's ids/refs: the entry
 /// uses the empty prefix; an `import … as ns` nests its target under
 /// `{prefix}{ns}.`.
+#[expect(
+    clippy::too_many_arguments,
+    reason = "project resolution keeps traversal, output, locations, and diagnostics in one recursive context"
+)]
 fn resolve_doc(
     surface: &SurfaceFile,
     location: (&str, &str),
     sources: &HashMap<String, String>,
     opts: Options,
     out: &mut Vec<canonical::Object>,
+    source_map: &mut SourceMap,
     visiting: &mut HashSet<String>,
     diags: &mut Diagnostics,
 ) {
@@ -231,18 +249,31 @@ fn resolve_doc(
             sources,
             opts,
             out,
+            source_map,
             visiting,
             diags,
         );
         visiting.remove(name);
     }
     let desugar_start = diags.items.len();
-    let mut objs = desugar::desugar(surface, opts.emit_acts, diags).objects;
+    let (desugared, origins) = desugar::desugar_with_origins(surface, opts.emit_acts, diags);
+    let mut objs = desugared.objects;
     diags.tag_since(desugar_start, source_name);
     if !prefix.is_empty() {
         prefix_objects(&mut objs, prefix);
     }
+    for (object, line) in objs.iter().zip(origins) {
+        source_map.record(desugar::object_id(object), source_name, line);
+    }
     out.extend(objs);
+}
+
+fn source_map_for(objects: &[canonical::Object], origins: &[usize], source: &str) -> SourceMap {
+    let mut source_map = SourceMap::default();
+    for (object, line) in objects.iter().zip(origins.iter().copied()) {
+        source_map.record(desugar::object_id(object), source, line);
+    }
+    source_map
 }
 
 fn prefix_id(prefix: &str, s: &mut String) {

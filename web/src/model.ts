@@ -16,6 +16,8 @@ export interface Diagnostic {
 export interface Diagnostics {
   items: Diagnostic[]
 }
+export interface SourceLocation { source: string; line: number }
+export interface SourceMap { objects: Record<string, SourceLocation> }
 
 export type Value =
   | { kind: 'text'; value: string }
@@ -112,6 +114,7 @@ export interface ParseResult {
   canonical: Canonical
   diagnostics: Diagnostics
   surface: unknown
+  source_map: SourceMap
 }
 
 /** Parse a (loose) ISO-8601 date/time to epoch ms, or undefined if unparseable. */

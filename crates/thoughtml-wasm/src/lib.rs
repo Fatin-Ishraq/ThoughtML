@@ -13,6 +13,7 @@ struct Output<'a> {
     canonical: &'a thoughtml::Canonical,
     diagnostics: &'a thoughtml::Diagnostics,
     surface: &'a thoughtml::SurfaceFile,
+    source_map: &'a thoughtml::SourceMap,
 }
 
 /// The full derived view the playground always wants: confidence, status, and
@@ -37,6 +38,7 @@ fn render(result: &thoughtml::ParseResult) -> String {
         canonical: &result.canonical,
         diagnostics: &result.diagnostics,
         surface: &result.surface,
+        source_map: &result.source_map,
     };
     serde_json::to_string(&output).unwrap_or_else(|e| {
         // `e` is a controlled message; encode it as a JSON string safely.
