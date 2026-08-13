@@ -28,8 +28,10 @@ No install — it runs entirely in your browser. To run it locally instead, see
   - **Structural** — the classic node-link graph: foci as nodes (shaped by
     [kind](../reference/foci-and-kinds.md)), links as labelled arrows (styled by
     [relation](../reference/relations.md)), stances attached to their targets.
-- **Detail panel** — click any node to see its facts: body, fields, authored
-  numbers, and the mirror's derived values **beside** them (never merged).
+- **Reasoning Card** — click any node for a compact floating explanation: prose,
+  high-signal status/confidence, connection count, and exact source. **Explore
+  details** reveals the complete technical record without permanently consuming
+  canvas space.
 - **Example tray** — load any bundled example to explore it.
 
 ## Multi-file projects
@@ -79,8 +81,12 @@ link quality.core-rules-are-stable supports ship-v1
   transitive import closure.
 - Clicking a file-qualified diagnostic switches tabs and moves to its line.
 - Clicking an authored graph node exposes its defining file and line in the
-  detail header; that source chip navigates back to the editor. These locations
+  Reasoning Card; that source chip navigates back to the editor. These locations
   come from the Rust compiler, including links generated from readable syntax.
+- Imported conclusions with hidden supporting ancestry carry a subtle stacked
+  marker and branch glyph. Select one and use **Expand reasoning** in the card to
+  reveal only its same-module reasons inside the unified graph. The action then
+  becomes **Collapse reasoning**, returning to the compact project overview.
 
 Compilation runs in a Web Worker after a short debounce. The editor therefore
 stays responsive and keeps showing the last valid graph while a newer project
@@ -141,9 +147,10 @@ reasoning replays moment by moment: beliefs fade in as of when they were asserte
 and revised-away or abandoned branches dim — so you can watch a conclusion form (or
 fall apart) as evidence arrived. Try it on
 [`launch-readiness.thml`](../appendix/examples.md) or
-[`launch-readiness.thml`](../appendix/examples.md). The same projection is on the
+[`assistant-memory.thml`](../appendix/examples.md). The same projection is on the
 CLI as [`--as-of`](cli.md#time-options-as-of-replay).
 
-> **Note.** The playground curates a **spine** of ten examples and the two lenses
-> above for v0.1.0. The compute and multi-document demos and additional lenses are
-> parked, not deleted — the CLI exposes the full set of readings via flags.
+The playground keeps the visual lens set deliberately small—Type and Argument—
+while the Reasoning Card surfaces derived confidence and other computed facts on
+demand. The CLI exposes the full readings through `--derived`, `--status`,
+`--sensitivity`, `--decisions`, and `--compute`.

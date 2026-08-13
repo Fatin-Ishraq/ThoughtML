@@ -3,16 +3,19 @@ name: Publish to PyPI
 # Publish ThoughtML's platform wheels to PyPI via Trusted Publishing (OIDC) — no
 # stored token. The wheels repackage the binaries cargo-dist already attached to
 # the GitHub Release (see packaging/pypi/build_wheels.py), so this never compiles.
-# Runs automatically when a release is published, or on demand for a given version.
+# Runs after cargo-dist successfully publishes the GitHub Release, or on demand
+# for a given version. `workflow_run` is intentional: releases created with the
+# built-in GITHUB_TOKEN do not emit another workflow-triggering release event.
 on:
-  release:
-    types: [published]
+  workflow_run:
+    workflows: [Release]
+    types: [completed]
   workflow_dispatch:
     inputs:
       version:
-        description: "Version to build & publish (e.g. 0.3.0)"
+        description: "Version to build & publish (e.g. 0.4.0)"
         required: true
-        default: "0.3.0"
+        default: "0.4.0"
 
 permissions:
   contents: read
@@ -20,6 +23,9 @@ permissions:
 jobs:
   pypi:
     name: Build wheels and publish
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     # Must match the environment configured on the PyPI trusted-publisher.
     environment: pypi
@@ -28,20 +34,22 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      # A release event carries the tag (strip the leading `v`); a manual run
-      # carries the version input directly.
+      # A completed tag workflow carries the tag in head_branch (strip the
+      # leading `v`); a manual run carries the version input directly.
       - name: Resolve version
         id: v
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "version=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
           else
-            tag="${{ github.event.release.tag_name }}"
+            tag="${{ github.event.workflow_run.head_branch }}"
             echo "version=${tag#v}" >> "$GITHUB_OUTPUT"
           fi
 

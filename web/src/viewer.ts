@@ -9,6 +9,7 @@ import './styles.css'
 import { createTimeView } from './timeview'
 import { buildLegend } from './legend'
 import { createReasoningCard } from './reasoning-card'
+import { ReasoningExpansion } from './reasoning-expansion'
 import { setIcon } from './icons'
 import type { Canonical, Diagnostic, SourceMap } from './model'
 import type { Theme } from './graph'
@@ -130,6 +131,9 @@ async function boot(): Promise<void> {
   document.title = `${title} — ThoughtML`
 
   const view = createTimeView(el('#graph'), theme, { embedded: false })
+  const reasoningExpansion = new ReasoningExpansion()
+  if (canon) reasoningExpansion.update(canon, sourceMap)
+  const visibleCanonical = () => canon ? reasoningExpansion.project(canon) : null
 
   // ---- legend ----
   buildLegend(el('#legend'), theme)
@@ -141,6 +145,14 @@ async function boot(): Promise<void> {
     sourceFor: (id) => {
       const origin = sourceMap.objects[id]
       return origin ? { label: `${origin.source}:${origin.line}` } : undefined
+    },
+    expansionFor: (id) => reasoningExpansion.info(id),
+    onToggleExpansion: (id) => {
+      if (!canon || (!reasoningExpansion.toggle(id) && !reasoningExpansion.info(id))) return
+      view.update(reasoningExpansion.project(canon))
+      view.setReasoningExpansions(reasoningExpansion.markers())
+      view.select(id)
+      window.setTimeout(() => view.centerOn(id), 60)
     },
     onNavigate: (id) => showDetail(id),
     onClose: (cardMode) => {
@@ -200,7 +212,10 @@ async function boot(): Promise<void> {
   window.addEventListener('resize', () => view.fit())
 
   // ---- initial render ----
-  if (canon && canon.objects.length > 0) view.render(canon)
+  if (canon && canon.objects.length > 0) {
+    view.render(visibleCanonical()!)
+    view.setReasoningExpansions(reasoningExpansion.markers())
+  }
   else el('#empty-state').hidden = false
 
   // ---- optional live session ----
@@ -323,9 +338,12 @@ async function boot(): Promise<void> {
         const graphChanged = snapshot.source_state === 'valid' && latest?.kind !== 'unchanged'
         canon = snapshot.canonical
         sourceMap = snapshot.source_map ?? { objects: {} }
+        reasoningExpansion.update(canon, sourceMap)
+        const projected = reasoningExpansion.project(canon)
         el('#empty-state').hidden = true
-        if (first) view.render(canon)
-        else if (graphChanged) view.update(canon, latest?.changes)
+        if (first) view.render(projected)
+        else if (graphChanged) view.update(projected, latest?.changes)
+        view.setReasoningExpansions(reasoningExpansion.markers())
         if (selectedId && !canon.objects.some((o) => o.id === selectedId)) closeDetail()
         else if (selectedId || reasoningCard.mode() === 'follow') reasoningCard.refresh(canon)
       } else if (!canon) {

@@ -7,6 +7,7 @@ import { createTimeView } from './timeview'
 import { buildLegend, buildLensKey } from './legend'
 import { renderDiagnostics } from './diagnostics'
 import { createReasoningCard } from './reasoning-card'
+import { ReasoningExpansion } from './reasoning-expansion'
 import { EXAMPLES, DEFAULT_EXAMPLE, ADVANCED_EXAMPLES } from './examples'
 import { setIcon } from './icons'
 import { downloadStandalone, documentTitle } from './download'
@@ -141,6 +142,7 @@ async function boot(): Promise<void> {
   // overlaid on the graph pane; "Structural" stays the Cytoscape compound view.
   // Exactly one is active at a time; the toggle swaps them.
   const view = createTimeView(el('#graph').parentElement!, theme, { embedded: true })
+  const reasoningExpansion = new ReasoningExpansion()
   const isView = () => mode === 'readable'
   const rSelect = (id: string | null) => { if (isView()) view.select(id); else if (id) graph.select(id); else graph.cy.elements().unselect() }
   const rFit = () => (isView() ? view.fit() : graph.fit())
@@ -152,6 +154,7 @@ async function boot(): Promise<void> {
   let baseline: ParseResult | null = null
   let last: ParseResult | null = null
   let selectedId: string | null = null
+  const visibleCanonical = () => last ? reasoningExpansion.project(last.canonical) : null
 
   const editor = createEditor(el('#editor'), workspace.active, initialSrc, scheduleRun, theme)
 
@@ -671,6 +674,25 @@ async function boot(): Promise<void> {
       const origin = sourceOrigin(id, last, workspace)
       return origin ? { label: `${origin.file}:${origin.line}`, open: () => switchFile(origin.file, origin.line) } : undefined
     },
+    expansionFor: (id) => reasoningExpansion.info(id),
+    onToggleExpansion: (id) => {
+      if (!last || !reasoningExpansion.toggle(id)) {
+        // `toggle` returns false both for an unsupported id and after collapse;
+        // the projection still needs to be redrawn in the latter case.
+        if (!reasoningExpansion.info(id)) return
+      }
+      const projected = visibleCanonical()
+      if (!projected) return
+      if (isView()) {
+        view.update(projected)
+        view.setReasoningExpansions(reasoningExpansion.markers())
+      } else {
+        graph.render(projected, mode, true)
+        graph.setReasoningExpansions(reasoningExpansion.markers())
+      }
+      rSelect(id)
+      window.setTimeout(() => rCenter(id), 80)
+    },
     onNavigate: (id) => showDetail(id),
     onClose: (cardMode) => {
       selectedId = null
@@ -743,7 +765,15 @@ async function boot(): Promise<void> {
     el('#graph').style.display = isView() ? 'none' : ''
     if (isView() && timelineEl) timelineEl.hidden = true
     if (!last) return
-    if (isView()) { view.render(last.canonical) } else { graph.render(last.canonical, mode, animate) }
+    const projected = visibleCanonical()
+    if (!projected) return
+    if (isView()) {
+      view.render(projected)
+      view.setReasoningExpansions(reasoningExpansion.markers())
+    } else {
+      graph.render(projected, mode, animate)
+      graph.setReasoningExpansions(reasoningExpansion.markers())
+    }
     if (!isView()) syncTimeline(last)
     if (selectedId) rSelect(selectedId)
   }
@@ -852,11 +882,18 @@ async function boot(): Promise<void> {
     if (!baseline) return
     last = baseline
     const canon = last.canonical
+    reasoningExpansion.update(canon, last.source_map)
+    const projected = reasoningExpansion.project(canon)
     el('#empty-state').hidden = canon.objects.length > 0
     el('#graph').style.display = isView() ? 'none' : ''
     view.setActive(isView())
-    if (isView()) view.render(canon)
-    else graph.render(canon, mode)
+    if (isView()) {
+      view.render(projected)
+      view.setReasoningExpansions(reasoningExpansion.markers())
+    } else {
+      graph.render(projected, mode)
+      graph.setReasoningExpansions(reasoningExpansion.markers())
+    }
     syncTimeline(last)
     const conflicts = canon.audit?.conflicts ?? []
     setDiagStatus(last.diagnostics.items, conflicts)

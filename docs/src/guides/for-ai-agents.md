@@ -90,3 +90,35 @@ the agent believed something its own structure defeats.
 See [`assistant-memory.thml`](../appendix/examples.md) for an agent's evolving memory
 of a user, and [`ship-the-hotfix.thml`](../appendix/examples.md) for the audit in
 action.
+
+## Long-running repository work
+
+Keep substantial agent reasoning beside the repository as a project rather than
+forcing it into one growing file:
+
+```text
+.thoughtml/
+├── project.thml       # imports the modules and connects their conclusions
+├── architecture.thml
+├── implementation.thml
+├── verification.thml
+└── release.thml
+```
+
+The entry document compiles the recursive import closure into one graph while
+the source map preserves every object's file and line. A human can remain at the
+project level, expand an imported conclusion in place to inspect why the module
+reached it, then jump to source in the playground when an edit is needed.
+
+Start a local observer before a long task:
+
+```sh
+thoughtml stream .thoughtml/project.thml --json --events
+```
+
+Parse the one startup object from stdout, give its `viewer_url` to the local
+administrator, and continue editing ordinary `.thml` files. Runtime lifecycle
+events stay on stderr. The stream debounces write bursts, recompiles every
+transitive import, keeps the last valid graph during incomplete edits, and needs
+no publishing API or account. See [Live streaming](streaming.md) for the network
+boundary and session controls.

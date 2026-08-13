@@ -446,6 +446,16 @@ details.stream-activity-item > summary { cursor: pointer; }
 @keyframes tv-pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.95; } }
 .tv-node.tv-live-added .tv-node-shape { animation: tv-live-added 2.8s ease-out; }
 .tv-node.tv-live-modified .tv-node-shape { animation: tv-live-modified 2.8s ease-out; }
+.tv-node-stack, .tv-expand-hint { opacity: 0; pointer-events: none; transition: opacity .18s ease, transform .22s ease; }
+.tv-expand-hint path { stroke: var(--accent); stroke-width: 1.35; stroke-linecap: round; stroke-linejoin: round; }
+.tv-expand-hint circle { fill: var(--accent); }
+.tv-node.tv-reasoning-expandable:not(.tv-reasoning-expanded) .tv-node-stack-far { opacity: .2; }
+.tv-node.tv-reasoning-expandable:not(.tv-reasoning-expanded) .tv-node-stack-near { opacity: .38; }
+.tv-node.tv-reasoning-expandable .tv-expand-hint { opacity: 1; }
+.tv-node.tv-reasoning-expandable:hover .tv-node-stack-far { opacity: .32; }
+.tv-node.tv-reasoning-expandable:hover .tv-node-stack-near { opacity: .52; }
+.tv-node.tv-reasoning-expanded .tv-expand-hint { transform: rotate(180deg); transform-box: fill-box; transform-origin: center; }
+.tv-node.tv-reasoning-expanded .tv-node-shape { stroke-width: 2; filter: drop-shadow(0 0 4px color-mix(in srgb, var(--accent) 24%, transparent)); }
 @keyframes tv-live-added {
   0% { stroke-width: 4.5; filter: drop-shadow(0 0 10px color-mix(in srgb, var(--ok) 72%, transparent)); }
   100% { stroke-width: 1.4; filter: none; }
@@ -512,12 +522,14 @@ details.stream-activity-item > summary { cursor: pointer; }
 .reasoning-chip.status-undecided { color: var(--warning); }
 .reasoning-card-warning { position: relative; margin: 11px 0 0; padding: 9px 10px 9px 29px; border-radius: var(--r-md); color: color-mix(in srgb, var(--error) 86%, var(--text)); background: color-mix(in srgb, var(--error) 9%, transparent); font-size: 12px; line-height: 1.42; }
 .reasoning-card-warning::before { content: '\26A0'; position: absolute; left: 10px; top: 9px; }
-.reasoning-card-actions { display: flex; align-items: center; gap: 8px; margin-top: 13px; }
-.reasoning-card-source, .reasoning-card-more { min-width: 0; padding: 6px 9px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--bg-elev); font: 600 11px var(--sans); }
+.reasoning-card-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 13px; }
+.reasoning-card-source, .reasoning-card-reasoning, .reasoning-card-more { min-width: 0; padding: 6px 9px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--bg-elev); font: 600 11px var(--sans); }
 .reasoning-card-source { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--accent); font-family: var(--mono); }
 .reasoning-card-source:disabled { cursor: default; opacity: .9; }
+.reasoning-card-reasoning { color: var(--accent); }
+.reasoning-card-reasoning[aria-pressed="true"] { border-color: color-mix(in srgb, var(--accent) 50%, var(--border)); background: color-mix(in srgb, var(--accent) 10%, var(--bg-elev)); }
 .reasoning-card-more { margin-left: auto; color: var(--text-dim); }
-.reasoning-card-more:hover, .reasoning-card-source:not(:disabled):hover { color: var(--text); border-color: var(--border-strong); background: var(--bg-elev-2); }
+.reasoning-card-more:hover, .reasoning-card-reasoning:hover, .reasoning-card-source:not(:disabled):hover { color: var(--text); border-color: var(--border-strong); background: var(--bg-elev-2); }
 .reasoning-card-details { margin: 14px -3px 0; padding: 14px 3px 2px; border-top: 1px solid var(--border); overflow: visible; }
 .reasoning-card-details[hidden] { display: none; }
 .reasoning-card-progress { flex: none; height: 3px; background: color-mix(in srgb, var(--text) 7%, transparent); }

@@ -2,8 +2,8 @@
 
 The reference implementation's command-line tool is `thoughtml`. With no
 subcommand it parses a `.thml` file and emits the canonical object model as JSON;
-subcommands add the rest of the toolchain — validation, formatting, tracing, and a
-belief-level diff.
+subcommands add the rest of the toolchain—validation, formatting, tracing, a
+belief-level diff, the embedded language guide, and local live streaming.
 
 ```sh
 thoughtml [OPTIONS] <FILE>      # parse + emit the canonical JSON model
@@ -11,6 +11,7 @@ thoughtml check <FILE>          # validate and report diagnostics
 thoughtml fmt <FILE>            # rewrite in the canonical style
 thoughtml explain <FILE> <ID>   # trace a node's derived confidence / status
 thoughtml diff <A> <B>          # semantic (belief-level) diff of two documents
+thoughtml guide [TOPIC]         # learn the bundled language, offline
 thoughtml stream <FILE>         # host a live view from this computer
 ```
 
@@ -173,6 +174,19 @@ conflicts:
   + [confidence-vs-status] `analyst` asserts confidence 0.90 in `c`, but ... (out)
 ```
 
+## `thoughtml guide` — the language inside the binary
+
+The complete AI-ready language guide is embedded from the same `llms.txt` that
+ships with the packages and site:
+
+```sh
+thoughtml guide              # one-screen model and topic index
+thoughtml guide relations    # one section by name, alias, or number
+thoughtml guide --full       # the complete guide, suitable for an agent prompt
+```
+
+It requires no network and stays versioned with the installed binary.
+
 ## `thoughtml stream` — computer-hosted live view
 
 Watch an entry document and its transitive sibling imports, compile the complete
@@ -199,6 +213,10 @@ pushes versioned canonical snapshots over Server-Sent Events. When the newest
 edit is invalid, the browser receives its diagnostics while retaining the last
 valid graph. Each diagnostic identifies its source file. Existing offline
 commands never open a network connection.
+
+The viewer uses the shared Reasoning Card, retains file/line provenance for
+imported objects, supports inline expansion of a module conclusion's hidden
+ancestry, and can download the current valid revision as standalone HTML.
 
 Manage detached sessions locally:
 

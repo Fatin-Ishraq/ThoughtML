@@ -3,7 +3,8 @@
 The reference implementation ships a corpus of twenty example documents in
 [`examples/`](https://github.com/Fatin-Ishraq/ThoughtML/tree/main/examples).
 Every one parses **strict-clean** (zero errors, zero warnings) under default
-options — a test enforces it. They double as the playground's example tray.
+options—a test enforces it. A curated spine appears in the playground's example
+tray; every file can also be opened directly in the project workspace.
 
 Open any of them in the [playground](../guides/playground.md) to see the graph, or
 run `thoughtml <file>` (add `--compute` for the second reading, `--audit` for the
@@ -11,6 +12,16 @@ mirror). The set is designed to span the language: many kinds and relations, bot
 mirror conflicts, the temporal layer, the compute layer, profiles, and imports —
 across engineering, ops, medicine, science, business, product, security, and
 AI-agent scenarios.
+
+The repository also includes a six-file project under `examples/snake-project/`.
+Its `project.thml` entry imports product, architecture, gameplay, quality, and
+release modules into one graph. Use it to try the multi-file playground,
+file/line provenance, live streaming, and inline expansion of imported
+conclusions:
+
+```sh
+thoughtml stream examples/snake-project/project.thml
+```
 
 ## Start here
 

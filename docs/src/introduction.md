@@ -63,12 +63,13 @@ answer*. It's to make the reasoning legible enough that its flaws can't hide.
 - **[The Mirror](mirror/index.md)** — the opt-in evaluation layer: derived
   confidence, argument status, conflict reports, and the compute layer.
 - **[Guides](guides/use-cases.md)** — when to reach for ThoughtML, how to drive
-  it from an AI agent, the CLI, and the playground.
+  it from an AI agent, author multi-file projects, stream long-running work, and
+  share a standalone viewer.
 - **[Appendix](appendix/glossary.md)** — glossary, example gallery, FAQ.
 
 ## A note on stability
 
-This documentation describes **v0.3.0**, the current public release. The
+This documentation describes **v0.4.0**, the current public release. The
 language is real and usable, but its surface may still move (hence 0.x, not
 1.0). Where a feature is *opt-in* or *advanced*, this book says so plainly.
 

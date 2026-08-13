@@ -82,6 +82,19 @@ thoughtml examples/choose-datastore.thml --html -o datastore-decision.html
 It carries the interactive graph with the model baked in (no wasm). See
 [The standalone viewer](../guides/viewer.md).
 
+## Stream a changing project
+
+To observe work while the source continues changing, host a private read-only
+view from the editing computer:
+
+```sh
+thoughtml stream .thoughtml/project.thml
+```
+
+The default link is loopback-only and stops when the command or computer stops.
+It watches transitive imports and uploads nothing. See
+[Live streaming](../guides/streaming.md) before using `--lan`.
+
 ## Running the playground
 
 Building the playground locally needs **Node.js 20+**, a Rust toolchain with the

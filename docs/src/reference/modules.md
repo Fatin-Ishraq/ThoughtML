@@ -58,13 +58,31 @@ documents' sources:
 
 - **CLI:** when an entry file contains `import` lines, the parser reads the
   sibling files `<name>.thml` from the entry's directory.
-- **Playground:** it resolves imports against its bundled examples.
+- **Playground:** the project workspace resolves imports against the sibling
+  `.thml` files currently open. It can connect to a real directory (where the
+  browser supports directory access), open a portable selection of files, or
+  load the bundled six-file Snake project.
 
 Every id and structural reference from an imported document is prefixed with the
 namespace, so two documents can use the same local id without collision. The
 bundled [`compliance-rollout.thml`](../appendix/examples.md) (which imports
 `control-library.thml`) must be run as a project to resolve — open it in the
 playground, or run it through the CLI from the examples directory.
+
+### Provenance in the unified graph
+
+Project compilation produces a source map beside the canonical model. Every
+authored or desugared object records the module and source line that produced it.
+The playground uses that map to label imported nodes, jump from a Reasoning Card
+to the exact editor location, and qualify diagnostics; live and standalone
+viewers keep the location as read-only provenance.
+
+An imported conclusion used by another module is a compact gateway in the
+unified graph. If it has supporting ancestry inside its own module, a subtle
+stacked-node marker appears. Select it and choose **Expand reasoning** to reveal
+that same-module ancestry in place; **Collapse reasoning** folds it back into the
+project overview. Expansion does not reparse or alter the document—it is a view
+over the already merged canonical graph.
 
 > **v1 limitations.** References *inside a `formula` string* are not namespace-
 > rewritten, and agent names stay global (not prefixed).

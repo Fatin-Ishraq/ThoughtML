@@ -24,6 +24,7 @@ export interface TimeViewHandle {
   onSelect(cb: (info: { id: string; kind: string; x?: number } | null) => void): void
   onFollow(cb: (moment: FollowMoment | null) => void): void
   setFollow(on: boolean): void
+  setReasoningExpansions(markers: Record<string, boolean>): void
   setTheme(theme: Theme): void
   fit(): void
   zoomIn(): void
@@ -1002,6 +1003,25 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
       g.appendChild(title)
 
       const shapeDef = svgNodeShape(n.kind, n.x, n.y, NODE_W, NODE_H)
+      const backFarDef = svgNodeShape(n.kind, n.x + 7, n.y + 7, NODE_W, NODE_H)
+      const backNearDef = svgNodeShape(n.kind, n.x + 4, n.y + 4, NODE_W, NODE_H)
+      const backFar = EL(backFarDef.tag, {
+        ...backFarDef.attrs,
+        class: 'tv-node-stack tv-node-stack-far',
+        fill: 'var(--bg-panel)',
+        style: `stroke:var(${n.colorVar})`,
+        'stroke-width': 1,
+        'stroke-linejoin': 'round',
+      })
+      const backNear = EL(backNearDef.tag, {
+        ...backNearDef.attrs,
+        class: 'tv-node-stack tv-node-stack-near',
+        fill: 'var(--bg-panel)',
+        style: `stroke:var(${n.colorVar})`,
+        'stroke-width': 1.2,
+        'stroke-linejoin': 'round',
+      })
+      g.append(backFar, backNear)
       const shape = EL(shapeDef.tag, {
         ...shapeDef.attrs,
         class: 'tv-node-shape',
@@ -1051,6 +1071,15 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
         opacity: 0,
       })
       g.appendChild(ring)
+      const hx = n.x + NODE_W - 18, hy = n.y + 12
+      const expandHint = EL('g', { class: 'tv-expand-hint', 'aria-hidden': 'true' })
+      expandHint.appendChild(EL('path', {
+        d: `M${hx - 5},${hy - 5} V${hy + 5} M${hx - 5},${hy - 2} H${hx + 2} M${hx - 5},${hy + 4} H${hx + 2}`,
+        fill: 'none',
+      }))
+      expandHint.appendChild(EL('circle', { cx: hx + 4, cy: hy - 2, r: 1.8 }))
+      expandHint.appendChild(EL('circle', { cx: hx + 4, cy: hy + 4, r: 1.8 }))
+      g.appendChild(expandHint)
       n.g = g
       n.shape = shape
       n.ring = ring
@@ -1273,6 +1302,17 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
     else selectCb(null)
   }
 
+  function setReasoningExpansions(markers: Record<string, boolean>) {
+    for (const node of model.nodes) {
+      if (!node.g) continue
+      const available = node.id in markers
+      const open = !!markers[node.id]
+      node.g.classList.toggle('tv-reasoning-expandable', available)
+      node.g.classList.toggle('tv-reasoning-expanded', available && open)
+      if (available) node.g.setAttribute('aria-label', `${node.g.getAttribute('aria-label')?.replace(/; (expand|collapse) reasoning$/, '')}; ${open ? 'collapse' : 'expand'} reasoning`)
+    }
+  }
+
   // ---- timeline bar: beat-stepped playback ----
   // The tour advances one *event* at a time (even pacing), not by sweeping clock
   // time — so dense years and dead centuries get the same dwell.
@@ -1329,6 +1369,7 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
     onSelect: (cb) => { selectCb = cb },
     onFollow: (cb) => { followCb = cb },
     setFollow: (on) => setFollowMode(on),
+    setReasoningExpansions,
     setTheme: () => { /* themed by CSS vars on <body>; nothing to recompute */ },
     fit,
     zoomIn: () => zoomAbout(1.25),

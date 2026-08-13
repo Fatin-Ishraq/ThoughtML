@@ -4,8 +4,8 @@
 
 ## Checklist
 
-- [ ] `cargo test` passes
-- [ ] `cargo fmt` applied
-- [ ] `npm run build` passes (if the playground changed)
+- [ ] `cargo fmt --all -- --check`, Clippy, and `cargo test -p thoughtml --all-features` pass
+- [ ] `npm test` and `npm run build` pass (if the playground changed)
+- [ ] `npm run build:viewer` and the viewer-freshness test pass (if shared viewer code changed)
 - [ ] Examples still parse strict-clean (the conformance guard)
-- [ ] Docs updated if the language surface changed
+- [ ] Docs are updated and `mdbook build docs` passes when behavior or language changed

@@ -56,7 +56,12 @@ to keep up.
 
 ## Pull requests
 
-- Keep `cargo test` (and `npm run build`, if the playground changed) green.
+- Keep `cargo fmt --all -- --check`, Clippy with warnings denied, and
+  `cargo test -p thoughtml --all-features` green.
+- If the playground or shared viewer changes, run `npm test`, `npm run build`,
+  `npm run build:viewer`, and
+  `cargo test -p thoughtml --test viewer_freshness`.
+- If the book changes, run `mdbook build docs` and check internal Markdown links.
 - Run `cargo fmt` before committing.
 - Explain the *why*, not just the *what*. ThoughtML is a language about making
   reasoning legible; the same standard applies to its history.

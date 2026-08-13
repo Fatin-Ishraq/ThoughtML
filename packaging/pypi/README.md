@@ -38,18 +38,17 @@ Outputs to `packaging/pypi/build/dist/` (git-ignored).
 
 ## Publish
 
-Needs a PyPI API token (username `__token__`):
-
-```sh
-python -m twine upload packaging/pypi/build/dist/*.whl
-```
+Publishing is automated by `.github/workflows/pypi.yml` after a GitHub Release
+is published. The workflow uses PyPI Trusted Publishing (GitHub OIDC): there is
+no stored username, password, or API token. A manual `workflow_dispatch` with
+the release version is available for recovery after the GitHub assets exist.
 
 ## Releasing a new version
 
 1. Cut the GitHub Release for the new tag (the `dist` workflow builds the binaries).
-2. Re-run `build_wheels.py` — it picks up the new version from `Cargo.toml` and
-   pulls the matching release binaries.
-3. `twine upload` the fresh wheels.
+2. The PyPI workflow resolves the release tag, runs `build_wheels.py`, and checks
+   every wheel with Twine.
+3. Trusted Publishing uploads the checked wheels to PyPI.
 
 If the release ever changes its Linux build environment, update the `manylinux_2_*`
 tags in `build_wheels.py` to match the new glibc floor (it's in the release's npm

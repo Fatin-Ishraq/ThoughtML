@@ -16,6 +16,8 @@ export type ReasoningCardMode = 'node' | 'follow'
 
 export interface ReasoningCardOptions {
   sourceFor?: (id: string) => CardSource | undefined
+  expansionFor?: (id: string) => { count: number; expanded: boolean; source: string } | undefined
+  onToggleExpansion?: (id: string) => void
   onNavigate?: (id: string) => void
   onClose?: (mode: ReasoningCardMode) => void
 }
@@ -90,6 +92,7 @@ export function createReasoningCard(container: HTMLElement, options: ReasoningCa
       <p class="reasoning-card-warning" hidden></p>
       <div class="reasoning-card-actions">
         <button class="reasoning-card-source" type="button" hidden></button>
+        <button class="reasoning-card-reasoning" type="button" hidden></button>
         <button class="reasoning-card-more" type="button">Explore details</button>
       </div>
       <div class="reasoning-card-details detail-body" hidden></div>
@@ -105,6 +108,7 @@ export function createReasoningCard(container: HTMLElement, options: ReasoningCa
   const metaEl = card.querySelector('.reasoning-card-meta') as HTMLElement
   const warningEl = card.querySelector('.reasoning-card-warning') as HTMLElement
   const sourceEl = card.querySelector('.reasoning-card-source') as HTMLButtonElement
+  const reasoningEl = card.querySelector('.reasoning-card-reasoning') as HTMLButtonElement
   const moreEl = card.querySelector('.reasoning-card-more') as HTMLButtonElement
   const detailsEl = card.querySelector('.reasoning-card-details') as HTMLElement
   const progressEl = card.querySelector('.reasoning-card-progress') as HTMLElement
@@ -127,6 +131,16 @@ export function createReasoningCard(container: HTMLElement, options: ReasoningCa
     sourceEl.textContent = source?.label ?? ''
     sourceEl.disabled = !source?.open
     sourceEl.onclick = source?.open ?? null
+  }
+
+  const expansionFor = (id: string | null) => {
+    const info = id ? options.expansionFor?.(id) : undefined
+    reasoningEl.hidden = !info
+    reasoningEl.textContent = info?.expanded ? 'Collapse reasoning' : 'Expand reasoning'
+    reasoningEl.setAttribute('aria-pressed', String(!!info?.expanded))
+    reasoningEl.title = info
+      ? `${info.expanded ? 'Hide' : 'Show'} ${info.count} supporting reasoning item${info.count === 1 ? '' : 's'} from ${info.source}`
+      : ''
   }
 
   const renderExpanded = () => {
@@ -176,6 +190,7 @@ export function createReasoningCard(container: HTMLElement, options: ReasoningCa
     warningEl.textContent = ''
     progressEl.hidden = true
     sourceFor(id)
+    expansionFor(id)
     moreEl.hidden = !obj && !id.startsWith('agent:')
     renderExpanded()
     show()
@@ -205,6 +220,7 @@ export function createReasoningCard(container: HTMLElement, options: ReasoningCa
     progressEl.hidden = false
     progressFill.style.width = moment.total > 1 ? `${(moment.index / (moment.total - 1)) * 100}%` : '100%'
     sourceFor(moment.primaryId)
+    expansionFor(null)
     moreEl.hidden = !moment.primaryId
     renderExpanded()
     show()
@@ -233,6 +249,11 @@ export function createReasoningCard(container: HTMLElement, options: ReasoningCa
     }
     expanded = !expanded
     renderExpanded()
+  })
+  reasoningEl.addEventListener('click', () => {
+    if (!currentNode) return
+    options.onToggleExpansion?.(currentNode)
+    expansionFor(currentNode)
   })
   card.querySelector('.reasoning-card-close')?.addEventListener('click', () => close())
 

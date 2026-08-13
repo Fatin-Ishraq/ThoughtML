@@ -351,6 +351,8 @@ function buildStyle(p: Palette): any[] {
     { selector: 'node.dv-decision', style: { 'border-color': p.accent, 'border-width': 3, 'border-style': 'double' } },
     { selector: 'node.dv-option', style: { 'border-color': p.scope, 'border-width': 2, 'border-style': 'dashed', 'background-opacity': 0.1, 'text-opacity': 0.72 } },
     { selector: 'node:selected', style: { 'border-color': p.select, 'border-width': 3.5, 'background-opacity': p.nodeOpacity + 0.2 } },
+    { selector: 'node.reasoning-expandable', style: { 'border-width': 2.2, 'border-color': p.accent, 'underlay-color': p.accent, 'underlay-opacity': 0.1, 'underlay-padding': 5 } },
+    { selector: 'node.reasoning-expanded', style: { 'border-width': 2.7, 'background-opacity': p.nodeOpacity + 0.1, 'underlay-opacity': 0.2, 'underlay-padding': 7 } },
     { selector: 'node.faded', style: { 'background-opacity': 0.04, opacity: 0.32, 'text-opacity': 0.3 } },
     // As-of view (v0.2, Phase 3): hide assertions later than the slider time;
     // dim + mute beliefs that have been superseded as of that time.
@@ -428,6 +430,8 @@ export interface GraphHandle {
   setSensitivity(on: boolean): void
   /** Toggle the decision overlay (mark the decision and the options it weighs). */
   setDecision(on: boolean): void
+  /** Mark imported conclusions whose hidden reasoning can be expanded. */
+  setReasoningExpansions(markers: Record<string, boolean>): void
 }
 
 export function createGraph(container: HTMLElement, theme: Theme): GraphHandle {
@@ -526,6 +530,21 @@ export function createGraph(container: HTMLElement, theme: Theme): GraphHandle {
     })
   }
 
+  function setReasoningExpansions(markers: Record<string, boolean>) {
+    cy.batch(() => {
+      cy.nodes().forEach((node) => {
+        const base = (node.data('reasoningBaseLabel') as string | undefined) ?? node.data('label') as string
+        node.data('reasoningBaseLabel', base)
+        node.data('label', base)
+        node.removeClass('reasoning-expandable reasoning-expanded')
+        if (!(node.id() in markers)) return
+        const open = markers[node.id()]
+        node.addClass(`reasoning-expandable${open ? ' reasoning-expanded' : ''}`)
+      })
+    })
+    runLayout(false)
+  }
+
   function render(canon: Canonical, mode: ViewMode, animate = false) {
     cy.elements().remove()
     cy.add(buildElements(canon, mode))
@@ -579,5 +598,6 @@ export function createGraph(container: HTMLElement, theme: Theme): GraphHandle {
     setStatus,
     setSensitivity,
     setDecision,
+    setReasoningExpansions,
   }
 }

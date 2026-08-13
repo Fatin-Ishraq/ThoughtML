@@ -41,9 +41,13 @@ opens a session panel containing:
 - whether the graph is showing the newest model or the last valid one.
 
 Selecting a graph node shows the exact project source that produced it, such as
-`quality.thml:18`. The **Snapshot** button downloads the graph currently being
-shown as a self-contained HTML file. If the newest edit is invalid, the download
-uses—and is named for—the last valid revision, matching the graph on screen.
+`quality.thml:18`, in the same floating Reasoning Card used everywhere else.
+Imported conclusions with folded module ancestry carry a quiet stacked-node
+marker; **Expand reasoning** reveals those supporting nodes inside the current
+graph and **Collapse reasoning** folds them away again. The **Snapshot** button
+downloads the graph currently being shown as a self-contained HTML file. If the
+newest edit is invalid, the download uses—and is named for—the last valid
+revision, matching the graph on screen.
 
 If an agent saves a half-written or invalid document, the current graph does not
 disappear. The stream publishes the errors and keeps the most recent successful

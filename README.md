@@ -18,7 +18,7 @@
   <a href="https://fatin-ishraq.github.io/ThoughtML/playground/"><img alt="playground" src="https://img.shields.io/badge/playground-try%20it%20live-8957e5" /></a>
   <a href="https://github.com/Fatin-Ishraq/ThoughtML/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/Fatin-Ishraq/ThoughtML/actions/workflows/ci.yml/badge.svg" /></a>
   <a href="LICENSE"><img alt="license: MIT" src="https://img.shields.io/badge/license-MIT-green" /></a>
-  <a href="CHANGELOG.md"><img alt="version" src="https://img.shields.io/badge/version-0.3.0-blueviolet" /></a>
+  <a href="CHANGELOG.md"><img alt="version" src="https://img.shields.io/badge/version-0.4.0-blueviolet" /></a>
 </p>
 
 <p align="center">
@@ -127,6 +127,10 @@ the answer.* It's to make reasoning legible enough that its flaws can't hide.
   what you said: high confidence in a claim your own evidence defeats
   (`confidence-vs-status`), or the same focus defined two incompatible ways
   (`definition-divergence`). It reports; it does not decide.
+- **Projects with provenance.** Split long-running reasoning across imported `.thml`
+  modules without losing the unified graph. Every compiled object retains its source
+  file and line; imported conclusions can reveal their supporting module reasoning in
+  place and collapse back into the project overview.
 
 ## What's in the repo
 
@@ -143,10 +147,10 @@ hat, so the browser, the CLI, and the exported file can never disagree.
 | **Reference parser** | Rust: source → surface AST → canonical objects → JSON, with diagnostics. The source of truth for the language. | [`crates/thoughtml`](crates/thoughtml) |
 | **CLI toolchain** | The parser as git-style subcommands — `check`, `fmt`, `explain`, `diff`, `stream` — plus the mirror (`--audit`), the compute layer (`--compute`), as-of replay (`--as-of`), and standalone HTML export (`--html`). | same crate |
 | **wasm build** | The *same* parser compiled for the web, so the playground and the CLI can't drift. | [`crates/thoughtml-wasm`](crates/thoughtml-wasm) |
-| **Playground** | Live editor + reasoning graph (mermaid.live in spirit): a time-driven **Viewer** with replay and Follow-mode storytelling, a node-link **Structural** view, and one-click standalone-HTML export. | [`web`](web) · [live ↗](https://fatin-ishraq.github.io/ThoughtML/playground/) |
+| **Playground** | Persistent multi-file editor + unified reasoning graph: a time-driven **Viewer** with replay and Follow narration, a node-link **Structural** view, source-aware Reasoning Cards, and standalone/project export. | [`web`](web) · [live ↗](https://fatin-ishraq.github.io/ThoughtML/playground/) |
 | **The book** | Tutorial, complete language reference, the mirror, and practical guides. | [`docs`](docs) · [live ↗](https://fatin-ishraq.github.io/ThoughtML/) |
 | **`llms.txt`** | The whole language in one file — embedded in the binary, so `thoughtml guide --full` prints it too. | [`llms.txt`](crates/thoughtml/llms.txt) |
-| **Example gallery** | 20 worked, strict-clean documents — an incident triage, a clinical differential, an AI moderation call, a security threat model, a self-auditing hotfix, and more. | [`examples`](examples) |
+| **Example gallery** | 20 worked, strict-clean standalone documents plus a six-file Snake project — incident triage, a clinical differential, an AI moderation call, a security threat model, a self-auditing hotfix, and more. | [`examples`](examples) |
 
 ## Install & run
 
@@ -170,10 +174,10 @@ Prebuilt binaries for macOS, Linux, and Windows are attached to every
 thoughtml guide                                       # the language itself, one screen (--full for all of it)
 thoughtml examples/ship-the-hotfix.thml               # canonical JSON + diagnostics
 thoughtml --audit examples/ship-the-hotfix.thml       # the mirror: where structure disagrees
-thoughtml check --json doc.thml                  # diagnostics with stable codes + suggested fixes
-thoughtml fmt -w doc.thml                          # format in the one canonical style
-thoughtml explain doc.thml some-claim              # why a node has its confidence / status
-thoughtml diff before.thml after.thml              # a semantic, belief-level diff
+thoughtml check --json doc.thml                         # diagnostics with stable codes + suggested fixes
+thoughtml fmt -w doc.thml                               # format in the one canonical style
+thoughtml explain doc.thml some-claim                   # why a node has its confidence / status
+thoughtml diff before.thml after.thml                   # a semantic, belief-level diff
 thoughtml --html -o record.html examples/choose-datastore.thml   # bake to one interactive HTML file
 thoughtml stream doc.thml                          # host a live view on this computer
 ```
@@ -197,6 +201,11 @@ source locations. It detects external agent edits and protects conflicts rather
 than silently overwriting them. Compilation runs in a worker and produces one
 unified graph without uploading the selected `.thml` files. The included
 six-file Snake project is a ready-made example.
+
+In a unified project graph, imported conclusions stay compact. A subtle stacked-node
+mark indicates that more reasoning is available; select the node and use **Expand
+reasoning** in its floating card to reveal only the supporting ancestry from that
+module. **Collapse reasoning** returns to the overview without navigating away.
 
 **Hack on the playground locally:**
 
@@ -222,19 +231,22 @@ More in [Use cases ↗](https://fatin-ishraq.github.io/ThoughtML/guides/use-case
 
 ## Status
 
-**v0.3.0** — the self-describing release. `thoughtml guide` now embeds the whole language
-*inside the binary* — a one-screen tour, a section lookup, or `--full` for the complete,
-source-derived spec to hand an AI — so an agent that runs `cargo install` can learn ThoughtML
-with no website and no network. It builds on the 0.2.0 toolchain (`check` / `fmt` / `explain`
-/ `diff`, the valid-time memory overhaul, and the standalone `--html` viewer). The full trail
-is in [CHANGELOG.md](CHANGELOG.md); the language as it stands today is in the
-[book](https://fatin-ishraq.github.io/ThoughtML/). The surface may still move — hence 0.x, not 1.0.
+**v0.4.0 — connected reasoning.** ThoughtML now scales from one document to a living
+project: persistent multi-file authoring, authoritative file/line provenance, a unified
+graph with inline reasoning drill-down, computer-hosted live streams for long-running
+agents, and self-contained snapshots. Semantic node shapes and one universal Reasoning
+Card keep the playground, stream, and standalone viewer visually and behaviorally aligned.
+The core language remains compatible with v0.3.0. The full trail is in
+[CHANGELOG.md](CHANGELOG.md); the language and workflows are in the
+[book](https://fatin-ishraq.github.io/ThoughtML/). The surface may still move — hence 0.x,
+not 1.0.
 
 ## Contributing
 
 Issues and ideas are welcome — open one [here](https://github.com/Fatin-Ishraq/ThoughtML/issues).
 The reference parser is the source of truth for the language and the docs are derived from
 it, so if the two ever disagree, that's a bug worth reporting.
+Maintainers preparing a tag should follow the complete [release checklist](RELEASING.md).
 
 ## License
 
