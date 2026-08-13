@@ -131,16 +131,16 @@ fn check_provenance(canon: &Canonical, diags: &mut Diagnostics) {
                     );
                 }
             }
-            Object::Link(l) => {
-                if (l.weight.is_some() || l.probability.is_some()) && l.basis.is_none() {
-                    diags.warning(
-                        0,
-                        format!(
-                            "number on link `{}` declares no basis (add measured/estimated/assumed)",
-                            l.id
-                        ),
-                    );
-                }
+            Object::Link(l)
+                if (l.weight.is_some() || l.probability.is_some()) && l.basis.is_none() =>
+            {
+                diags.warning(
+                    0,
+                    format!(
+                        "number on link `{}` declares no basis (add measured/estimated/assumed)",
+                        l.id
+                    ),
+                );
             }
             _ => {}
         }
