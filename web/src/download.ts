@@ -6,7 +6,7 @@
 // asset, so its ~600 KB never weighs down the playground's main bundle.
 
 import viewerTemplateUrl from '../../crates/thoughtml/assets/viewer.html?url'
-import type { Canonical } from './model'
+import type { Canonical, SourceMap } from './model'
 
 // The template carries two empty placeholders we fill (same markers as the CLI).
 const MODEL_MARKER = 'id="thoughtml-model">'
@@ -17,9 +17,9 @@ const TITLE_MARKER = 'id="thoughtml-title">'
 const neutralize = (s: string): string => s.replaceAll('</', '<\\/')
 
 /** Bake `canon` into the viewer template and trigger a download of `<title>.html`. */
-export async function downloadStandalone(canon: Canonical, title: string): Promise<void> {
+export async function downloadStandalone(canon: Canonical, title: string, sourceMap?: SourceMap): Promise<void> {
   const template = await fetch(viewerTemplateUrl).then((r) => r.text())
-  const model = neutralize(JSON.stringify(canon))
+  const model = neutralize(JSON.stringify(sourceMap ? { canonical: canon, source_map: sourceMap } : canon))
   let html = template.replace(MODEL_MARKER, MODEL_MARKER + model)
   html = html.replace(TITLE_MARKER, TITLE_MARKER + neutralize(title))
 

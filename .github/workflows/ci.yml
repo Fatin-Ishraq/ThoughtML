@@ -48,6 +48,9 @@ jobs:
       - name: Build wasm
         working-directory: web
         run: npm run wasm
+      - name: Workspace tests
+        working-directory: web
+        run: npm test
       - name: Typecheck + build
         working-directory: web
         run: npm run build

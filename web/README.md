@@ -28,7 +28,8 @@ live playground (`index.html` / `main.ts`, with wasm) and the standalone viewer
 - `src/parse.ts` — the wasm adapter (`initParser()` / `parse()` …), importing its
   types from `model.ts`. Only live hosts need it.
 - `src/graph.ts` — projects canonical objects to a Cytoscape graph *(core)*.
-- `src/detail.ts` — the node-detail panel *(core)*.
+- `src/reasoning-card.ts` — the universal compact node/Follow explanation card *(core)*.
+- `src/detail.ts` — expanded technical node details used inside that card *(core)*.
 - `src/legend.ts` — the legend + lens keys, shared by both shells *(core)*.
 - `src/icons.ts` — glyphs *(core)*.
 - `src/editor.ts` — CodeMirror 6 with a ThoughtML highlight mode *(playground)*.
@@ -73,7 +74,7 @@ fails if the committed template is stale.
 
 Implemented: live editor, syntax highlighting, interactive graph (both views),
 diagnostics panel + lint gutter, canonical-JSON and surface-AST tabs, examples,
-resizable split, node inspector, and a **standalone wasm-free viewer** exported
+resizable split, universal Reasoning Card, and a **standalone wasm-free viewer** exported
 via `thoughtml --html`.
 
 Planned polish: shareable URL (source in the hash), code-split the bundle,

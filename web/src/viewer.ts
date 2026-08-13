@@ -8,9 +8,9 @@
 import './styles.css'
 import { createTimeView } from './timeview'
 import { buildLegend } from './legend'
-import { renderDetail, kindOf, labelOf } from './detail'
-import { setIcon, glyph } from './icons'
-import type { Canonical, Diagnostic } from './model'
+import { createReasoningCard } from './reasoning-card'
+import { setIcon } from './icons'
+import type { Canonical, Diagnostic, SourceMap } from './model'
 import type { Theme } from './graph'
 
 const LS = { theme: 'thoughtml:theme' }
@@ -33,6 +33,7 @@ interface StreamSnapshot {
   showing_last_valid: boolean
   updated_at_ms: number
   canonical: Canonical | null
+  source_map: SourceMap
   diagnostics: Diagnostic[]
   watched_files: string[]
   activity: StreamActivity[]
@@ -47,11 +48,17 @@ function el<T extends HTMLElement = HTMLElement>(sel: string): T {
 
 /** Read the baked canonical model from the page, accepting either a bare
  *  `Canonical` ({objects,…}) or a full parse result ({canonical,…}). */
-function parseModel(raw: string): Canonical | null {
+interface ViewerModel { canonical: Canonical; sourceMap: SourceMap }
+
+function parseModel(raw: string): ViewerModel | null {
   try {
     const data = JSON.parse(raw)
     const canon = data && typeof data === 'object' && 'canonical' in data ? data.canonical : data
-    return canon && Array.isArray(canon.objects) ? (canon as Canonical) : null
+    if (!canon || !Array.isArray(canon.objects)) return null
+    const sourceMap = data && typeof data === 'object' && data.source_map?.objects
+      ? data.source_map as SourceMap
+      : { objects: {} }
+    return { canonical: canon as Canonical, sourceMap }
   } catch {
     return null
   }
@@ -59,7 +66,7 @@ function parseModel(raw: string): Canonical | null {
 
 /** Load the model: the inline script tag if filled, else (dev only) a fetch of
  *  the dev fixture so the viewer can be developed without a bake step. */
-async function loadModel(): Promise<Canonical | null> {
+async function loadModel(): Promise<ViewerModel | null> {
   const inline = document.getElementById('thoughtml-model')?.textContent?.trim()
   if (inline) return parseModel(inline)
   if (import.meta.env.DEV) {
@@ -100,18 +107,20 @@ function docTitle(canon: Canonical): string {
 }
 
 async function boot(): Promise<void> {
+  const pristineHtml = `<!doctype html>\n${document.documentElement.outerHTML}`
   let theme: Theme = localStorage.getItem(LS.theme) === 'light' ? 'light' : 'dark'
   document.body.dataset.theme = theme
 
   setIcon(el('#theme'), theme === 'dark' ? 'moon' : 'sun')
   setIcon(el('#fit'), 'fit')
   setIcon(el('#legend-toggle'), 'legend')
-  setIcon(el('#detail-close'), 'close')
   setIcon(el('#zoom-in'), 'plus')
   setIcon(el('#zoom-out'), 'minus')
 
   const live = streamConfig()
-  let canon = await loadModel()
+  const initialModel = await loadModel()
+  let canon = initialModel?.canonical ?? null
+  let sourceMap: SourceMap = initialModel?.sourceMap ?? { objects: {} }
 
   // prefer the title baked by the CLI (the source file name); fall back to the
   // document's root scope when developing against a dev fixture.
@@ -126,24 +135,26 @@ async function boot(): Promise<void> {
   buildLegend(el('#legend'), theme)
   el('#legend-toggle').addEventListener('click', () => { el('#legend').hidden = !el('#legend').hidden })
 
-  // ---- detail panel ----
-  const detailPane = el('#detail')
-  const detailBody = el('#detail-body')
-  const detailBadge = el('#detail-badge')
-  const detailId = el('#detail-id')
+  // ---- universal Reasoning Card: standalone, stream, and Follow ----
   let selectedId: string | null = null
+  const reasoningCard = createReasoningCard(el('.graph-pane'), {
+    sourceFor: (id) => {
+      const origin = sourceMap.objects[id]
+      return origin ? { label: `${origin.source}:${origin.line}` } : undefined
+    },
+    onNavigate: (id) => showDetail(id),
+    onClose: (cardMode) => {
+      selectedId = null
+      if (cardMode === 'follow') view.setFollow(false)
+      view.select(null)
+    },
+  })
 
-  function showDetail(id: string, syncView = true) {
+  function showDetail(id: string, syncView = true, anchorX?: number) {
     if (!canon) return
+    view.setFollow(false)
     selectedId = id
-    detailPane.classList.remove('collapsed')
-    const kind = kindOf(canon, id)
-    const obj = canon.objects.find((o) => o.id === id)
-    const gname = obj?.type === 'focus' ? obj.kind : obj?.type === 'stance' ? obj.posture : ''
-    detailBadge.className = `detail-badge k-${kind}`
-    detailBadge.innerHTML = `${gname ? glyph(gname) : ''}<span>${kind}</span>`
-    detailId.textContent = labelOf(id)
-    renderDetail(detailBody, canon, id, navigateTo)
+    reasoningCard.showNode(canon, id, anchorX)
     if (syncView) {
       view.select(id)
       window.setTimeout(() => view.centerOn(id), 60)
@@ -151,13 +162,19 @@ async function boot(): Promise<void> {
   }
   function closeDetail(syncView = true) {
     selectedId = null
-    detailPane.classList.add('collapsed')
+    reasoningCard.close(false)
     if (syncView) view.select(null)
   }
-  function navigateTo(id: string) { showDetail(id) }
 
-  view.onSelect((info) => { if (info) showDetail(info.id, false); else closeDetail(false) })
-  el('#detail-close').addEventListener('click', () => closeDetail())
+  view.onSelect((info) => { if (info) showDetail(info.id, false, info.x); else if (reasoningCard.mode() !== 'follow') closeDetail(false) })
+  view.onFollow((moment) => {
+    if (!moment || !canon) {
+      if (reasoningCard.mode() === 'follow') reasoningCard.close(false)
+      return
+    }
+    if (selectedId) { selectedId = null; view.select(null) }
+    reasoningCard.showMoment(canon, moment)
+  })
 
   // ---- controls + zoom ----
   el('#fit').addEventListener('click', () => view.fit())
@@ -178,7 +195,7 @@ async function boot(): Promise<void> {
 
   // ---- keyboard ----
   window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !detailPane.classList.contains('collapsed')) closeDetail()
+    if (e.key === 'Escape' && reasoningCard.isOpen()) closeDetail()
   })
   window.addEventListener('resize', () => view.fit())
 
@@ -192,6 +209,7 @@ async function boot(): Promise<void> {
     const statusText = el('#stream-status-text')
     const panel = el('#stream-panel')
     const closePanel = el<HTMLButtonElement>('#stream-panel-close')
+    const download = el<HTMLButtonElement>('#stream-download')
     status.hidden = false
     let latestSequence = 0
     let latestSourceState: 'valid' | 'invalid' = 'valid'
@@ -203,6 +221,35 @@ async function boot(): Promise<void> {
     }
     status.addEventListener('click', () => openPanel(panel.hidden))
     closePanel.addEventListener('click', () => openPanel(false))
+
+    download.addEventListener('click', () => {
+      if (!latestSnapshot?.canonical) return
+      const graphRevision = [...latestSnapshot.activity]
+        .reverse()
+        .find((item) => item.kind === 'revision' || item.kind === 'started')
+        ?.sequence ?? latestSnapshot.sequence
+      const snapshotTitle = `${title}-revision-${graphRevision}`
+      const parsed = new DOMParser().parseFromString(pristineHtml, 'text/html')
+      const model = parsed.querySelector('#thoughtml-model')
+      const bakedTitle = parsed.querySelector('#thoughtml-title')
+      const stream = parsed.querySelector('#thoughtml-stream-config')
+      if (!model || !bakedTitle || !stream) return
+      model.textContent = JSON.stringify({
+        canonical: latestSnapshot.canonical,
+        source_map: latestSnapshot.source_map,
+      }).replaceAll('</', '<\\/')
+      bakedTitle.textContent = snapshotTitle
+      stream.textContent = ''
+      const html = `<!doctype html>\n${parsed.documentElement.outerHTML}`
+      const url = URL.createObjectURL(new Blob([html], { type: 'text/html;charset=utf-8' }))
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `${snapshotTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'thoughtml-snapshot'}.html`
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      URL.revokeObjectURL(url)
+    })
 
     let ended = false
     const connectionState = (state: 'online' | 'invalid' | 'offline' | 'ended') => {
@@ -260,6 +307,7 @@ async function boot(): Promise<void> {
       latestSequence = snapshot.sequence
       latestSourceState = snapshot.source_state
       latestSnapshot = snapshot
+      download.disabled = !snapshot.canonical
       const latest = snapshot.activity.at(-1)
       statusText.textContent = snapshot.source_state === 'valid'
         ? latest?.kind === 'revision' ? `Live · ${latest.summary}` : `Live · revision ${snapshot.sequence}`
@@ -274,11 +322,12 @@ async function boot(): Promise<void> {
         const first = !canon || canon.objects.length === 0
         const graphChanged = snapshot.source_state === 'valid' && latest?.kind !== 'unchanged'
         canon = snapshot.canonical
+        sourceMap = snapshot.source_map ?? { objects: {} }
         el('#empty-state').hidden = true
         if (first) view.render(canon)
         else if (graphChanged) view.update(canon, latest?.changes)
         if (selectedId && !canon.objects.some((o) => o.id === selectedId)) closeDetail()
-        else if (selectedId) renderDetail(detailBody, canon, selectedId, navigateTo)
+        else if (selectedId || reasoningCard.mode() === 'follow') reasoningCard.refresh(canon)
       } else if (!canon) {
         const empty = el('#empty-state')
         empty.textContent = 'Waiting for the first valid ThoughtML revision.'

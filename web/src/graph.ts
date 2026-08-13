@@ -417,7 +417,7 @@ export interface GraphHandle {
   onZoom(cb: (pct: number) => void): void
   centerOn(id: string): void
   select(id: string): boolean
-  onSelect(cb: (info: { id: string; kind: string } | null) => void): void
+  onSelect(cb: (info: { id: string; kind: string; x?: number } | null) => void): void
   /** Filter the graph to an as-of time (epoch ms), or `null` to show all. */
   applyAsOf(t: number | null): void
   /** Toggle the evidence-heat overlay (colour nodes by derived confidence). */
@@ -537,8 +537,8 @@ export function createGraph(container: HTMLElement, theme: Theme): GraphHandle {
     setDecision(decisionOn)
   }
 
-  function onSelect(cb: (info: { id: string; kind: string } | null) => void) {
-    cy.on('tap', 'node', (e) => cb({ id: e.target.data('id'), kind: e.target.data('kind') }))
+  function onSelect(cb: (info: { id: string; kind: string; x?: number } | null) => void) {
+    cy.on('tap', 'node', (e) => cb({ id: e.target.data('id'), kind: e.target.data('kind'), x: e.target.renderedPosition('x') }))
     cy.on('tap', (e) => { if (e.target === cy) cb(null) })
   }
 

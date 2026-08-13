@@ -40,6 +40,11 @@ opens a session panel containing:
 - semantic activity entries with added, changed, and removed object counts; and
 - whether the graph is showing the newest model or the last valid one.
 
+Selecting a graph node shows the exact project source that produced it, such as
+`quality.thml:18`. The **Snapshot** button downloads the graph currently being
+shown as a self-contained HTML file. If the newest edit is invalid, the download
+uses—and is named for—the last valid revision, matching the graph on screen.
+
 If an agent saves a half-written or invalid document, the current graph does not
 disappear. The stream publishes the errors and keeps the most recent successful
 canonical model until the source becomes valid again.

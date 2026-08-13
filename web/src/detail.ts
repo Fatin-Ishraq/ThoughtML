@@ -1,4 +1,4 @@
-// Node-detail panel: identity facts + computed relationships ("how this node
+// Expanded node details: identity facts + computed relationships ("how this node
 // affects the whole"). Relationship chips navigate to the connected node.
 
 import { formatValue, type Canonical, type CanonObject, type DecisionEV, type ExpectedValue, type Fields, type Link, type Quantity, type Value } from './model'

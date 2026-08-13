@@ -6,9 +6,9 @@ import { createGraph, type ViewMode, type Theme } from './graph'
 import { createTimeView } from './timeview'
 import { buildLegend, buildLensKey } from './legend'
 import { renderDiagnostics } from './diagnostics'
-import { renderDetail, kindOf, labelOf } from './detail'
+import { createReasoningCard } from './reasoning-card'
 import { EXAMPLES, DEFAULT_EXAMPLE, ADVANCED_EXAMPLES } from './examples'
-import { setIcon, glyph } from './icons'
+import { setIcon } from './icons'
 import { downloadStandalone, documentTitle } from './download'
 import { SNAKE_PROJECT, type WorkspaceSeed } from './project-examples'
 import {
@@ -132,7 +132,6 @@ async function boot(): Promise<void> {
   setIcon(el('#download-html'), 'download')
   setIcon(el('#copy-data'), 'copy')
   setIcon(el('#drawer-close'), 'close')
-  setIcon(el('#detail-close'), 'close')
   setIcon(el('#zoom-in'), 'plus')
   setIcon(el('#zoom-out'), 'minus')
 
@@ -665,42 +664,45 @@ async function boot(): Promise<void> {
     })
   }
 
-  // ---- detail panel (third column) ----
-  const detailPane = el('#detail')
-  const detailBody = el('#detail-body')
-  const detailBadge = el('#detail-badge')
-  const detailId = el('#detail-id')
-  const detailSource = el<HTMLButtonElement>('#detail-source')
+  // ---- universal Reasoning Card: node selection + Follow narration ----
+  const reasoningCard = createReasoningCard(el('.graph-pane'), {
+    sourceFor: (id) => {
+      if (!last) return undefined
+      const origin = sourceOrigin(id, last, workspace)
+      return origin ? { label: `${origin.file}:${origin.line}`, open: () => switchFile(origin.file, origin.line) } : undefined
+    },
+    onNavigate: (id) => showDetail(id),
+    onClose: (cardMode) => {
+      selectedId = null
+      if (cardMode === 'follow') view.setFollow(false)
+      rSelect(null)
+    },
+  })
 
-  function showDetail(id: string) {
+  function showDetail(id: string, anchorX?: number, syncRenderer = true) {
     if (!last) return
+    view.setFollow(false)
     selectedId = id
-    detailPane.classList.remove('collapsed')
-    const kind = kindOf(last.canonical, id)
-    const obj = last.canonical.objects.find((o) => o.id === id)
-    const gname = obj?.type === 'focus' ? obj.kind : obj?.type === 'stance' ? obj.posture : ''
-    detailBadge.className = `detail-badge k-${kind}`
-    detailBadge.innerHTML = `${gname ? glyph(gname) : ''}<span>${kind}</span>`
-    detailId.textContent = labelOf(id)
-    const origin = sourceOrigin(id, last, workspace)
-    detailSource.hidden = !origin
-    detailSource.textContent = origin ? `${origin.file}:${origin.line}` : ''
-    detailSource.onclick = origin ? () => switchFile(origin.file, origin.line) : null
-    renderDetail(detailBody, last.canonical, id, navigateTo)
-    rSelect(id)
-    window.setTimeout(() => { if (!isView()) graph.resize(); rCenter(id) }, 230)
+    reasoningCard.showNode(last.canonical, id, anchorX)
+    if (syncRenderer) rSelect(id)
+    window.setTimeout(() => rCenter(id), 80)
   }
-  function closeDetail() {
+  function closeDetail(syncRenderer = true) {
     selectedId = null
-    detailPane.classList.add('collapsed')
-    rSelect(null)
-    if (!isView()) window.setTimeout(() => graph.resize(), 230)
+    reasoningCard.close(false)
+    if (syncRenderer) rSelect(null)
   }
-  function navigateTo(id: string) { showDetail(id) }
 
-  graph.onSelect((info) => { if (info) showDetail(info.id); else closeDetail() })
-  view.onSelect((info) => { if (info) showDetail(info.id); else closeDetail() })
-  el('#detail-close').addEventListener('click', closeDetail)
+  graph.onSelect((info) => { if (info) showDetail(info.id, info.x, false); else closeDetail(false) })
+  view.onSelect((info) => { if (info) showDetail(info.id, info.x, false); else if (reasoningCard.mode() !== 'follow') closeDetail(false) })
+  view.onFollow((moment) => {
+    if (!moment || !last) {
+      if (reasoningCard.mode() === 'follow') reasoningCard.close(false)
+      return
+    }
+    if (selectedId) { selectedId = null; rSelect(null) }
+    reasoningCard.showMoment(last.canonical, moment)
+  })
 
   // ---- data drawer ----
   const drawer = el('#drawer')
@@ -750,6 +752,7 @@ async function boot(): Promise<void> {
   for (const btn of viewBtns) {
     btn.addEventListener('click', () => {
       mode = btn.dataset.view as ViewMode
+      if (mode !== 'readable') view.setFollow(false)
       localStorage.setItem(LS.view, mode)
       viewBtns.forEach((b) => b.classList.toggle('active', b === btn))
       syncRenderers(true)
@@ -758,7 +761,7 @@ async function boot(): Promise<void> {
 
   // ---- graph controls + zoom ----
   el('#download-html').addEventListener('click', () => {
-    if (last) void downloadStandalone(last.canonical, documentTitle(last.canonical))
+    if (last) void downloadStandalone(last.canonical, documentTitle(last.canonical), last.source_map)
   })
   el('#fit').addEventListener('click', () => rFit())
   el('#relayout').addEventListener('click', () => (isView() ? view.fit() : graph.relayout()))
@@ -867,22 +870,18 @@ async function boot(): Promise<void> {
     el('#json').textContent = JSON.stringify(canon, null, 2)
     el('#ast').textContent = JSON.stringify(last.surface, null, 2)
 
-    // keep detail panel in sync with the latest view
+    // Keep the shared explanation surface in sync with the latest project.
     if (selectedId) {
       const stillThere = selectedId.startsWith('agent:')
         ? canon.objects.some((o) => o.type === 'stance' && o.agent === selectedId!.slice(6))
         : canon.objects.some((o) => o.id === selectedId)
       if (stillThere) {
-        const origin = sourceOrigin(selectedId, last, workspace)
-        detailSource.hidden = !origin
-        detailSource.textContent = origin ? `${origin.file}:${origin.line}` : ''
-        detailSource.onclick = origin ? () => switchFile(origin.file, origin.line) : null
-        renderDetail(detailBody, canon, selectedId, navigateTo)
+        reasoningCard.refresh(canon)
         rSelect(selectedId)
       } else {
         closeDetail()
       }
-    }
+    } else if (reasoningCard.mode() === 'follow') reasoningCard.refresh(canon)
     renderWorkspace()
     if (!isView()) el('#zoom-pct').textContent = `${Math.round(graph.cy.zoom() * 100)}%`
   }
@@ -955,7 +954,7 @@ async function boot(): Promise<void> {
     }
     if (e.key === 'Escape') {
       if (drawer.classList.contains('open')) drawer.classList.remove('open')
-      else if (!detailPane.classList.contains('collapsed')) closeDetail()
+      else if (reasoningCard.isOpen()) closeDetail()
     }
   })
   window.addEventListener('beforeunload', (event) => {

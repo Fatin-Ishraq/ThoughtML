@@ -65,7 +65,7 @@ evidence, rounded to three decimals, e.g.:
   "derived_confidence": 0.94 }
 ```
 
-In the playground, it shows in the detail panel **beside** your authored
+In the playground, it shows in the Reasoning Card's expanded details **beside** your authored
 confidence — two bars, never merged. On the bundled
 [`hiring-panel.thml`](../appendix/examples.md), the displacement hypothesis lands
 ≈0.94 while the optimist's rebuttal comes out ≈0.22, several hops deep.

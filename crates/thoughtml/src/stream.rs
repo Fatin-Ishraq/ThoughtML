@@ -121,6 +121,7 @@ struct Snapshot {
     showing_last_valid: bool,
     updated_at_ms: u128,
     canonical: Option<thoughtml::Canonical>,
+    source_map: thoughtml::SourceMap,
     diagnostics: Vec<thoughtml::Diagnostic>,
     watched_files: Vec<String>,
     activity: Vec<Activity>,
@@ -476,7 +477,10 @@ fn publish_compile(
         project,
         title,
         strict,
-        previous.canonical.as_ref(),
+        previous
+            .canonical
+            .as_ref()
+            .map(|canonical| (canonical, &previous.source_map)),
         previous.sequence + 1,
         previous.activity.clone(),
     );
@@ -533,7 +537,7 @@ fn compile_project(
     project: &ProjectRead,
     title: &str,
     strict: bool,
-    previous_valid: Option<&thoughtml::Canonical>,
+    previous_valid: Option<(&thoughtml::Canonical, &thoughtml::SourceMap)>,
     sequence: u64,
     mut activity: Vec<Activity>,
 ) -> Snapshot {
@@ -546,13 +550,21 @@ fn compile_project(
     };
     let valid = !result.diagnostics.has_errors();
     let now = now_ms();
+    let previous_canonical = previous_valid.map(|(canonical, _)| canonical);
     let canonical = if valid {
         Some(result.canonical.clone())
     } else {
-        previous_valid.cloned()
+        previous_canonical.cloned()
+    };
+    let source_map = if valid {
+        map_source_locations(result.source_map.clone(), project)
+    } else {
+        previous_valid
+            .map(|(_, source_map)| source_map.clone())
+            .unwrap_or_default()
     };
     let item = if valid {
-        match previous_valid {
+        match previous_canonical {
             Some(previous) => {
                 let diff = thoughtml::diff::diff(previous, &result.canonical);
                 let changes = ChangeSummary {
@@ -627,6 +639,7 @@ fn compile_project(
         showing_last_valid: !valid && canonical.is_some(),
         updated_at_ms: now,
         canonical,
+        source_map,
         diagnostics: map_diagnostic_sources(result.diagnostics.items, project),
         watched_files: display_paths(&project.watched, Some(&project.entry_path)),
         activity,
@@ -792,6 +805,26 @@ fn map_diagnostic_sources(
         .collect()
 }
 
+fn map_source_locations(
+    mut source_map: thoughtml::SourceMap,
+    project: &ProjectRead,
+) -> thoughtml::SourceMap {
+    let entry_name = project
+        .entry_path
+        .file_name()
+        .and_then(|name| name.to_str())
+        .unwrap_or("entry.thml")
+        .to_string();
+    for location in source_map.objects.values_mut() {
+        location.source = match location.source.as_str() {
+            "entry" => entry_name.clone(),
+            source if project.sources.contains_key(source) => format!("{source}.thml"),
+            source => source.to_string(),
+        };
+    }
+    source_map
+}
+
 fn diagnostics_equal(a: &[thoughtml::Diagnostic], b: &[thoughtml::Diagnostic]) -> bool {
     serde_json::to_vec(a).ok() == serde_json::to_vec(b).ok()
 }
@@ -830,6 +863,7 @@ fn publish_read_error(shared: &SharedState, entry: &Path, message: &str, log: &R
         showing_last_valid: previous.canonical.is_some(),
         updated_at_ms: now_ms(),
         canonical: previous.canonical,
+        source_map: previous.source_map,
         diagnostics: vec![diagnostic],
         watched_files: previous.watched_files,
         activity,
@@ -1289,7 +1323,12 @@ fn stream_html(
     let model = snapshot
         .canonical
         .as_ref()
-        .map(serde_json::to_string)
+        .map(|canonical| {
+            serde_json::to_string(&serde_json::json!({
+                "canonical": canonical,
+                "source_map": &snapshot.source_map,
+            }))
+        })
         .transpose()
         .map_err(|e| e.to_string())?
         .unwrap_or_default()
@@ -1381,13 +1420,20 @@ mod tests {
             &project("this is not valid"),
             "test",
             false,
-            valid.canonical.as_ref(),
+            valid
+                .canonical
+                .as_ref()
+                .map(|canonical| (canonical, &valid.source_map)),
             2,
             valid.activity,
         );
         assert_eq!(invalid.source_state, "invalid");
         assert!(invalid.showing_last_valid);
         assert!(invalid.canonical.is_some());
+        assert_eq!(
+            invalid.source_map.objects.get("stable").unwrap().source,
+            "test.thml"
+        );
         assert_eq!(invalid.activity.last().unwrap().kind, "invalid");
     }
 
@@ -1403,6 +1449,9 @@ mod tests {
         );
         let html = stream_html(&snapshot, "/snapshot", "/events").unwrap();
         assert!(html.contains("Stream me."));
+        assert!(html.contains("&quot;source_map&quot;") || html.contains("\"source_map\""));
+        assert!(html.contains("reasoning-card"));
+        assert!(!html.contains("detail-pane"));
         assert!(html.contains("\"events\":\"/events\""));
         assert!(html.contains("id=\"thoughtml-stream-config\">{"));
     }

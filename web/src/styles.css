@@ -222,7 +222,7 @@ a { color: inherit; }
 @keyframes stream-pulse { 65%, 100% { box-shadow: 0 0 0 7px transparent; } }
 
 .stream-panel {
-  position: absolute; top: 56px; right: 16px; z-index: 9;
+  position: absolute; top: 56px; right: 16px; z-index: 14;
   width: min(390px, calc(100% - 32px)); max-height: calc(100% - 144px); overflow: auto;
   color: var(--text); background: color-mix(in srgb, var(--bg-panel) 96%, transparent);
   border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-lg);
@@ -232,6 +232,10 @@ a { color: inherit; }
 .stream-panel-head { position: sticky; top: 0; z-index: 1; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 13px 14px; background: inherit; border-bottom: 1px solid var(--border); }
 .stream-panel-head strong { display: block; font-size: 13px; }
 .stream-panel-head span { display: block; margin-top: 2px; color: var(--text-faint); font: 10.5px var(--mono); }
+.stream-panel-actions { display: flex; align-items: center; gap: 5px; }
+.stream-download { display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 9px; border: 1px solid var(--border); border-radius: var(--r-sm); color: var(--accent); background: var(--bg-elev); font: 600 10.5px var(--sans); cursor: pointer; }
+.stream-download:hover:not(:disabled) { color: var(--text); border-color: var(--border-strong); background: var(--bg-elev-2); }
+.stream-download:disabled { opacity: .45; cursor: default; }
 .stream-panel-close { width: 26px; height: 26px; border: 0; border-radius: var(--r-sm); color: var(--text-dim); background: transparent; cursor: pointer; font-size: 20px; line-height: 1; }
 .stream-panel-close:hover { color: var(--text); background: var(--bg-elev); }
 .stream-section { padding: 12px 14px; border-bottom: 1px solid color-mix(in srgb, var(--border) 75%, transparent); }
@@ -299,12 +303,12 @@ details.stream-activity-item > summary { cursor: pointer; }
   display: flex; gap: 4px; flex: 1 0 100%; min-width: 0; overflow-x: auto; padding-bottom: 1px;
   scrollbar-width: thin;
 }
-.workspace-actions button, .file-tab, .project-file, .project-import, .project-problem, .detail-source {
+.workspace-actions button, .file-tab, .project-file, .project-import, .project-problem {
   border: 1px solid var(--border); color: var(--text-dim); background: var(--bg-elev);
   font: 600 10.5px var(--sans); cursor: pointer; transition: color 0.15s, border-color 0.15s, background 0.15s;
 }
 .workspace-actions button { flex: none; padding: 4px 7px; border-radius: var(--r-sm); }
-.workspace-actions button:hover, .file-tab:hover, .project-file:hover, .project-import:hover, .project-problem:hover, .detail-source:hover { color: var(--text); border-color: var(--border-strong); }
+.workspace-actions button:hover, .file-tab:hover, .project-file:hover, .project-import:hover, .project-problem:hover { color: var(--text); border-color: var(--border-strong); }
 .workspace-actions button:disabled { opacity: 0.42; cursor: default; }
 .workspace-body { display: flex; flex: 1 1 auto; min-height: 0; }
 .project-files {
@@ -350,8 +354,6 @@ details.stream-activity-item > summary { cursor: pointer; }
 #compile-status.compiling { color: var(--accent); }
 #compile-status.stale { color: var(--warning); }
 #compile-status.error { color: var(--error); }
-.detail-source { margin-left: auto; padding: 4px 7px; border-radius: var(--r-pill); color: var(--accent); font-family: var(--mono); }
-.detail-source + .detail-close { margin-left: 0; }
 
 .workspace-dialog {
   width: min(560px, calc(100vw - 30px)); padding: 0; border: 1px solid var(--border-strong);
@@ -459,73 +461,73 @@ details.stream-activity-item > summary { cursor: pointer; }
 .timeview { animation: tv-fade-in 0.5s ease; }
 @keyframes tv-fade-in { from { opacity: 0; } to { opacity: 1; } }
 
-/* narration — an elegant, boxless serif line floating over the stage */
-/* The floating story card — the narration surface during Follow/replay. Rides each
-   beat: who + kind + when, the sentence, and the relation that ties it to the story
-   (the connective tissue). Folds in the old conflict banner via the `.alert` state. */
-.tv-story {
-  position: absolute; top: 102px; left: 50%; z-index: 6; /* below the corner toolbars */
-  width: min(540px, calc(100% - 40px));
-  padding: 13px 18px 15px;
-  background: color-mix(in srgb, var(--bg-panel) 84%, transparent);
-  border: 1px solid color-mix(in srgb, var(--border-strong) 34%, transparent);
-  border-radius: var(--r-lg);
-  box-shadow: var(--shadow-md);
-  backdrop-filter: blur(16px) saturate(1.15);
-  pointer-events: none; overflow: hidden;
-  opacity: 0; transform: translateX(-50%) translateY(-8px);
-  transition: opacity 0.34s ease, transform 0.34s ease, border-color 0.34s ease, box-shadow 0.34s ease;
+/* ---- universal Reasoning Card: selection, Follow, stream, standalone ---- */
+.reasoning-card {
+  position: absolute;
+  z-index: 12;
+  top: 72px;
+  right: 18px;
+  width: min(390px, calc(100% - 36px));
+  max-height: calc(100% - 168px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: var(--text);
+  background: color-mix(in srgb, var(--bg-panel) 92%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border-strong) 58%, transparent);
+  border-radius: 18px;
+  box-shadow: 0 18px 52px color-mix(in srgb, #000 26%, transparent), 0 2px 10px color-mix(in srgb, #000 12%, transparent);
+  backdrop-filter: blur(20px) saturate(1.14);
+  opacity: 0;
+  transform: translateY(-7px) scale(.985);
+  transform-origin: top right;
+  transition: opacity .2s ease, transform .22s ease, width .24s ease, border-color .2s ease;
 }
-.tv-story.on { opacity: 1; transform: translateX(-50%) translateY(0); }
-.tv-story.alert {
-  border-color: color-mix(in srgb, var(--error) 50%, transparent);
-  box-shadow: 0 12px 36px color-mix(in srgb, var(--error) 24%, transparent);
+.reasoning-card[hidden] { display: none; }
+.reasoning-card.on { opacity: 1; transform: translateY(0) scale(1); }
+.reasoning-card.place-left { left: 18px; right: auto; transform-origin: top left; }
+.reasoning-card.expanded { width: min(480px, calc(100% - 36px)); }
+.reasoning-card.alert { border-color: color-mix(in srgb, var(--error) 58%, transparent); box-shadow: 0 18px 52px color-mix(in srgb, var(--error) 20%, transparent); }
+.reasoning-card-accent { flex: none; height: 3px; background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 22%, transparent)); }
+.reasoning-card.alert .reasoning-card-accent { background: linear-gradient(90deg, var(--error), color-mix(in srgb, var(--error) 20%, transparent)); }
+.reasoning-card-head { flex: none; display: flex; align-items: center; gap: 10px; padding: 13px 15px 0 17px; }
+.reasoning-card-kicker { min-width: 0; display: flex; align-items: center; gap: 7px; color: var(--accent); font: 700 10px var(--sans); letter-spacing: .72px; text-transform: uppercase; }
+.reasoning-card-kicker.follow::before { content: ''; width: 7px; height: 7px; flex: none; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 4px color-mix(in srgb, var(--ok) 14%, transparent); }
+.reasoning-card-glyph { display: inline-flex; flex: none; }
+.reasoning-card-glyph svg { width: 14px; height: 14px; }
+.reasoning-card-kind { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.reasoning-card-close { margin-left: auto; width: 27px; height: 27px; flex: none; border: 0; border-radius: 50%; color: var(--text-faint); background: transparent; font-size: 20px; line-height: 1; }
+.reasoning-card-close:hover { color: var(--text); background: var(--bg-elev); }
+.reasoning-card-scroll { min-height: 0; overflow: auto; padding: 8px 17px 16px; }
+.reasoning-card-title { margin: 0 0 7px; font: 650 18px/1.2 var(--sans); letter-spacing: -.18px; color: var(--text); }
+.reasoning-card-copy { margin: 0; font: 400 15px/1.52 var(--serif); color: color-mix(in srgb, var(--text) 90%, var(--text-dim)); display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.reasoning-card.expanded .reasoning-card-copy { -webkit-line-clamp: 7; }
+.reasoning-card-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.reasoning-card-meta:empty { display: none; }
+.reasoning-chip { padding: 3px 8px; border: 1px solid var(--border); border-radius: var(--r-pill); color: var(--text-dim); background: color-mix(in srgb, var(--text) 6%, transparent); font: 600 10.5px var(--mono); }
+.reasoning-chip.confidence { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 30%, transparent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.reasoning-chip.relation { color: var(--c-link); border-color: color-mix(in srgb, var(--c-link) 32%, transparent); background: color-mix(in srgb, var(--c-link) 10%, transparent); }
+.reasoning-chip.status-in { color: var(--ok); }
+.reasoning-chip.status-out { color: var(--error); text-decoration: line-through; }
+.reasoning-chip.status-undecided { color: var(--warning); }
+.reasoning-card-warning { position: relative; margin: 11px 0 0; padding: 9px 10px 9px 29px; border-radius: var(--r-md); color: color-mix(in srgb, var(--error) 86%, var(--text)); background: color-mix(in srgb, var(--error) 9%, transparent); font-size: 12px; line-height: 1.42; }
+.reasoning-card-warning::before { content: '\26A0'; position: absolute; left: 10px; top: 9px; }
+.reasoning-card-actions { display: flex; align-items: center; gap: 8px; margin-top: 13px; }
+.reasoning-card-source, .reasoning-card-more { min-width: 0; padding: 6px 9px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--bg-elev); font: 600 11px var(--sans); }
+.reasoning-card-source { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--accent); font-family: var(--mono); }
+.reasoning-card-source:disabled { cursor: default; opacity: .9; }
+.reasoning-card-more { margin-left: auto; color: var(--text-dim); }
+.reasoning-card-more:hover, .reasoning-card-source:not(:disabled):hover { color: var(--text); border-color: var(--border-strong); background: var(--bg-elev-2); }
+.reasoning-card-details { margin: 14px -3px 0; padding: 14px 3px 2px; border-top: 1px solid var(--border); overflow: visible; }
+.reasoning-card-details[hidden] { display: none; }
+.reasoning-card-progress { flex: none; height: 3px; background: color-mix(in srgb, var(--text) 7%, transparent); }
+.reasoning-card-progress span { display: block; height: 100%; background: var(--accent); transition: width .38s cubic-bezier(.2,.7,.2,1); }
+.reasoning-card.alert .reasoning-card-progress span { background: var(--error); }
+@media (max-width: 720px) {
+  .reasoning-card, .reasoning-card.place-left { top: auto; left: 12px; right: 12px; bottom: 112px; width: auto; max-height: min(58vh, 520px); transform-origin: bottom center; }
+  .graph-pane:has(.diagnostics-bar) .reasoning-card { bottom: 150px; }
+  .reasoning-card.expanded { width: auto; }
 }
-.tv-story-kick {
-  display: flex; align-items: center; gap: 7px;
-  font-size: 11px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;
-  color: var(--text-dim); margin-bottom: 7px;
-}
-.tv-story-glyph { display: inline-flex; flex: none; }
-.tv-story-glyph svg { width: 14px; height: 14px; stroke: currentColor; }
-.tv-story-who { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tv-story-head {
-  font-family: var(--serif); font-size: 17px; line-height: 1.36; color: var(--text);
-  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
-}
-.tv-story-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin-top: 10px; }
-.tv-story-meta:empty { display: none; }
-.tv-chip {
-  font: 600 11px var(--mono); letter-spacing: 0.2px;
-  padding: 2.5px 8px; border-radius: var(--r-pill); white-space: nowrap;
-  border: 1px solid transparent;
-}
-.tv-chip-handle { color: var(--text-dim); background: color-mix(in srgb, var(--text) 8%, transparent); }
-.tv-chip-rel {
-  color: var(--chip, var(--c-link));
-  background: color-mix(in srgb, var(--chip, var(--c-link)) 15%, transparent);
-  border-color: color-mix(in srgb, var(--chip, var(--c-link)) 34%, transparent);
-}
-.tv-chip-conf { color: var(--accent); background: color-mix(in srgb, var(--accent) 13%, transparent); }
-.tv-chip-life { color: var(--text-dim); background: color-mix(in srgb, var(--text) 6%, transparent); font-style: italic; }
-.tv-story-warn {
-  position: relative; margin-top: 9px; padding-left: 18px;
-  font-size: 12px; line-height: 1.4; color: color-mix(in srgb, var(--error) 85%, var(--text));
-}
-.tv-story-warn::before { content: '\26A0'; position: absolute; left: 0; top: 0; }
-.tv-story-warn:empty { display: none; }
-.tv-story-progress {
-  position: absolute; left: 0; right: 0; bottom: 0; height: 2px;
-  background: color-mix(in srgb, var(--text) 8%, transparent);
-}
-.tv-story-fill {
-  display: block; height: 100%; width: 0;
-  background: color-mix(in srgb, var(--accent) 80%, transparent);
-  transition: width 0.42s cubic-bezier(0.2, 0.7, 0.2, 1);
-}
-.tv-story.alert .tv-story-fill { background: color-mix(in srgb, var(--error) 80%, transparent); }
-.tv-beat-in { animation: tv-beat-in 0.4s cubic-bezier(0.2, 0.7, 0.2, 1); }
-@keyframes tv-beat-in { from { opacity: 0.2; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
 /* time bar — the bottom-centre centrepiece, same flat glass as the dock */
 .tv-bar {
@@ -619,8 +621,6 @@ details.stream-activity-item > summary { cursor: pointer; }
 .dock-sep { height: 1px; margin: 3px 5px; background: color-mix(in srgb, var(--border) 85%, transparent); }
 .viewer .zoom-pct { font: 600 11px var(--mono); width: 100%; padding: 3px 0; text-align: center; color: var(--text-dim); border-radius: var(--r-sm); transition: background 0.15s, color 0.15s; }
 .viewer .zoom-pct:hover { color: var(--text); background: var(--bg-elev); }
-.viewer .detail-pane { background: var(--bg-app); border-left: 1px solid color-mix(in srgb, var(--border) 70%, transparent); }
-.viewer .detail-head { padding: 14px 16px; border-bottom: 1px solid color-mix(in srgb, var(--border) 55%, transparent); }
 
 /* floating clusters */
 .cluster {
@@ -944,44 +944,7 @@ pre.code {
 }
 .zoom-pct:hover { color: var(--text); }
 
-/* ---- detail panel (third column) ---- */
-.detail-pane {
-  flex: 0 0 320px;
-  background: var(--bg-panel);
-  border-left: 1px solid var(--border);
-  transition: flex-basis 0.22s ease;
-}
-.detail-pane.collapsed { flex-basis: 0; border-left: none; }
-.detail-head { gap: 9px; }
-.detail-badge {
-  flex: 0 0 auto;
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 2px 8px;
-  border-radius: var(--r-pill);
-  color: #fff;
-  background: var(--text-faint);
-}
-.detail-badge.k-focus { background: var(--c-focus); }
-.detail-badge.k-question { background: var(--c-question); color: #1a1206; }
-.detail-badge.k-link { background: var(--c-link); color: #04221d; }
-.detail-badge.k-stance { background: var(--c-stance); }
-.detail-badge.k-scope { background: var(--c-scope); }
-.detail-badge.k-agent { background: var(--c-agent); color: #04210f; }
-.detail-badge.k-missing { background: var(--c-missing); }
-.detail-id {
-  flex: 1 1 auto;
-  min-width: 0;
-  font-family: var(--mono);
-  font-size: 12.5px;
-  color: var(--text);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.detail-close { flex: 0 0 auto; }
+/* ---- expanded technical detail inside the Reasoning Card ---- */
 .detail-body { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 14px; }
 .detail-kind {
   display: inline-block;
@@ -1199,6 +1162,4 @@ pre.code {
 .chip-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .chip-glyph { display: inline-flex; flex: 0 0 auto; opacity: 0.8; }
 .diag-sev { display: inline-flex; align-items: center; gap: 5px; }
-.detail-badge { display: inline-flex; align-items: center; gap: 4px; }
-.detail-badge svg { width: 12px; height: 12px; flex: 0 0 auto; }
 .detail-kind svg, .detail-tag svg, .chip-glyph svg, .diag-sev svg { width: 13px; height: 13px; flex: 0 0 auto; }

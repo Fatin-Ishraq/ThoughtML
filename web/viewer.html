@@ -49,7 +49,10 @@
         <aside class="stream-panel" id="stream-panel" hidden>
           <div class="stream-panel-head">
             <div><strong>Live session</strong><span id="stream-updated"></span></div>
-            <button class="stream-panel-close" id="stream-panel-close" type="button" aria-label="Close live session panel">×</button>
+            <div class="stream-panel-actions">
+              <button class="stream-download" id="stream-download" type="button" disabled title="Download the graph currently shown as standalone HTML"><span aria-hidden="true">↓</span> Snapshot</button>
+              <button class="stream-panel-close" id="stream-panel-close" type="button" aria-label="Close live session panel">×</button>
+            </div>
           </div>
           <div class="stream-section">
             <div class="stream-section-title">Watching</div>
@@ -79,14 +82,6 @@
         <div class="empty-state" id="empty-state" hidden>No model — bake one with <code>thoughtml &lt;doc&gt;.thml --html</code>.</div>
       </section>
 
-      <section class="pane detail-pane collapsed" id="detail">
-        <div class="pane-head detail-head">
-          <span class="detail-badge" id="detail-badge"></span>
-          <span class="detail-id" id="detail-id"></span>
-          <button class="icon-btn detail-close" id="detail-close" title="Close (Esc)"></button>
-        </div>
-        <div class="detail-body" id="detail-body"></div>
-      </section>
     </main>
 
     <script type="module" src="/src/viewer.ts"></script>

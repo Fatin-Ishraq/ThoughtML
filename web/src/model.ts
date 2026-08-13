@@ -1,7 +1,7 @@
 // The ThoughtML canonical model — the type contract and pure value helpers,
 // with no dependency on the wasm parser. This is the seam between the *compiler*
 // (which produces the canonical JSON) and the *view* (which renders it): the
-// graph, detail panel, legend, and any future standalone viewer depend on these
+// graph, Reasoning Card, legend, and any future standalone viewer depend on these
 // shapes alone, never on how the JSON was produced. The wasm adapter lives in
 // `parse.ts` and imports its types from here.
 

@@ -2,16 +2,15 @@
 // lays a ThoughtML document out the way the design mock does: reasoning
 // *emerges over a time axis* (x = when), with the vertical placement settled by
 // a small force relaxation rather than any fixed lanes. It owns its own
-// play/scrub timeline and a floating story card that narrates each beat (who,
-// what, the relation that ties it in, and any conflict); selection is handed
-// back to the host (which shows the detail card). Themed entirely through the
+// play/scrub timeline and emits structured Follow moments to the host's shared
+// Reasoning Card. Selection is handed back to that same universal surface.
+// Themed entirely through the
 // app's CSS custom properties, so the light/dark toggle is free.
 //
 // Shared by both surfaces: it is the playground's primary view (where
 // "Readable" was) and the whole standalone `--html` viewer.
 
 import { relationCategory, REL_STYLE, type RelCat, type Theme } from './graph'
-import { glyph } from './icons'
 import { assertedAt, parseTime, type Canonical, type CanonObject, type Value } from './model'
 import { nodeVisual, shapePort, svgNodeShape, type ShapeSide } from './node-visuals'
 
@@ -22,7 +21,9 @@ export interface TimeViewHandle {
   update(canon: Canonical, changedIds?: { added?: string[]; modified?: string[] }): void
   applyAsOf(t: number | null): void
   select(id: string | null): boolean
-  onSelect(cb: (info: { id: string; kind: string } | null) => void): void
+  onSelect(cb: (info: { id: string; kind: string; x?: number } | null) => void): void
+  onFollow(cb: (moment: FollowMoment | null) => void): void
+  setFollow(on: boolean): void
   setTheme(theme: Theme): void
   fit(): void
   zoomIn(): void
@@ -33,6 +34,23 @@ export interface TimeViewHandle {
   resize(): void
   setActive(on: boolean): void
   destroy(): void
+}
+
+export interface FollowMoment {
+  primaryId: string | null
+  nodeIds: string[]
+  who: string | null
+  kind: string
+  headline: string
+  handle: string
+  hasSentence: boolean
+  link: { rel: string; target: string } | null
+  confidence: number | null
+  lifecycle: 'superseded' | 'abandoned' | null
+  tension: string | null
+  when?: string
+  index: number
+  total: number
 }
 
 // --- colour: kind / relation → a CSS custom property ---------------------
@@ -82,8 +100,8 @@ interface Beat { t: number; text: string }
 // A beat is one distinct event instant: the nodes that *arrive* at time `t`, in
 // document/time order, plus a caption. It's the shared spine — replay advances by
 // beat (even pacing) and the layout columns by beat (collapsed dead time).
-// The structured narration for a beat — what the floating story card renders as
-// Follow rides through the document. `link` is the connective tissue: how this
+// The structured narration for a beat — what the shared Reasoning Card renders
+// as Follow rides through the document. `link` is the connective tissue: how this
 // moment relates to one already on screen ("supports X", "opposes it", "revises Y"),
 // which is what makes a sequence of nodes read as a story rather than a list.
 interface BeatStory {
@@ -739,15 +757,6 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
   const eL = document.createElementNS(SVGNS, 'g')
   const nL = document.createElementNS(SVGNS, 'g')
   vp.append(bandL, eL, nL); svg.appendChild(vp)
-  // The floating story card — the narration surface that rides each beat during
-  // Follow/replay, so the document reads as a story without opening the sidebar.
-  const story = document.createElement('div'); story.className = 'tv-story'
-  story.innerHTML =
-    '<div class="tv-story-kick"><span class="tv-story-glyph"></span><span class="tv-story-who"></span></div>' +
-    '<div class="tv-story-head"></div>' +
-    '<div class="tv-story-meta"></div>' +
-    '<div class="tv-story-warn"></div>' +
-    '<div class="tv-story-progress"><span class="tv-story-fill"></span></div>'
   const bar = document.createElement('div'); bar.className = 'tv-bar'
   bar.innerHTML =
     '<div class="tv-bar-row">' +
@@ -761,7 +770,7 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
     '</div>' +
     '<div class="tv-track"><input class="tv-range" type="range" min="0" max="1000" value="1000" step="1" aria-label="time" /><div class="tv-ticks"></div></div>' +
     '<div class="tv-ends"><span class="tv-start"></span><span class="tv-end"></span></div>'
-  root.append(svg, story, bar)
+  root.append(svg, bar)
   container.appendChild(root)
 
   const clockEl = bar.querySelector('.tv-clock') as HTMLElement
@@ -773,13 +782,6 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
   const ticksEl = bar.querySelector('.tv-ticks') as HTMLElement
   const startEl = bar.querySelector('.tv-start') as HTMLElement
   const endEl = bar.querySelector('.tv-end') as HTMLElement
-  const storyGlyph = story.querySelector('.tv-story-glyph') as HTMLElement
-  const storyWho = story.querySelector('.tv-story-who') as HTMLElement
-  const storyHead = story.querySelector('.tv-story-head') as HTMLElement
-  const storyMeta = story.querySelector('.tv-story-meta') as HTMLElement
-  const storyWarn = story.querySelector('.tv-story-warn') as HTMLElement
-  const storyFill = story.querySelector('.tv-story-fill') as HTMLElement
-
   let model: TimeModel = { nodes: [], edges: [], narration: [], beats: [], tension: [], tMin: 0, tMax: 1, narrative: false, bands: [], worldW: 0, bandH: 150 }
   let byId = new Map<string, TNode>()
   let asOf: number | null = null
@@ -789,7 +791,8 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
   let beatIdx = -1            // current beat in the tour; -1 = unstarted / showing all
   let rafId: number | null = null
   let emphaTimer: number | undefined
-  let selectCb: (info: { id: string; kind: string } | null) => void = () => {}
+  let selectCb: (info: { id: string; kind: string; x?: number } | null) => void = () => {}
+  let followCb: (moment: FollowMoment | null) => void = () => {}
   let zoomCb: (pct: number) => void = () => {}
   const T = { x: 0, y: 0, k: 1 }
 
@@ -881,7 +884,7 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
     let cMinX = Infinity, cMinY = Infinity, cMaxX = -Infinity, cMaxY = -Infinity
     for (const n of primary) { cMinX = Math.min(cMinX, n.x); cMinY = Math.min(cMinY, n.y); cMaxX = Math.max(cMaxX, n.x + NODE_W); cMaxY = Math.max(cMaxY, n.y + NODE_H) }
     const W = svg.clientWidth || 1000, Hh = svg.clientHeight || 700
-    const padX = 80, topRoom = 120, botRoom = 128 // leaves the story card clear at the top
+    const padX = 80, topRoom = 120, botRoom = 128 // leaves breathing room around the focused moment
     // Size to the beat's nodes plus a context margin, so neighbours are *hinted*
     // (they fall around the edges) rather than shrunk to fit — this keeps the tour
     // zoomed in on the moment instead of pulling back to the whole graph.
@@ -901,38 +904,26 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
     emphaTimer = window.setTimeout(() => { for (const id of ids) byId.get(id)?.g?.classList.remove('tv-arrive') }, 1100)
   }
 
-  function chip(kind: string, text: string): HTMLElement {
-    const c = document.createElement('span'); c.className = `tv-chip tv-chip-${kind}`; c.textContent = text; return c
-  }
-  // Fill the floating story card from a beat's structured narration (or hide it
-  // when there is no active beat). Runs on every step / scrub / play / follow.
-  function renderStory(beat: TBeat | null) {
-    // The card is the *narration* surface: only shown while Follow is on, so it
-    // never sits over the graph when you're just exploring or scrubbing.
-    if (!beat || !followMode) { story.classList.remove('on', 'alert'); return }
+  // Emit one structured narration moment to the universal Reasoning Card.
+  function emitFollow(beat: TBeat | null) {
+    if (!beat || !followMode) { followCb(null); return }
     const s = beat.story
-    storyGlyph.innerHTML = glyph(s.kind)
-    const kick: string[] = []
-    if (s.who) kick.push(s.who)
-    kick.push(s.kind)
-    if (!model.narrative) kick.push(fmtDate(beat.t))
-    storyWho.textContent = kick.join('  ·  ')
-    storyHead.textContent = s.headline
-    storyMeta.replaceChildren()
-    if (s.hasSentence) storyMeta.appendChild(chip('handle', s.handle))
-    if (s.link) {
-      const c = chip('rel', `${s.link.rel} ${s.link.target}`)
-      c.style.setProperty('--chip', `var(${REL_VAR[relationCategory(s.link.rel)]})`)
-      storyMeta.appendChild(c)
-    }
-    if (s.confidence !== null) storyMeta.appendChild(chip('conf', `conf ${s.confidence.toFixed(2)}`))
-    if (s.lifecycle) storyMeta.appendChild(chip('life', s.lifecycle === 'abandoned' ? 'dead end' : 'revised later'))
-    storyWarn.textContent = s.tension ?? ''
-    story.classList.toggle('alert', !!s.tension)
-    storyFill.style.width = s.total > 1 ? `${(s.index / (s.total - 1)) * 100}%` : '100%'
-    story.classList.add('on')
-    // re-trigger the content fade on each beat change
-    storyHead.classList.remove('tv-beat-in'); void storyHead.getBoundingClientRect(); storyHead.classList.add('tv-beat-in')
+    followCb({
+      primaryId: beat.nodeIds[0] ?? null,
+      nodeIds: [...beat.nodeIds],
+      who: s.who,
+      kind: s.kind,
+      headline: s.headline,
+      handle: s.handle,
+      hasSentence: s.hasSentence,
+      link: s.link,
+      confidence: s.confidence,
+      lifecycle: s.lifecycle,
+      tension: s.tension,
+      when: model.narrative ? undefined : fmtDate(beat.t),
+      index: s.index,
+      total: s.total,
+    })
   }
 
   // Move the tour to beat i: reveal up to its instant, caption it, emphasise the
@@ -944,7 +935,7 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
     const beat = model.beats[beatIdx]
     applyAsOf(beat.t)
     rangeEl.value = String(beatIdx) // the slider is beat-indexed (even spacing)
-    renderStory(beat)
+    emitFollow(beat)
     if (emphasis) emphasize(beat.nodeIds)
     if (camera && followMode) { const f = frameOf(beat.nodeIds); if (f) animateTo(f.k, f.x, f.y) }
   }
@@ -1099,7 +1090,7 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
       e.g.style.opacity = vis ? (e.cat === 'other' ? '0.5' : '1') : '0'
       e.g.style.pointerEvents = vis ? '' : 'none'
     }
-    // Conflict alerting and narration now ride the story card (per beat, in setBeat).
+    // Conflict alerting and narration ride the host's shared Reasoning Card.
     clockEl.textContent = model.narrative ? '' : t === null ? clk(model.tMax) : clk(t)
     // the slider fill tracks the beat index (even spacing), not raw clock time, so
     // the dense years aren't crushed into a sliver of the bar
@@ -1183,7 +1174,7 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
     renderGraph()
     setBar()
     beatIdx = -1 // a fresh document starts the tour unstarted (all shown)
-    renderStory(null)
+    emitFollow(null)
     applyAsOf(preserveView && !wasAtLatest && previousAsOf !== null ? Math.min(previousAsOf, model.tMax) : model.tMax)
     const added = new Set(changedIds.added ?? [])
     const modified = new Set(changedIds.modified ?? [])
@@ -1223,7 +1214,7 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
   let drag: { x: number; y: number; tx: number; ty: number; node: string | null; moved: boolean } | null = null
   let pointerId: number | null = null
   function endDrag(click: boolean) {
-    if (drag && click && !drag.moved) selectNode(drag.node ?? null)
+    if (drag && click && !drag.moved) selectNode(drag.node ?? null, true)
     drag = null; root.classList.remove('dragging')
     if (pointerId !== null) { try { svg.releasePointerCapture(pointerId) } catch { /* already released */ } pointerId = null }
   }
@@ -1254,7 +1245,7 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
     if (!ge || (ev.key !== 'Enter' && ev.key !== ' ')) return
     ev.preventDefault()
     ev.stopPropagation()
-    selectNode(ge.getAttribute('data-id'))
+    selectNode(ge.getAttribute('data-id'), true)
   })
   // releases / cancels outside the SVG must still clear the drag
   window.addEventListener('pointerup', () => { if (drag) endDrag(false) })
@@ -1269,11 +1260,16 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
     for (const n of model.nodes) { if (!n.g || !n.visible) continue; n.g.style.opacity = nb.has(n.id) ? String(restOpacity(n, asOf)) : '0.16' }
   }
 
-  function selectNode(id: string | null) {
+  function selectNode(id: string | null, interruptFollow = false) {
+    if (interruptFollow && followMode) setFollowMode(false, false)
     focusId = id
     for (const n of model.nodes) if (n.g && n.visible) n.g.style.opacity = String(restOpacity(n, asOf))
     clearFocusDim()
-    if (id) { applyFocus(); const n = byId.get(id); selectCb(n ? { id, kind: n.kind } : null) }
+    if (id) {
+      applyFocus()
+      const n = byId.get(id)
+      selectCb(n ? { id, kind: n.kind, x: T.x + (n.x + NODE_W / 2) * T.k } : null)
+    }
     else selectCb(null)
   }
 
@@ -1295,18 +1291,20 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
   playEl.addEventListener('click', () => { if (timer) stopPlay(); else startPlay() })
   prevEl.addEventListener('click', () => { stopPlay(); setBeat(beatIdx <= 0 ? 0 : beatIdx - 1) })
   nextEl.addEventListener('click', () => { stopPlay(); setBeat(beatIdx + 1) })
-  followEl.addEventListener('click', () => {
-    followMode = !followMode
+  function setFollowMode(on: boolean, fitWhenOff = true) {
+    if (followMode === on) return
+    followMode = on
     followEl.classList.toggle('on', followMode)
     followEl.setAttribute('aria-pressed', String(followMode))
     if (followMode) {
       if (beatIdx < 0) setBeat(0)
-      else { renderStory(model.beats[beatIdx] ?? null); const f = frameOf(model.beats[beatIdx]?.nodeIds ?? []); if (f) animateTo(f.k, f.x, f.y) }
+      else { emitFollow(model.beats[beatIdx] ?? null); const f = frameOf(model.beats[beatIdx]?.nodeIds ?? []); if (f) animateTo(f.k, f.x, f.y) }
     } else {
-      renderStory(null) // hide the story card and return to the overview
-      fit()
+      emitFollow(null)
+      if (fitWhenOff) fit()
     }
-  })
+  }
+  followEl.addEventListener('click', () => setFollowMode(!followMode))
   rangeEl.addEventListener('input', () => {
     stopPlay(); cancelAnim()
     // the slider is beat-indexed: scrub jumps to that event (no camera/emphasis jank)
@@ -1329,6 +1327,8 @@ export function createTimeView(container: HTMLElement, theme: Theme, opts: { emb
     applyAsOf,
     select: (id) => { selectNode(id); return id === null || byId.has(id) },
     onSelect: (cb) => { selectCb = cb },
+    onFollow: (cb) => { followCb = cb },
+    setFollow: (on) => setFollowMode(on),
     setTheme: () => { /* themed by CSS vars on <body>; nothing to recompute */ },
     fit,
     zoomIn: () => zoomAbout(1.25),
