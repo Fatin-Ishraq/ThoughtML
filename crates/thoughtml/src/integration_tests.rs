@@ -2890,6 +2890,46 @@ fn project_examples_are_strict_clean() {
 }
 
 #[test]
+fn snake_workspace_compiles_as_one_clean_six_file_project() {
+    let sources = std::collections::HashMap::from([
+        (
+            "product".to_string(),
+            include_str!("../../../examples/snake-project/product.thml").to_string(),
+        ),
+        (
+            "architecture".to_string(),
+            include_str!("../../../examples/snake-project/architecture.thml").to_string(),
+        ),
+        (
+            "gameplay".to_string(),
+            include_str!("../../../examples/snake-project/gameplay.thml").to_string(),
+        ),
+        (
+            "quality".to_string(),
+            include_str!("../../../examples/snake-project/quality.thml").to_string(),
+        ),
+        (
+            "release".to_string(),
+            include_str!("../../../examples/snake-project/release.thml").to_string(),
+        ),
+    ]);
+    let result = parse_project(
+        include_str!("../../../examples/snake-project/project.thml"),
+        &sources,
+        full_options(),
+    );
+    assert!(
+        result.diagnostics.items.is_empty(),
+        "diags: {:?}",
+        result.diagnostics.items
+    );
+    assert!(focus(&result.canonical.objects, "release.ship-v1").is_some());
+    assert!(result.canonical.objects.iter().any(
+        |object| matches!(object, Object::Link(link) if link.from == "quality.mobile-swipe-bug" && link.to == "release.hold-v1")
+    ));
+}
+
+#[test]
 fn compliance_rollout_clean_under_full_options() {
     // The importer must also stay clean with the whole computational stack on,
     // checked as a project alongside its imported library.

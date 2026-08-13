@@ -1,0 +1,15 @@
+claim movement-feels-consistent
+  Snake movement feels predictable at the current speed.
+
+claim speed-increase-improves-tension
+  Gradually increasing speed makes longer sessions more exciting.
+
+claim wall-collision-should-end-run
+  Hitting a wall should end the current run.
+
+claim food-never-spawns-on-snake
+  Food must only appear on unoccupied cells.
+
+link movement-feels-consistent supports speed-increase-improves-tension
+link wall-collision-should-end-run supports movement-feels-consistent
+link food-never-spawns-on-snake supports movement-feels-consistent

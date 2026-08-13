@@ -1,0 +1,25 @@
+# Snake game — project assembly. Open this file as the workspace entry.
+
+import product as product
+import architecture as architecture
+import gameplay as gameplay
+import quality as quality
+import release as release
+
+link product.responsive-controls-required supports architecture.fixed-timestep
+  Responsive controls require predictable simulation timing.
+
+link architecture.fixed-timestep-is-consistent supports gameplay.movement-feels-consistent
+  The timing architecture explains the observed consistency.
+
+link gameplay.movement-feels-consistent supports release.ship-v1
+  Reliable movement supports releasing the game.
+
+link quality.core-rules-are-stable supports release.ship-v1
+  Passing core-rule tests support release readiness.
+
+link quality.mobile-swipe-bug supports release.hold-v1
+  The remaining input bug is evidence for delaying.
+
+link product.instant-restart-required supports release.ship-v1
+  The current build satisfies the expected restart experience.

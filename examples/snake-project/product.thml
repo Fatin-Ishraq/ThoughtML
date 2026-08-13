@@ -1,0 +1,11 @@
+goal enjoyable-short-session
+  The game should be enjoyable in sessions lasting two to five minutes.
+
+claim responsive-controls-required
+  Immediate directional response is essential to the game feeling fair.
+
+claim instant-restart-required
+  A player should be able to restart immediately after losing.
+
+link responsive-controls-required supports enjoyable-short-session
+link instant-restart-required supports enjoyable-short-session

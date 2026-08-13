@@ -1,0 +1,11 @@
+decision release-v1
+  Is the Snake game ready for its first public release?
+
+option ship-v1
+  Publish the current version.
+
+option hold-v1
+  Delay publication until remaining input problems are fixed.
+
+link ship-v1 option-of release-v1
+link hold-v1 option-of release-v1

@@ -1,0 +1,17 @@
+decision game-loop-design
+  How should movement timing be controlled?
+
+option fixed-timestep
+  Move the snake using a fixed simulation interval.
+
+option frame-dependent-movement
+  Move the snake according to rendered frame timing.
+
+link fixed-timestep option-of game-loop-design
+link frame-dependent-movement option-of game-loop-design
+
+claim fixed-timestep-is-consistent
+  Fixed simulation steps produce consistent movement across devices.
+
+link fixed-timestep supports fixed-timestep-is-consistent
+link fixed-timestep-is-consistent opposes frame-dependent-movement

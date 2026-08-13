@@ -1,0 +1,15 @@
+observation collision-tests-green
+  Wall and self-collision tests are passing.
+
+observation food-placement-tests-green
+  Food placement tests passed for ten thousand generated positions.
+
+observation mobile-swipe-bug
+  Fast opposite-direction swipes can still reverse the snake unexpectedly.
+
+claim core-rules-are-stable
+  The core movement and collision rules are reliable.
+
+link collision-tests-green supports core-rules-are-stable
+link food-placement-tests-green supports core-rules-are-stable
+link mobile-swipe-bug opposes core-rules-are-stable

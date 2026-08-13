@@ -282,6 +282,49 @@ details.stream-activity-item > summary { cursor: pointer; }
 .cm-editor { height: 100%; background: transparent; }
 .cm-scroller { font-family: var(--mono); font-size: 13px; line-height: 1.65; }
 
+/* multi-file project workspace */
+.workspace-head { gap: 9px; padding-right: 8px; }
+.workspace-entry {
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  color: var(--text-faint); font: 10.5px var(--mono);
+}
+.workspace-actions { display: flex; gap: 4px; margin-left: auto; }
+.workspace-actions button, .file-tab, .project-file, .detail-source {
+  border: 1px solid var(--border); color: var(--text-dim); background: var(--bg-elev);
+  font: 600 10.5px var(--sans); cursor: pointer; transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.workspace-actions button { padding: 4px 7px; border-radius: var(--r-sm); }
+.workspace-actions button:hover, .file-tab:hover, .project-file:hover, .detail-source:hover { color: var(--text); border-color: var(--border-strong); }
+.workspace-body { display: flex; flex: 1 1 auto; min-height: 0; }
+.project-files {
+  flex: 0 0 128px; min-width: 0; overflow: auto; padding: 8px 7px;
+  border-right: 1px solid var(--border); background: color-mix(in srgb, var(--bg-panel) 93%, var(--bg-canvas));
+}
+.project-files-head { display: flex; justify-content: space-between; padding: 3px 6px 8px; color: var(--text-faint); font-size: 9px; font-weight: 700; letter-spacing: 0.7px; text-transform: uppercase; }
+.project-file-list { display: flex; flex-direction: column; gap: 3px; }
+.project-file {
+  display: flex; align-items: center; gap: 6px; width: 100%; min-width: 0; padding: 6px 7px;
+  border-color: transparent; border-radius: var(--r-sm); text-align: left; background: transparent;
+}
+.project-file::before { content: '◇'; flex: none; color: var(--accent); font-size: 9px; }
+.project-file span:first-of-type { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--mono); font-weight: 500; }
+.project-file small { flex: none; margin-left: auto; color: var(--text-faint); font-size: 8px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; }
+.project-file.active { color: var(--text); background: var(--accent-dim); border-color: color-mix(in srgb, var(--accent) 22%, transparent); }
+.project-file.has-error::before { content: '●'; color: var(--error); }
+.project-file.has-warning::before { content: '●'; color: var(--warning); }
+.workspace-editor { display: flex; flex: 1 1 auto; min-width: 0; min-height: 0; flex-direction: column; }
+.file-tabs { display: flex; flex: 0 0 31px; min-width: 0; overflow-x: auto; border-bottom: 1px solid var(--border); scrollbar-width: thin; }
+.file-tab { flex: 0 0 auto; max-width: 150px; overflow: hidden; padding: 0 11px; border: 0; border-right: 1px solid var(--border); border-radius: 0; text-overflow: ellipsis; white-space: nowrap; background: transparent; font-family: var(--mono); font-weight: 500; }
+.file-tab.active { color: var(--text); background: var(--bg-panel); box-shadow: inset 0 -2px var(--accent); }
+.detail-source { margin-left: auto; padding: 4px 7px; border-radius: var(--r-pill); color: var(--accent); font-family: var(--mono); }
+.detail-source + .detail-close { margin-left: 0; }
+
+@media (max-width: 980px) {
+  .project-files { flex-basis: 104px; }
+  .workspace-actions #download-file { display: none; }
+  .workspace-actions button { padding-inline: 5px; font-size: 10px; }
+}
+
 /* examples tray */
 .examples-tray { flex: 0 0 auto; border-top: 1px solid var(--border); background: var(--bg-panel); }
 .tray-head {
@@ -718,7 +761,7 @@ pre.code {
 .diagnostics-bar.open .diag-list { max-height: 30vh; }
 .diag {
   display: grid;
-  grid-template-columns: 34px 60px 1fr;
+  grid-template-columns: minmax(72px, 118px) 60px 1fr;
   gap: 10px;
   align-items: baseline;
   width: 100%;
@@ -731,6 +774,7 @@ pre.code {
   font-family: var(--mono);
   font-size: 12px;
 }
+.diag-line { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .diag:hover { background: var(--bg-elev); }
 .diag-line { color: var(--text-faint); text-align: right; }
 .diag-error .diag-sev { color: var(--error); }

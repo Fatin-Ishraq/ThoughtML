@@ -75,8 +75,28 @@
 
     <main class="split">
       <section class="pane editor-pane">
-        <div class="pane-head"><span class="pane-title">Source</span></div>
-        <div id="editor" class="editor"></div>
+        <div class="pane-head workspace-head">
+          <span class="pane-title">Project</span>
+          <span class="workspace-entry" id="workspace-entry">untitled.thml</span>
+          <div class="workspace-actions">
+            <button type="button" id="snake-project" title="Load the six-file Snake project">Snake demo</button>
+            <button type="button" id="open-project" title="Open one or more sibling .thml files">Open</button>
+            <button type="button" id="new-file" title="Create and import a new ThoughtML file">New</button>
+            <button type="button" id="set-entry" title="Compile the project from the active file">Set entry</button>
+            <button type="button" id="download-file" title="Download the active ThoughtML file">Download</button>
+          </div>
+          <input id="project-file-input" type="file" accept=".thml,text/plain" multiple hidden />
+        </div>
+        <div class="workspace-body">
+          <aside class="project-files" aria-label="Project files">
+            <div class="project-files-head"><span>Files</span><span id="project-file-count"></span></div>
+            <div class="project-file-list" id="project-files"></div>
+          </aside>
+          <div class="workspace-editor">
+            <div class="file-tabs" id="file-tabs" role="tablist" aria-label="Open ThoughtML files"></div>
+            <div id="editor" class="editor"></div>
+          </div>
+        </div>
         <div class="examples-tray" id="examples-tray">
           <button class="tray-head" id="examples-toggle">
             <span class="chevron"></span><span>Examples</span>
@@ -156,6 +176,7 @@
         <div class="pane-head detail-head">
           <span class="detail-badge" id="detail-badge"></span>
           <span class="detail-id" id="detail-id"></span>
+          <button class="detail-source" id="detail-source" type="button" hidden></button>
           <button class="icon-btn detail-close" id="detail-close" title="Close (Esc)"></button>
         </div>
         <div class="detail-body" id="detail-body"></div>

@@ -8,7 +8,7 @@ export function renderDiagnostics(
   el: HTMLElement,
   diags: Diagnostic[],
   conflicts: Conflict[],
-  onJump: (line: number) => void,
+  onJump: (diagnostic: Diagnostic) => void,
 ): void {
   el.replaceChildren()
 
@@ -40,7 +40,9 @@ export function renderDiagnostics(
 
     const line = document.createElement('span')
     line.className = 'diag-line'
-    line.textContent = d.line > 0 ? String(d.line) : '–'
+    const location = d.source ? `${d.source}${d.line > 0 ? `:${d.line}` : ''}` : d.line > 0 ? String(d.line) : '–'
+    line.textContent = location
+    line.title = location
 
     const sev = document.createElement('span')
     sev.className = 'diag-sev'
@@ -51,7 +53,7 @@ export function renderDiagnostics(
     msg.textContent = d.message
 
     row.append(line, sev, msg)
-    row.addEventListener('click', () => onJump(d.line))
+    row.addEventListener('click', () => onJump(d))
     el.appendChild(row)
   }
 }

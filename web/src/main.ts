@@ -10,8 +10,18 @@ import { renderDetail, kindOf, labelOf } from './detail'
 import { EXAMPLES, DEFAULT_EXAMPLE, ADVANCED_EXAMPLES } from './examples'
 import { setIcon, glyph } from './icons'
 import { downloadStandalone, documentTitle } from './download'
+import { SNAKE_PROJECT, type WorkspaceSeed } from './project-examples'
+import {
+  addImport,
+  diagnosticFile,
+  findSourceOrigin,
+  importsOf,
+  projectSources,
+  validFileName,
+  type WorkspaceState,
+} from './workspace'
 
-const LS = { src: 'thoughtml:src', theme: 'thoughtml:theme', view: 'thoughtml:view' }
+const LS = { src: 'thoughtml:src', project: 'thoughtml:project:v1', theme: 'thoughtml:theme', view: 'thoughtml:view' }
 
 function el<T extends HTMLElement = HTMLElement>(sel: string): T {
   const node = document.querySelector(sel)
@@ -19,10 +29,55 @@ function el<T extends HTMLElement = HTMLElement>(sel: string): T {
   return node as T
 }
 
+function workspaceFromSeed(seed: WorkspaceSeed): WorkspaceState {
+  return { entry: seed.entry, active: seed.entry, files: { ...seed.files } }
+}
+
+function exampleWorkspace(name: string): WorkspaceState {
+  const entry = `${name}.thml`
+  const files: Record<string, string> = { [entry]: EXAMPLES[name] }
+  const queue = [...importsOf(EXAMPLES[name]).values()]
+  const seen = new Set<string>()
+  while (queue.length) {
+    const file = queue.shift()!
+    if (seen.has(file)) continue
+    seen.add(file)
+    const source = EXAMPLES[file.slice(0, -5)]
+    if (!source) continue
+    files[file] = source
+    queue.push(...importsOf(source).values())
+  }
+  return { entry, active: entry, files }
+}
+
+function loadWorkspace(): WorkspaceState {
+  const stored = localStorage.getItem(LS.project)
+  if (stored) {
+    try {
+      const parsed = JSON.parse(stored) as WorkspaceState
+      const files = Object.fromEntries(
+        Object.entries(parsed.files ?? {}).filter(([name, source]) => validFileName(name) && typeof source === 'string'),
+      )
+      if (Object.keys(files).length && parsed.entry in files) {
+        return { entry: parsed.entry, active: parsed.active in files ? parsed.active : parsed.entry, files }
+      }
+    } catch { /* migrate the older single-source storage below */ }
+  }
+  const legacy = localStorage.getItem(LS.src)
+  if (legacy) return { entry: 'untitled.thml', active: 'untitled.thml', files: { 'untitled.thml': legacy } }
+  return exampleWorkspace(DEFAULT_EXAMPLE)
+}
+
+function persistWorkspace(workspace: WorkspaceState): void {
+  localStorage.setItem(LS.project, JSON.stringify(workspace))
+  localStorage.setItem(LS.src, workspace.files[workspace.entry] ?? '')
+}
+
 async function boot(): Promise<void> {
   let theme: Theme = localStorage.getItem(LS.theme) === 'light' ? 'light' : 'dark'
   let mode: ViewMode = localStorage.getItem(LS.view) === 'structural' ? 'structural' : 'readable'
-  const initialSrc = localStorage.getItem(LS.src) ?? EXAMPLES[DEFAULT_EXAMPLE]
+  let workspace = loadWorkspace()
+  const initialSrc = workspace.files[workspace.active]
   document.body.dataset.theme = theme
 
   // icons
@@ -59,6 +114,126 @@ async function boot(): Promise<void> {
 
   const editor = createEditor(el('#editor'), initialSrc, scheduleRun, theme)
 
+  // ---- project workspace ----
+  const workspaceEntry = el('#workspace-entry')
+  const projectFilesEl = el('#project-files')
+  const fileTabsEl = el('#file-tabs')
+  const projectFileCount = el('#project-file-count')
+
+  function fileDiagnostics(file: string): Diagnostic[] {
+    return last?.diagnostics.items.filter((diag) => diagnosticFile(diag, workspace) === file) ?? []
+  }
+
+  function renderWorkspace(): void {
+    const files = Object.keys(workspace.files).sort((a, b) => {
+      if (a === workspace.entry) return -1
+      if (b === workspace.entry) return 1
+      return a.localeCompare(b)
+    })
+    workspaceEntry.textContent = workspace.entry
+    workspaceEntry.title = `Entry file: ${workspace.entry}`
+    projectFileCount.textContent = String(files.length)
+    projectFilesEl.replaceChildren(...files.map((file) => {
+      const button = document.createElement('button')
+      button.type = 'button'
+      button.className = 'project-file'
+      button.classList.toggle('active', file === workspace.active)
+      const diagnostics = fileDiagnostics(file)
+      button.classList.toggle('has-error', diagnostics.some((diag) => diag.severity === 'error'))
+      button.classList.toggle('has-warning', diagnostics.length > 0 && !diagnostics.some((diag) => diag.severity === 'error'))
+      const name = document.createElement('span'); name.textContent = file
+      button.appendChild(name)
+      if (file === workspace.entry) {
+        const badge = document.createElement('small'); badge.textContent = 'entry'; button.appendChild(badge)
+      }
+      button.addEventListener('click', () => switchFile(file))
+      return button
+    }))
+    fileTabsEl.replaceChildren(...files.map((file) => {
+      const tab = document.createElement('button')
+      tab.type = 'button'
+      tab.className = 'file-tab'
+      tab.classList.toggle('active', file === workspace.active)
+      tab.setAttribute('role', 'tab')
+      tab.setAttribute('aria-selected', String(file === workspace.active))
+      tab.textContent = file
+      tab.title = file
+      tab.addEventListener('click', () => switchFile(file))
+      return tab
+    }))
+  }
+
+  function syncActiveDiagnostics(): void {
+    editor.setDiagnostics(fileDiagnostics(workspace.active))
+  }
+
+  function switchFile(file: string, line?: number): void {
+    if (!(file in workspace.files)) return
+    workspace.active = file
+    persistWorkspace(workspace)
+    editor.setValue(workspace.files[file])
+    renderWorkspace()
+    syncActiveDiagnostics()
+    if (line) window.setTimeout(() => editor.gotoLine(line), 0)
+  }
+
+  function loadProject(next: WorkspaceState, message: string): void {
+    workspace = next
+    persistWorkspace(workspace)
+    editor.setValue(workspace.files[workspace.active])
+    pills.forEach((pill) => pill.classList.remove('active'))
+    renderWorkspace()
+    runProject()
+    toast(message)
+  }
+
+  el('#snake-project').addEventListener('click', () => loadProject(workspaceFromSeed(SNAKE_PROJECT), 'Loaded the six-file Snake project'))
+  el('#set-entry').addEventListener('click', () => {
+    workspace.entry = workspace.active
+    persistWorkspace(workspace)
+    renderWorkspace()
+    runProject()
+    toast(`${workspace.entry} is now the project entry`)
+  })
+  el('#new-file').addEventListener('click', () => {
+    const requested = window.prompt('New sibling ThoughtML file', 'evidence.thml')?.trim().toLowerCase()
+    if (!requested) return
+    const file = requested.endsWith('.thml') ? requested : `${requested}.thml`
+    if (!validFileName(file)) { toast('Use a lowercase kebab-case .thml filename'); return }
+    if (file in workspace.files) { switchFile(file); toast(`${file} already exists`); return }
+    workspace.files[file] = `# ${file.slice(0, -5)}\n\n`
+    if (file !== workspace.entry) workspace.files[workspace.entry] = addImport(workspace.files[workspace.entry], file)
+    workspace.active = file
+    persistWorkspace(workspace)
+    editor.setValue(workspace.files[file])
+    renderWorkspace()
+    runProject()
+    toast(`Created and imported ${file}`)
+  })
+
+  const fileInput = el<HTMLInputElement>('#project-file-input')
+  el('#open-project').addEventListener('click', () => fileInput.click())
+  fileInput.addEventListener('change', async () => {
+    const selected = [...(fileInput.files ?? [])]
+    const entries = await Promise.all(selected.map(async (file) => [file.name.toLowerCase(), await file.text()] as const))
+    const files = Object.fromEntries(entries.filter(([name]) => validFileName(name)))
+    const names = Object.keys(files).sort()
+    if (!names.length) { toast('Choose one or more .thml files'); return }
+    const entry = names.includes('project.thml') ? 'project.thml' : names[0]
+    loadProject({ entry, active: entry, files }, `Opened ${names.length} ThoughtML file${names.length === 1 ? '' : 's'}`)
+    fileInput.value = ''
+  })
+
+  el('#download-file').addEventListener('click', () => {
+    const file = workspace.active
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(new Blob([workspace.files[file]], { type: 'text/plain;charset=utf-8' }))
+    link.download = file
+    link.click()
+    URL.revokeObjectURL(link.href)
+    toast(`Downloaded ${file}`)
+  })
+
   // ---- examples ----
   const examplesEl = el('#examples')
   const pills: HTMLButtonElement[] = []
@@ -68,12 +243,12 @@ async function boot(): Promise<void> {
     b.className = 'pill'
     b.textContent = name
     b.addEventListener('click', () => {
-      editor.setValue(EXAMPLES[name])
+      loadProject(exampleWorkspace(name), `Loaded ${name}`)
       pills.forEach((p) => p.classList.toggle('active', p === b))
     })
     pills.push(b)
     examplesEl.appendChild(b)
-    if (EXAMPLES[name] === initialSrc) b.classList.add('active')
+    if (workspace.entry === `${name}.thml`) b.classList.add('active')
   }
   el('#examples-toggle').addEventListener('click', () => el('#examples-tray').classList.toggle('collapsed'))
 
@@ -101,6 +276,7 @@ async function boot(): Promise<void> {
   const detailBody = el('#detail-body')
   const detailBadge = el('#detail-badge')
   const detailId = el('#detail-id')
+  const detailSource = el<HTMLButtonElement>('#detail-source')
 
   function showDetail(id: string) {
     if (!last) return
@@ -112,6 +288,10 @@ async function boot(): Promise<void> {
     detailBadge.className = `detail-badge k-${kind}`
     detailBadge.innerHTML = `${gname ? glyph(gname) : ''}<span>${kind}</span>`
     detailId.textContent = labelOf(id)
+    const origin = findSourceOrigin(id, workspace)
+    detailSource.hidden = !origin
+    detailSource.textContent = origin ? `${origin.file}:${origin.line}` : ''
+    detailSource.onclick = origin ? () => switchFile(origin.file, origin.line) : null
     renderDetail(detailBody, last.canonical, id, navigateTo)
     rSelect(id)
     window.setTimeout(() => { if (!isView()) graph.resize(); rCenter(id) }, 230)
@@ -250,19 +430,18 @@ async function boot(): Promise<void> {
   })
 
   // ---- pipeline ----
-  // `run` parses the source into the baseline; `applyView` renders it.
-  function run(src: string): void {
+  // Always compile the entry document against every sibling file in the current
+  // workspace. Editing an imported tab therefore updates one unified graph.
+  function runProject(): void {
     let res: ParseResult
     try {
-      // Resolve any `import`s (§12.5) against the bundled examples, so a document
-      // can pull in another by name. A doc with no imports parses unchanged.
-      res = parseProject(src, EXAMPLES)
+      res = parseProject(workspace.files[workspace.entry], projectSources(workspace))
     } catch (err) {
       toast(`Parser error: ${String(err)}`)
       return
     }
     baseline = res
-    localStorage.setItem(LS.src, src)
+    persistWorkspace(workspace)
     applyView()
   }
 
@@ -278,8 +457,11 @@ async function boot(): Promise<void> {
     syncTimeline(last)
     const conflicts = canon.audit?.conflicts ?? []
     setDiagStatus(last.diagnostics.items, conflicts)
-    renderDiagnostics(el('#diagnostics'), last.diagnostics.items, conflicts, (line) => editor.gotoLine(line))
-    editor.setDiagnostics(last.diagnostics.items)
+    const displayDiagnostics = last.diagnostics.items.map((diag) => ({ ...diag, source: diagnosticFile(diag, workspace) }))
+    renderDiagnostics(el('#diagnostics'), displayDiagnostics, conflicts, (diag) => {
+      switchFile(diagnosticFile(diag, workspace), diag.line)
+    })
+    syncActiveDiagnostics()
     diagText = formatDiagnostics(last.diagnostics.items, conflicts)
     el('#diag-copy').hidden = diagText === ''
     el('#json').textContent = JSON.stringify(canon, null, 2)
@@ -291,12 +473,17 @@ async function boot(): Promise<void> {
         ? canon.objects.some((o) => o.type === 'stance' && o.agent === selectedId!.slice(6))
         : canon.objects.some((o) => o.id === selectedId)
       if (stillThere) {
+        const origin = findSourceOrigin(selectedId, workspace)
+        detailSource.hidden = !origin
+        detailSource.textContent = origin ? `${origin.file}:${origin.line}` : ''
+        detailSource.onclick = origin ? () => switchFile(origin.file, origin.line) : null
         renderDetail(detailBody, canon, selectedId, navigateTo)
         rSelect(selectedId)
       } else {
         closeDetail()
       }
     }
+    renderWorkspace()
     if (!isView()) el('#zoom-pct').textContent = `${Math.round(graph.cy.zoom() * 100)}%`
   }
 
@@ -306,8 +493,9 @@ async function boot(): Promise<void> {
   function formatDiagnostics(items: Diagnostic[], conflicts: Conflict[]): string {
     const lines: string[] = []
     for (const c of conflicts) lines.push(`conflict [${c.severity}]: ${c.message}`)
-    for (const d of [...items].sort((a, b) => a.line - b.line)) {
-      lines.push(`${d.line > 0 ? `line ${d.line}` : '–'} [${d.severity}]: ${d.message}`)
+    for (const d of [...items].sort((a, b) => diagnosticFile(a, workspace).localeCompare(diagnosticFile(b, workspace)) || a.line - b.line)) {
+      const file = diagnosticFile(d, workspace)
+      lines.push(`${file}${d.line > 0 ? `:${d.line}` : ''} [${d.severity}]: ${d.message}`)
     }
     return lines.join('\n')
   }
@@ -339,8 +527,10 @@ async function boot(): Promise<void> {
 
   let timer: number | undefined
   function scheduleRun(src: string): void {
+    workspace.files[workspace.active] = src
+    persistWorkspace(workspace)
     if (timer) clearTimeout(timer)
-    timer = window.setTimeout(() => run(src), 200)
+    timer = window.setTimeout(runProject, 200)
   }
 
   // ---- keyboard ----
@@ -355,7 +545,8 @@ async function boot(): Promise<void> {
   setupDivider(el('#divider'), el('.editor-pane'), () => { graph.resize(); if (isView()) view.fit() })
   window.addEventListener('resize', () => { graph.resize(); if (isView()) view.fit() })
 
-  run(editor.getValue())
+  renderWorkspace()
+  runProject()
 
   const loading = el('#loading')
   loading.classList.add('done')

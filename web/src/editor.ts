@@ -16,7 +16,11 @@ import { lintGutter, setDiagnostics, type Diagnostic as CmDiagnostic } from '@co
 import type { Diagnostic } from './model'
 import type { Theme } from './graph'
 
-const RECORD_KEYWORDS = new Set(['focus', 'link', 'stance', 'scope', 'question'])
+const RECORD_KEYWORDS = new Set([
+  'focus', 'link', 'stance', 'scope', 'question', 'profile', 'import',
+  'observation', 'claim', 'hypothesis', 'assumption', 'option', 'decision',
+  'goal', 'action', 'outcome', 'memory',
+])
 const POSTURES = new Set([
   'noticed', 'considers', 'suspects', 'infers', 'asks', 'holds',
   'chooses', 'rejects', 'revises', 'remembers', 'doubts', 'accepts',
@@ -24,6 +28,7 @@ const POSTURES = new Set([
 const RELATIONS = new Set([
   'supports', 'opposes', 'undercuts', 'answers', 'causes', 'enables',
   'prevents', 'depends-on', 'blocks', 'revises',
+  'leads-to', 'option-of', 'part-of', 'candidate-for',
 ])
 const FIELDS = new Set([
   'note', 'kind', 'about', 'weight', 'confidence', 'because', 'answers', 'expects',
