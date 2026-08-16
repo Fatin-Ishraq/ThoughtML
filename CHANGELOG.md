@@ -4,6 +4,57 @@ All notable changes to ThoughtML are recorded here. The project follows
 [Semantic Versioning](https://semver.org). **v0.1.0** is the first public
 release — real and usable, but the surface may still move.
 
+## [Unreleased]
+
+**Security release.** A security audit of the project found issues in the parser,
+the viewer, the `thoughtml stream` server, and the release pipeline. **Everyone
+should upgrade**; there is no configuration workaround for most of them.
+
+Full detail is published separately as a GitHub Security Advisory, so that the
+description and the fix do not arrive at the same time as an unpatched release.
+
+### Security
+
+- **Document content can no longer become markup.** A `quantity`'s unit and a
+  question's `expects` / `status` were carried into the viewer's DOM without
+  being constrained by the parser or escaped at the sink, so a document could
+  execute script in anyone who opened it — in the playground, in a shared
+  `--html` export, or in a browser watching a stream. Fixed at both layers: those
+  fields are now lexically constrained, and the detail pane builds text nodes.
+- **Malformed input can no longer abort the process.** Three passes recursed
+  without a depth bound and could exhaust the stack, which is not recoverable and
+  took down the stream server, the playground's worker, and any embedding host.
+  All three are bounded and report a diagnostic instead.
+- **Stream session records are private.** They were written to the shared system
+  temp directory at default permissions while holding the tokens that gate a live
+  session; they now live in a per-user directory, owner-only, and are validated
+  when read back.
+- **The stream server's network surface is narrower.** `Host` validation (DNS
+  rebinding), loopback-only `/health`, an explicit `--expose-public` for public
+  binds, constant-time token comparison, and a per-peer connection cap.
+- **The release pipeline only publishes what this repository tagged.** The
+  publish job's trigger, checkout ref, and script inputs are all constrained, and
+  release archives are verified against the release's own checksums before being
+  repackaged.
+- **Bounded analysis.** The sensitivity pass is superlinear and is now skipped,
+  with a warning, past a size limit — it was usable as a denial of service
+  anywhere the compiler runs on someone else's document.
+- A Content-Security-Policy on the playground and the standalone viewer, and
+  complete escaping of payloads baked into `<script>` tags.
+
+### Changed
+
+- `thoughtml stream --host <public address>` now requires `--expose-public`.
+  `--lan` and private/link-local addresses are unaffected.
+- `/health` answers over loopback only.
+- `SECURITY.md` states the actual threat model — a ThoughtML document is
+  untrusted input — and what the stream link does and does not protect.
+
+### Fixed
+
+- The standalone viewer template is pinned to LF. Built on Windows it picked up
+  CRLF, which made the byte-for-byte freshness guard impossible to satisfy.
+
 ## [0.4.0] — 2026-08-13
 
 **Connected reasoning.** This release turns ThoughtML from a strong single-file
