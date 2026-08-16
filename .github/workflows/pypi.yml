@@ -6,6 +6,20 @@ name: Publish to PyPI
 # Runs after cargo-dist successfully publishes the GitHub Release, or on demand
 # for a given version. `workflow_run` is intentional: releases created with the
 # built-in GITHUB_TOKEN do not emit another workflow-triggering release event.
+#
+# SECURITY — this job holds `id-token: write`, i.e. live PyPI publish rights, so
+# every input to it is treated as hostile:
+#
+#   * `workflow_run` hands a job the *base* repo's privileges while the run that
+#     triggered it may have come from a fork's pull request. This workflow
+#     therefore refuses to run unless the upstream run was a **tag push from this
+#     repository** — never a pull request, never a fork.
+#   * It checks out a validated `refs/tags/vX.Y.Z`, never `workflow_run.head_sha`.
+#     Checking out a head SHA would run an outside contributor's version of
+#     `build_wheels.py` with publish credentials attached.
+#   * No `${{ }}` expression is ever interpolated into a `run:` script. Branch and
+#     tag names may contain shell metacharacters; they arrive through `env:` and
+#     are validated before use.
 on:
   workflow_run:
     workflows: [Release]
@@ -21,40 +35,75 @@ permissions:
   contents: read
 
 jobs:
-  pypi:
-    name: Build wheels and publish
+  # Resolve and validate the version *before* anything privileged happens, and
+  # with no credentials of its own. A tag that is not plain SemVer fails closed.
+  resolve:
+    name: Resolve the release tag
+    # Only a successful tag push from this very repository qualifies. A fork's
+    # pull request produces `workflow_run.event == 'pull_request'` and a
+    # `head_repository` that is not ours, so it can never reach the publish job.
     if: >-
       github.event_name == 'workflow_dispatch' ||
-      github.event.workflow_run.conclusion == 'success'
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+      tag: ${{ steps.v.outputs.tag }}
+    steps:
+      - name: Resolve and validate version
+        id: v
+        env:
+          # Untrusted-by-default inputs, kept out of the script body.
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_VERSION: ${{ inputs.version }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            version="$INPUT_VERSION"
+          else
+            # A completed tag workflow carries the tag in head_branch.
+            version="${HEAD_BRANCH#v}"
+          fi
+          if ! printf '%s' "$version" \
+               | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+([-+][0-9A-Za-z.-]+)?$'; then
+            echo "::error::refusing to publish: '$version' is not a plain SemVer version"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+
+  pypi:
+    name: Build wheels and publish
+    needs: resolve
     runs-on: ubuntu-latest
     # Must match the environment configured on the PyPI trusted-publisher.
+    # Keep required reviewers on it: it is the last gate before a publish.
     environment: pypi
     permissions:
       id-token: write # required for PyPI Trusted Publishing (OIDC)
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      # The *validated* tag, not the triggering run's head SHA.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          ref: refs/tags/${{ needs.resolve.outputs.tag }}
+          persist-credentials: false
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.12"
 
-      # A completed tag workflow carries the tag in head_branch (strip the
-      # leading `v`); a manual run carries the version input directly.
-      - name: Resolve version
-        id: v
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "version=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
-          else
-            tag="${{ github.event.workflow_run.head_branch }}"
-            echo "version=${tag#v}" >> "$GITHUB_OUTPUT"
-          fi
-
+      # build_wheels.py verifies each downloaded archive's SHA-256 against the
+      # release's dist-manifest.json before it repackages anything.
       - name: Build platform wheels from the release binaries
-        run: python packaging/pypi/build_wheels.py --version "${{ steps.v.outputs.version }}"
+        env:
+          VERSION: ${{ needs.resolve.outputs.version }}
+        run: python packaging/pypi/build_wheels.py --version "$VERSION"
 
       - name: Check the wheels
         run: |
@@ -64,6 +113,6 @@ jobs:
       # Trusted Publishing: no username/password, no token — GitHub's OIDC identity
       # is exchanged for a short-lived PyPI credential, scoped to this repo+workflow.
       - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+        uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # release/v1
         with:
           packages-dir: packaging/pypi/build/dist
