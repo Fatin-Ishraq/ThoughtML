@@ -26,6 +26,19 @@ const MAX_PROJECT_BYTES: u64 = 16 * 1024 * 1024;
 const MAX_HEADER_BYTES: usize = 64 * 1024;
 const MAX_CONNECTIONS: usize = 64;
 const MAX_SSE_CLIENTS: usize = 24;
+/// Ceiling on a control-plane response read, so a misbehaving loopback listener
+/// cannot stream indefinitely into `thoughtml stream status` / `stop`.
+const MAX_CONTROL_RESPONSE_BYTES: u64 = 64 * 1024;
+
+// Token sizes, in bytes of entropy and in the hex length they render to. The
+// session id is generated independently of the viewer token: deriving it from a
+// prefix of the token (as it once was) published 48 bits of a live secret into
+// stdout, `--json` startup output, and `stream status`.
+const VIEWER_TOKEN_BYTES: usize = 24;
+const CONTROL_TOKEN_BYTES: usize = 32;
+const SESSION_ID_BYTES: usize = 6;
+const CONTROL_TOKEN_HEX: usize = CONTROL_TOKEN_BYTES * 2;
+const SESSION_ID_HEX: usize = SESSION_ID_BYTES * 2;
 
 #[derive(clap::Args, Debug)]
 pub(crate) struct StreamArgs {
@@ -166,6 +179,29 @@ struct SessionRecord {
     entry_file: String,
     started_at_ms: u128,
     pid: u32,
+    /// Where this record was read from. Not part of the on-disk shape — records
+    /// can come from the current directory or the legacy one, and reaping has to
+    /// delete the file it actually found.
+    #[serde(skip)]
+    path: PathBuf,
+}
+
+/// Is `s` exactly `len` lowercase-or-uppercase hex digits?
+fn is_hex(s: &str, len: usize) -> bool {
+    s.len() == len && s.bytes().all(|b| b.is_ascii_hexdigit())
+}
+
+impl SessionRecord {
+    /// Are the fields this process will *act on* shaped the way it wrote them?
+    ///
+    /// `control_token` is pasted into a request line, so a value carrying CR/LF
+    /// would let whoever wrote the record smuggle extra HTTP requests into any
+    /// loopback service (`request_local`). The session id becomes a file name.
+    /// Both are generated as fixed-length hex, so anything else is not ours —
+    /// reject the record rather than trust the disk.
+    fn is_well_formed(&self) -> bool {
+        is_hex(&self.session_id, SESSION_ID_HEX) && is_hex(&self.control_token, CONTROL_TOKEN_HEX)
+    }
 }
 
 #[derive(Clone, Serialize)]
@@ -260,21 +296,29 @@ pub(crate) fn run(args: StreamArgs) -> ExitCode {
         .and_then(|s| s.to_str())
         .unwrap_or("ThoughtML stream")
         .to_string();
-    let viewer_token = match secure_token(24) {
+    let viewer_token = match secure_token(VIEWER_TOKEN_BYTES) {
         Ok(token) => token,
         Err(e) => {
             eprintln!("error: cannot create a secure stream token: {e}");
             return ExitCode::FAILURE;
         }
     };
-    let control_token = match secure_token(32) {
+    let control_token = match secure_token(CONTROL_TOKEN_BYTES) {
         Ok(token) => token,
         Err(e) => {
             eprintln!("error: cannot create a secure control token: {e}");
             return ExitCode::FAILURE;
         }
     };
-    let session = viewer_token[..12].to_string();
+    // Independent of the viewer token — the session id is printed to stdout and
+    // listed by `stream status`, so it must not be a prefix of a live secret.
+    let session = match secure_token(SESSION_ID_BYTES) {
+        Ok(id) => id,
+        Err(e) => {
+            eprintln!("error: cannot create a session id: {e}");
+            return ExitCode::FAILURE;
+        }
+    };
     let initial = compile_project(
         &project,
         &title,
@@ -326,6 +370,7 @@ pub(crate) fn run(args: StreamArgs) -> ExitCode {
         entry_file: entry.display().to_string(),
         started_at_ms: now_ms(),
         pid: std::process::id(),
+        path: PathBuf::new(),
     };
     let state_path = match write_session_record(&record) {
         Ok(path) => path,
@@ -885,29 +930,98 @@ fn secure_token(bytes: usize) -> io::Result<String> {
     Ok(random.iter().map(|byte| format!("{byte:02x}")).collect())
 }
 
+/// Where session records live: a **per-user, private** directory.
+///
+/// A record carries the control token *and* the viewer URL — and the viewer token
+/// inside that URL is the only thing gating `/s/…`, the snapshot, and the event
+/// stream. The shared system temp directory is therefore the wrong home for it:
+/// on a multi-user machine every other account can list and read `/tmp`, and a
+/// fixed path there can be pre-created or symlinked by whoever gets there first.
 fn session_dir() -> PathBuf {
+    #[cfg(unix)]
+    {
+        // Already per-user and 0700 when the system provides it.
+        if let Some(runtime) = std::env::var_os("XDG_RUNTIME_DIR") {
+            if !runtime.is_empty() {
+                return PathBuf::from(runtime).join("thoughtml/stream-sessions");
+            }
+        }
+        if let Some(home) = std::env::var_os("HOME") {
+            if !home.is_empty() {
+                return PathBuf::from(home).join(".cache/thoughtml/stream-sessions");
+            }
+        }
+    }
+    #[cfg(windows)]
+    {
+        // Per-user by default ACL, unlike the machine-wide temp directory.
+        if let Some(local) = std::env::var_os("LOCALAPPDATA") {
+            if !local.is_empty() {
+                return PathBuf::from(local).join("thoughtml\\stream-sessions");
+            }
+        }
+    }
+    // Last resort. `write_session_record` still clamps the mode to owner-only.
     std::env::temp_dir().join("thoughtml-stream-sessions")
+}
+
+/// Clamp a directory to owner-only (`0700`) on Unix; a no-op elsewhere, where the
+/// chosen locations are already per-user by ACL.
+fn restrict_dir(dir: &Path) -> io::Result<()> {
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        std::fs::set_permissions(dir, std::fs::Permissions::from_mode(0o700))?;
+    }
+    #[cfg(not(unix))]
+    let _ = dir;
+    Ok(())
+}
+
+/// Create `path` fresh and owner-readable only (`0600`), then write `bytes`.
+/// `create_new` refuses to follow anything already sitting at that name.
+fn write_private(path: &Path, bytes: &[u8]) -> io::Result<()> {
+    let mut options = std::fs::OpenOptions::new();
+    options.write(true).create_new(true);
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        options.mode(0o600);
+    }
+    let mut file = options.open(path)?;
+    file.write_all(bytes)?;
+    file.sync_all()
 }
 
 fn write_session_record(record: &SessionRecord) -> io::Result<PathBuf> {
     let dir = session_dir();
     std::fs::create_dir_all(&dir)?;
+    restrict_dir(&dir)?;
     let path = dir.join(format!("{}.json", record.session_id));
     let temporary = dir.join(format!(".{}.{}.tmp", record.session_id, std::process::id()));
     let bytes = serde_json::to_vec_pretty(record).map_err(io::Error::other)?;
-    std::fs::write(&temporary, bytes)?;
+    // A leftover temp file from a crashed run of *this* pid would block
+    // `create_new`; clearing it is safe now that the directory is owner-only.
+    let _ = std::fs::remove_file(&temporary);
+    write_private(&temporary, &bytes)?;
     std::fs::rename(&temporary, &path)?;
     Ok(path)
 }
 
-fn load_session_records() -> io::Result<Vec<SessionRecord>> {
-    let dir = session_dir();
-    let entries = match std::fs::read_dir(&dir) {
+/// The legacy, world-readable location records were written to before they moved
+/// to a per-user directory. Still *read* so an upgrade does not orphan a session
+/// started by an older binary — and so `stream status`, which deletes records it
+/// cannot reach, reaps the leftovers instead of leaving live tokens in `/tmp`.
+fn legacy_session_dir() -> PathBuf {
+    std::env::temp_dir().join("thoughtml-stream-sessions")
+}
+
+fn read_records_in(dir: &Path, records: &mut Vec<SessionRecord>) -> io::Result<()> {
+    let entries = match std::fs::read_dir(dir) {
         Ok(entries) => entries,
-        Err(e) if e.kind() == io::ErrorKind::NotFound => return Ok(Vec::new()),
+        Err(e) if e.kind() == io::ErrorKind::NotFound => return Ok(()),
         Err(e) => return Err(e),
     };
-    let mut records = Vec::new();
     for entry in entries.flatten() {
         let path = entry.path();
         if path.extension().and_then(|extension| extension.to_str()) != Some("json") {
@@ -917,17 +1031,57 @@ fn load_session_records() -> io::Result<Vec<SessionRecord>> {
             .ok()
             .and_then(|bytes| serde_json::from_slice::<SessionRecord>(&bytes).ok())
         {
-            Some(record) if record.schema_version == SCHEMA_VERSION => records.push(record),
+            Some(mut record)
+                if record.schema_version == SCHEMA_VERSION && record.is_well_formed() =>
+            {
+                record.path = path;
+                records.push(record);
+            }
             _ => {
                 let _ = std::fs::remove_file(path);
             }
         }
     }
+    Ok(())
+}
+
+fn load_session_records() -> io::Result<Vec<SessionRecord>> {
+    let mut records = Vec::new();
+    read_records_in(&session_dir(), &mut records)?;
+    let legacy = legacy_session_dir();
+    if legacy != session_dir() {
+        // Best-effort: the shared temp directory may not be readable by us.
+        let _ = read_records_in(&legacy, &mut records);
+    }
+    // A session id is unique per process; keep the first sighting if an upgrade
+    // left the same record in both places.
+    let mut seen = HashSet::new();
+    records.retain(|record| seen.insert(record.session_id.clone()));
     records.sort_by_key(|record| record.started_at_ms);
     Ok(records)
 }
 
+/// Send one request to a recorded session's control plane and return its response.
+///
+/// `path` is built from the record's `control_token`, which came off disk, so the
+/// caller must have validated the record (`SessionRecord::is_well_formed`) first —
+/// a token containing CR/LF would otherwise be written straight into the request
+/// line and smuggle attacker-chosen requests into whatever listens on that port.
+/// Re-checked here rather than assumed, since this is the function that writes.
 fn request_local(record: &SessionRecord, method: &str, path: &str) -> io::Result<String> {
+    if !record.is_well_formed() {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidData,
+            "stream session record is malformed",
+        ));
+    }
+    // Printable ASCII only: no CR, LF, space, or control bytes reach the socket.
+    if path.bytes().any(|b| !(0x21..=0x7e).contains(&b)) {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidInput,
+            "refusing to send a control path with unsafe characters",
+        ));
+    }
     let address: SocketAddr = record
         .control_addr
         .parse()
@@ -948,7 +1102,10 @@ fn request_local(record: &SessionRecord, method: &str, path: &str) -> io::Result
     )?;
     socket.flush()?;
     let mut response = String::new();
-    socket.read_to_string(&mut response)?;
+    // Bounded: only the status line matters to either caller.
+    (&socket)
+        .take(MAX_CONTROL_RESPONSE_BYTES)
+        .read_to_string(&mut response)?;
     Ok(response)
 }
 
@@ -971,9 +1128,9 @@ fn run_action(action: StreamAction) -> ExitCode {
             for record in records {
                 let reachable = record_reachable(&record);
                 if !reachable {
-                    let _ = std::fs::remove_file(
-                        session_dir().join(format!("{}.json", record.session_id)),
-                    );
+                    // Delete the file we actually read, which may be the legacy
+                    // world-readable one left by an older binary.
+                    let _ = std::fs::remove_file(&record.path);
                 }
                 statuses.push(SessionStatus {
                     session_id: record.session_id,
@@ -1576,6 +1733,80 @@ mod tests {
             changed_files(&old, &new),
             ["entry.thml", "new.thml", "old.thml"]
         );
+    }
+
+    fn record(session_id: &str, control_token: &str) -> SessionRecord {
+        SessionRecord {
+            schema_version: SCHEMA_VERSION,
+            session_id: session_id.to_string(),
+            viewer_url: "http://127.0.0.1:9/s/x".into(),
+            control_addr: "127.0.0.1:9".into(),
+            control_token: control_token.to_string(),
+            entry_file: "entry.thml".into(),
+            started_at_ms: 0,
+            pid: 1,
+            path: PathBuf::new(),
+        }
+    }
+
+    #[test]
+    fn session_records_off_disk_must_be_shaped_like_ours() {
+        let good = record(&"a".repeat(SESSION_ID_HEX), &"b".repeat(CONTROL_TOKEN_HEX));
+        assert!(good.is_well_formed());
+
+        // A control token is pasted into a request line; CR/LF in it would smuggle
+        // extra HTTP requests into whatever loopback service the record names.
+        let crlf = format!("{}\r\nX-Injected: 1", "b".repeat(CONTROL_TOKEN_HEX));
+        assert!(!record(&"a".repeat(SESSION_ID_HEX), &crlf).is_well_formed());
+        // Wrong length, non-hex, and traversal-shaped ids are all rejected.
+        assert!(!record("../../etc/passwd", &"b".repeat(CONTROL_TOKEN_HEX)).is_well_formed());
+        assert!(!record(&"a".repeat(SESSION_ID_HEX), "short").is_well_formed());
+        assert!(
+            !record(&"z".repeat(SESSION_ID_HEX), &"b".repeat(CONTROL_TOKEN_HEX)).is_well_formed()
+        );
+    }
+
+    #[test]
+    fn control_requests_refuse_a_malformed_record() {
+        let crlf = format!("{}\r\nGET /evil HTTP/1.1", "b".repeat(CONTROL_TOKEN_HEX));
+        let bad = record(&"a".repeat(SESSION_ID_HEX), &crlf);
+        let err = request_local(&bad, "POST", "/control/x/stop").unwrap_err();
+        assert_eq!(err.kind(), io::ErrorKind::InvalidData);
+
+        // Even with a clean record, a path carrying control characters is refused
+        // before a single byte reaches the socket.
+        let good = record(&"a".repeat(SESSION_ID_HEX), &"b".repeat(CONTROL_TOKEN_HEX));
+        let err = request_local(&good, "POST", "/control/a\r\nX: 1/stop").unwrap_err();
+        assert_eq!(err.kind(), io::ErrorKind::InvalidInput);
+    }
+
+    #[test]
+    fn session_id_is_not_derived_from_the_viewer_token() {
+        let viewer = secure_token(VIEWER_TOKEN_BYTES).unwrap();
+        let session = secure_token(SESSION_ID_BYTES).unwrap();
+        assert_eq!(session.len(), SESSION_ID_HEX);
+        // The id is published (stdout, `--json`, `stream status`); the token is not.
+        assert!(!viewer.starts_with(&session));
+    }
+
+    #[test]
+    fn session_directory_is_not_the_shared_temp_directory() {
+        // The record holds the viewer token, which is the only thing gating the
+        // reasoning graph. On a multi-user box the system temp dir is readable by
+        // every other account, so it must not be the default home.
+        let dir = session_dir();
+        let shared = std::env::temp_dir();
+        let private = std::env::var_os("XDG_RUNTIME_DIR").is_some()
+            || std::env::var_os("HOME").is_some()
+            || std::env::var_os("LOCALAPPDATA").is_some();
+        if private {
+            assert!(
+                !dir.starts_with(&shared),
+                "session dir {} still sits under the shared temp dir {}",
+                dir.display(),
+                shared.display()
+            );
+        }
     }
 
     #[test]
