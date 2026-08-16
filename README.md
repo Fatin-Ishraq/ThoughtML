@@ -18,7 +18,7 @@
   <a href="https://fatin-ishraq.github.io/ThoughtML/playground/"><img alt="playground" src="https://img.shields.io/badge/playground-try%20it%20live-8957e5" /></a>
   <a href="https://github.com/Fatin-Ishraq/ThoughtML/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/Fatin-Ishraq/ThoughtML/actions/workflows/ci.yml/badge.svg" /></a>
   <a href="LICENSE"><img alt="license: MIT" src="https://img.shields.io/badge/license-MIT-green" /></a>
-  <a href="CHANGELOG.md"><img alt="version" src="https://img.shields.io/badge/version-0.4.0-blueviolet" /></a>
+  <a href="CHANGELOG.md"><img alt="version" src="https://img.shields.io/badge/version-0.4.1-blueviolet" /></a>
 </p>
 
 <p align="center">
@@ -230,6 +230,12 @@ npm run dev
 More in [Use cases ↗](https://fatin-ishraq.github.io/ThoughtML/guides/use-cases.html).
 
 ## Status
+
+**v0.4.1 — security release.** Upgrade from 0.4.0 or earlier: a security audit found
+issues in the parser, the viewer, the `thoughtml stream` server, and the release
+pipeline, and there is no configuration workaround for most of them. Nothing in the
+language changed. Details are in [CHANGELOG.md](CHANGELOG.md) and the repository's
+security advisories.
 
 **v0.4.0 — connected reasoning.** ThoughtML now scales from one document to a living
 project: persistent multi-file authoring, authoritative file/line provenance, a unified

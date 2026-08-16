@@ -4,7 +4,7 @@ All notable changes to ThoughtML are recorded here. The project follows
 [Semantic Versioning](https://semver.org). **v0.1.0** is the first public
 release — real and usable, but the surface may still move.
 
-## [Unreleased]
+## [0.4.1] — 2026-08-17
 
 **Security release.** A security audit of the project found issues in the parser,
 the viewer, the `thoughtml stream` server, and the release pipeline. **Everyone
