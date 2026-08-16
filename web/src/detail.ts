@@ -4,6 +4,36 @@
 import { formatValue, type Canonical, type CanonObject, type DecisionEV, type ExpectedValue, type Fields, type Link, type Quantity, type Value } from './model'
 import { glyph } from './icons'
 
+// --- safe DOM construction -------------------------------------------------
+//
+// Nothing in this file interpolates document-derived text into `innerHTML`.
+// A ThoughtML document is untrusted input: it can arrive from an AI, a repo, a
+// shared `--html` export, or someone else's `thoughtml stream`. Several fields
+// reach here verbatim — a `quantity`'s unit, a question's `expects`/`status` —
+// and a unit of `<img/src=q/onerror=…>` used to execute in the playground, in
+// every baked standalone file, and in every viewer watching a stream.
+//
+// `glyph()` is a lookup into a fixed table of our own SVG, so it is the one
+// thing still assigned as markup; everything else goes in as `textContent`.
+
+/** A `<span class=cls>` whose text is set safely. */
+function textSpan(cls: string, text: string): HTMLSpanElement {
+  const el = document.createElement('span')
+  if (cls) el.className = cls
+  el.textContent = text
+  return el
+}
+
+/** A `<span>` holding one of our own glyphs (trusted markup), or null. */
+function glyphSpan(name: string | undefined, cls = ''): HTMLSpanElement | null {
+  const markup = name ? glyph(name) : ''
+  if (!markup) return null
+  const el = document.createElement('span')
+  if (cls) el.className = cls
+  el.innerHTML = markup // fixed table in icons.ts, never document-derived
+  return el
+}
+
 /** A row in the "load-bearing evidence" list: an incoming evidence link, its
  *  signed leverage, and a magnitude bar. Clicking navigates to the source. */
 function leverageRow(l: Link, isTop: boolean, onNav: (id: string) => void): HTMLElement {
@@ -61,7 +91,7 @@ function quantityFact(q: Quantity, label?: string): HTMLElement {
   }
   const main = document.createElement('div')
   main.className = 'quantity-main'
-  main.innerHTML = `<span class="quantity-value">${formatNum(q.value)}</span><span class="quantity-unit">${q.unit}</span>`
+  main.append(textSpan('quantity-value', formatNum(q.value)), textSpan('quantity-unit', q.unit))
   const meta = document.createElement('div')
   meta.className = 'quantity-meta'
   const dim = q.dimension.split(':')[0]
@@ -263,7 +293,7 @@ function meterBar(value: Value | undefined, title = 'confidence', accent?: strin
   const lab = document.createElement('div')
   lab.className = 'conf-label'
   const titleText = basis ? `${title} · ${basis}` : title
-  lab.innerHTML = `<span>${titleText}</span><span>${label}</span>`
+  lab.append(textSpan('', titleText), textSpan('', label))
   const track = document.createElement('div')
   track.className = 'conf-track'
   const fill = document.createElement('div')
@@ -299,8 +329,9 @@ export function renderDetail(
   const makeChip = (label: string, navId: string, glyphName?: string) => {
     const b = document.createElement('button')
     b.className = `chip chip-${kindOf(canon, navId)}`
-    const g = glyphName ? glyph(glyphName) : ''
-    b.innerHTML = `${g ? `<span class="chip-glyph">${g}</span>` : ''}<span class="chip-label">${label}</span>`
+    const gs = glyphSpan(glyphName, 'chip-glyph')
+    if (gs) b.appendChild(gs)
+    b.appendChild(textSpan('chip-label', label))
     b.title = navId
     b.addEventListener('click', () => onNav(navId))
     return b
@@ -324,7 +355,9 @@ export function renderDetail(
     if (obj.type === 'focus' && obj.kind) {
       const k = document.createElement('div')
       k.className = 'detail-kind'
-      k.innerHTML = `${glyph(obj.kind)}<span>${obj.kind}</span>`
+      const ks = glyphSpan(obj.kind)
+      if (ks) k.appendChild(ks)
+      k.appendChild(textSpan('', obj.kind))
       facts.appendChild(k)
     }
     // Typed measure (Phase 7) and/or formula (Phase 8): the authored value, the
@@ -341,7 +374,7 @@ export function renderDetail(
     if ('superseded_by' in obj && obj.superseded_by) {
       const s = document.createElement('div')
       s.className = 'detail-superseded'
-      s.innerHTML = `<span class="strike">${labelOf(id)}</span> · revised`
+      s.append(textSpan('strike', labelOf(id)), document.createTextNode(' · revised'))
       facts.appendChild(s)
     }
     // Grounded argument status (Phase 5): does this claim survive the attacks?
@@ -465,7 +498,8 @@ export function renderDetail(
 function tag(text: string, glyphName?: string): HTMLElement {
   const s = document.createElement('span')
   s.className = 'detail-tag'
-  const g = glyphName ? glyph(glyphName) : ''
-  s.innerHTML = `${g}<span>${text}</span>`
+  const gs = glyphSpan(glyphName)
+  if (gs) s.appendChild(gs)
+  s.appendChild(textSpan('', text))
   return s
 }

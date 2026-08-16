@@ -3369,3 +3369,64 @@ fn fmt_never_changes_the_model() {
         "fmt changed the canonical model"
     );
 }
+
+// --- Untrusted-document hardening -----------------------------------------
+//
+// A ThoughtML document is untrusted input: it arrives from an AI, a repo, a
+// shared `--html` export, or someone else's `thoughtml stream`. Fields that are
+// rendered back to a reader must therefore be lexically constrained at the
+// parser, not merely escaped at whichever sink happens to consume them today.
+
+/// Every string a viewer renders as a label must be free of markup characters.
+/// This is the invariant the sinks in `web/src/detail.ts` rely on.
+#[test]
+fn rendered_labels_never_carry_markup() {
+    let hostile = "<img/src=q/onerror=alert(1)>";
+    let cases = [
+        format!("focus a\n  kind claim\n  Body.\n  quantity 5 {hostile}\n"),
+        format!("question q\n  expects {hostile}\n  about a\nfocus a\n  Body.\n"),
+        format!("question q\n  status {hostile}\n  Body?\n"),
+        format!("profile p\n  relations {hostile}\n"),
+        format!("profile p\n  kinds {hostile}\n"),
+    ];
+    for src in cases {
+        let result = parse_str(&src);
+        assert!(
+            result.diagnostics.has_errors(),
+            "hostile value was accepted without an error:\n{src}"
+        );
+        let json = serde_json::to_string(&result.canonical).unwrap();
+        assert!(
+            !json.contains("onerror"),
+            "hostile value survived into the canonical model:\n{src}\n{json}"
+        );
+    }
+}
+
+/// The units real documents use must keep parsing clean — the validation above
+/// is a character-class gate, not a whitelist of known units.
+#[test]
+fn ordinary_units_and_symbols_still_parse_clean() {
+    let src = "focus cost\n  kind claim\n  Spend.\n  quantity 0.021 USD/GB measured\n\
+               \nfocus lat\n  kind observation\n  Latency.\n  quantity 200 ms\n\
+               \nfocus share\n  kind observation\n  Share.\n  quantity 30 %\n\
+               \nfocus seats\n  kind observation\n  Seats.\n  quantity 5000 user\n\
+               \nlink lat supports cost\nlink share supports cost\nlink seats supports cost\n\
+               \nquestion q\n  expects forecast\n  status open\n  about cost\n";
+    let result = parse_str(src);
+    assert!(
+        !result.diagnostics.has_errors(),
+        "ordinary units were rejected: {:?}",
+        result.diagnostics.items
+    );
+    let quantities: Vec<_> = result
+        .canonical
+        .objects
+        .iter()
+        .filter_map(|o| match o {
+            Object::Focus(f) => f.quantity.as_ref().map(|q| q.unit.clone()),
+            _ => None,
+        })
+        .collect();
+    assert_eq!(quantities, ["USD/GB", "ms", "%", "user"]);
+}
