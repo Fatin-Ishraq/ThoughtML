@@ -3430,3 +3430,151 @@ fn ordinary_units_and_symbols_still_parse_clean() {
         .collect();
     assert_eq!(quantities, ["USD/GB", "ms", "%", "user"]);
 }
+
+// --- Unbounded recursion --------------------------------------------------
+//
+// These three inputs used to abort the process with a stack overflow. That is
+// strictly worse than a panic: it is not unwindable, so it takes down
+// `thoughtml stream`, the wasm worker behind the playground, and any host
+// embedding the library — and two of them are reachable with no flags at all.
+// The harness cannot catch an overflow either, so if a bound regresses these
+// tests do not fail politely; the runner dies. That is the intended signal.
+
+/// The full compute stack, as the playground and `--compute` run it.
+fn all_on() -> Options {
+    Options {
+        derive_confidence: true,
+        argument_status: true,
+        sensitivity: true,
+        formulas: true,
+        decision_ev: true,
+        audit: true,
+        ..Default::default()
+    }
+}
+
+/// A formula of a few thousand parentheses drove
+/// `parse_expr → parse_term → parse_unary → parse_primary → parse_expr` off the
+/// end of the stack.
+#[test]
+fn deeply_nested_formulas_are_rejected_not_fatal() {
+    for depth in [512, 5_000, 100_000] {
+        let src = format!("focus a\n  = {}1{}\n", "(".repeat(depth), ")".repeat(depth));
+        let result = parse_str_with(&src, all_on());
+        assert!(
+            result
+                .diagnostics
+                .items
+                .iter()
+                .any(|d| d.message.contains("nests deeper")),
+            "depth {depth} produced no depth diagnostic"
+        );
+    }
+    // Unary minus recurses through the same path.
+    let src = format!("focus a\n  = {}1\n", "-".repeat(50_000));
+    let result = parse_str_with(&src, all_on());
+    assert!(result
+        .diagnostics
+        .items
+        .iter()
+        .any(|d| d.message.contains("nests deeper")));
+}
+
+/// Formulas people actually write must keep evaluating.
+#[test]
+fn ordinary_formula_nesting_still_evaluates() {
+    let src = "focus hosting\n  kind observation\n  Hosting.\n  quantity 100 USD\n\
+               \nfocus bandwidth\n  kind observation\n  Bandwidth.\n  quantity 20 USD\n\
+               \nfocus total\n  kind claim\n  Total.\n  = ((hosting + bandwidth) * 2) - 10 USD\n";
+    let result = parse_str_with(src, all_on());
+    assert!(
+        !result.diagnostics.has_errors(),
+        "{:?}",
+        result.diagnostics.items
+    );
+    let computed = result.canonical.objects.iter().find_map(|o| match o {
+        Object::Focus(f) if f.id == "total" => f.computed_quantity.as_ref(),
+        _ => None,
+    });
+    assert_eq!(computed.map(|q| q.value), Some(230.0));
+}
+
+/// A long `causes` chain became the recursion depth of the cycle check — on the
+/// *default* path, so `thoughtml check` and every playground keystroke hit it.
+#[test]
+fn long_dependency_chains_do_not_exhaust_the_stack() {
+    let n = 20_000;
+    let mut src = String::new();
+    for i in 0..n {
+        src.push_str(&format!("focus f{i}\n  Body {i}.\n"));
+    }
+    for i in 0..n - 1 {
+        src.push_str(&format!("link f{i} causes f{}\n", i + 1));
+    }
+    let result = parse_str(&src);
+    assert!(!result.diagnostics.has_errors());
+    // An acyclic chain: no cycle warning, and crucially no abort.
+    assert!(!result
+        .diagnostics
+        .items
+        .iter()
+        .any(|d| d.message.contains("cyclic dependency")));
+}
+
+/// Making the chain iterative must not change what it reports.
+#[test]
+fn cycles_are_still_detected_after_the_chain() {
+    let n = 5_000;
+    let mut src = String::new();
+    for i in 0..n {
+        src.push_str(&format!("focus f{i}\n  Body {i}.\n"));
+    }
+    for i in 0..n - 1 {
+        src.push_str(&format!("link f{i} causes f{}\n", i + 1));
+    }
+    // Close the loop at the far end.
+    src.push_str(&format!("link f{} causes f0\n", n - 1));
+    let result = parse_str(&src);
+    let cycles: Vec<_> = result
+        .diagnostics
+        .items
+        .iter()
+        .filter(|d| d.message.contains("cyclic dependency"))
+        .collect();
+    assert_eq!(cycles.len(), 1, "expected exactly one reported cycle");
+
+    // And the small case reports the same path it always did.
+    let small = parse_str("focus a\n  A.\nfocus b\n  B.\nfocus c\n  C.\nlink a causes b\nlink b causes c\nlink c causes a\n");
+    assert!(small
+        .diagnostics
+        .items
+        .iter()
+        .any(|d| d.message == "cyclic dependency: a → b → c → a"));
+}
+
+/// Nesting is built iteratively but consumed recursively — by the vocabulary
+/// lint, the desugarer, and `Record`'s derived `Drop`.
+#[test]
+fn deeply_nested_records_are_rejected_not_fatal() {
+    let src: String = (0..5_000)
+        .map(|i| format!("{}scope n{i}\n", "  ".repeat(i)))
+        .collect();
+    let result = parse_str(&src);
+    assert!(result
+        .diagnostics
+        .items
+        .iter()
+        .any(|d| d.message.contains("nest deeper")));
+}
+
+/// The nesting a real document uses stays clean.
+#[test]
+fn ordinary_record_nesting_still_parses_clean() {
+    let src = "scope outer\n  scope middle\n    scope inner\n      focus deep\n        Nested but fine.\n";
+    let result = parse_str(src);
+    assert!(
+        !result.diagnostics.has_errors(),
+        "{:?}",
+        result.diagnostics.items
+    );
+}

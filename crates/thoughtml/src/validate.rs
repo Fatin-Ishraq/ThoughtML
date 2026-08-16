@@ -294,37 +294,72 @@ fn check_cycles(canon: &Canonical, diags: &mut Diagnostics) {
     }
 }
 
+/// One step of the iterative DFS: either descend into `node`, or finish it once
+/// its neighbours are done.
+enum Step<'a> {
+    Enter(&'a str),
+    Leave(&'a str),
+}
+
+/// Depth-first search for a back edge, driven by an explicit stack.
+///
+/// This was written recursively, which meant a document's `causes` chain became
+/// the process's call depth — around three thousand links (a ~150 KB file) was
+/// enough to overflow the stack and abort. Unlike a panic that is not something
+/// a caller can catch, and this runs on the *default* path: plain
+/// `thoughtml doc.thml`, `thoughtml check`, and every keystroke in the
+/// playground. The traversal order and the reported cycles are unchanged.
 fn dfs_cycle<'a>(
-    node: &'a str,
+    start_node: &'a str,
     adj: &BTreeMap<&'a str, Vec<&'a str>>,
     color: &mut BTreeMap<&'a str, Color>,
     stack: &mut Vec<&'a str>,
     reported: &mut BTreeSet<Vec<&'a str>>,
     diags: &mut Diagnostics,
 ) {
-    color.insert(node, Color::Gray);
-    stack.push(node);
-    if let Some(neighbors) = adj.get(node) {
-        for &next in neighbors {
-            match color.get(next).copied().unwrap_or(Color::White) {
-                Color::White => dfs_cycle(next, adj, color, stack, reported, diags),
-                Color::Gray => {
-                    let start = stack.iter().position(|&n| n == next).unwrap_or(0);
-                    let cycle = stack[start..].to_vec();
-                    let mut key = cycle.clone();
-                    key.sort_unstable();
-                    if reported.insert(key) {
-                        let mut path = cycle;
-                        path.push(next);
-                        diags.warning(0, format!("cyclic dependency: {}", path.join(" → ")));
+    let mut work = vec![Step::Enter(start_node)];
+    while let Some(step) = work.pop() {
+        match step {
+            Step::Leave(node) => {
+                stack.pop();
+                color.insert(node, Color::Black);
+            }
+            Step::Enter(node) => {
+                // A node can be queued more than once by different parents; skip it
+                // if an earlier branch already finished it.
+                if color.get(node).copied().unwrap_or(Color::White) != Color::White {
+                    continue;
+                }
+                color.insert(node, Color::Gray);
+                stack.push(node);
+                work.push(Step::Leave(node));
+                if let Some(neighbors) = adj.get(node) {
+                    // Reversed, so popping the work stack visits them in source
+                    // order — matching what the recursive version reported.
+                    for &next in neighbors.iter().rev() {
+                        match color.get(next).copied().unwrap_or(Color::White) {
+                            Color::White => work.push(Step::Enter(next)),
+                            Color::Gray => {
+                                let begin = stack.iter().position(|&n| n == next).unwrap_or(0);
+                                let cycle = stack[begin..].to_vec();
+                                let mut key = cycle.clone();
+                                key.sort_unstable();
+                                if reported.insert(key) {
+                                    let mut path = cycle;
+                                    path.push(next);
+                                    diags.warning(
+                                        0,
+                                        format!("cyclic dependency: {}", path.join(" → ")),
+                                    );
+                                }
+                            }
+                            Color::Black => {}
+                        }
                     }
                 }
-                Color::Black => {}
             }
         }
     }
-    stack.pop();
-    color.insert(node, Color::Black);
 }
 
 /// Warn on foci that nothing in the graph connects to — no link touches them,
