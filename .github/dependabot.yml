@@ -1,0 +1,28 @@
+version: 2
+
+# Keep the three dependency surfaces patched. The CI `audit` job checks the
+# committed Cargo.lock against the RustSec advisory database on every push;
+# Dependabot is what actually opens the upgrade PRs.
+#
+# `github-actions` matters most here: the workflows pin third-party actions to
+# commit SHAs (a tag can be repointed at new code by whoever owns the action), and
+# a SHA pin only stays safe if something keeps bumping it. Dependabot rewrites the
+# SHA and the trailing `# v4` comment together.
+updates:
+  - package-ecosystem: cargo
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: npm
+    directory: "/web"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
