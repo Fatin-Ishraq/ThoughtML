@@ -3,3 +3,12 @@
 # CLI via include_str!. It's a build artifact, not hand-written source, so keep it out
 # of GitHub's language statistics (and collapse it in diffs).
 crates/thoughtml/assets/viewer.html linguist-generated=true
+
+# The viewer template is compared byte-for-byte against a fresh build by
+# `tests/viewer_freshness.rs`, and the HTML skeletons below are copied straight
+# into it. Left to the platform, a Windows checkout gives them CRLF, the bundle
+# inherits it, and the artifact can never match what CI builds — so a Windows
+# contributor could not pass the guard. Pin all three to LF.
+crates/thoughtml/assets/viewer.html eol=lf
+web/viewer.html eol=lf
+web/index.html eol=lf

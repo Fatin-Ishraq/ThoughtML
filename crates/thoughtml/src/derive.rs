@@ -47,6 +47,14 @@ impl Overrides {
     }
 }
 
+/// Object count past which the sensitivity pass is skipped rather than run.
+///
+/// Chosen for interactivity, not correctness: the pass is superlinear, and this
+/// keeps its worst case in the low seconds. Real documents are dozens to low
+/// hundreds of objects, so this is roughly forty times the largest thing anyone
+/// writes by hand.
+pub const MAX_SENSITIVITY_OBJECTS: usize = 2_000;
+
 /// Run the derive pass: supersession + timeline (always), and — when requested —
 /// evidence-propagated `derived_confidence` (§10.3), grounded `argument_status`
 /// (§10.4), and per-evidence `leverage` (§10.5). `overrides` perturbs the
@@ -76,7 +84,25 @@ pub fn derive(
         compute_status(canon, overrides);
     }
     if sensitivity {
-        compute_sensitivity(canon, overrides);
+        // Leverage re-derives the whole confidence pass once per evidence edge, so
+        // it costs roughly O(edges × objects²) — measured at ~5 s for 2 400 objects
+        // while every other pass together took under 0.3 s. That is a denial of
+        // service anywhere the compiler runs on input someone else supplies: the
+        // stream server compiles on its accept loop, and the playground recompiles
+        // as you type. Past the cap the cheap analyses still run and the document
+        // is still valid; only the leverage numbers are withheld, with a warning
+        // that says so rather than silently producing nothing.
+        if canon.objects.len() > MAX_SENSITIVITY_OBJECTS {
+            diags.warning(
+                0,
+                format!(
+                    "skipped sensitivity/leverage: {} objects exceeds the {MAX_SENSITIVITY_OBJECTS} limit for this analysis",
+                    canon.objects.len()
+                ),
+            );
+        } else {
+            compute_sensitivity(canon, overrides);
+        }
     }
     if formulas {
         compute_formulas(canon, overrides, diags);

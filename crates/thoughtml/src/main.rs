@@ -348,6 +348,31 @@ fn collect_sources(entry: &Path, entry_src: &str) -> HashMap<String, String> {
 /// `<script type="application/json" id="thoughtml-model">` tag; we fill it with
 /// the compact canonical JSON. `</` is neutralized to `<\/` (still valid JSON) so
 /// a node's body text can never prematurely close the script tag.
+/// Escape a JSON payload so it cannot interact with the HTML tokenizer at all.
+///
+/// Neutralizing only `</` stops `</script>`, but leaves `<!--` and `<script`
+/// intact: together those drive the tokenizer into its script-data-double-escaped
+/// state, where the template's own `</script>` no longer closes the element and
+/// the rest of the page is swallowed as script text. Escaping every `<`, `>` and
+/// `&` as a `\uXXXX` sequence removes the whole class — the result is still valid
+/// JSON that `JSON.parse` decodes back to the original characters. U+2028/U+2029
+/// go too: legal in JSON, but line terminators to a JavaScript parser.
+pub(crate) fn escape_json_for_script(json: &str) -> String {
+    json.replace('<', "\\u003c")
+        .replace('>', "\\u003e")
+        .replace('&', "\\u0026")
+        .replace('\u{2028}', "\\u2028")
+        .replace('\u{2029}', "\\u2029")
+}
+
+/// Make plain text safe inside a `<script type="text/plain">` slot. The viewer
+/// reads it with `textContent`, so it only has to be unable to affect parsing —
+/// and `<`/`>` are not legal in a filename on Windows and vanishingly rare
+/// elsewhere, so dropping them costs nothing real.
+pub(crate) fn sanitize_script_text(text: &str) -> String {
+    text.replace(['<', '>'], "")
+}
+
 fn render_html(canon: &thoughtml::Canonical, title: Option<&str>) -> Result<String, String> {
     const TEMPLATE: &str = include_str!("../assets/viewer.html");
     const MARKER: &str = "id=\"thoughtml-model\">";
@@ -356,11 +381,11 @@ fn render_html(canon: &thoughtml::Canonical, title: Option<&str>) -> Result<Stri
         return Err("viewer template is missing the model placeholder".into());
     }
     let json = serde_json::to_string(canon).map_err(|e| e.to_string())?;
-    let safe = json.replace("</", "<\\/");
+    let safe = escape_json_for_script(&json);
     let mut out = TEMPLATE.replace(MARKER, &format!("{MARKER}{safe}"));
     // bake the document title (file name) when the template has the slot
     if let Some(t) = title {
-        let ts = t.replace("</", "<\\/");
+        let ts = sanitize_script_text(t);
         out = out.replace(TITLE_MARKER, &format!("{TITLE_MARKER}{ts}"));
     }
     Ok(out)
