@@ -26,6 +26,9 @@ const MAX_PROJECT_BYTES: u64 = 16 * 1024 * 1024;
 const MAX_HEADER_BYTES: usize = 64 * 1024;
 const MAX_CONNECTIONS: usize = 64;
 const MAX_SSE_CLIENTS: usize = 24;
+/// Per-peer share of the global connection budget, so one client cannot hold
+/// every slot open and lock out the people the link was shared with.
+const MAX_CONNECTIONS_PER_PEER: usize = 12;
 /// Ceiling on a control-plane response read, so a misbehaving loopback listener
 /// cannot stream indefinitely into `thoughtml stream status` / `stop`.
 const MAX_CONTROL_RESPONSE_BYTES: u64 = 64 * 1024;
@@ -61,8 +64,14 @@ pub(crate) struct StreamArgs {
     host: Option<IpAddr>,
 
     /// Hostname or IP printed in the viewer URL (useful with --host 0.0.0.0).
+    /// Also the one non-IP `Host` header the server will answer to.
     #[arg(long, value_name = "HOST")]
     advertise_host: Option<String>,
+
+    /// Allow binding a public address. The stream is plain HTTP with its token
+    /// in the URL, so this exposes the document to anyone who can see the traffic.
+    #[arg(long)]
+    expose_public: bool,
 
     /// Emit one machine-readable startup object on stdout; logs stay on stderr.
     #[arg(long)]
@@ -147,6 +156,31 @@ struct SharedState {
     shutdown: AtomicBool,
     viewers: AtomicUsize,
     connections: AtomicUsize,
+    /// Live connections per peer address, for the per-IP cap.
+    per_peer: Mutex<HashMap<IpAddr, usize>>,
+}
+
+impl SharedState {
+    /// Take a connection slot for `peer`, or refuse if it already holds its share.
+    fn claim_peer(&self, peer: IpAddr) -> bool {
+        let mut map = self.per_peer.lock().unwrap();
+        let slot = map.entry(peer).or_insert(0);
+        if *slot >= MAX_CONNECTIONS_PER_PEER {
+            return false;
+        }
+        *slot += 1;
+        true
+    }
+
+    fn release_peer(&self, peer: IpAddr) {
+        let mut map = self.per_peer.lock().unwrap();
+        if let Some(slot) = map.get_mut(&peer) {
+            *slot = slot.saturating_sub(1);
+            if *slot == 0 {
+                map.remove(&peer);
+            }
+        }
+    }
 }
 
 struct ProjectRead {
@@ -262,6 +296,19 @@ pub(crate) fn run(args: StreamArgs) -> ExitCode {
             IpAddr::V4(Ipv4Addr::LOCALHOST)
         }
     });
+    // Anything past this machine is served in the clear, with the capability
+    // token sitting in the URL — so it lands in browser history, proxy logs, and
+    // `Referer`, and anyone on the path can read both it and the reasoning. `--lan`
+    // says "my local network", which is a claim about the network, not the code.
+    // A bind that is neither loopback nor private has to be asked for explicitly.
+    if !bind_ip.is_loopback() && !is_private_address(&bind_ip) && !args.expose_public {
+        eprintln!(
+            "error: {bind_ip} is a public address. `thoughtml stream` speaks plain HTTP and \
+             puts its access token in the URL, so anyone who can see the traffic can read \
+             the document. Re-run with --expose-public if that is genuinely what you want."
+        );
+        return ExitCode::FAILURE;
+    }
     let listener = match TcpListener::bind(SocketAddr::new(bind_ip, args.port)) {
         Ok(listener) => listener,
         Err(e) => {
@@ -333,6 +380,7 @@ pub(crate) fn run(args: StreamArgs) -> ExitCode {
         shutdown: AtomicBool::new(false),
         viewers: AtomicUsize::new(0),
         connections: AtomicUsize::new(0),
+        per_peer: Mutex::new(HashMap::new()),
     });
 
     let shutdown_state = Arc::clone(&shared);
@@ -356,6 +404,19 @@ pub(crate) fn run(args: StreamArgs) -> ExitCode {
         }
     });
     let viewer_url = format!("http://{advertised}:{}/s/{viewer_token}", bound.port());
+    // The only names this server answers to. `advertised` may be a bare hostname
+    // when the operator supplied one; anything else with a name in `Host` is a
+    // rebinding attempt (see `host_is_allowed`). Strip the IPv6 brackets so the
+    // comparison sees the same form the header carries.
+    let policy = HostPolicy {
+        port: bound.port(),
+        advertised: Some(
+            advertised
+                .trim_start_matches('[')
+                .trim_end_matches(']')
+                .to_string(),
+        ),
+    };
     let control_host = if bound.is_ipv6() {
         "[::1]"
     } else {
@@ -402,8 +463,13 @@ pub(crate) fn run(args: StreamArgs) -> ExitCode {
         println!("Watching: {}", entry.display());
         println!("Stop:     Ctrl+C");
         if args.lan || !bind_ip.is_loopback() {
-            println!("Access:   protected by an unguessable link on this trusted local network");
-            println!("Privacy:  compiled reasoning, diagnostics, and file names are shared");
+            // Say what is actually true. The link is unguessable, but it travels
+            // in cleartext HTTP with the token in the URL, so anyone who can see
+            // the traffic — or read a browser history or proxy log afterwards —
+            // has the same access the recipient does.
+            println!("Access:   anyone on this network who has the link");
+            println!("Privacy:  plain HTTP, token in the URL — do not use on untrusted networks");
+            println!("Shared:   compiled reasoning, diagnostics, and file names");
         } else {
             println!("Access:   this computer only (use --lan to share on your local network)");
         }
@@ -431,8 +497,15 @@ pub(crate) fn run(args: StreamArgs) -> ExitCode {
     while !shared.shutdown.load(Ordering::SeqCst) {
         loop {
             match listener.accept() {
-                Ok((socket, _)) => {
+                Ok((socket, peer)) => {
                     if shared.connections.load(Ordering::Relaxed) >= MAX_CONNECTIONS {
+                        reject_busy(socket);
+                        continue;
+                    }
+                    // Per-peer cap as well as the global one: without it a single
+                    // client on the LAN can hold every slot open with slow headers
+                    // and lock out everyone the link was actually shared with.
+                    if !shared.claim_peer(peer.ip()) {
                         reject_busy(socket);
                         continue;
                     }
@@ -440,9 +513,17 @@ pub(crate) fn run(args: StreamArgs) -> ExitCode {
                     let state = Arc::clone(&shared);
                     let view_secret = viewer_token.clone();
                     let control_secret = control_token.clone();
+                    let host_policy = policy.clone();
                     thread::spawn(move || {
-                        handle_connection(socket, &view_secret, &control_secret, state.clone());
+                        handle_connection(
+                            socket,
+                            &view_secret,
+                            &control_secret,
+                            &host_policy,
+                            state.clone(),
+                        );
                         state.connections.fetch_sub(1, Ordering::Relaxed);
+                        state.release_peer(peer.ip());
                     });
                 }
                 Err(e) if e.kind() == io::ErrorKind::WouldBlock => break,
@@ -755,13 +836,20 @@ fn read_project(entry: &Path) -> io::Result<ProjectRead> {
     })
 }
 
+/// Top-level `import <name> as <ns>` names, filtered to lexical identifiers.
+///
+/// Same reasoning as the CLI's copy: this drives a read and a watch entry, and an
+/// unfiltered name escaped the project directory (absolute paths, `..`, or a
+/// Windows UNC share). In this module it also fed `watched_files`, which is
+/// published to every viewer — so a traversal path was disclosed as well.
 fn import_names(source: &str) -> Vec<String> {
     source
         .lines()
         .filter(|line| line.starts_with("import "))
         .filter_map(|line| {
             let tokens: Vec<&str> = line.split_whitespace().collect();
-            (tokens.len() == 4 && tokens[2] == "as").then(|| tokens[1].to_string())
+            (tokens.len() == 4 && tokens[2] == "as" && thoughtml::lex::is_identifier(tokens[1]))
+                .then(|| tokens[1].to_string())
         })
         .collect()
 }
@@ -1216,12 +1304,135 @@ fn run_action(action: StreamAction) -> ExitCode {
 struct Request {
     method: String,
     path: String,
+    host: Option<String>,
+}
+
+/// What `Host` values this server answers to.
+#[derive(Clone)]
+struct HostPolicy {
+    port: u16,
+    advertised: Option<String>,
+}
+
+/// Is this a private / link-local address — a "my own network" bind, as opposed
+/// to something routable from the internet? `0.0.0.0` and `::` count: they mean
+/// "every interface I have", which is what `--lan` asks for.
+fn is_private_address(ip: &IpAddr) -> bool {
+    match ip {
+        IpAddr::V4(v4) => {
+            v4.is_private() || v4.is_link_local() || v4.is_unspecified() || v4.is_loopback()
+        }
+        IpAddr::V6(v6) => {
+            v6.is_unspecified()
+                || v6.is_loopback()
+                // fc00::/7 unique-local and fe80::/10 link-local.
+                || (v6.segments()[0] & 0xfe00) == 0xfc00
+                || (v6.segments()[0] & 0xffc0) == 0xfe80
+        }
+    }
+}
+
+/// Split `host[:port]`, handling the `[::1]:port` form.
+fn split_host_port(raw: &str) -> (&str, Option<u16>) {
+    if let Some(rest) = raw.strip_prefix('[') {
+        // IPv6 literal: [addr] or [addr]:port
+        if let Some((addr, tail)) = rest.split_once(']') {
+            let port = tail.strip_prefix(':').and_then(|p| p.parse().ok());
+            return (addr, port);
+        }
+        return (raw, None);
+    }
+    match raw.rsplit_once(':') {
+        Some((name, port)) if port.chars().all(|c| c.is_ascii_digit()) && !port.is_empty() => {
+            (name, port.parse().ok())
+        }
+        _ => (raw, None),
+    }
+}
+
+/// Is this request's `Host` one we serve?
+///
+/// Without this check a malicious web page can reach the server by DNS
+/// rebinding: it points its own hostname at 127.0.0.1, so the browser treats
+/// `http://evil.example/` as same-origin with the stream and the page can read
+/// every response. Rebinding needs a *name* — a request that arrives with an IP
+/// literal in `Host` is an ordinary cross-origin request the browser will not let
+/// the page read — so IP literals, `localhost`, and whatever `--advertise-host`
+/// declared are accepted, and any other name is refused.
+fn host_is_allowed(host: Option<&str>, policy: &HostPolicy) -> bool {
+    // HTTP/1.1 requires Host; a request without one is not a browser we trust.
+    let Some(raw) = host else { return false };
+    let (name, port) = split_host_port(raw.trim());
+    if port.is_some_and(|p| p != policy.port) {
+        return false;
+    }
+    if name.eq_ignore_ascii_case("localhost") || name.parse::<IpAddr>().is_ok() {
+        return true;
+    }
+    policy
+        .advertised
+        .as_deref()
+        .is_some_and(|a| a.eq_ignore_ascii_case(name))
+}
+
+/// Compare a secret without an early exit on the first differing byte. The
+/// lengths are fixed and public, so only the contents need the constant-time
+/// treatment.
+fn secret_eq(a: &str, b: &str) -> bool {
+    let (a, b) = (a.as_bytes(), b.as_bytes());
+    a.len() == b.len() && a.iter().zip(b).fold(0u8, |acc, (x, y)| acc | (x ^ y)) == 0
+}
+
+/// The routes this server exposes, after the capability token has been checked.
+#[derive(Debug, PartialEq, Eq)]
+enum Route {
+    Root,
+    Viewer,
+    Snapshot,
+    Events,
+    Health,
+    Stop,
+    Unknown,
+}
+
+fn route_of(path: &str, viewer_token: &str, control_token: &str) -> Route {
+    if path == "/" {
+        return Route::Root;
+    }
+    if path == "/health" {
+        return Route::Health;
+    }
+    if let Some(token) = path.strip_prefix("/s/") {
+        if secret_eq(token, viewer_token) {
+            return Route::Viewer;
+        }
+    }
+    if let Some(rest) = path.strip_prefix("/api/") {
+        if let Some((token, tail)) = rest.split_once('/') {
+            if secret_eq(token, viewer_token) {
+                match tail {
+                    "snapshot" => return Route::Snapshot,
+                    "events" => return Route::Events,
+                    _ => {}
+                }
+            }
+        }
+    }
+    if let Some(rest) = path.strip_prefix("/control/") {
+        if let Some((token, "stop")) = rest.split_once('/') {
+            if secret_eq(token, control_token) {
+                return Route::Stop;
+            }
+        }
+    }
+    Route::Unknown
 }
 
 fn handle_connection(
     mut socket: TcpStream,
     viewer_token: &str,
     control_token: &str,
+    policy: &HostPolicy,
     shared: Arc<SharedState>,
 ) {
     socket.set_read_timeout(Some(Duration::from_secs(5))).ok();
@@ -1239,18 +1450,28 @@ fn handle_connection(
             return;
         }
     };
-    let viewer_path = format!("/s/{viewer_token}");
+    if !host_is_allowed(request.host.as_deref(), policy) {
+        respond(
+            &mut socket,
+            "421 Misdirected Request",
+            "text/plain; charset=utf-8",
+            b"unrecognized Host\n",
+        );
+        return;
+    }
     let snapshot_path = format!("/api/{viewer_token}/snapshot");
     let events_path = format!("/api/{viewer_token}/events");
-    let stop_path = format!("/control/{control_token}/stop");
-    match (request.method.as_str(), request.path.as_str()) {
-        ("GET", "/") => respond(
+    match (
+        request.method.as_str(),
+        route_of(&request.path, viewer_token, control_token),
+    ) {
+        ("GET", Route::Root) => respond(
             &mut socket,
             "404 Not Found",
             "text/plain; charset=utf-8",
             b"ThoughtML stream: use the private viewer link printed by the CLI.\n",
         ),
-        ("GET", path) if path == viewer_path => {
+        ("GET", Route::Viewer) => {
             let snapshot = shared.snapshot.lock().unwrap().clone();
             match stream_html(&snapshot, &snapshot_path, &events_path) {
                 Ok(html) => respond(
@@ -1267,7 +1488,7 @@ fn handle_connection(
                 ),
             }
         }
-        ("GET", path) if path == snapshot_path => {
+        ("GET", Route::Snapshot) => {
             let mut snapshot = shared.snapshot.lock().unwrap().clone();
             snapshot.connected_viewers = shared.viewers.load(Ordering::Relaxed);
             match serde_json::to_vec(&snapshot) {
@@ -1280,8 +1501,11 @@ fn handle_connection(
                 ),
             }
         }
-        ("GET", path) if path == events_path => serve_events(socket, shared),
-        ("GET", "/health") => {
+        ("GET", Route::Events) => serve_events(socket, shared),
+        // Loopback-only: on `--lan` an open health probe told the whole network a
+        // session was live, how many people were watching, and how many revisions
+        // in it was. `stream status` always probes over loopback.
+        ("GET", Route::Health) if peer_is_loopback => {
             let snapshot = shared.snapshot.lock().unwrap();
             let body = serde_json::to_vec(&serde_json::json!({
                 "status": if shared.shutdown.load(Ordering::SeqCst) { "stopping" } else { "ok" },
@@ -1292,7 +1516,7 @@ fn handle_connection(
             .unwrap_or_else(|_| b"{\"status\":\"error\"}".to_vec());
             respond(&mut socket, "200 OK", "application/json", &body);
         }
-        ("POST", path) if path == stop_path && peer_is_loopback => {
+        ("POST", Route::Stop) if peer_is_loopback => {
             shared.shutdown.store(true, Ordering::SeqCst);
             shared.changed.notify_all();
             respond(
@@ -1302,7 +1526,7 @@ fn handle_connection(
                 b"{\"status\":\"stopping\"}\n",
             );
         }
-        ("POST", path) if path == stop_path => respond(
+        ("POST", Route::Stop) => respond(
             &mut socket,
             "403 Forbidden",
             "text/plain; charset=utf-8",
@@ -1352,6 +1576,7 @@ fn read_request(socket: &TcpStream) -> io::Result<Request> {
         ));
     }
     let mut total = first.len();
+    let mut host = None;
     loop {
         let mut line = String::new();
         let read = reader.read_line(&mut line)?;
@@ -1371,10 +1596,23 @@ fn read_request(socket: &TcpStream) -> io::Result<Request> {
         if line == "\r\n" || line == "\n" {
             break;
         }
+        if let Some((name, value)) = line.split_once(':') {
+            // First Host wins; a second one is a request-smuggling smell, so refuse.
+            if name.eq_ignore_ascii_case("host") {
+                if host.is_some() {
+                    return Err(io::Error::new(
+                        io::ErrorKind::InvalidData,
+                        "duplicate Host header",
+                    ));
+                }
+                host = Some(value.trim().to_string());
+            }
+        }
     }
     Ok(Request {
         method: method.to_string(),
         path: path.split('?').next().unwrap_or(path).to_string(),
+        host,
     })
 }
 
@@ -1530,6 +1768,14 @@ mod tests {
         }
     }
 
+    /// Accepts the `Host: localhost` the test requests send, on any port.
+    fn test_policy() -> HostPolicy {
+        HostPolicy {
+            port: 0,
+            advertised: None,
+        }
+    }
+
     fn state() -> Arc<SharedState> {
         Arc::new(SharedState {
             snapshot: Mutex::new(compile_project(
@@ -1544,6 +1790,7 @@ mod tests {
             shutdown: AtomicBool::new(false),
             viewers: AtomicUsize::new(0),
             connections: AtomicUsize::new(0),
+            per_peer: Mutex::new(HashMap::new()),
         })
     }
 
@@ -1552,7 +1799,13 @@ mod tests {
         let address = listener.local_addr().unwrap();
         let server = thread::spawn(move || {
             let (socket, _) = listener.accept().unwrap();
-            handle_connection(socket, "viewer-secret", "control-secret", shared);
+            handle_connection(
+                socket,
+                "viewer-secret",
+                "control-secret",
+                &test_policy(),
+                shared,
+            );
         });
         let mut client = TcpStream::connect(address).unwrap();
         client.write_all(request.as_bytes()).unwrap();
@@ -1640,6 +1893,7 @@ mod tests {
             Request {
                 method: "GET".into(),
                 path: "/health".into(),
+                host: Some("localhost".into()),
             }
         );
     }
@@ -1700,7 +1954,13 @@ mod tests {
         let server_state = Arc::clone(&shared);
         let server = thread::spawn(move || {
             let (socket, _) = listener.accept().unwrap();
-            handle_connection(socket, "viewer-secret", "control-secret", server_state);
+            handle_connection(
+                socket,
+                "viewer-secret",
+                "control-secret",
+                &test_policy(),
+                server_state,
+            );
         });
         let mut client = TcpStream::connect(address).unwrap();
         client
@@ -1747,6 +2007,156 @@ mod tests {
             pid: 1,
             path: PathBuf::new(),
         }
+    }
+
+    #[test]
+    fn unrecognized_host_headers_are_refused() {
+        // DNS rebinding: a page at evil.example points that name at 127.0.0.1, so
+        // the browser treats the stream as same-origin and can read every response.
+        // The defence is refusing the *name*; an IP literal cannot be rebound.
+        let rebound = exchange(
+            "GET / HTTP/1.1\r\nHost: evil.example\r\nConnection: close\r\n\r\n",
+            state(),
+        );
+        assert!(rebound.starts_with("HTTP/1.1 421"));
+
+        let ip_literal = exchange(
+            "GET / HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n",
+            state(),
+        );
+        assert!(ip_literal.starts_with("HTTP/1.1 404"));
+
+        // HTTP/1.1 requires Host; a request without one is not a browser.
+        let missing = exchange("GET / HTTP/1.1\r\nConnection: close\r\n\r\n", state());
+        assert!(missing.starts_with("HTTP/1.1 421"));
+    }
+
+    #[test]
+    fn host_policy_matches_ports_and_advertised_names() {
+        let policy = HostPolicy {
+            port: 8080,
+            advertised: Some("my-laptop.local".into()),
+        };
+        assert!(host_is_allowed(Some("localhost:8080"), &policy));
+        assert!(host_is_allowed(Some("192.168.1.5:8080"), &policy));
+        assert!(host_is_allowed(Some("[::1]:8080"), &policy));
+        assert!(host_is_allowed(Some("my-laptop.local:8080"), &policy));
+        // Wrong port, and any other name.
+        assert!(!host_is_allowed(Some("localhost:9999"), &policy));
+        assert!(!host_is_allowed(Some("evil.example:8080"), &policy));
+        assert!(!host_is_allowed(None, &policy));
+    }
+
+    #[test]
+    fn health_is_not_served_to_the_network() {
+        // Loopback-only: on `--lan` this used to tell anyone on the network that a
+        // session was live, how many viewers it had, and how many revisions in.
+        // The test client connects over loopback, so it still gets an answer.
+        let response = exchange(
+            "GET /health HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n",
+            state(),
+        );
+        assert!(response.starts_with("HTTP/1.1 200"));
+        assert!(response.contains("\"revision\""));
+    }
+
+    #[test]
+    fn route_matching_requires_the_whole_token() {
+        // A prefix of the real token must not open anything.
+        assert_eq!(
+            route_of("/s/viewer-secret", "viewer-secret", "control-secret"),
+            Route::Viewer
+        );
+        assert_eq!(
+            route_of("/s/viewer-secre", "viewer-secret", "control-secret"),
+            Route::Unknown
+        );
+        assert_eq!(
+            route_of("/api/viewer-secret/snapshot", "viewer-secret", "c"),
+            Route::Snapshot
+        );
+        assert_eq!(
+            route_of("/api/nope/snapshot", "viewer-secret", "c"),
+            Route::Unknown
+        );
+        assert_eq!(
+            route_of("/control/control-secret/stop", "v", "control-secret"),
+            Route::Stop
+        );
+        assert_eq!(
+            route_of("/control/nope/stop", "v", "control-secret"),
+            Route::Unknown
+        );
+    }
+
+    #[test]
+    fn secret_comparison_is_length_safe() {
+        assert!(secret_eq("abc", "abc"));
+        assert!(!secret_eq("abc", "abd"));
+        assert!(!secret_eq("abc", "ab"));
+        assert!(!secret_eq("ab", "abc"));
+    }
+
+    #[test]
+    fn one_peer_cannot_take_every_connection_slot() {
+        let shared = state();
+        let peer: IpAddr = "203.0.113.7".parse().unwrap();
+        for _ in 0..MAX_CONNECTIONS_PER_PEER {
+            assert!(shared.claim_peer(peer));
+        }
+        assert!(!shared.claim_peer(peer), "per-peer cap was not enforced");
+        // A different client is unaffected.
+        assert!(shared.claim_peer("203.0.113.8".parse().unwrap()));
+        // Slots come back when connections close.
+        shared.release_peer(peer);
+        assert!(shared.claim_peer(peer));
+    }
+
+    #[test]
+    fn public_binds_are_recognized_as_public() {
+        for private in [
+            "127.0.0.1",
+            "192.168.1.10",
+            "10.0.0.4",
+            "172.16.5.1",
+            "0.0.0.0",
+        ] {
+            assert!(
+                is_private_address(&private.parse().unwrap()),
+                "{private} should not require --expose-public"
+            );
+        }
+        for public in ["203.0.113.7", "8.8.8.8"] {
+            assert!(
+                !is_private_address(&public.parse().unwrap()),
+                "{public} should require --expose-public"
+            );
+        }
+    }
+
+    #[test]
+    fn import_scanner_rejects_paths_that_escape_the_project() {
+        // The scan drives a filesystem read before the parser ever sees the name,
+        // and `Path::join` discards the base for an absolute component.
+        assert_eq!(
+            import_names("import ../../../secrets as x"),
+            Vec::<String>::new()
+        );
+        assert_eq!(
+            import_names("import /etc/shadow as x"),
+            Vec::<String>::new()
+        );
+        assert_eq!(
+            import_names("import //attacker/share/x as y"),
+            Vec::<String>::new()
+        );
+        assert_eq!(
+            import_names("import C:\\Windows\\win as y"),
+            Vec::<String>::new()
+        );
+        // Ordinary imports still resolve.
+        assert_eq!(import_names("import base as b"), ["base"]);
+        assert_eq!(import_names("import shared-defs as s"), ["shared-defs"]);
     }
 
     #[test]

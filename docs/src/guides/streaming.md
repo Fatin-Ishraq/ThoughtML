@@ -104,9 +104,32 @@ The HTTP surface is deliberately small:
 | `/s/<viewer-token>` | self-contained live viewer |
 | `/api/<viewer-token>/snapshot` | current schema-versioned state |
 | `/api/<viewer-token>/events` | Server-Sent Events carrying newer snapshots |
-| `/health` | process health check |
+| `/health` | process health check — **loopback only** |
 
 The root route deliberately does not redirect to the private viewer link.
+
+## What the transport does and does not protect
+
+The viewer link is an unguessable capability: 192 bits of OS randomness, and the
+token is compared without an early exit. Two things it is *not*:
+
+* **It is not encrypted.** The stream is plain HTTP and the token sits in the
+  URL path, so it also lands in browser history, proxy logs, and `Referer`.
+  Anyone who can see the traffic can read the document and reuse the link. Share
+  a `--lan` session only on a network you would trust with the document itself.
+* **It is not an identity.** Whoever has the link has full read access, and there
+  is no way to revoke one recipient short of restarting the session.
+
+The server refuses requests whose `Host` is a name it does not serve — only
+`localhost`, IP literals, and whatever `--advertise-host` declared. That blocks
+DNS rebinding, where a web page points its own hostname at `127.0.0.1` so the
+browser treats your stream as same-origin and lets the page read it.
+
+Binding a *public* address needs `--expose-public` on top of `--host`. `--lan`
+and any private or link-local address are unaffected.
+
+`/health` answers over loopback only; it reports revision count and connected
+viewers, which is not something a whole network needs to know.
 
 This transport can later sit behind a hosted relay without moving parsing into
 the service: the CLI remains the compiler and the viewer remains a consumer of
