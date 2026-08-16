@@ -388,5 +388,9 @@ async function boot(): Promise<void> {
 }
 
 boot().catch((err) => {
-  document.body.innerHTML = `<pre style="padding:16px;color:#f06576">Failed to start: ${String(err)}</pre>`
+  // `err` can carry document-derived text; build the node instead of interpolating.
+  const pre = document.createElement('pre')
+  pre.setAttribute('style', 'padding:16px;color:#f06576')
+  pre.textContent = `Failed to start: ${String(err)}`
+  document.body.replaceChildren(pre)
 })

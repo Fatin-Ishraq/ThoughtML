@@ -268,7 +268,14 @@ impl AllowedVocab {
                         "postures" => &mut self.postures,
                         _ => continue,
                     };
-                    target.extend(value_list(&f.value));
+                    // Mirrors the check in `Desugarer::profile`, which reports the
+                    // diagnostic. A name that is not an identifier must not widen
+                    // the allowed vocabulary either.
+                    target.extend(
+                        value_list(&f.value)
+                            .into_iter()
+                            .filter(|n| crate::lex::is_identifier(n)),
+                    );
                 }
             }
             self.extend_from(&rec.children);
@@ -606,14 +613,38 @@ impl<'a> Desugarer<'a> {
             postures: Vec::new(),
         };
         for f in &rec.block.fields {
+            if !matches!(
+                f.name.as_str(),
+                "kinds" | "relations" | "fields" | "postures"
+            ) {
+                continue;
+            }
+            // A profile declares new vocabulary, and those names are carried into
+            // the canonical model and widen what the rest of the document is
+            // checked against. `value_list` hands back raw `Text` for anything
+            // that did not lex as a list of identifiers, so validate each one
+            // here rather than adopting arbitrary bytes as a relation name.
+            let mut accepted = Vec::new();
+            for name in value_list(&f.value) {
+                if crate::lex::is_identifier(&name) {
+                    accepted.push(name);
+                } else {
+                    self.diags.error(
+                        f.line,
+                        format!(
+                            "invalid `{}` entry `{name}` in profile `{}` (expected lowercase kebab-case)",
+                            f.name, p.name
+                        ),
+                    );
+                }
+            }
             let target = match f.name.as_str() {
                 "kinds" => &mut p.kinds,
                 "relations" => &mut p.relations,
                 "fields" => &mut p.fields,
-                "postures" => &mut p.postures,
-                _ => continue,
+                _ => &mut p.postures,
             };
-            target.extend(value_list(&f.value));
+            target.extend(accepted);
         }
         self.push_object(Object::Profile(p), rec.line);
     }
@@ -626,19 +657,22 @@ impl<'a> Desugarer<'a> {
         let mut fields = Fields::new();
         for f in &rec.block.fields {
             match f.name.as_str() {
+                // `expects` and `status` name a kind and a lifecycle state. Both
+                // are rendered back to the reader, so — like an id — they must be
+                // lexical identifiers rather than whatever bytes the line held.
                 "expects" => {
                     if expects.is_some() {
                         self.diags
                             .warning(f.line, "duplicate `expects` field; using the last");
                     }
-                    expects = f.first_arg().map(str::to_string);
+                    expects = self.checked_symbol(f.first_arg(), "expects", f.line);
                 }
                 "status" => {
                     if status.is_some() {
                         self.diags
                             .warning(f.line, "duplicate `status` field; using the last");
                     }
-                    status = f.first_arg().map(str::to_string);
+                    status = self.checked_symbol(f.first_arg(), "status", f.line);
                 }
                 // `about a, b` records what the question is about (§13 ASKS_ABOUT).
                 "about" => match &f.value {
@@ -1354,12 +1388,23 @@ impl<'a> Desugarer<'a> {
 
     /// Build a typed [`Quantity`] from a focus block's `quantity` field (v0.2,
     /// Phase 7). Classifies the unit into a dimension and normalizes to the base
-    /// unit where convertible. Warns (never errors) on a malformed value.
+    /// unit where convertible. Warns on a malformed *value*; a malformed *unit*
+    /// is an error, because the unit is echoed into every rendering of the
+    /// document and an unrecognized one is otherwise carried through verbatim.
     fn build_quantity(&mut self, block: &Block, line: usize) -> Option<Quantity> {
         let f = block.fields.iter().find(|f| f.name == "quantity")?;
         let (qargs, basis) = peel_basis(&f.args);
         match parse_quantity(qargs) {
             Some((value, unit)) => {
+                if !units::is_valid_unit(&unit) {
+                    self.diags.error(
+                        f.line.max(line),
+                        format!(
+                            "invalid unit `{unit}` (letters, digits, and `% / - _ .`, starting with a letter)"
+                        ),
+                    );
+                    return None;
+                }
                 let (dimension, factor, base) = units::classify_unit(&unit);
                 let normalized = factor.map(|fac| round3(value * fac));
                 let base_unit = factor.map(|_| base);
@@ -1380,6 +1425,23 @@ impl<'a> Desugarer<'a> {
                 None
             }
         }
+    }
+
+    /// A field value that names something in the language (a kind, a lifecycle
+    /// state, a declared vocabulary term) must be a lexical identifier. Anything
+    /// else is an error and the value is dropped — these strings are rendered
+    /// back to the reader, and the parser is the only place that can stop a
+    /// document from smuggling markup through them.
+    fn checked_symbol(&mut self, value: Option<&str>, field: &str, line: usize) -> Option<String> {
+        let raw = value?;
+        if crate::lex::is_identifier(raw) {
+            return Some(raw.to_string());
+        }
+        self.diags.error(
+            line,
+            format!("invalid `{field}` value `{raw}` (expected lowercase kebab-case)"),
+        );
+        None
     }
 
     fn reserve_explicit(&mut self, id: &str, line: usize) {

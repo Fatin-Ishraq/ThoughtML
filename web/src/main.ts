@@ -958,7 +958,11 @@ async function boot(): Promise<void> {
       if (cls === 'ok') cls = 'has-warn'
     }
     status.classList.add(cls)
-    status.innerHTML = `<span class="dot"></span>${text}`
+    // Built from counts, but kept off innerHTML so no future caller can slip
+    // document-derived text into it.
+    const dot = document.createElement('span')
+    dot.className = 'dot'
+    status.replaceChildren(dot, document.createTextNode(text))
   }
 
   let timer: number | undefined
@@ -1045,5 +1049,9 @@ function setupDivider(divider: HTMLElement, leftPane: HTMLElement, onResize: () 
 }
 
 boot().catch((err) => {
-  document.body.innerHTML = `<pre style="padding:16px;color:#f06576">Failed to start: ${String(err)}</pre>`
+  // `err` can carry document-derived text; build the node instead of interpolating.
+  const pre = document.createElement('pre')
+  pre.setAttribute('style', 'padding:16px;color:#f06576')
+  pre.textContent = `Failed to start: ${String(err)}`
+  document.body.replaceChildren(pre)
 })

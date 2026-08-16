@@ -61,6 +61,27 @@ const CURRENCIES: &[&str] = &[
     "USD", "EUR", "GBP", "JPY", "CNY", "INR", "CAD", "AUD", "CHF", "BRL", "SGD", "KRW",
 ];
 
+/// Is `unit` a well-formed unit token?
+///
+/// Unrecognized units are deliberately allowed — `classify_unit` files anything
+/// it does not know as its own `count:` dimension, which is what lets a document
+/// measure `users` or `widgets`. That openness is not a licence to carry
+/// *arbitrary bytes*: a unit is echoed back into every rendering of the document,
+/// and a unit of `<img/src=q/onerror=…>` used to execute as script in the viewer.
+///
+/// So: letters and digits (Unicode, so `µs` and non-English units work), plus the
+/// separators real units actually use — `%`, `/`, `-`, `_`, `.` — and it must
+/// begin with a letter or `%`. Markup and quoting characters, whitespace, and
+/// control bytes are all excluded.
+pub fn is_valid_unit(unit: &str) -> bool {
+    let mut chars = unit.chars();
+    let starts_ok = matches!(chars.next(), Some(c) if c.is_alphabetic() || c == '%');
+    starts_ok
+        && unit
+            .chars()
+            .all(|c| c.is_alphanumeric() || matches!(c, '%' | '/' | '-' | '_' | '.'))
+}
+
 /// Classify a unit into `(dimension, factor_to_base, base_unit)`. A `Some` factor
 /// means the value is convertible: `value * factor` gives it in `base_unit`.
 pub fn classify_unit(unit: &str) -> (String, Option<f64>, String) {
