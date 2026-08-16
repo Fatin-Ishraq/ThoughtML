@@ -159,9 +159,34 @@ fn func_of(name: &str) -> Option<Func> {
 
 // --- Parser ---------------------------------------------------------------
 
+/// How deep `( … )` and unary `-` may nest before the parser gives up.
+///
+/// `parse_expr → parse_term → parse_unary → parse_primary → parse_expr` is a
+/// recursive descent with no natural bound, so a formula of a few thousand
+/// parentheses used to exhaust the call stack. That is not a catchable panic: it
+/// aborts the process, taking down `thoughtml stream`, the wasm worker behind the
+/// playground, and any host embedding the library. Real formulas nest a handful
+/// of levels deep; this is far above anything a person writes and far below the
+/// stack we have.
+const MAX_DEPTH: u32 = 256;
+
 struct Parser {
     toks: Vec<Token>,
     pos: usize,
+    depth: u32,
+}
+
+/// Run `body` one level deeper, refusing to recurse past [`MAX_DEPTH`].
+macro_rules! nested {
+    ($self:ident, $body:expr) => {{
+        if $self.depth >= MAX_DEPTH {
+            return Err(format!("formula nests deeper than {MAX_DEPTH} levels"));
+        }
+        $self.depth += 1;
+        let result = $body;
+        $self.depth -= 1;
+        result
+    }};
 }
 
 impl Parser {
@@ -187,6 +212,10 @@ impl Parser {
     }
 
     fn parse_expr(&mut self) -> Result<Expr, String> {
+        nested!(self, self.parse_expr_inner())
+    }
+
+    fn parse_expr_inner(&mut self) -> Result<Expr, String> {
         let mut left = self.parse_term()?;
         while let Some(op) = match self.peek() {
             Some(Token::Plus) => Some(Op::Add),
@@ -215,6 +244,10 @@ impl Parser {
     }
 
     fn parse_unary(&mut self) -> Result<Expr, String> {
+        nested!(self, self.parse_unary_inner())
+    }
+
+    fn parse_unary_inner(&mut self) -> Result<Expr, String> {
         if self.peek() == Some(&Token::Minus) {
             self.pos += 1;
             return Ok(Expr::Neg(Box::new(self.parse_unary()?)));
@@ -265,7 +298,11 @@ pub fn parse(src: &str) -> Result<Formula, String> {
     if toks.is_empty() {
         return Err("empty formula".to_string());
     }
-    let mut p = Parser { toks, pos: 0 };
+    let mut p = Parser {
+        toks,
+        pos: 0,
+        depth: 0,
+    };
     let expr = p.parse_expr()?;
     if p.pos != p.toks.len() {
         return Err("unexpected trailing tokens in formula".to_string());
