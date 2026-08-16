@@ -7,6 +7,11 @@ GitHub Release into platform-tagged wheels. Each wheel carries one binary in its
 ``.data/scripts/`` directory, so ``pip install thoughtml`` drops ``thoughtml``
 straight onto the PATH — no Python code, no compile, no install-time download.
 
+Every archive is verified against the release's own ``sha256.sum`` before it is
+unpacked. This script runs in a job holding PyPI publish credentials, so what it
+signs must provably be what CI built: a failed or missing checksum aborts the
+build rather than shipping an unverified binary.
+
 Usage (from anywhere):
     python packaging/pypi/build_wheels.py            # download + build all wheels
     python packaging/pypi/build_wheels.py --version 0.2.0
@@ -85,13 +90,25 @@ def wheel_file(platform_tag: str) -> str:
 
 
 def extract_binary(archive: Path, member: str, is_zip: bool) -> bytes:
+    # Match the member exactly (allowing one leading directory component), not by
+    # `endswith`. A bare suffix test would happily pick `evil/thoughtml` out of a
+    # tampered archive; the checksum gate above makes that unreachable, but the
+    # selector should not be the thing standing between us and a wrong binary.
+    def matches(name: str) -> bool:
+        parts = name.split("/")
+        return name == member or (len(parts) == 2 and parts[1] == member)
+
     if is_zip:
         with zipfile.ZipFile(archive) as z:
-            name = next(n for n in z.namelist() if n.endswith(member) and not n.endswith("/"))
-            return z.read(name)
+            names = [n for n in z.namelist() if matches(n) and not n.endswith("/")]
+            if len(names) != 1:
+                raise SystemExit(f"{archive.name}: expected exactly one `{member}`, found {len(names)}")
+            return z.read(names[0])
     with tarfile.open(archive, "r:xz") as t:
-        name = next(m for m in t.getmembers() if m.name.endswith(member) and m.isfile())
-        return t.extractfile(name).read()
+        members = [m for m in t.getmembers() if matches(m.name) and m.isfile()]
+        if len(members) != 1:
+            raise SystemExit(f"{archive.name}: expected exactly one `{member}`, found {len(members)}")
+        return t.extractfile(members[0]).read()
 
 
 def build_wheel(version: str, readme: str, archive: str, member: str, binname: str, platform_tag: str) -> Path:
@@ -125,17 +142,81 @@ def build_wheel(version: str, readme: str, archive: str, member: str, binname: s
     return out
 
 
+def sha256_of(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as fh:
+        for chunk in iter(lambda: fh.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def fetch_checksums(base: str) -> dict[str, str]:
+    """The release's `sha256.sum`, parsed to {artifact name: hex digest}.
+
+    cargo-dist publishes one unified checksum file per release alongside the
+    archives. Everything this script republishes to PyPI is verified against it,
+    so a tampered download — or a stale/poisoned file left in build/dl/ — cannot
+    silently become a signed wheel. No checksum file means no publish.
+    """
+    url = f"{base}/sha256.sum"
+    print(f"  fetching sha256.sum ...")
+    try:
+        with urllib.request.urlopen(url, timeout=60) as response:  # noqa: S310 (fixed https URL)
+            text = response.read().decode("utf-8")
+    except Exception as e:  # noqa: BLE001 — any failure here must stop the publish
+        raise SystemExit(f"cannot fetch {url}: {e}\nRefusing to build unverified wheels.")
+
+    sums: dict[str, str] = {}
+    for line in text.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        # `sha256sum` format: "<hex>  name" (text) or "<hex> *name" (binary).
+        digest, _, name = line.partition(" ")
+        name = name.lstrip(" *")
+        if len(digest) == 64 and name:
+            sums[name] = digest.lower()
+    if not sums:
+        raise SystemExit(f"{url} contained no usable checksum lines; refusing to continue.")
+    return sums
+
+
 def download_release(version: str) -> None:
     DL.mkdir(parents=True, exist_ok=True)
     base = f"https://github.com/{REPO_SLUG}/releases/download/v{version}"
+    sums = fetch_checksums(base)
+
     for archive, *_ in TARGETS:
         dest = DL / archive
+        expected = sums.get(archive)
+        if expected is None:
+            raise SystemExit(
+                f"{archive} has no entry in the release's sha256.sum; refusing to publish it."
+            )
+
         if dest.exists():
-            print(f"  have {archive}")
-            continue
+            if sha256_of(dest) == expected:
+                print(f"  have {archive}  (sha256 ok)")
+                continue
+            # A cached file that does not match is not trustworthy; replace it
+            # rather than reuse it.
+            print(f"  cached {archive} failed its checksum — re-downloading")
+            dest.unlink()
+
         url = f"{base}/{archive}"
         print(f"  downloading {archive} ...")
-        urllib.request.urlretrieve(url, dest)
+        urllib.request.urlretrieve(url, dest)  # noqa: S310 (fixed https URL)
+
+        actual = sha256_of(dest)
+        if actual != expected:
+            dest.unlink(missing_ok=True)
+            raise SystemExit(
+                f"checksum mismatch for {archive}\n"
+                f"  expected {expected}\n"
+                f"  actual   {actual}\n"
+                "Refusing to package a binary that does not match the release manifest."
+            )
+        print(f"    sha256 ok")
 
 
 def main() -> None:
