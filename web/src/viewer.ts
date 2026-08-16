@@ -249,10 +249,12 @@ async function boot(): Promise<void> {
       const bakedTitle = parsed.querySelector('#thoughtml-title')
       const stream = parsed.querySelector('#thoughtml-stream-config')
       if (!model || !bakedTitle || !stream) return
+      // Same escaping as the CLI: `outerHTML` serializes script content raw, so
+      // the payload must not be able to reach the tokenizer at all.
       model.textContent = JSON.stringify({
         canonical: latestSnapshot.canonical,
         source_map: latestSnapshot.source_map,
-      }).replaceAll('</', '<\\/')
+      }).replace(/[<>&\u2028\u2029]/g, (c) => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0'))
       bakedTitle.textContent = snapshotTitle
       stream.textContent = ''
       const html = `<!doctype html>\n${parsed.documentElement.outerHTML}`

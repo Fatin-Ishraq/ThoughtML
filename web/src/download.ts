@@ -12,16 +12,24 @@ import type { Canonical, SourceMap } from './model'
 const MODEL_MARKER = 'id="thoughtml-model">'
 const TITLE_MARKER = 'id="thoughtml-title">'
 
-// Neutralize `</` so a node's body text can never close the inlined <script> tag
-// early (still valid JSON). Mirrors `render_html` in the CLI.
-const neutralize = (s: string): string => s.replaceAll('</', '<\\/')
+// Escape every character that can reach the HTML tokenizer as a \uXXXX sequence —
+// still valid JSON, and JSON.parse gives the originals back. Neutralizing only
+// `</` stopped `</script>` but left `<!--<script`, which drives the tokenizer into
+// script-data-double-escaped state, where the template's real `</script>` no
+// longer closes the tag. Mirrors `escape_json_for_script` in the CLI.
+const neutralize = (s: string): string =>
+  s.replace(/[<>&\u2028\u2029]/g, (c) => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0'))
+
+// A plain-text slot (the title) only has to be unable to affect parsing; the
+// viewer reads it back with textContent. Mirrors `sanitize_script_text`.
+const plainText = (s: string): string => s.replace(/[<>]/g, '')
 
 /** Bake `canon` into the viewer template and trigger a download of `<title>.html`. */
 export async function downloadStandalone(canon: Canonical, title: string, sourceMap?: SourceMap): Promise<void> {
   const template = await fetch(viewerTemplateUrl).then((r) => r.text())
   const model = neutralize(JSON.stringify(sourceMap ? { canonical: canon, source_map: sourceMap } : canon))
   let html = template.replace(MODEL_MARKER, MODEL_MARKER + model)
-  html = html.replace(TITLE_MARKER, TITLE_MARKER + neutralize(title))
+  html = html.replace(TITLE_MARKER, TITLE_MARKER + plainText(title))
 
   const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
   const url = URL.createObjectURL(blob)
