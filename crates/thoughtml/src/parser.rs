@@ -20,6 +20,16 @@ struct OpenRecord {
     body: Vec<String>,
 }
 
+/// How deeply records may nest.
+///
+/// The tree is *built* iteratively, but almost everything downstream walks it
+/// recursively — the vocabulary lint, the desugarer, and `Record`'s own derived
+/// `Drop` — so the nesting depth of a document became the process's call depth.
+/// A couple of thousand levels was enough to overflow the stack and abort, which
+/// no caller can catch. Bounding it here bounds every one of those consumers at
+/// once. Real documents nest a few levels; scopes-in-scopes rarely pass five.
+const MAX_NESTING: usize = 128;
+
 /// Pop the deepest open record, finalize its joined body, and attach it to its
 /// parent's `children` (or to `roots` if it was a top-level header).
 fn close_top(stack: &mut Vec<OpenRecord>, roots: &mut Vec<Record>) {
@@ -91,6 +101,13 @@ fn parse_lines(lines: &[Line], diags: &mut Diagnostics) -> SurfaceFile {
                     // A nested child header (only `scope` gives this meaning; see
                     // desugar). A malformed header reports its own error and is
                     // simply not pushed — the stack stays consistent.
+                    if stack.len() >= MAX_NESTING {
+                        diags.error(
+                            line.number,
+                            format!("records nest deeper than {MAX_NESTING} levels"),
+                        );
+                        continue;
+                    }
                     if let Some(header) = parse_header(line, diags) {
                         stack.push(open(line, header, indent));
                     }
