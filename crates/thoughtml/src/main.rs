@@ -303,12 +303,21 @@ fn read_source(path: &std::path::Path) -> io::Result<String> {
 }
 
 /// Top-level `import <name> as <ns>` declarations in `src` (column 0 only).
+///
+/// Names that are not lexical identifiers are dropped here rather than left for
+/// the parser to reject later. This scan drives a filesystem read, and the name
+/// is joined onto the entry's directory: `Path::join` discards the base when the
+/// component is absolute, so an unfiltered name reached any path on the machine
+/// (`import /etc/thoughtml/private as x` → `/etc/thoughtml/private.thml`), or on
+/// Windows a UNC share — an outbound SMB authentication, i.e. a credential leak.
+/// The parser refused the *name* afterwards, but the read had already happened.
 fn import_names(src: &str) -> Vec<String> {
     src.lines()
         .filter(|l| l.starts_with("import "))
         .filter_map(|l| {
             let toks: Vec<&str> = l.split_whitespace().collect();
-            (toks.len() == 4 && toks[2] == "as").then(|| toks[1].to_string())
+            (toks.len() == 4 && toks[2] == "as" && thoughtml::lex::is_identifier(toks[1]))
+                .then(|| toks[1].to_string())
         })
         .collect()
 }
