@@ -46,7 +46,12 @@ export function renderDiagnostics(
 
     const sev = document.createElement('span')
     sev.className = 'diag-sev'
-    sev.innerHTML = `${glyph(d.severity)}<span>${d.severity}</span>`
+    // `glyph()` is our own fixed SVG table; the severity label goes in as text.
+    const sevGlyph = document.createElement('span')
+    sevGlyph.innerHTML = glyph(d.severity)
+    const sevLabel = document.createElement('span')
+    sevLabel.textContent = d.severity
+    sev.append(sevGlyph, sevLabel)
 
     const msg = document.createElement('span')
     msg.className = 'diag-msg'
