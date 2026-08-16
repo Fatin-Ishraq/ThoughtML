@@ -1726,13 +1726,12 @@ fn stream_html(
         })
         .transpose()
         .map_err(|e| e.to_string())?
-        .unwrap_or_default()
-        .replace("</", "<\\/");
+        .unwrap_or_default();
+    let model = super::escape_json_for_script(&model);
     let config = serde_json::json!({ "snapshot": snapshot_path, "events": events_path });
-    let config = serde_json::to_string(&config)
-        .map_err(|e| e.to_string())?
-        .replace("</", "<\\/");
-    let title = snapshot.title.replace("</", "<\\/");
+    let config =
+        super::escape_json_for_script(&serde_json::to_string(&config).map_err(|e| e.to_string())?);
+    let title = super::sanitize_script_text(&snapshot.title);
     Ok(VIEWER_TEMPLATE
         .replace(MODEL_MARKER, &format!("{MODEL_MARKER}{model}"))
         .replace(TITLE_MARKER, &format!("{TITLE_MARKER}{title}"))

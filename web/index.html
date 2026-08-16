@@ -3,6 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- The playground compiles in a worker and fetches only its own assets.
+         `'unsafe-inline'` is required by the bundle, so this is not XSS
+         containment — it is the blast radius: no plugins, no injected <base>, no
+         form posts, and nowhere to exfiltrate to. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; worker-src 'self' blob:; base-uri 'none'; form-action 'none'; object-src 'none'" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <title>ThoughtML Playground — try the reasoning language live</title>
     <meta
