@@ -20,7 +20,7 @@
     "@codemirror/view": "^6.43.8",
     "@lezer/highlight": "^1.2.0",
     "cytoscape": "^3.30.0",
-    "cytoscape-dagre": "^2.5.0",
+    "cytoscape-dagre": "^4.0.0",
     "dagre": "^0.8.5",
     "fflate": "^0.8.3"
   },
