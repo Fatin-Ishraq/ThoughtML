@@ -1,0 +1,119 @@
+focus f0
+  B.
+focus f1
+  B.
+focus f2
+  B.
+focus f3
+  B.
+focus f4
+  B.
+focus f5
+  B.
+focus f6
+  B.
+focus f7
+  B.
+focus f8
+  B.
+focus f9
+  B.
+focus f10
+  B.
+focus f11
+  B.
+focus f12
+  B.
+focus f13
+  B.
+focus f14
+  B.
+focus f15
+  B.
+focus f16
+  B.
+focus f17
+  B.
+focus f18
+  B.
+focus f19
+  B.
+focus f20
+  B.
+focus f21
+  B.
+focus f22
+  B.
+focus f23
+  B.
+focus f24
+  B.
+focus f25
+  B.
+focus f26
+  B.
+focus f27
+  B.
+focus f28
+  B.
+focus f29
+  B.
+focus f30
+  B.
+focus f31
+  B.
+focus f32
+  B.
+focus f33
+  B.
+focus f34
+  B.
+focus f35
+  B.
+focus f36
+  B.
+focus f37
+  B.
+focus f38
+  B.
+focus f39
+  B.
+link f0 causes f1
+link f1 causes f2
+link f2 causes f3
+link f3 causes f4
+link f4 causes f5
+link f5 causes f6
+link f6 causes f7
+link f7 causes f8
+link f8 causes f9
+link f9 causes f10
+link f10 causes f11
+link f11 causes f12
+link f12 causes f13
+link f13 causes f14
+link f14 causes f15
+link f15 causes f16
+link f16 causes f17
+link f17 causes f18
+link f18 causes f19
+link f19 causes f20
+link f20 causes f21
+link f21 causes f22
+link f22 causes f23
+link f23 causes f24
+link f24 causes f25
+link f25 causes f26
+link f26 causes f27
+link f27 causes f28
+link f28 causes f29
+link f29 causes f30
+link f30 causes f31
+link f31 causes f32
+link f32 causes f33
+link f33 causes f34
+link f34 causes f35
+link f35 causes f36
+link f36 causes f37
+link f37 causes f38
+link f38 causes f39

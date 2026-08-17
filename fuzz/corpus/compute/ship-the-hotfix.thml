@@ -1,0 +1,25 @@
+# ship-the-hotfix — a clean document the mirror still catches.
+#
+# The form is fine: zero errors, zero warnings. But `--audit` flags that the
+# on-call engineer holds "safe to ship" at 0.90 while their own recorded evidence
+# — a failing canary — defeats it. ThoughtML shows the conflict; it does not
+# decide. This is the flagship demonstration of the mirror.
+
+focus hotfix-is-safe
+  kind claim
+  The payments hotfix is safe to ship to production now.
+
+focus suite-is-green
+  kind observation
+  The full unit and integration suite passed on the release branch.
+
+focus canary-errored
+  kind observation
+  The 5% canary threw a spike of HTTP 500s on checkout within ten minutes.
+
+link suite-is-green supports hotfix-is-safe
+link canary-errored opposes hotfix-is-safe
+
+oncall holds hotfix-is-safe
+  confidence 0.9 assumed
+  note Shipping — the suite is green and the release window closes at 17:00.

@@ -1,0 +1,87 @@
+# cloud-bill — a monthly cost model that computes itself.
+#
+# Every input line is a focus with a `quantity`; every derived line is an
+# `= formula` over the others. The parser checks units as it goes (USD/hour ×
+# hour = USD, USD × a dimensionless factor = USD), so a unit mistake is caught,
+# not silently shipped. Change one input and the whole bill recomputes — the
+# numbers are a *second reading* of what you wrote, not a spreadsheet you keep by
+# hand. Turn it on with `--compute`.
+
+scope cloud-bill-march
+
+# --- Compute ---
+observation instance-price
+  On-demand price per instance-hour.
+  quantity 0.096 USD/hour
+
+observation instance-hours
+  Total instance-hours across the fleet this month.
+  quantity 21600 hour
+
+focus compute-cost
+  kind claim
+  Monthly compute spend.
+  = instance-price * instance-hours
+
+# --- Storage ---
+observation storage-price
+  Object-storage price per GB-month.
+  quantity 0.021 USD/GB
+
+observation storage-used
+  Average stored volume this month.
+  quantity 12000 GB
+
+focus storage-cost
+  kind claim
+  Monthly storage spend.
+  = storage-price * storage-used
+
+# --- Egress ---
+observation egress-price
+  Data-transfer price per GB.
+  quantity 0.085 USD/GB
+
+observation egress-volume
+  Outbound transfer this month.
+  quantity 8000 GB
+
+focus egress-cost
+  kind claim
+  Monthly egress spend.
+  = egress-price * egress-volume
+
+# --- Database ---
+observation db-price
+  Managed-database price per instance-hour.
+  quantity 0.24 USD/hour
+
+observation db-hours
+  Database instance-hours this month.
+  quantity 1440 hour
+
+focus db-cost
+  kind claim
+  Monthly database spend.
+  = db-price * db-hours
+
+# --- Support ---
+observation support-plan
+  Flat monthly business-support fee.
+  quantity 400 USD
+
+# --- Totals ---
+focus total-bill
+  kind claim
+  Total monthly cloud bill.
+  = compute-cost + storage-cost + egress-cost + db-cost + support-plan
+
+# --- Unit economics ---
+observation active-users
+  Monthly active users served this month.
+  quantity 5000 user
+
+focus cost-per-user
+  kind claim
+  Blended infrastructure cost per active user.
+  = total-bill / active-users

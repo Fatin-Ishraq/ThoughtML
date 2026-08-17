@@ -1,0 +1,33 @@
+# replication-study — weighing a scientific claim on the evidence.
+#
+# A hypothesis, a pre-registered replication that supports it, a failed
+# replication that opposes it, and a methodological critique that `undercuts` the
+# failed one rather than attacking the hypothesis directly. Each weight carries a
+# `measured` or `estimated` basis, so the strength of every edge says on what
+# footing it stands.
+
+hypothesis effect-is-real
+  The facilitation effect reported in the 2019 study is real.
+
+observation direct-replication
+  A pre-registered direct replication reproduced the effect at p < 0.01.
+
+observation failed-replication
+  A larger, better-powered study found no effect.
+
+observation different-task
+  The failed replication substituted a materially harder task.
+
+link direct-replication supports effect-is-real
+  weight 0.8 measured
+
+link failed-replication opposes effect-is-real
+  weight 0.6 measured
+
+link different-task undercuts failed-replication
+  weight 0.5 estimated
+
+researcher accepts effect-is-real
+  confidence 0.7 estimated
+  because direct-replication
+  note The null result is confounded by the task change; the pre-registered replication is the cleaner signal.
