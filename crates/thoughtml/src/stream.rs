@@ -299,13 +299,17 @@ pub(crate) fn run(args: StreamArgs) -> ExitCode {
     // Anything past this machine is served in the clear, with the capability
     // token sitting in the URL — so it lands in browser history, proxy logs, and
     // `Referer`, and anyone on the path can read both it and the reasoning. `--lan`
-    // says "my local network", which is a claim about the network, not the code.
-    // A bind that is neither loopback nor private has to be asked for explicitly.
-    if !bind_ip.is_loopback() && !is_private_address(&bind_ip) && !args.expose_public {
+    // says "my local network", which is a claim about the network, not the code —
+    // so check what the network actually is rather than taking the flag's word.
+    if bind_is_public(&bind_ip) && !args.expose_public {
+        let reached = discover_lan_ip()
+            .map(|ip| format!(" (this host is reachable at {ip})"))
+            .unwrap_or_default();
         eprintln!(
-            "error: {bind_ip} is a public address. `thoughtml stream` speaks plain HTTP and \
-             puts its access token in the URL, so anyone who can see the traffic can read \
-             the document. Re-run with --expose-public if that is genuinely what you want."
+            "error: binding {bind_ip} would expose this stream publicly{reached}. \
+             `thoughtml stream` speaks plain HTTP and puts its access token in the URL, \
+             so anyone who can see the traffic can read the document. Re-run with \
+             --expose-public if that is genuinely what you want."
         );
         return ExitCode::FAILURE;
     }
@@ -1314,22 +1318,54 @@ struct HostPolicy {
     advertised: Option<String>,
 }
 
-/// Is this a private / link-local address — a "my own network" bind, as opposed
-/// to something routable from the internet? `0.0.0.0` and `::` count: they mean
-/// "every interface I have", which is what `--lan` asks for.
+/// Is this a private / link-local address — a "my own network" address, as
+/// opposed to something routable from the internet?
+///
+/// Deliberately says nothing about the wildcard addresses `0.0.0.0` / `::`.
+/// Those are not a network location at all, they are "every interface I have",
+/// so whether they are safe depends on what interfaces the host actually has.
+/// [`bind_is_public`] answers that question; classifying them here as private
+/// was the bug — it let `--lan` on a public-IP host skip the exposure gate.
 fn is_private_address(ip: &IpAddr) -> bool {
     match ip {
-        IpAddr::V4(v4) => {
-            v4.is_private() || v4.is_link_local() || v4.is_unspecified() || v4.is_loopback()
-        }
+        IpAddr::V4(v4) => v4.is_private() || v4.is_link_local() || v4.is_loopback(),
         IpAddr::V6(v6) => {
-            v6.is_unspecified()
-                || v6.is_loopback()
+            v6.is_loopback()
                 // fc00::/7 unique-local and fe80::/10 link-local.
                 || (v6.segments()[0] & 0xfe00) == 0xfc00
                 || (v6.segments()[0] & 0xffc0) == 0xfe80
         }
     }
+}
+
+/// Would binding `bind_ip` expose this stream beyond the operator's own network?
+///
+/// A wildcard bind is the ordinary way to reach a machine from elsewhere, and on
+/// a VPS or any host holding a routable address it is also the ordinary way to
+/// publish something to the internet by accident. So rather than trusting the
+/// literal `0.0.0.0`, ask the operating system which address it would use to
+/// reach the outside world and judge *that*. A laptop on a home network answers
+/// with a 192.168/10./172.16 address and `--lan` keeps working untouched; a cloud
+/// host answers with its public address and the exposure gate engages.
+///
+/// No route at all (offline) means nothing is reachable, so nothing to gate.
+fn bind_is_public(bind_ip: &IpAddr) -> bool {
+    bind_reaches_public(bind_ip, discover_lan_ip())
+}
+
+/// The decision itself, with the host's outbound address passed in.
+///
+/// Split out so both branches are testable. The case this whole function exists
+/// for — a wildcard bind on a host holding a routable address — is precisely the
+/// one a test running on a laptop or a CI runner would otherwise never reach.
+fn bind_reaches_public(bind_ip: &IpAddr, outbound: Option<IpAddr>) -> bool {
+    if bind_ip.is_loopback() {
+        return false;
+    }
+    if bind_ip.is_unspecified() {
+        return outbound.is_some_and(|ip| !ip.is_loopback() && !is_private_address(&ip));
+    }
+    !is_private_address(bind_ip)
 }
 
 /// Split `host[:port]`, handling the `[::1]:port` form.
@@ -2113,24 +2149,57 @@ mod tests {
 
     #[test]
     fn public_binds_are_recognized_as_public() {
-        for private in [
-            "127.0.0.1",
-            "192.168.1.10",
-            "10.0.0.4",
-            "172.16.5.1",
-            "0.0.0.0",
-        ] {
-            assert!(
-                is_private_address(&private.parse().unwrap()),
-                "{private} should not require --expose-public"
-            );
+        for private in ["127.0.0.1", "192.168.1.10", "10.0.0.4", "172.16.5.1"] {
+            let ip = private.parse().unwrap();
+            assert!(is_private_address(&ip), "{private} is a private address");
+            assert!(!bind_is_public(&ip), "{private} must not require the flag");
         }
         for public in ["203.0.113.7", "8.8.8.8"] {
-            assert!(
-                !is_private_address(&public.parse().unwrap()),
-                "{public} should require --expose-public"
-            );
+            let ip = public.parse().unwrap();
+            assert!(!is_private_address(&ip), "{public} is a public address");
+            assert!(bind_is_public(&ip), "{public} must require --expose-public");
         }
+        // IPv6 loopback and unique-local are private; a routable one is not.
+        assert!(!bind_is_public(&"::1".parse().unwrap()));
+        assert!(!bind_is_public(&"fd00::1".parse().unwrap()));
+        assert!(bind_is_public(&"2001:db8::1".parse().unwrap()));
+    }
+
+    /// The wildcard addresses are not a location, so they cannot be classified on
+    /// their own — `0.0.0.0` on a laptop is the LAN, and on a VPS it is the
+    /// internet. Treating them as inherently private is what let `--lan` skip the
+    /// exposure gate on a public-IP host.
+    #[test]
+    fn wildcard_binds_are_judged_by_the_hosts_real_address() {
+        let lan: Option<IpAddr> = Some("192.168.1.20".parse().unwrap());
+        let vps: Option<IpAddr> = Some("203.0.113.7".parse().unwrap());
+        let offline: Option<IpAddr> = None;
+
+        for wildcard in ["0.0.0.0", "::"] {
+            let ip: IpAddr = wildcard.parse().unwrap();
+            assert!(
+                !is_private_address(&ip),
+                "{wildcard} must not be classified as a private address"
+            );
+            // A laptop on a home network: `--lan` keeps working, no flag needed.
+            assert!(
+                !bind_reaches_public(&ip, lan),
+                "{wildcard} on a private network must not require the flag"
+            );
+            // A cloud host: the same command publishes to the internet. This is
+            // the case the gate exists for, and the one it used to miss.
+            assert!(
+                bind_reaches_public(&ip, vps),
+                "{wildcard} on a public-IP host must require --expose-public"
+            );
+            // No route out: nothing is reachable, so nothing to gate.
+            assert!(!bind_reaches_public(&ip, offline));
+        }
+
+        // An explicit address is judged on its own merits, whatever the host is.
+        assert!(bind_reaches_public(&"8.8.8.8".parse().unwrap(), lan));
+        assert!(!bind_reaches_public(&"127.0.0.1".parse().unwrap(), vps));
+        assert!(!bind_reaches_public(&"10.1.2.3".parse().unwrap(), vps));
     }
 
     #[test]

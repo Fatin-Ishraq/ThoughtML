@@ -44,10 +44,17 @@ compared without an early exit. It is **not** encrypted and **not** an identity:
 * Anyone holding the link has full read access, and a single recipient cannot be
   revoked short of restarting the session.
 
-Binding a public address requires `--expose-public`. The server refuses requests
-whose `Host` is a name it does not serve (DNS-rebinding defence), `/health` answers
-over loopback only, and session records are written to a per-user directory with
-owner-only permissions. Treat a `--lan` session as readable by that whole network.
+Exposing the stream beyond your own network requires `--expose-public`. That check
+looks at where the bind actually reaches, not at what was typed: `--lan` and
+`--host 0.0.0.0` mean "every interface I have", which is the LAN on a laptop and
+the internet on a cloud host, so the host's own outbound address decides. A laptop
+on a home network is unaffected; the same command on a VPS is refused until you
+ask for it explicitly.
+
+The server also refuses requests whose `Host` is a name it does not serve
+(DNS-rebinding defence), `/health` answers over loopback only, and session records
+are written to a per-user directory with owner-only permissions. Treat a `--lan`
+session as readable by that whole network.
 
 ## Reporting a vulnerability
 
