@@ -21,6 +21,13 @@ updates:
       interval: weekly
     open-pull-requests-limit: 5
 
+  # NOTE: this also rewrites `.github/workflows/release.yml`, which is *generated*
+  # by dist — Dependabot cannot tell a generated workflow from a hand-written one,
+  # and there is no per-file ignore. dist then refuses to run because the file no
+  # longer matches its output, which breaks the release at tag time. The
+  # `generated-workflow` job in ci.yml catches that on the pull request instead;
+  # when it fires, revert that one file (`git checkout <base> -- release.yml`) and
+  # keep the rest of the bump.
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
