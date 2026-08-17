@@ -1,0 +1,15 @@
+focus shared
+  kind claim
+  First.
+
+scope shared
+
+observation a
+  Some evidence.
+
+link a supports shared
+link shared supports b
+
+focus b
+  kind claim
+  Downstream.
