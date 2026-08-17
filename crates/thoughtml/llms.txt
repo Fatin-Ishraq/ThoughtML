@@ -545,11 +545,15 @@ focus conditions-are-fine
 focus truck-is-booked
   kind observation
   The ready-mix truck is booked for 14:00 and the full crew is on site.
+  source site-diary
+  observed-at 2026-03-11
 
 focus overnight-freeze
   kind observation
   The site thermometer logged minus four degrees from 02:00 to 06:00, and tonight's
   forecast repeats it. Fresh concrete that freezes before it sets never recovers.
+  source site-diary
+  observed-at 2026-03-11
 
 link truck-is-booked supports conditions-are-fine
 link overnight-freeze opposes conditions-are-fine
