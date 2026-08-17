@@ -4,7 +4,7 @@ All notable changes to ThoughtML are recorded here. The project follows
 [Semantic Versioning](https://semver.org). **v0.1.0** is the first public
 release — real and usable, but the surface may still move.
 
-## [Unreleased]
+## [0.4.2] — 2026-08-17
 
 Follow-ups from a review of the 0.4.1 security work, plus the first bug the new
 fuzzing found.

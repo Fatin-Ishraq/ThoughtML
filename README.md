@@ -18,7 +18,7 @@
   <a href="https://fatin-ishraq.github.io/ThoughtML/playground/"><img alt="playground" src="https://img.shields.io/badge/playground-try%20it%20live-8957e5" /></a>
   <a href="https://github.com/Fatin-Ishraq/ThoughtML/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/Fatin-Ishraq/ThoughtML/actions/workflows/ci.yml/badge.svg" /></a>
   <a href="LICENSE"><img alt="license: MIT" src="https://img.shields.io/badge/license-MIT-green" /></a>
-  <a href="CHANGELOG.md"><img alt="version" src="https://img.shields.io/badge/version-0.4.1-blueviolet" /></a>
+  <a href="CHANGELOG.md"><img alt="version" src="https://img.shields.io/badge/version-0.4.2-blueviolet" /></a>
 </p>
 
 <p align="center">
@@ -230,6 +230,10 @@ npm run dev
 More in [Use cases ↗](https://fatin-ishraq.github.io/ThoughtML/guides/use-cases.html).
 
 ## Status
+
+**v0.4.2 — follow-ups.** Closes a gap in 0.4.1's stream exposure check, stops
+`thoughtml fmt` deleting comments, and fixes a wrong-answer bug in evidence
+propagation found by the new continuous fuzzing.
 
 **v0.4.1 — security release.** Upgrade from 0.4.0 or earlier: a security audit found
 issues in the parser, the viewer, the `thoughtml stream` server, and the release

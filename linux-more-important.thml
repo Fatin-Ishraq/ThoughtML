@@ -1,0 +1,179 @@
+# Linux versus Windows — importance to global computing infrastructure.
+#
+# "More important" is deliberately scoped to systemic dependence: how much of
+# the modern computing stack relies on the platform, not which desktop OS is
+# more familiar or preferable. The Windows case and Linux's weaknesses are kept
+# in the graph so the conclusion is contestable rather than promotional.
+
+question platform-importance
+  Which operating-system family is more important to global computing infrastructure?
+  expects claim
+
+claim linux-more-important
+  Linux is more important than Windows to global computing infrastructure.
+
+claim windows-more-important
+  Windows's desktop and organizational reach makes it more important overall.
+
+candidate-for platform-importance
+  linux-more-important
+  windows-more-important
+
+claim systemic-dependence-standard
+  Importance here means how much critical infrastructure and downstream computing depend on the platform.
+
+claim infrastructure-outweighs-desktop
+  Foundational infrastructure dependence matters more to this comparison than desktop market presence alone.
+
+claim linux-internet-backbone
+  Linux is a foundational platform for internet-facing infrastructure.
+
+claim linux-cloud-platform
+  Linux is the default substrate for much cloud-native computing.
+
+claim linux-mobile-embedded
+  Linux-derived systems underpin enormous parts of mobile and embedded computing.
+
+claim linux-open-infrastructure
+  Linux enables infrastructure that organizations can inspect, adapt, redistribute, and operate independently.
+
+claim linux-scientific-platform
+  Linux is foundational to high-performance and research computing.
+
+claim windows-enduser-platform
+  Windows remains exceptionally important to end-user and organizational computing.
+
+observation linux-server-deployment
+  Linux is widely deployed on production servers across hosting, enterprise, and public infrastructure.
+
+observation web-serving-footprint
+  A large share of public web services run on Linux or other Unix-like server stacks.
+
+observation network-appliance-footprint
+  Routers, firewalls, storage appliances, and network services frequently use Linux-based systems.
+
+supports linux-internet-backbone
+  linux-server-deployment      weight 0.90 estimated
+  web-serving-footprint        weight 0.85 estimated
+  network-appliance-footprint  weight 0.75 estimated
+
+observation public-cloud-footprint
+  Linux images and managed Linux services are central offerings across major public clouds.
+
+observation container-host-standard
+  Linux kernel facilities provide the native foundation for mainstream container isolation.
+
+observation kubernetes-node-footprint
+  Most production Kubernetes worker nodes use Linux operating systems.
+
+supports linux-cloud-platform
+  public-cloud-footprint   weight 0.90 estimated
+  container-host-standard  weight 0.95 estimated
+  kubernetes-node-footprint weight 0.85 estimated
+
+observation android-kernel-lineage
+  Android uses the Linux kernel and extends Linux's reach across billions of mobile devices.
+
+observation embedded-device-footprint
+  Linux is common in televisions, vehicles, industrial controllers, consumer devices, and edge computers.
+
+supports linux-mobile-embedded
+  android-kernel-lineage      weight 0.95 measured
+  embedded-device-footprint   weight 0.80 estimated
+
+observation forkability
+  Linux's licensing permits organizations to fork and maintain the system without a single vendor's permission.
+
+observation source-auditability
+  Its source can be inspected and modified by operators, researchers, vendors, and governments.
+
+observation cross-org-maintenance
+  Development and maintenance are distributed across many companies, communities, and independent contributors.
+
+supports linux-open-infrastructure
+  forkability            weight 0.90 measured
+  source-auditability    weight 0.85 measured
+  cross-org-maintenance  weight 0.75 estimated
+
+observation supercomputer-footprint
+  Linux dominates the operating systems used by leading supercomputers.
+
+observation research-cluster-footprint
+  Research clusters and technical computing environments commonly standardize on Linux.
+
+supports linux-scientific-platform
+  supercomputer-footprint      weight 0.95 measured
+  research-cluster-footprint   weight 0.80 estimated
+
+observation windows-desktop-footprint
+  Windows has an enormous installed base on personal and workplace computers.
+
+observation office-workflow-dependence
+  Many organizations depend on Windows-centered productivity and document workflows.
+
+observation enterprise-identity-dependence
+  Active Directory and related Microsoft administration systems remain deeply embedded in enterprises.
+
+observation commercial-app-dependence
+  Important commercial creative, engineering, accounting, and specialist applications target Windows first or exclusively.
+
+observation pc-gaming-dependence
+  Windows remains the primary compatibility target for much of PC gaming.
+
+observation accessibility-support-depth
+  Windows benefits from mature accessibility tooling, hardware support, training, and commercial assistance.
+
+supports windows-enduser-platform
+  windows-desktop-footprint       weight 0.95 measured
+  office-workflow-dependence      weight 0.85 estimated
+  enterprise-identity-dependence  weight 0.85 estimated
+  commercial-app-dependence       weight 0.80 estimated
+  pc-gaming-dependence            weight 0.75 estimated
+  accessibility-support-depth     weight 0.70 estimated
+
+observation linux-fragmentation
+  Distribution, packaging, and configuration differences impose real integration and support costs.
+
+observation linux-desktop-app-gap
+  Linux desktop users still face gaps in some commercial applications and vendor-certified workflows.
+
+observation uneven-vendor-support
+  Hardware and software vendors do not support every Linux distribution equally well.
+
+observation governance-capture-risk
+  Open development does not eliminate concentrated influence by major corporate contributors and maintainers.
+
+link linux-fragmentation opposes linux-open-infrastructure
+  weight 0.55 estimated
+
+link governance-capture-risk opposes linux-open-infrastructure
+  weight 0.45 estimated
+
+link linux-desktop-app-gap supports windows-enduser-platform
+  weight 0.70 estimated
+
+link uneven-vendor-support supports windows-enduser-platform
+  weight 0.65 estimated
+
+supports linux-more-important
+  linux-internet-backbone    weight 0.90 estimated
+  linux-cloud-platform       weight 0.95 estimated
+  linux-mobile-embedded      weight 0.85 estimated
+  linux-open-infrastructure  weight 0.75 estimated
+  linux-scientific-platform  weight 0.80 estimated
+  systemic-dependence-standard weight 0.85 assumed
+  infrastructure-outweighs-desktop weight 0.80 assumed
+
+link windows-enduser-platform supports windows-more-important
+  weight 0.90 estimated
+
+link windows-more-important opposes linux-more-important
+  weight 0.75 estimated
+
+link infrastructure-outweighs-desktop opposes windows-more-important
+  weight 0.80 assumed
+
+analyst holds linux-more-important
+  confidence 0.75 estimated
+  because systemic-dependence-standard
+  note The conclusion is about infrastructural dependence, not desktop quality or total user value.

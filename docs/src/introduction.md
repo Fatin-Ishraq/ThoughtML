@@ -69,7 +69,7 @@ answer*. It's to make the reasoning legible enough that its flaws can't hide.
 
 ## A note on stability
 
-This documentation describes **v0.4.1**, the current public release. The
+This documentation describes **v0.4.2**, the current public release. The
 language is real and usable, but its surface may still move (hence 0.x, not
 1.0). Where a feature is *opt-in* or *advanced*, this book says so plainly.
 

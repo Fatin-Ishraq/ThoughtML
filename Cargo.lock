@@ -338,7 +338,7 @@ dependencies = [
 
 [[package]]
 name = "thoughtml"
-version = "0.4.1"
+version = "0.4.2"
 dependencies = [
  "clap",
  "ctrlc",
@@ -349,7 +349,7 @@ dependencies = [
 
 [[package]]
 name = "thoughtml-wasm"
-version = "0.4.1"
+version = "0.4.2"
 dependencies = [
  "serde",
  "serde_json",

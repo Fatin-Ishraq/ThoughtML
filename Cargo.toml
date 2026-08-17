@@ -8,7 +8,7 @@ members = [
 # Shared metadata for the workspace members. Each crate inherits these with
 # `<field>.workspace = true`, so the version is bumped in exactly one place.
 [workspace.package]
-version = "0.4.1"
+version = "0.4.2"
 edition = "2021"
 license = "MIT"
 repository = "https://github.com/Fatin-Ishraq/ThoughtML"
