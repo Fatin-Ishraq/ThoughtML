@@ -77,3 +77,11 @@ web/public/dev-model-*.json
 graphify-out/
 exampleview/
 
+# Scratch documents at the repo root. Real ones live in examples/; anything loose
+# at the top level is a local experiment, and four of them were swept into the
+# v0.4.2 release commit by a `git add -A`. The two exceptions below are tracked
+# deliberately and are listed so they read as intentional rather than survivors.
+/*.thml
+/*.html
+!/google0358dcbaac28de38.html
+!/thoughtml-node-shapes-demo.html
