@@ -1,0 +1,88 @@
+# grant-panel — one award, four people, and everything that was ruled out.
+#
+# The criteria are a `part-of` collection, not evidence. Naming what you weighed must
+# not make the decision look better argued than it is, and `part-of` carries no
+# polarity, so it cannot. The withdrawn proposal is parked `abandoned` with its reason
+# rather than deleted, and the award letter is blocked `until` the ethics review
+# answers — which is just a `blocks` edge, written the way a person would say it.
+
+scope spring-panel
+
+  goal fund-best-science
+    Award the spring grant to the proposal most likely to produce usable results.
+
+  question which-proposal
+    Which of the three proposals should take the spring award?
+    expects option
+    about coastal-sensors, gut-microbiome, teaching-study
+    status settled
+
+  decision spring-award
+    The panel's award for the spring funding cycle.
+    chosen-by panel-chair
+
+  option coastal-sensors
+    Deploy a low-cost sensor array along the estuary for a full tidal year.
+
+  option gut-microbiome
+    Sequence a longitudinal cohort of two hundred infants over eighteen months.
+
+  option teaching-study
+    Trial a new laboratory teaching sequence across three cohorts.
+    status abandoned
+    note Withdrawn in week two — the lead investigator moved institution.
+
+link coastal-sensors option-of spring-award
+link gut-microbiome option-of spring-award
+link teaching-study option-of spring-award
+link gut-microbiome answers which-proposal
+link spring-award enables fund-best-science
+
+claim panel-criteria
+  What the panel agreed to weigh, before reading any of the proposals.
+
+claim methods-are-sound
+  The design can actually answer the question the applicants are asking.
+
+claim team-can-deliver
+  The team has the people and the equipment to finish inside the grant period.
+
+claim result-is-usable
+  Somebody outside the project can use the result within about two years.
+
+part-of panel-criteria
+  methods-are-sound
+  team-can-deliver
+  result-is-usable
+
+observation cohort-already-recruited
+  The infant cohort is recruited and consented; sequencing could start in June.
+
+link cohort-already-recruited supports gut-microbiome
+
+question ethics-review
+  Has the committee cleared the revised infant cohort protocol?
+  expects claim
+  status open
+
+action award-letter
+  Send the award letter and open the project account.
+  blocked-by ethics-review
+
+link award-letter depends-on spring-award
+
+panel-chair holds award-letter
+  until ethics-review answered
+  note Drafted and ready. It does not go out before the committee clears the protocol.
+
+reviewer-a considers coastal-sensors
+  confidence 0.6 estimated
+  note Cheap, and a full tidal year makes the dataset reusable by other groups.
+
+reviewer-b rejects teaching-study
+  note Withdrawn by the applicant. Recorded so next cycle can see why.
+
+stance chair-call: panel-chair chooses gut-microbiome
+  confidence 0.65 estimated
+  because cohort-already-recruited
+  note Highest expected yield of the three, and it can start almost immediately.

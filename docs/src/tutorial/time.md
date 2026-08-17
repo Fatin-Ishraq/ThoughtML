@@ -109,8 +109,9 @@ thoughtml --as-of-seq 3 doc.thml           # …as of the 3rd recorded event
 transaction order. Either way, links and stances that would dangle once a node
 drops out are cascaded away, so the projected model is always coherent.
 
-The bundled [`launch-readiness.thml`](../appendix/examples.md) is built entirely
-around this — a launch date that slips twice as evidence arrives.
+The bundled [`dating-the-codex.thml`](../appendix/examples.md) is built entirely
+around this — a manuscript dating superseded once the radiocarbon result lands, where
+`--as-of` makes the conflict disappear because at that date it did not exist yet.
 
 Our cache document is a single moment in time, so it needs no revision. We now
 have every piece. Time to read it back — [the mirror](the-mirror.md).

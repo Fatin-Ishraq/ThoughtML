@@ -30,7 +30,7 @@ ops flags port-strike
 A profile declares four list-valued fields — `kinds`, `relations`, `fields`,
 `postures` — and any term it lists stops triggering the "unknown kind/relation/
 field/posture" warnings. The bundled
-[`threat-model.thml`](../appendix/examples.md) is a complete example. The
+[`bridge-inspection.thml`](../appendix/examples.md) is a complete example. The
 profile itself is recorded as a `Profile` object (document metadata, not a
 referenceable node).
 
@@ -65,8 +65,8 @@ documents' sources:
 
 Every id and structural reference from an imported document is prefixed with the
 namespace, so two documents can use the same local id without collision. The
-bundled [`compliance-rollout.thml`](../appendix/examples.md) (which imports
-`control-library.thml`) must be run as a project to resolve — open it in the
+bundled [`bridge-inspection.thml`](../appendix/examples.md) (which imports
+`inspection-standards.thml`) must be run as a project to resolve — open it in the
 playground, or run it through the CLI from the examples directory.
 
 ### Provenance in the unified graph

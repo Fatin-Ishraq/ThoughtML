@@ -4,6 +4,29 @@ All notable changes to ThoughtML are recorded here. The project follows
 [Semantic Versioning](https://semver.org). **v0.1.0** is the first public
 release — real and usable, but the surface may still move.
 
+## [Unreleased]
+
+### Changed
+
+- **The examples corpus is rebuilt: ten documents instead of twenty.** The previous
+  set had accreted through the language's growth and much of it was written against
+  v0.2 idioms. It is replaced by ten fresh documents, each carrying one construct as
+  its worked reference, on a ladder from thirty to ninety lines. Between them they
+  contain an instance of every kind, relation, posture, field, basis, lifecycle
+  state, confidence form, and both mirror conflicts — pinned by a test. The domains
+  are deliberately spread outside software: a concrete pour stopped by a frost
+  reading, a failed sourdough, a waterborne-outbreak investigation, two referees on
+  one paper, a re-dated manuscript, a funding panel, an orchard's water budget, a
+  wildfire evacuation, and a bridge inspection against a shared standard.
+- **`thoughtml fmt` now formats the way the language reads.** Two changes, so that
+  a well-written document *is* the canonical one: `kind` is emitted directly under
+  its header rather than after the body prose, and a run of lone header lines (the
+  links closing a document, a stack of imports) stays tight instead of being spaced
+  out. A comment block the author set off with a blank line — a file header, a
+  section divider — keeps that blank line, because the gap is what marks it as
+  introducing more than the one record below it. All ten examples are `fmt --check`
+  clean, and CI now walks `examples/` to keep them that way.
+
 ## [0.4.2] — 2026-08-17
 
 Follow-ups from a review of the 0.4.1 security work, plus the first bug the new

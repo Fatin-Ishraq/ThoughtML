@@ -1,0 +1,62 @@
+# dating-the-codex — a belief that changed, with the old one still in the graph.
+#
+# Nothing here is deleted. The first dating is kept, marked `superseded`, and a
+# `revises` edge records what replaced it and when. Because the stances are dated,
+# `--as-of 2026-01-01` replays the document as it stood before the lab result came
+# back — the earlier reading, argued in its own terms, not a redacted version of it.
+#
+# The two readings disagree, and the mirror says so. `--audit` reports a
+# `confidence-vs-status` error: the palaeographer held the twelfth century at 0.70 and
+# the radiocarbon range now defeats it. Run `--as-of 2026-01-01 --audit` and the
+# conflict is gone. It is not that the belief was unreasonable — it is that it was
+# reasonable *then*. Replay is what lets you tell those two things apart.
+
+focus twelfth-century-dating
+  kind claim
+  The codex was copied in the late twelfth century.
+  asserted-at 2025-09-12
+  valid-during 2025-09-12..2026-02-20
+  status superseded
+
+focus fourteenth-century-dating
+  kind claim
+  The codex was copied between roughly 1320 and 1360.
+  asserted-at 2026-02-20
+
+link fourteenth-century-dating revises twelfth-century-dating
+
+observation script-is-early-gothic
+  The hand is an early gothic textualis, a script in use from the late twelfth
+  century onward.
+  observed-at 2025-09-10
+
+observation radiocarbon-range
+  Radiocarbon dating of the parchment returned 1315 to 1365 at ninety-five per cent.
+  observed-at 2026-02-14
+  source lab-report-4471
+
+memory catalogue-of-1904
+  The museum's 1904 catalogue also placed the codex in the twelfth century.
+  source museum-catalogue-1904
+
+link script-is-early-gothic supports twelfth-century-dating
+link catalogue-of-1904 supports twelfth-century-dating
+link radiocarbon-range supports fourteenth-century-dating
+link radiocarbon-range opposes twelfth-century-dating
+
+palaeographer remembers catalogue-of-1904
+  note Not independent evidence — the 1904 cataloguer read the same hand we did.
+
+palaeographer holds twelfth-century-dating
+  asserted-at 2025-09-12
+  confidence 0.7 estimated
+  note On the script alone. Early gothic gives a lower bound, not a date.
+
+palaeographer revises twelfth-century-dating
+  asserted-at 2026-02-21
+  confidence 0.05 measured
+  note The radiocarbon range rules it out. Kept so the reasoning stays legible.
+
+conservator doubts radiocarbon-range
+  confidence ?
+  note I cannot judge their calibration curve, so the doubt goes down without a number.

@@ -258,22 +258,22 @@ See [Live streaming](streaming.md) for the protocol and agent workflow.
 
 ```sh
 # Canonical JSON + diagnostics
-thoughtml examples/triage-742.thml
+thoughtml examples/pour-the-slab.thml
 
 # The full second reading, compact, to a file
-thoughtml --compute --compact -o out.json examples/ship-or-hold.thml
+thoughtml --compute --compact -o out.json examples/evacuate-or-shelter.thml
 
 # Just the conflict report
-thoughtml --audit examples/ship-the-hotfix.thml
+thoughtml --audit examples/pour-the-slab.thml
 
 # Replay: what did the document believe as of a date?
-thoughtml --as-of 2026-01-13 examples/launch-readiness.thml
+thoughtml --as-of 2026-01-13 examples/dating-the-codex.thml
 
 # A standalone interactive viewer — one self-contained HTML file, opens anywhere
-thoughtml --html -o decision-record.html examples/choose-datastore.thml
+thoughtml --html -o decision-record.html examples/grant-panel.thml
 
 # A live view hosted by this computer until Ctrl+C
-thoughtml stream examples/ship-or-hold.thml
+thoughtml stream examples/evacuate-or-shelter.thml
 
 # Enforce provenance and fail on any warning (good for CI)
 thoughtml --strict --strict-provenance reasoning.thml
@@ -297,5 +297,5 @@ Before installing the binary, you can run via cargo from the repository root
 (`-p thoughtml` selects the parser crate):
 
 ```sh
-cargo run -p thoughtml -- --compute examples/ship-or-hold.thml
+cargo run -p thoughtml -- --compute examples/evacuate-or-shelter.thml
 ```

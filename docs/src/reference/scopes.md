@@ -34,8 +34,8 @@ scope college-choice
       Which offer do I commit to?
 ```
 
-The bundled [`ship-or-hold.thml`](../appendix/examples.md) uses four sub-scopes
-(goals / evidence / decision / second-thoughts) to organize a real decision.
+The bundled [`grant-panel.thml`](../appendix/examples.md) nests a goal, a question, a
+decision and three options inside one scope, so the panel reads as a single unit.
 
 ## Inheritance
 
@@ -48,7 +48,7 @@ This means you can stamp an entire investigation with one date and source at the
 top, and only override where a specific record differs:
 
 ```thml
-scope launch-readiness
+scope burndown-review
   asserted-at 2026-06-01        # every member inherits this date…
   analyst suspects early-burndown causes on-track
     asserted-at 2026-06-01

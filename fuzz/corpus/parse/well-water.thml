@@ -1,0 +1,63 @@
+# well-water — a field investigation drawn as a causal graph.
+#
+# The scope carries the provenance once and the records nested inside it inherit:
+# a member takes its container's `source` and `observed-at` unless it says otherwise.
+# Note the division of labour between the relations. `causes` / `enables` / `prevents`
+# describe how the world works and move no numbers; only the `supports` bundle argues.
+
+scope kabir-hat-survey
+  source district-health-survey
+  observed-at 2026-05-03
+
+  observation cases-clustered
+    Nineteen of the twenty-two diarrhoeal cases live within three hundred metres of
+    the north well.
+    noticed-by field-nurse
+
+  observation apron-cracked
+    The concrete apron around the north well is cracked and holds standing water.
+
+  observation latrines-uphill
+    Two pit latrines sit nine metres uphill of the well, dug well below the wet-season
+    water table.
+    observed-at 2026-05-04
+
+observation chlorine-absent
+  Free chlorine at the well head measured zero on both visits.
+  quantity 0 mg/L measured
+  source district-health-survey
+
+observation rainfall-spike
+  Sixty millimetres of rain fell in the week before the first case.
+  quantity 60 mm measured
+
+claim seepage-into-well
+  Surface and latrine water is reaching the well through the cracked apron.
+  suspected-by field-nurse
+
+claim well-is-contaminated
+  The north well is the contaminated source behind this outbreak.
+
+link latrines-uphill causes seepage-into-well
+link apron-cracked enables seepage-into-well
+link seepage-into-well causes well-is-contaminated
+
+supports well-is-contaminated
+  cases-clustered weight 0.85 measured
+  chlorine-absent weight 0.6 measured
+
+action chlorinate-and-seal
+  Shock-chlorinate the well, recast the apron, and re-site both latrines downhill.
+  status open
+
+link chlorinate-and-seal prevents seepage-into-well
+
+field-nurse noticed cases-clustered
+  note Four households on one lane reported illness on the same morning.
+
+field-nurse suspects rainfall-spike causes seepage-into-well as rain-drove-seepage
+  confidence 0.5 estimated
+
+epidemiologist infers outbreak-is-waterborne from cases-clustered well-is-contaminated
+  confidence 0.82 estimated
+  note Enough to act on. Stool cultures will confirm the organism, not the route.

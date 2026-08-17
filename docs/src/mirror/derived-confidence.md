@@ -67,5 +67,6 @@ evidence, rounded to three decimals, e.g.:
 
 In the playground, it shows in the Reasoning Card's expanded details **beside** your authored
 confidence — two bars, never merged. On the bundled
-[`hiring-panel.thml`](../appendix/examples.md), the displacement hypothesis lands
-≈0.94 while the optimist's rebuttal comes out ≈0.22, several hops deep.
+[`evacuate-or-shelter.thml`](../appendix/examples.md), `town-overrun` lands ≈0.802 on
+one weighted support, while `fire-turns-away` comes out ≈0.401 — a 0.5-weight support
+outweighed by a 0.7-weight attack.

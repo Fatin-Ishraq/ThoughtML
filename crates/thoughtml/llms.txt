@@ -95,7 +95,7 @@ three sugar forms.
 | `stance <agent> <posture> <target>` | an agent stance (longhand) | `stance payments-agent holds root-cause` |
 | `scope <id>` | a container | `scope incident-742` |
 | `profile <name>` | a dialect (advanced, §5/§6) | `profile appsec` |
-| `import <name> as <ns>` | a namespace (advanced, §9) | `import control-library as baseline` |
+| `import <name> as <ns>` | a namespace (advanced, §9) | `import inspection-standards as standard` |
 | **`<kind> <id>`** (typed header, sugar) | a focus with that kind | `observation error-rate-up` |
 | **`<relation> <target>`** (evidence bundle, sugar) | many links | see §10 |
 | **`<agent> <posture> …`** (readable action) | a stance (+ maybe a focus/link) | `team noticed shift` |
@@ -106,8 +106,8 @@ If a header's first word is a **kind** (§5) it's a typed focus; if it's a **rel
 header`). So the first word (and an action's second word) is overloaded across the closed
 sets — which is why inventing a kind / relation / posture doesn't merely warn, it can
 change how a line parses. (`stance` longhand and the readable `<agent> <posture>` form
-build the *same* stance object; use whichever reads better — `merge-conflict-beliefs`
-mixes both to prove it.)
+build the *same* stance object; use whichever reads better — `grant-panel` and
+`bridge-inspection` mix both to prove it.)
 
 ---
 
@@ -186,12 +186,12 @@ it silently inflates that claim's confidence: "Netflix has strengths" reads as
 100%-certain just for *naming* them. `part-of` has no polarity, so enumerations stay
 structure and the numbers keep meaning something. Likewise use `candidate-for` for a
 question's proposed options and reserve `answers` for the one that actually resolves it.
-(`roadmap-priorities` and `control-library` show `part-of` done right; `differential-dx`
-shows `candidate-for` vs `answers`.)
+(`grant-panel` and `inspection-standards` show `part-of` done right;
+`why-the-loaf-failed` shows `candidate-for` vs `answers`.)
 
 **Other easy confusions:**
 - `opposes` (a claim is false) vs `undercuts` (a step doesn't follow — target the **link**).
-  `pr-feedback` sets them side by side.
+  `peer-review` sets them side by side.
 - `weight` (evidential strength, any evidence/structural link, `0..1`) vs `probability`
   (outcome likelihood, `leads-to` **only**, `0..1`). Putting one where the other belongs
   is ignored with a warning.
@@ -200,19 +200,23 @@ shows `candidate-for` vs `answers`.)
 - There is **no** `rejects` or `mitigates` relation in the core. A hard rejection is
   `opposes`; defending X is attacking X's attacker (`guard opposes risk`). (`rejects`
   exists only as a *posture*, §7. A domain that truly wants `mitigates` declares it in a
-  `profile` — see `threat-model`.)
+  `profile` — see `bridge-inspection`.)
 
 **Profiles add relations (and kinds/fields/postures).** A `profile` header opens a dialect
 whose declared words are then legal below it; anything it doesn't declare still warns.
 Comma-separated lists:
 
 ```thml
-profile appsec
-  kinds threat, control, weakness
-  relations mitigates, aggravates, exposes
-  fields likelihood, severity
-  postures flags
+profile structural
+  kinds defect, remedy
+  relations aggravates, mitigates
+  fields severity, next-inspection
+  postures certifies
 ```
+
+One scoping rule: a posture a profile adds is reachable only through the `stance`
+longhand. The readable `<agent> <posture> …` form is resolved against the twelve core
+postures before any profile is consulted.
 
 ---
 
@@ -241,7 +245,7 @@ lives. You almost never write `stance` longhand; you write the readable form **`
 Confidence and rationale ride on the stance: put `confidence`, `note`, `because`, and
 `asserted-at` in the block under a posture line. `confidence` may be a scalar
 (`confidence 0.72`), a **range** (`confidence 0.25..0.70`, read at its midpoint), or
-genuinely **unknown** (`confidence ?` — see `assistant-memory`). `suspects` takes a full
+genuinely **unknown** (`confidence ?` — see `dating-the-codex`). `suspects` takes a full
 edge (`<from> <relation> <to> [as <alias>]`); `infers` takes `<target> from <id> <id> …`
 and wires each source with a `supports` link, so the reasoning is explicit.
 
@@ -264,7 +268,7 @@ anywhere — including from another agent's stance, or a later scope.
 **Divergence is kept, not dropped.** If a later mention gives a *different*
 body/quantity/formula (not a repeat), the alternative is retained on the node and the
 mirror raises a `definition-divergence` conflict (§13). Concurrent authors never clobber
-each other — see `merge-conflict-beliefs`, where two teams define one `root-cause` two
+each other — see `peer-review`, where two referees write one `central-claim` two
 ways and both survive.
 
 ---
@@ -274,9 +278,9 @@ ways and both survive.
 Indent records under a `scope` to group them, or under a `focus`/`question` to make a
 **thought-tree** — a claim (or question) and the reasoning that hangs off it, as one unit.
 Nested members are recorded on the container's `includes` and **inherit its provenance and
-temporal context** — an explicit value on the child wins. (`prod-outage` puts `source
-pagerduty` and `observed-at` on a scope and lets the observations inherit; `roadmap-
-priorities` nests candidate options under a question.)
+temporal context** — an explicit value on the child wins. (`well-water` puts `source`
+and `observed-at` on a scope and lets the observations inherit; `grant-panel` nests its
+options and questions inside one scope.)
 
 ```thml
 focus ship-decision
@@ -293,9 +297,9 @@ focus ship-decision
 **Imports (multi-document).** `import <file> as <ns>` pulls another document's nodes in
 under a namespace; you then reference them as `ns.id`. The importer is checked as a
 **project** (importer + library together) so cross-document references resolve. A library
-must itself be strict-clean as a standalone document. See `control-library` (the library)
-and `compliance-rollout` (`import control-library as baseline`, then `depends-on
-baseline.encryption-at-rest`).
+must itself be strict-clean as a standalone document. See `inspection-standards` (the
+library) and `bridge-inspection` (`import inspection-standards as standard`, then
+`depends-on standard.load-rating-on-record`).
 
 ---
 
@@ -322,20 +326,19 @@ saying on what footing it stands.
 **Formulas (`= expr`).** A focus can compute its `quantity` from other foci with a
 `= expression` line over `+ - * /` and referenced ids. The parser **checks units** as it
 goes (USD/hour × hour = USD; USD ÷ user = USD/user), so a dimensional mistake is caught,
-not shipped. `--compute` evaluates them into `computed_quantity`. See `cloud-bill` (a
-self-computing monthly bill) — change one input and the whole thing recomputes.
+not shipped. `--compute` evaluates them into `computed_quantity`. See `orchard-water` (a
+self-computing water budget) — change one input and the whole thing recomputes.
 
 ```thml
-observation instance-price
-  quantity 0.096 USD/hour
-observation instance-hours
-  quantity 21600 hour
-focus compute-cost
-  kind claim
-  = instance-price * instance-hours
+observation well-yield
+  quantity 30 L/min measured
+observation pump-window
+  quantity 480 min measured
+claim daily-supply
+  = well-yield * pump-window
 ```
 
-`compute-cost` computes to `2073.6 USD` — `USD/hour × hour` is unit-checked to `USD`, so a
+`daily-supply` computes to `14400 L` — `L/min × min` is unit-checked to `L`, so a
 dimensional slip is an error, not a silent wrong number.
 
 **Evidence bundles** collapse the common "many sources → one target" repetition. A bare
@@ -376,13 +379,13 @@ When it does, three ISO-8601 fields (partial dates like `2026` or `2026-06` are 
 
 - `observed-at` — when something was seen.
 - `asserted-at` — when a belief was put on the record.
-- `valid-during <start>..<end>` — a span over which something holds (`launch-readiness`).
+- `valid-during <start>..<end>` — a span over which something holds (`dating-the-codex`).
 
 **Lifecycle (`status`).** A focus can carry a `status`: `open` (default, live), `settled`
 (resolved), `superseded` (replaced by a later belief), `abandoned` (a dead end). A
 settled/superseded/abandoned branch is kept with its reason and folds in the viewer —
-never deleted. (`choose-datastore` parks a rejected option as `abandoned`; `launch-
-readiness` walks a call through `superseded`.)
+never deleted. (`grant-panel` parks a withdrawn option as `abandoned`;
+`dating-the-codex` walks a dating through `superseded`.)
 
 **Revision.** `link new revises old` supersedes a *node*; the `revises` posture supersedes
 the same agent's *prior stance*. Either way the old belief stays in the graph (it just
@@ -399,7 +402,7 @@ and supersession and the audit recompute as of that instant.
 
 This is the most important operational rule. **A good ThoughtML document is
 "strict-clean": zero errors AND zero warnings.** Treat that as a fitness function — author,
-run the parser, read the diagnostics, fix, repeat until clean. Every one of the 20 corpus
+run the parser, read the diagnostics, fix, repeat until clean. Every one of the 10 corpus
 examples is strict-clean; aim for the same.
 
 Run the reference CLI (`thoughtml <file>`); it prints diagnostics with source lines and
@@ -484,8 +487,8 @@ interpret the numbers:
   one option must share a dimension. **Probability** is the edge's authored `probability`, or
   — if omitted — the outcome's own `derived_confidence` (belief becomes likelihood, once and
   visibly). Options are **ranked** high-to-low under their decision but **no winner is
-  crowned** — it reports, you decide. (`ship-or-hold` is the full worked case, including a
-  what-if that flips the ranking.)
+  crowned** — it reports, you decide. (`evacuate-or-shelter` is the full worked case,
+  including a what-if that flips the ranking.)
 - **`timeline`** — the ordered `events` array (by valid-time, `seq` tiebreak).
 - **`conflict report`** (`--audit`) — **the headline.** Where structure disagrees with the
   author. Exactly two conflict types:
@@ -494,7 +497,7 @@ interpret the numbers:
     **defeats** (`out`) is an **error**; low confidence **≤ 0.34** in one that **survives**
     every attack (`in`) is a **warning**. Needs both an attack (`opposes`/`undercuts`)
     giving the target a status *and* an authored `confidence` on it. This is the flagship —
-    `ship-the-hotfix`.
+    `pour-the-slab`.
   - `definition-divergence` — one id defined two different ways (§8); a **warning**.
 
 When you transform prose into ThoughtML, run `--audit` afterward and check the conflicts
@@ -529,35 +532,36 @@ clean, meaningful conflict report is the sign you modeled the reasoning faithful
 
 ## 15. Gold examples, and the corpus (one worked instance of everything)
 
-Two full strict-clean documents inline; then an index of all 20 corpus files, each a
+Two full strict-clean documents inline; then an index of all 10 corpus files, each a
 canonical instance of one construct. To learn a feature, read the file named beside it.
 
-**A. The flagship — clean in form, caught by the mirror (`ship-the-hotfix`):**
+**A. The flagship — clean in form, caught by the mirror (`pour-the-slab`):**
 
 ```thml
-focus hotfix-is-safe
+focus conditions-are-fine
   kind claim
-  The payments hotfix is safe to ship to production now.
+  Conditions on site are fine to pour the foundation slab this afternoon.
 
-focus suite-is-green
+focus truck-is-booked
   kind observation
-  The full unit and integration suite passed on the release branch.
+  The ready-mix truck is booked for 14:00 and the full crew is on site.
 
-focus canary-errored
+focus overnight-freeze
   kind observation
-  The 5% canary threw a spike of HTTP 500s on checkout within ten minutes.
+  The site thermometer logged minus four degrees from 02:00 to 06:00, and tonight's
+  forecast repeats it. Fresh concrete that freezes before it sets never recovers.
 
-link suite-is-green supports hotfix-is-safe
-link canary-errored opposes hotfix-is-safe
+link truck-is-booked supports conditions-are-fine
+link overnight-freeze opposes conditions-are-fine
 
-oncall holds hotfix-is-safe
-  confidence 0.9 assumed
-  note Shipping — the suite is green and the release window closes at 17:00.
+site-engineer holds conditions-are-fine
+  confidence 0.88 assumed
+  note Pouring today. The truck is booked and the crew moves to another job Thursday.
 ```
 
 Zero errors, zero warnings — the *form* is perfect. But `--audit` reports a
-`confidence-vs-status` **error**: `oncall` holds the claim at 0.90 while its own
-`canary-errored` evidence defeats it (`argument_status: out`). The mirror shows the
+`confidence-vs-status` **error**: `site-engineer` holds the claim at 0.88 while their own
+`overnight-freeze` evidence defeats it (`argument_status: out`). The mirror shows the
 conflict; it does not decide.
 
 **B. Dateless analysis — declare nodes, then bundle. `part-of` (structure) never inflates,
@@ -603,41 +607,33 @@ Under `--compute`: the `supports` bundle raises `eliminate-late-fees-was-key` to
 report is empty because nothing overstates. Swap the `part-of` for `supports` and
 `netflix-strengths` would falsely read near-certain — the exact pollution to avoid.
 
-**The corpus — concept → file** (all in `examples/`, all strict-clean):
+**The corpus — concept → file** (all in `examples/`, all strict-clean, all `fmt`-clean):
 
 *Start here (small, complete):*
-- `triage-742` — the smallest full incident: `noticed`/`suspects`(edge + `as` alias)/`holds`, an open question, `until … answered` (→ `blocks`), dated replay, a confidence **range**.
-- `weekend-plan` — the most pared-down decision: `decision`/`option`/`goal`, `option-of`, `enables`, `chooses`.
-- `bad-oyster` — everyday causal reasoning: the `asks` posture, `suspects` + `causes`.
-
-*The mirror (conflict report):*
-- `ship-the-hotfix` — `confidence-vs-status` (example A above). The flagship.
-- `merge-conflict-beliefs` — `definition-divergence`: two agents define one id two ways, both kept; mixes `stance`/`link` longhand with the readable surface.
+- `pour-the-slab` — the flagship: clean in form, and `--audit` still catches it (example A above).
+- `why-the-loaf-failed` — an everyday question done right: `candidate-for` proposes, `answers` resolves; `asks`, `suspects` (edge + `as` alias), `hypothesis`, a `status abandoned` dead end kept with its reason.
 
 *Argument structure (the attack graph):*
-- `pr-feedback` — `undercuts` (attack an inference, with a `link alias:`) vs `opposes` (attack a claim), side by side.
-- `hiring-panel` — several agents, shared evidence, different `confidence`; `because` ties each stance to what moved it.
-- `replication-study` — weighed evidence with `measured`/`estimated` bases on links; a critique that `undercuts` the counter-evidence.
-- `differential-dx` — competing `hypothesis`es as `candidate-for` a question, then one `answers` it once labs return.
-- `moderation-decision` — an AI call emitted for a human to audit: signals for/against, an `action`, an inspectable `confidence`.
-
-*Structure vs. evidence:*
-- `roadmap-priorities` — `part-of` grouping (not `supports`) + candidate options nested under a question (a thought-tree).
-- `control-library` — a standalone, importable library: a `part-of` collection of `claim`s, `enables`, a budget `quantity`.
+- `peer-review` — `undercuts` (attack an inference, with a `link alias:`) vs `opposes` (attack a claim); a confidence **range**, `because`, and the second mirror conflict: `definition-divergence`, two referees writing one id two ways, both kept.
+- `well-water` — a field investigation as an acyclic `causes`/`enables`/`prevents` graph; a `scope` whose provenance the members inherit; a weighted `supports` bundle; `noticed`/`infers`/`suspects` and `-by` attribution.
 
 *Time, lifecycle, and change:*
-- `launch-readiness` — a call `revises`d twice; `status superseded`, `valid-during`, `--as-of` replay.
-- `choose-datastore` — an ADR: an option `abandoned` + `rejects` (kept, not deleted), a question moved to `settled`, `until … answered`.
-- `prod-outage` — a postmortem as an acyclic `causes`/`enables`/`prevents` graph; nested scopes with their own timestamps; `-by` attribution (`noticed-by`, `undercut-by`); an `action` that recovers it.
-- `assistant-memory` — an AI across turns: `infers` (sources wired explicitly), `kind memory`, `remembers` with a `source`, a `revises` posture, `confidence ?`.
+- `dating-the-codex` — a belief `revises`d: `status superseded`, `valid-during`, `asserted-at`, a `memory` with a `source`, `confidence ?`, and `--as-of` replay that makes a conflict disappear because it did not exist yet.
+
+*Structure vs. evidence, and decisions:*
+- `grant-panel` — one award, four agents: a `part-of` criteria collection (not `supports`), `option-of`, `considers`/`chooses`/`rejects`, `stance` longhand with an alias, `about`, `until … answered` (→ `blocks`), an `abandoned` proposal.
 
 *The compute layer (`--compute`):*
-- `cloud-bill` — a cost model that computes itself: `= formula` lines over `quantity`s with real **unit checking** (USD/hour × hour, ÷ users).
-- `ship-or-hold` — the capstone: formula payoffs, `leads-to` probabilities (one omitted → falls back to derived confidence), expected-value ranking, and a what-if that flips the order.
+- `orchard-water` — a budget that computes itself: `= formula` lines over `quantity`s with real **unit checking** (L/min × min, ÷ trees, and a dimension-matched subtraction).
+- `evacuate-or-shelter` — the capstone: `leads-to` probabilities (one omitted → falls back to derived confidence), expected-value ranking, and a what-if that flips the order.
 
-*Extensibility:*
-- `threat-model` — a `profile` (`appsec`) adding domain kinds/relations/fields/postures, then a full security review in that dialect.
-- `compliance-rollout` — `import control-library as baseline`, referencing `baseline.<id>`, checked as a project.
+*Extensibility (the import pair):*
+- `inspection-standards` — a standalone, importable library: a `part-of` collection of `claim`s, `enables`, `depends-on`, a budget `quantity`.
+- `bridge-inspection` — `import inspection-standards as standard`, referencing `standard.<id>`, checked as a project; plus a `profile` (`structural`) adding domain kinds/relations/fields/postures.
+
+Between them they carry a worked instance of all ten kinds, all fourteen relations, all
+twelve postures, every field, every basis and lifecycle state, all three confidence forms,
+and both audit conflicts — pinned by a test, so this list cannot quietly go stale.
 
 ---
 

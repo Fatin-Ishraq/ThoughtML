@@ -150,7 +150,7 @@ hat, so the browser, the CLI, and the exported file can never disagree.
 | **Playground** | Persistent multi-file editor + unified reasoning graph: a time-driven **Viewer** with replay and Follow narration, a node-link **Structural** view, source-aware Reasoning Cards, and standalone/project export. | [`web`](web) · [live ↗](https://fatin-ishraq.github.io/ThoughtML/playground/) |
 | **The book** | Tutorial, complete language reference, the mirror, and practical guides. | [`docs`](docs) · [live ↗](https://fatin-ishraq.github.io/ThoughtML/) |
 | **`llms.txt`** | The whole language in one file — embedded in the binary, so `thoughtml guide --full` prints it too. | [`llms.txt`](crates/thoughtml/llms.txt) |
-| **Example gallery** | 20 worked, strict-clean standalone documents plus a six-file Snake project — incident triage, a clinical differential, an AI moderation call, a security threat model, a self-auditing hotfix, and more. | [`examples`](examples) |
+| **Example gallery** | 10 worked, strict-clean standalone documents plus a six-file Snake project — a concrete pour caught by its own evidence, a waterborne-outbreak investigation, two referees on one paper, a re-dated manuscript, a funding panel, an irrigation budget that computes itself, a wildfire evacuation call, and an import pair. | [`examples`](examples) |
 
 ## Install & run
 
@@ -172,13 +172,13 @@ Prebuilt binaries for macOS, Linux, and Windows are attached to every
 
 ```sh
 thoughtml guide                                       # the language itself, one screen (--full for all of it)
-thoughtml examples/ship-the-hotfix.thml               # canonical JSON + diagnostics
-thoughtml --audit examples/ship-the-hotfix.thml       # the mirror: where structure disagrees
+thoughtml examples/pour-the-slab.thml               # canonical JSON + diagnostics
+thoughtml --audit examples/pour-the-slab.thml       # the mirror: where structure disagrees
 thoughtml check --json doc.thml                         # diagnostics with stable codes + suggested fixes
 thoughtml fmt -w doc.thml                               # format in the one canonical style
 thoughtml explain doc.thml some-claim                   # why a node has its confidence / status
 thoughtml diff before.thml after.thml                   # a semantic, belief-level diff
-thoughtml --html -o record.html examples/choose-datastore.thml   # bake to one interactive HTML file
+thoughtml --html -o record.html examples/grant-panel.thml   # bake to one interactive HTML file
 thoughtml stream doc.thml                          # host a live view on this computer
 ```
 

@@ -1,0 +1,58 @@
+# orchard-water — a budget that computes itself, and checks its own units.
+#
+# Every number below is authored once; the `= expr` lines derive the rest. The parser
+# does real dimensional analysis as it goes: litres per minute times minutes is litres,
+# litres divided by trees is litres per tree, and a subtraction between two quantities
+# of different dimension is an error rather than a plausible wrong answer. Change the
+# well yield and the shortfall follows. Run it with `--compute`.
+
+goal orchard-survives-summer
+  Keep all twelve hundred trees alive through a dry season without buying tanker water.
+
+observation well-yield
+  Sustained yield of the bore well, measured over an hour with the flow meter.
+  quantity 30 L/min measured
+
+observation pump-window
+  Hours the diesel pump can run each day on the fuel ration.
+  quantity 480 min measured
+
+observation tree-count
+  Bearing trees in the two blocks under irrigation.
+  quantity 1200 tree measured
+
+assumption need-per-tree
+  Water a bearing tree needs each day in a dry season to hold its fruit.
+  quantity 45 L/tree estimated
+
+claim daily-supply
+  What the well and pump can actually deliver in a day.
+  = well-yield * pump-window
+
+claim supply-per-tree
+  What that comes to for each tree.
+  = daily-supply / tree-count
+
+claim shortfall-per-tree
+  The gap each tree is short by, every day of the season.
+  = need-per-tree - supply-per-tree
+
+link daily-supply enables orchard-survives-summer
+link shortfall-per-tree prevents orchard-survives-summer
+link supply-per-tree depends-on well-yield
+
+action mulch-and-drip
+  Mulch both blocks and convert the flood channels to drip lines.
+
+observation drip-cuts-demand
+  Drip irrigation with mulch cut daily demand by about a third in the neighbouring
+  orchard last season.
+  source grower-association-trial
+  observed-at 2025-08-19
+
+link drip-cuts-demand supports mulch-and-drip
+link mulch-and-drip prevents shortfall-per-tree
+
+grower holds mulch-and-drip
+  confidence 0.6 estimated
+  note A third off demand still leaves a gap, but a gap the tanker budget can cover.

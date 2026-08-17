@@ -1,0 +1,92 @@
+# evacuate-or-shelter — the whole compute layer behind one decision.
+#
+# This is the capstone. `--compute` turns on every reading at once:
+#   * expected value over the `leads-to` edges, `Σ probability · payoff`,
+#   * a probability *borrowed from belief* — the `fire-turns-away` edge deliberately
+#     omits its `probability`, so the engine falls back to that outcome's own derived
+#     confidence, computed from the two observations arguing over it,
+#   * options ranked high to low under their decision, with no winner crowned.
+# The what-if is the point. One radio report is holding the whole call: delete the
+# `spotting-observed` observation and the `opposes` line under it, and sheltering goes
+# from 641 to 1103 — past evacuating. The engine reports that; the commander decides.
+
+scope valley-fire
+
+goal nobody-is-hurt
+  Get through the next twelve hours with nobody in the valley injured.
+
+decision valley-response
+  Evacuate the valley now, or hold residents in place and defend the town?
+
+option evacuate-now
+  Order the valley cleared down the single river road, starting immediately.
+
+option shelter-in-place
+  Hold everyone in the town hall and the school, and defend the perimeter.
+
+link evacuate-now option-of valley-response
+link shelter-in-place option-of valley-response
+
+# --- If we clear the valley now ---
+
+outcome everyone-out
+  The convoy clears the river road well before the fire reaches it.
+  quantity 1400 person estimated
+
+outcome road-cut-off
+  The fire crosses the road mid-convoy and strands vehicles in the gorge.
+  quantity 300 person estimated
+
+link evacuate-now leads-to everyone-out
+  probability 0.6 estimated
+
+link evacuate-now leads-to road-cut-off
+  probability 0.4 estimated
+
+# --- If we shelter and defend ---
+#
+# The first edge below omits its probability on purpose. The engine reads the
+# outcome's own derived confidence instead — the one place in the language where a
+# belief turns into a likelihood, and it happens in the open rather than behind the
+# scenes. Which is why the two observations underneath it decide this whole document.
+
+outcome fire-turns-away
+  The wind holds westerly, the front runs past the ridge, and the town is untouched.
+  quantity 1400 person estimated
+
+outcome town-overrun
+  The fire reaches the town with everybody still inside it.
+  quantity 200 person estimated
+
+link shelter-in-place leads-to fire-turns-away
+
+link shelter-in-place leads-to town-overrun
+  probability 0.4 estimated
+
+observation wind-forecast-westerly
+  The two o'clock forecast holds the wind westerly until at least midnight.
+  observed-at 2026-08-04
+  source regional-met-office
+
+link wind-forecast-westerly supports fire-turns-away
+  weight 0.5 estimated
+
+observation spotting-observed
+  Crews report embers starting spot fires four hundred metres ahead of the front,
+  which is how a ridge gets crossed regardless of what the wind is doing.
+  observed-at 2026-08-04
+  source fire-line-radio
+
+link spotting-observed opposes fire-turns-away
+  weight 0.7 measured
+
+action open-river-road
+  Close the river road to inbound traffic and run the convoy out on both lanes.
+
+link open-river-road enables evacuate-now
+link valley-response enables nobody-is-hurt
+
+incident-commander holds valley-response
+  confidence 0.55 estimated
+  chosen-by incident-commander
+  note Clearing the valley, on one radio report. Reassess the moment the wind turns.

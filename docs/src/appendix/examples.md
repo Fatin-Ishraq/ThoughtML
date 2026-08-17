@@ -1,17 +1,19 @@
 # Example gallery
 
-The reference implementation ships a corpus of twenty example documents in
+The reference implementation ships a corpus of ten example documents in
 [`examples/`](https://github.com/Fatin-Ishraq/ThoughtML/tree/main/examples).
 Every one parses **strict-clean** (zero errors, zero warnings) under default
-options—a test enforces it. A curated spine appears in the playground's example
-tray; every file can also be opened directly in the project workspace.
+options and is **`fmt`-clean** — tests enforce both. A curated spine appears in
+the playground's example tray; every file can also be opened directly in the
+project workspace.
 
 Open any of them in the [playground](../guides/playground.md) to see the graph, or
 run `thoughtml <file>` (add `--compute` for the second reading, `--audit` for the
-mirror). The set is designed to span the language: many kinds and relations, both
-mirror conflicts, the temporal layer, the compute layer, profiles, and imports —
-across engineering, ops, medicine, science, business, product, security, and
-AI-agent scenarios.
+mirror). Ten files is deliberate: few enough to read all of them in a sitting, and
+between them they carry a worked instance of every kind, relation, posture, field,
+basis, lifecycle state, confidence form, and both mirror conflicts — pinned by a
+test, so the claim cannot quietly go stale. The domains are spread on purpose, from
+a home kitchen to a wildfire: nothing about the language is specific to software.
 
 The repository also includes a six-file project under `examples/snake-project/`.
 Its `project.thml` entry imports product, architecture, gameplay, quality, and
@@ -27,85 +29,76 @@ thoughtml stream examples/snake-project/project.thml
 
 | Example | What it teaches |
 |---------|-----------------|
-| [`ship-the-hotfix.thml`](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/examples/ship-the-hotfix.thml) | A clean document the mirror still flags — the `confidence-vs-status` conflict. The flagship demo. |
-| [`triage-742.thml`](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/examples/triage-742.thml) | The canonical minimal document: noticed → question → suspects → hold-until. The smallest complete piece of reasoning. |
-| [`weekend-plan.thml`](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/examples/weekend-plan.thml) | The plainest shape: a goal, two options, and the pick — proof it reads naturally for low-stakes reasoning. |
+| [`pour-the-slab.thml`](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/examples/pour-the-slab.thml) | A clean document the mirror still flags — the `confidence-vs-status` conflict. The flagship demo, and the smallest complete piece of reasoning. |
+| [`why-the-loaf-failed.thml`](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/examples/why-the-loaf-failed.thml) | An everyday question done properly: `candidate-for` proposes, `answers` resolves, and a ruled-out guess is parked `abandoned` rather than deleted. |
 
-## Arguments and decisions
-
-| Example | What it teaches |
-|---------|-----------------|
-| [`pr-feedback.thml`](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/examples/pr-feedback.thml) | `undercuts` (attack an inference) versus `opposes` (attack a claim) — the two distinct ways to push back. |
-| [`hiring-panel.thml`](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/examples/hiring-panel.thml) | Several interviewers on one call: shared evidence, different confidence, `because`, per-stance notes. |
-| [`choose-datastore.thml`](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/examples/choose-datastore.thml) | An ADR as a graph: options weighed, one rejected and kept `abandoned`, a blocking benchmark (`until`), the question `settled`. |
-| [`differential-dx.thml`](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/examples/differential-dx.thml) | A clinician's differential: competing hypotheses, `candidate-for` proposals versus the `answers` that resolves. |
-| [`moderation-decision.thml`](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/examples/moderation-decision.thml) | An AI moderation call emitted for a human to audit — the confidence and evidence made inspectable. |
-
-## Time and memory
+## Arguments and evidence
 
 | Example | What it teaches |
 |---------|-----------------|
-| [`launch-readiness.thml`](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/examples/launch-readiness.thml) | A belief revised twice as evidence lands; earlier versions `superseded`, not erased. Replay with `--as-of`. |
-| [`assistant-memory.thml`](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/examples/assistant-memory.thml) | An assistant's evolving memory: noticed, infers-from sources, remembers, revises, an unknown (`?`). |
-| [`merge-conflict-beliefs.thml`](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/examples/merge-conflict-beliefs.thml) | The second mirror conflict: two agents define one focus two ways — `definition-divergence`, kept losslessly. |
+| [`peer-review.thml`](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/examples/peer-review.thml) | `undercuts` (attack an inference — target the link) versus `opposes` (attack a claim), plus the second mirror conflict: two referees write one id two ways and both are kept. |
+| [`well-water.thml`](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/examples/well-water.thml) | A field investigation as an acyclic `causes`/`enables`/`prevents` graph; a scope whose provenance its members inherit; a weighted evidence bundle. |
 
-## Causes, collections, and everyday reasoning
+## Time and change
 
 | Example | What it teaches |
 |---------|-----------------|
-| [`prod-outage.thml`](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/examples/prod-outage.thml) | A postmortem as an acyclic `causes`/`enables`/`prevents` graph, with nested scopes and `-by` attribution. |
-| [`roadmap-priorities.thml`](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/examples/roadmap-priorities.thml) | `part-of` for grouping (not evidence), and a question that contains its candidate options as a thought-tree. |
-| [`bad-oyster.thml`](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/examples/bad-oyster.thml) | Everyday causal reasoning: `suspects` a cause and `asks` the question that would settle it. |
-| [`replication-study.thml`](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/examples/replication-study.thml) | Weighing a scientific claim: a critique that `undercuts` a failed replication, with `measured`/`estimated` bases. |
+| [`dating-the-codex.thml`](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/examples/dating-the-codex.thml) | A belief revised as evidence lands; the earlier one `superseded`, not erased. `--as-of` replay makes a conflict disappear, because at that date it did not exist yet. |
+
+## Decisions
+
+| Example | What it teaches |
+|---------|-----------------|
+| [`grant-panel.thml`](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/examples/grant-panel.thml) | One award, four people: criteria collected with `part-of` (not evidence), options weighed, one withdrawn and kept `abandoned`, the award blocked `until` a review answers. |
 
 ## The compute layer
 
 | Example | What it teaches |
 |---------|-----------------|
-| [`cloud-bill.thml`](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/examples/cloud-bill.thml) | A cost model that computes itself: `= formulas` over line items with full unit-checking (USD/hour × hour = USD). |
-| [`ship-or-hold.thml`](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/examples/ship-or-hold.thml) | The whole compute layer in one decision: formula payoffs, a probability borrowed from derived confidence, EV ranking, and a what-if that flips it. |
+| [`orchard-water.thml`](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/examples/orchard-water.thml) | A budget that computes itself: `= formula` lines with real dimensional analysis (L/min × min = L, ÷ trees = L/tree, and a subtraction that must match dimensions). |
+| [`evacuate-or-shelter.thml`](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/examples/evacuate-or-shelter.thml) | The whole compute layer in one decision: a probability borrowed from derived confidence, expected-value ranking, and a what-if that flips it. |
 
 ## Dialects and modularity (advanced)
 
 | Example | What it teaches |
 |---------|-----------------|
-| [`threat-model.thml`](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/examples/threat-model.thml) | A `profile` declaring a security dialect — custom `threat`/`control` kinds, `mitigates`/`aggravates` relations, `likelihood`/`severity` fields, a `flags` posture. |
-| [`control-library.thml`](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/examples/control-library.thml) | A minimal importable library — the building block the rollout imports. |
-| [`compliance-rollout.thml`](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/examples/compliance-rollout.thml) | `import … as` and namespaced cross-document references. Run as a project with its library. |
+| [`inspection-standards.thml`](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/examples/inspection-standards.thml) | A standalone importable library — a `part-of` collection of requirements, and the building block the inspection imports. |
+| [`bridge-inspection.thml`](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/examples/bridge-inspection.thml) | `import … as` with namespaced cross-document references, run as a project — plus a `profile` declaring a structural-engineering dialect (`defect`/`remedy` kinds, `aggravates`/`mitigates` relations, a `severity` field, a `certifies` posture). |
 
-## A walkthrough: `ship-the-hotfix.thml`
+## A walkthrough: `pour-the-slab.thml`
 
 The most instructive example is the smallest interesting one:
 
 ```thml
-focus hotfix-is-safe
+focus conditions-are-fine
   kind claim
-  The payments hotfix is safe to ship to production now.
+  Conditions on site are fine to pour the foundation slab this afternoon.
 
-focus suite-is-green
+focus truck-is-booked
   kind observation
-  The full unit and integration suite passed on the release branch.
+  The ready-mix truck is booked for 14:00 and the full crew is on site.
 
-focus canary-errored
+focus overnight-freeze
   kind observation
-  The 5% canary threw a spike of HTTP 500s on checkout within ten minutes.
+  The site thermometer logged minus four degrees from 02:00 to 06:00, and tonight's
+  forecast repeats it. Fresh concrete that freezes before it sets never recovers.
 
-link suite-is-green supports hotfix-is-safe
-link canary-errored opposes hotfix-is-safe
+link truck-is-booked supports conditions-are-fine
+link overnight-freeze opposes conditions-are-fine
 
-oncall holds hotfix-is-safe
-  confidence 0.9 assumed
-  note Shipping — the suite is green and the release window closes at 17:00.
+site-engineer holds conditions-are-fine
+  confidence 0.88 assumed
+  note Pouring today. The truck is booked and the crew moves to another job Thursday.
 ```
 
 Read it through the mirror:
 
-- **Argument status.** `canary-errored` has no attackers → `in`. It `opposes`
-  `hotfix-is-safe`, so `hotfix-is-safe` → `out` (defeated by its own recorded
-  counter-evidence, even though a passing suite supports it).
-- **Conflict.** The on-call holds the now-`out` claim at `0.9` (≥ 0.66) → a
+- **Argument status.** `overnight-freeze` has no attackers → `in`. It `opposes`
+  `conditions-are-fine`, so `conditions-are-fine` → `out` (defeated by its own
+  recorded counter-evidence, even though a booked truck supports it).
+- **Conflict.** The site engineer holds the now-`out` claim at `0.88` (≥ 0.66) → a
   `confidence-vs-status` **error**.
-- **Provenance.** That `0.9` is `assumed` — the mirror shows not just how sure the
+- **Provenance.** That `0.88` is `assumed` — the mirror shows not just how sure the
   engineer is, but on what footing.
 
 The document is structurally clean. The mirror surfaces the contradiction the

@@ -13,6 +13,10 @@ pub struct SurfaceFile {
     pub trailing_comments: Vec<String>,
 }
 
+fn is_false(b: &bool) -> bool {
+    !*b
+}
+
 /// A record: a header, its indented block, and any records nested under it.
 #[derive(Debug, Clone, Serialize)]
 pub struct Record {
@@ -23,6 +27,11 @@ pub struct Record {
     /// people write them and what lets the formatter put them back.
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub comments: Vec<String>,
+    /// Whether the author left a blank line between that comment block and this
+    /// header. A blank line means the comment introduces a *section* (or the
+    /// whole file) rather than this one record, so the formatter keeps the gap.
+    #[serde(skip_serializing_if = "is_false")]
+    pub comments_detached: bool,
     pub header: Header,
     pub block: Block,
     /// Records nested under this one by indentation (§6, Phase 5). Only a
@@ -128,6 +137,17 @@ pub struct Block {
     /// rather than at their original position — kept, not placed.
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub comments: Vec<String>,
+}
+
+impl Block {
+    /// Whether the record's header stands alone — nothing indented under it.
+    pub fn is_empty(&self) -> bool {
+        self.body.is_none()
+            && self.fields.is_empty()
+            && self.formula.is_none()
+            && self.evidence.is_empty()
+            && self.comments.is_empty()
+    }
 }
 
 /// One member line of an evidence bundle: a source id and the optional strength

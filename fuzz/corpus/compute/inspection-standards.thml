@@ -1,0 +1,49 @@
+# inspection-standards — a shared library, written to be imported.
+#
+# This document holds no findings and takes no position. It is the stable half of a
+# pair: the standard that many inspections refer to. Other documents pull it in with
+# `import inspection-standards as standard` and reference its nodes as `standard.<id>`
+# — see `bridge-inspection`. A library has to be strict-clean on its own, so every node
+# here earns its place through a relation, and the requirements are collected with
+# `part-of`, which is structure and moves no confidence.
+
+goal structures-stay-serviceable
+  Every highway structure in the region stays safe to carry its rated load between
+  inspections.
+
+claim inspection-baseline
+  The minimum inspection standard every highway structure is held to.
+
+claim general-inspection-every-two-years
+  A general visual inspection is carried out at most twenty-four months after the last.
+
+claim principal-inspection-every-six-years
+  A principal inspection, within touching distance of every element, every six years.
+
+claim scour-check-after-flood
+  Any structure over a watercourse is checked for scour after a flood above the
+  one-in-ten-year level.
+
+claim load-rating-on-record
+  A current load rating exists on file and is re-derived whenever the deck is altered.
+
+part-of inspection-baseline
+  general-inspection-every-two-years
+  principal-inspection-every-six-years
+  scour-check-after-flood
+  load-rating-on-record
+
+link inspection-baseline enables structures-stay-serviceable
+
+assumption inspection-budget
+  Funded inspector time available to the region for the year.
+  quantity 2400 hour estimated
+
+link inspection-baseline depends-on inspection-budget
+
+observation scour-caused-most-failures
+  Scour is the single largest cause of bridge failure in the national record.
+  source national-failure-register
+
+link scour-caused-most-failures supports scour-check-after-flood
+  weight 0.9 measured

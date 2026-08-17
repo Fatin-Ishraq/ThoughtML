@@ -1,0 +1,53 @@
+# why-the-loaf-failed — an ordinary question, asked properly.
+#
+# Three explanations are put forward with `candidate-for`, which proposes without
+# resolving anything. Only the one the evidence settles gets `answers`. Getting that
+# pair the right way round is what keeps a question honest: a list of guesses should
+# never read as an answer.
+
+question why-flat-loaf
+  Why did Sunday's sourdough come out of the oven flat?
+  expects hypothesis
+  status settled
+
+hypothesis dead-starter
+  The starter had lost its lift after three weeks unfed in the fridge.
+
+hypothesis cold-kitchen
+  The kitchen sat at sixteen degrees overnight, too cold for a full rise.
+
+hypothesis over-proofed
+  The dough was left well past its peak and collapsed when it went in the tin.
+  status abandoned
+  note Ruled out by the timing, but kept on the record so the next loaf can revisit it.
+
+candidate-for why-flat-loaf
+  dead-starter
+  cold-kitchen
+  over-proofed
+
+observation float-test-failed
+  A spoonful of starter sank in a glass of water instead of floating.
+  observed-at 2026-02-15
+
+observation dough-doubled
+  The dough had visibly doubled in the bowl before it was shaped.
+
+observation flat-crumb
+  The baked loaf was dense, with a tight and slightly gummy crumb.
+
+link float-test-failed supports dead-starter
+link dough-doubled opposes over-proofed
+link dead-starter answers why-flat-loaf
+
+baker asks why-flat-loaf
+  note Third flat loaf in a row, so it is worth working out rather than guessing.
+
+baker suspects dead-starter causes flat-crumb as starter-explains-crumb
+  confidence 0.7 estimated
+
+baker accepts dead-starter
+  because float-test-failed
+  answers why-flat-loaf
+  confidence 0.8 estimated
+  note Fed the starter twice a day for three days; the next loaf rose properly.

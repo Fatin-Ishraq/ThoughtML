@@ -1,0 +1,30 @@
+# pour-the-slab — clean in form, and caught by the mirror anyway.
+#
+# Zero errors, zero warnings: the structure is well formed. But `--audit` reports a
+# `confidence-vs-status` error, because the site engineer holds "conditions are fine"
+# at 0.88 while the freeze reading they logged themselves defeats it. ThoughtML shows
+# the conflict. It does not decide which side is right.
+
+focus conditions-are-fine
+  kind claim
+  Conditions on site are fine to pour the foundation slab this afternoon.
+
+focus truck-is-booked
+  kind observation
+  The ready-mix truck is booked for 14:00 and the full crew is on site.
+  source site-diary
+  observed-at 2026-03-11
+
+focus overnight-freeze
+  kind observation
+  The site thermometer logged minus four degrees from 02:00 to 06:00, and tonight's
+  forecast repeats it. Fresh concrete that freezes before it sets never recovers.
+  source site-diary
+  observed-at 2026-03-11
+
+link truck-is-booked supports conditions-are-fine
+link overnight-freeze opposes conditions-are-fine
+
+site-engineer holds conditions-are-fine
+  confidence 0.88 assumed
+  note Pouring today. The truck is booked and the crew moves to another job Thursday.

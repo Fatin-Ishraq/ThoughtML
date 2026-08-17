@@ -53,10 +53,19 @@ fn parse_lines(lines: &[Line], diags: &mut Diagnostics) -> SurfaceFile {
     // Comment lines seen since the last record; they belong to whatever comes
     // next, which is how people write them.
     let mut pending: Vec<String> = Vec::new();
+    // Whether a blank line has come between the last pending comment and here. A
+    // comment block the author set off with a blank line introduces a section, not
+    // the single record below it, so the formatter keeps that gap.
+    let mut pending_detached = false;
 
-    let open = |line: &Line, header: Header, indent: usize, comments: Vec<String>| OpenRecord {
+    let open = |line: &Line,
+                header: Header,
+                indent: usize,
+                comments: Vec<String>,
+                comments_detached: bool| OpenRecord {
         rec: Record {
             line: line.number,
+            comments_detached: comments_detached && !comments.is_empty(),
             comments,
             header,
             block: Block::default(),
@@ -68,14 +77,19 @@ fn parse_lines(lines: &[Line], diags: &mut Diagnostics) -> SurfaceFile {
 
     for line in lines {
         match &line.kind {
-            LineKind::Blank => {}
+            LineKind::Blank => pending_detached = true,
             LineKind::Comment => {
                 let indented = line.raw.starts_with([' ', '\t']);
                 match stack.last_mut() {
                     // An indented comment sits inside a record's block.
                     Some(top) if indented => top.rec.block.comments.push(line.raw.clone()),
                     // Anything at column 0 introduces whatever follows it.
-                    _ => pending.push(line.raw.clone()),
+                    // A comment is the most recent thing seen, so nothing separates
+                    // the block from the header until another blank line lands.
+                    _ => {
+                        pending_detached = false;
+                        pending.push(line.raw.clone());
+                    }
                 }
             }
             // A column-0 header closes the entire open chain, then starts fresh.
@@ -84,7 +98,13 @@ fn parse_lines(lines: &[Line], diags: &mut Diagnostics) -> SurfaceFile {
                     close_top(&mut stack, &mut roots);
                 }
                 if let Some(header) = parse_header(line, diags) {
-                    stack.push(open(line, header, 0, std::mem::take(&mut pending)));
+                    stack.push(open(
+                        line,
+                        header,
+                        0,
+                        std::mem::take(&mut pending),
+                        std::mem::take(&mut pending_detached),
+                    ));
                 }
             }
             LineKind::Block { indent } => {
@@ -123,7 +143,13 @@ fn parse_lines(lines: &[Line], diags: &mut Diagnostics) -> SurfaceFile {
                         continue;
                     }
                     if let Some(header) = parse_header(line, diags) {
-                        stack.push(open(line, header, indent, std::mem::take(&mut pending)));
+                        stack.push(open(
+                            line,
+                            header,
+                            indent,
+                            std::mem::take(&mut pending),
+                            std::mem::take(&mut pending_detached),
+                        ));
                     }
                 } else {
                     let top = stack.last_mut().unwrap();
