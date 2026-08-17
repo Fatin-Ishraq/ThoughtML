@@ -1,0 +1,54 @@
+# peer-review — two referees on one manuscript.
+#
+# The difference this file is built around: `opposes` says a claim is false, while
+# `undercuts` says a step does not follow — so it targets the *link*, not the node.
+# The referees also write down the paper's central claim in two different ways. Nothing
+# is silently overwritten: both readings are kept on the node and `--audit` reports the
+# `definition-divergence` for a human to reconcile.
+
+focus central-claim
+  kind claim
+  The paper claims that the tutoring programme raised exam scores.
+
+focus central-claim
+  kind claim
+  The paper claims that students who chose tutoring scored higher than those who did not.
+
+observation scores-rose
+  Mean exam score in the tutored group was 6.4 points higher.
+  quantity 6.4 point measured
+
+observation selection-not-random
+  Students opted into tutoring; the comparison group was simply everyone else.
+
+observation attendance-confounded
+  The tutored students also attended twelve per cent more classes overall.
+
+observation randomized-replication
+  A neighbouring district reported the same gap after a randomized rollout.
+
+claim programme-works
+  Tutoring caused the improvement, so the programme is worth scaling.
+
+link central-claim supports programme-works
+
+link inference: scores-rose supports programme-works
+  undercut-by referee-one
+
+link selection-not-random undercuts inference
+  weight 0.8 estimated
+
+link attendance-confounded opposes programme-works
+link randomized-replication supports programme-works
+link randomized-replication opposes attendance-confounded
+
+referee-one doubts programme-works
+  confidence 0.20..0.40 estimated
+  because selection-not-random
+  note The effect may well be real. This design cannot show that it is.
+
+referee-two accepts programme-works
+  confidence 0.7 estimated
+  because randomized-replication
+  noted-by handling-editor
+  note The replication is what carries it; the original comparison does not.

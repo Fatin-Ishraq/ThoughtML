@@ -41,7 +41,7 @@ focus monthly-cost
   computed value has no [provenance basis](../reference/numbers.md#provenance) —
   it wasn't authored.
 
-The bundled [`cloud-bill.thml`](../appendix/examples.md) is a full worked example.
+The bundled [`orchard-water.thml`](../appendix/examples.md) is a full worked example.
 
 ## Decision expected value {#decision-expected-value}
 
@@ -77,8 +77,8 @@ link harvard leads-to harvard-coast
 > no `margin`.** The mirror reports the expected values, ordered, with each
 > option's downside — and leaves the choice to you. Decisions are about risk, not
 > just the mean, and the call is yours. See
-> [`ship-or-hold.thml`](../appendix/examples.md) and
-> [`ship-or-hold.thml`](../appendix/examples.md).
+> [`evacuate-or-shelter.thml`](../appendix/examples.md) and
+> [`orchard-water.thml`](../appendix/examples.md).
 
 Diagnostics (never errors) flag the gaps: an outcome with no payoff, a `leads-to`
 with no probability and no derived confidence, mixed dimensions, or an authored
@@ -100,7 +100,7 @@ support); **negative** means it drags it down (an attack); the **magnitude** is
 how much the conclusion rests on that single edge.
 
 `leverage` is set on each evidence link. The bundled
-[`ship-or-hold.thml`](../appendix/examples.md) ranks evidence by it. It is
+[`evacuate-or-shelter.thml`](../appendix/examples.md) ranks evidence by it. It is
 computed by re-deriving the graph with each edge ablated in turn — single-edge
 sensitivity, precomputed for every edge at once — so the CLI never perturbs the
 document; it reports it as authored.

@@ -33,9 +33,9 @@ ThoughtML has two ways to write the same thing:
   *desugar* into the core (creating foci, links, and stances for you).
 
 They produce the same objects. The bundled
-[`merge-conflict-beliefs.thml`](../appendix/examples.md) writes the same reasoning as
-[`hiring-panel.thml`](../appendix/examples.md) using the bare core, to show
-the equivalence.
+[`grant-panel.thml`](../appendix/examples.md) writes both in one document — a `stance`
+longhand with an alias next to readable `<agent> <posture>` lines — to show the
+equivalence.
 
 ## How to read these pages
 

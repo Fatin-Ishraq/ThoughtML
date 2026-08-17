@@ -34,7 +34,8 @@ what you wrote, never on top of it.
 No — that's the canonical core, and you can write it directly. Most of the time
 you'll use the readable surface (`analyst noticed metric-shift`,
 `team chooses postgres-option`), which desugars into the core for you. They
-produce the same model; [`merge-conflict-beliefs.thml`](examples.md) shows the equivalence.
+produce the same model; [`grant-panel.thml`](examples.md) uses both side by side to
+show the equivalence.
 
 ### Why did `rejects`, `mitigates`, and `strongly`/`weakly` disappear?
 

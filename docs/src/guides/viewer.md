@@ -5,7 +5,7 @@ for *sharing*. `thoughtml --html` bakes a document into a single, self-contained
 HTML file that opens in any browser — no server, no install, no network.
 
 ```sh
-thoughtml choose-datastore.thml --html -o decision-record.html
+thoughtml grant-panel.thml --html -o decision-record.html
 ```
 
 Open the result and you get the same **time-driven view** the playground shows

@@ -5,7 +5,7 @@ single line to a complete argument the [mirror](../mirror/index.md) can audit.
 
 The scenario: an engineering team is deciding whether to ship a new cache layer
 today. By the end you'll have written the bundled example
-[`ship-the-hotfix.thml`](../appendix/examples.md) — a document that is *diagnostically
+[`pour-the-slab.thml`](../appendix/examples.md) — a document that is *diagnostically
 clean* yet hides a real contradiction, which the mirror surfaces.
 
 The chapters build on each other:

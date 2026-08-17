@@ -1,0 +1,79 @@
+# bridge-inspection — one inspection, in its own dialect, against a shared standard.
+#
+# Two extension mechanisms at once. The `import` pulls in `inspection-standards` under
+# a namespace, so this document can hang a `depends-on` off `standard.<id>` and be
+# checked as a *project* — importer plus library — with the references resolving. The
+# `profile` declares the words a bridge engineer actually uses: `defect` and `remedy`
+# kinds, `aggravates` and `mitigates` relations, a `severity` field, a `certifies`
+# posture. Anything the profile does not declare still warns. Same engine, domain words.
+#
+# One wrinkle worth knowing: a posture a profile adds is only reachable through the
+# `stance` longhand. The readable `<agent> <posture> …` form is resolved against the
+# twelve core postures before any profile is consulted.
+
+import inspection-standards as standard
+
+profile structural
+  kinds defect, remedy
+  relations aggravates, mitigates
+  fields severity, next-inspection
+  postures certifies
+
+scope bridge-b174-november
+
+focus deck-is-serviceable
+  kind claim
+  The deck can stay open to unrestricted traffic until the next principal inspection.
+  next-inspection 2028-11
+
+focus half-joint-corrosion
+  kind defect
+  Section loss on the reinforcement at both half joints, worst on the east abutment.
+  severity high
+  observed-at 2026-11-08
+  source inspection-b174-11
+
+focus drainage-blocked
+  kind defect
+  The deck drains are blocked, so chloride-laden runoff sits on the half joints.
+  severity medium
+  observed-at 2026-11-08
+  source inspection-b174-11
+
+focus clear-drains-and-wash
+  kind remedy
+  Clear all six drains and wash the joints down before the winter salting season.
+
+focus cathodic-protection
+  kind remedy
+  Install impressed-current cathodic protection across both half joint zones.
+  status open
+
+link drainage-blocked aggravates half-joint-corrosion
+link clear-drains-and-wash mitigates drainage-blocked
+link cathodic-protection mitigates half-joint-corrosion
+link half-joint-corrosion opposes deck-is-serviceable
+
+observation load-rating-unchanged
+  Re-derived load rating still meets the rated load with the measured section loss.
+  quantity 40 tonne measured
+  source load-assessment-b174
+
+link load-rating-unchanged supports deck-is-serviceable
+link deck-is-serviceable depends-on standard.load-rating-on-record
+link half-joint-corrosion depends-on standard.principal-inspection-every-six-years
+
+stance inspector certifies deck-is-serviceable
+  confidence 0.45 measured
+  because load-rating-unchanged
+  note Open, but not unconditionally — the rating holds today and the corrosion does not.
+
+inspector remembers b174-scour-2019
+  note The 2019 flood scoured the east pier; that repair is what the joints sit on.
+
+memory b174-scour-2019
+  Scour repair to the east pier after the 2019 flood, recorded in the last principal
+  inspection.
+  source inspection-b174-2019
+
+link b174-scour-2019 supports half-joint-corrosion

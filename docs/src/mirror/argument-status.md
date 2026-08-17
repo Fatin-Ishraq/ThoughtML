@@ -42,7 +42,8 @@ attack stay `undecided`.
 
 ## Worked example
 
-From the tutorial's [`ship-the-hotfix.thml`](../appendix/examples.md):
+From the tutorial's cache document — the same shape as the bundled
+[`pour-the-slab.thml`](../appendix/examples.md):
 
 ```thml
 link load-test-passed supports cache-is-safe
