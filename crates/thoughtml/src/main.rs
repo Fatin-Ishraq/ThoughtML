@@ -514,9 +514,24 @@ fn run_fmt(args: FmtArgs) -> ExitCode {
         return ExitCode::FAILURE;
     }
 
+    // The formatter regenerates the document from the parsed model, and the model
+    // does not carry comments — so formatting silently deletes every `#` line.
+    // That is data loss, not a style opinion, and `-w` writes it back over the
+    // author's file. Until the surface tree can carry comments, refuse rather than
+    // destroy: a formatter you cannot trust with a commented document is a
+    // formatter nobody should run unattended.
+    let comments = count_comment_lines(&source);
+
     if args.check {
         if source == formatted {
             ExitCode::SUCCESS
+        } else if comments > 0 {
+            eprintln!(
+                "{}: not formatted, and cannot be formatted yet — it has {comments} comment line(s), \
+                 which `thoughtml fmt` would drop (they are not carried in the parsed model).",
+                args.file.display(),
+            );
+            ExitCode::FAILURE
         } else {
             eprintln!(
                 "{}: not formatted (run `thoughtml fmt -w {}`)",
@@ -526,6 +541,15 @@ fn run_fmt(args: FmtArgs) -> ExitCode {
             ExitCode::FAILURE
         }
     } else if args.write {
+        if comments > 0 {
+            eprintln!(
+                "error: refusing to rewrite {} — it has {comments} comment line(s) and \
+                 `thoughtml fmt` cannot preserve them yet; writing would delete them.\n\
+                 \x20      Run without `-w` to see the formatted output on stdout.",
+                args.file.display()
+            );
+            return ExitCode::FAILURE;
+        }
         match std::fs::write(&args.file, &formatted) {
             Ok(()) => ExitCode::SUCCESS,
             Err(e) => {
@@ -534,9 +558,23 @@ fn run_fmt(args: FmtArgs) -> ExitCode {
             }
         }
     } else {
+        if comments > 0 {
+            eprintln!(
+                "warning: {comments} comment line(s) are not present in this output — \
+                 `thoughtml fmt` cannot preserve comments yet."
+            );
+        }
         print!("{formatted}");
         ExitCode::SUCCESS
     }
+}
+
+/// Lines the lexer treats as comments (`lines.rs`: trimmed, starting with `#`).
+fn count_comment_lines(source: &str) -> usize {
+    source
+        .lines()
+        .filter(|l| l.trim_start().starts_with('#'))
+        .count()
 }
 
 fn canonical_eq(a: &thoughtml::Canonical, b: &thoughtml::Canonical) -> bool {

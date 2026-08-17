@@ -3578,3 +3578,22 @@ fn ordinary_record_nesting_still_parses_clean() {
         result.diagnostics.items
     );
 }
+
+/// `thoughtml fmt` regenerates the document from the parsed model, and the model
+/// does not carry comments — so formatting drops every `#` line. The CLI refuses
+/// to write in that case rather than deleting an author's annotations; this pins
+/// the underlying fact so the guard cannot be removed without noticing.
+#[test]
+fn formatting_is_known_to_drop_comments() {
+    let src = "# keep me\nfocus a\n  kind claim\n  # inline note\n  The claim.\n";
+    let result = parse_str(src);
+    assert!(!result.diagnostics.has_errors());
+    let formatted = crate::fmt::format(&result.surface);
+    assert!(
+        !formatted.contains('#'),
+        "fmt now preserves comments — remove the CLI's refusal-to-write guard \
+         in main.rs (run_fmt) and update this test"
+    );
+    // The model is still intact: only the commentary is lost.
+    assert!(formatted.contains("The claim."));
+}
