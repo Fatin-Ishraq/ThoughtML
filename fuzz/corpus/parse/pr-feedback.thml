@@ -1,0 +1,28 @@
+# pr-feedback — `undercuts` (attack an inference) vs `opposes` (attack a claim).
+#
+# In review, two comments push back in different ways. One attacks the
+# CONCLUSION head-on (`opposes`). The other leaves the conclusion alone and
+# attacks the REASONING that supports it (`undercuts` the inference itself).
+# ThoughtML keeps the two moves distinct, so the argument graph stays honest.
+
+claim ready-to-merge
+  This pull request is ready to merge.
+
+observation benchmarks-improved
+  The new index cut p95 query latency by 40% in the benchmark.
+
+link perf-argument: benchmarks-improved supports ready-to-merge
+
+observation benchmark-was-warm-cache
+  The benchmark ran against a warm cache, unlike production.
+
+link benchmark-was-warm-cache undercuts perf-argument
+
+observation no-rollback-plan
+  There is no rollback plan for the schema migration.
+
+link no-rollback-plan opposes ready-to-merge
+
+reviewer doubts ready-to-merge
+  because no-rollback-plan
+  note The warm-cache caveat weakens the perf argument; the missing rollback is the real blocker.

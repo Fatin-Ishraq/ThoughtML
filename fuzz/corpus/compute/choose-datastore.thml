@@ -1,0 +1,48 @@
+# choose-datastore — an architecture decision, as a checkable graph.
+#
+# The gating question, the options weighed, the one rejected (kept on the record
+# as `abandoned`, not deleted), the one chosen, and the benchmark that blocked
+# sign-off `until` it ran. When the load test passed, the question moved to
+# `settled`. An ADR you can lint.
+
+scope adr-datastore
+
+decision datastore-choice
+  Which datastore backs the new events service.
+
+option postgres
+  Managed Postgres with a JSONB events table.
+
+option dynamo
+  DynamoDB with a single-table design.
+
+option cassandra
+  A self-hosted Cassandra cluster.
+  status abandoned
+
+link postgres option-of datastore-choice
+link dynamo option-of datastore-choice
+link cassandra option-of datastore-choice
+
+observation team-knows-sql
+  The team has deep Postgres experience and none operating Cassandra.
+
+link team-knows-sql supports postgres
+link team-knows-sql opposes cassandra
+
+architect rejects cassandra
+  note Operational burden we can't staff — parked with its reason, not deleted.
+
+question benchmark-passed
+  Did Postgres hold p99 under 2x projected load?
+  expects observation
+  status settled
+
+observation load-test-ok
+  Postgres held p99 at 45ms under 2x projected write load.
+
+link load-test-ok answers benchmark-passed
+
+architect chooses postgres
+  because team-knows-sql
+  until benchmark-passed answered

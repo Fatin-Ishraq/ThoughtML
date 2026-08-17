@@ -3597,3 +3597,97 @@ fn formatting_is_known_to_drop_comments() {
     // The model is still intact: only the commentary is lost.
     assert!(formatted.contains("The claim."));
 }
+
+/// A cheap, deterministic stand-in for the fuzzer, so the "no input crashes the
+/// parser" invariant is exercised everywhere `cargo test` runs — including the
+/// Windows MSVC target, where cargo-fuzz cannot run at all. The real search
+/// happens in CI (`.github/workflows/fuzz.yml`); this is the part that travels
+/// with the test suite.
+///
+/// Deterministic on purpose: a seeded xorshift, not `rand`. A test that fails
+/// only sometimes, on inputs nobody can reproduce, is worse than no test.
+#[test]
+fn generated_inputs_never_crash_the_parser() {
+    // Tokens drawn from the real grammar, plus the shapes that have actually
+    // broken things: nesting, separators, non-ASCII, and markup.
+    const PIECES: &[&str] = &[
+        "focus ",
+        "question ",
+        "link ",
+        "stance ",
+        "scope ",
+        "profile ",
+        "import ",
+        "a",
+        "b-c",
+        "x.y",
+        "0.5",
+        "0.25..0.70",
+        "?",
+        "-",
+        "\t",
+        "\n",
+        "  ",
+        "kind ",
+        "claim",
+        "quantity ",
+        "5 USD",
+        "%",
+        "= ",
+        "(",
+        ")",
+        "+",
+        "*",
+        "/",
+        "supports ",
+        "opposes ",
+        "causes ",
+        "leads-to ",
+        "as ",
+        "confidence ",
+        "expects ",
+        "status ",
+        "until ",
+        "because ",
+        "about ",
+        "note ",
+        "2026-06-09T09:20+06:00",
+        "uri:https://x.invalid",
+        "\"quoted\"",
+        "#comment",
+        "µs",
+        "😀",
+        "\u{2028}",
+        "<img/src=q>",
+        "\u{feff}",
+        "\0",
+    ];
+
+    let mut state: u64 = 0x5eed_1234_9abc_def0;
+    let mut next = move || {
+        // xorshift64*
+        state ^= state >> 12;
+        state ^= state << 25;
+        state ^= state >> 27;
+        state.wrapping_mul(0x2545_F491_4F6C_DD1D)
+    };
+
+    for case in 0..2_000 {
+        let len = (next() % 40) as usize;
+        let mut src = String::new();
+        for _ in 0..len {
+            src.push_str(PIECES[(next() % PIECES.len() as u64) as usize]);
+        }
+        // Both paths a real caller takes: the default parse, and the full stack.
+        let plain = parse_str(&src);
+        assert!(
+            serde_json::to_string(&plain.canonical).is_ok(),
+            "case {case} failed to serialize: {src:?}"
+        );
+        let computed = parse_str_with(&src, all_on());
+        assert!(
+            serde_json::to_string(&computed.canonical).is_ok(),
+            "case {case} failed to serialize under compute: {src:?}"
+        );
+    }
+}

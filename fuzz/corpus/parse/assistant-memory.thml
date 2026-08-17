@@ -1,0 +1,37 @@
+# assistant-memory — what an AI assistant carries between turns.
+#
+# Across one session the assistant notices facts, *infers* a preference from two
+# of them (infers wires its sources explicitly, so the reasoning is visible),
+# commits it to memory with a source and a timestamp, then revises it when the
+# user contradicts it. Confidence can be genuinely unknown (`?`), and every
+# belief stays auditable rather than collapsing into a hidden score.
+
+scope user-session
+
+observation asked-for-python
+  The user asked for the first snippet in Python.
+  observed-at 2026-06-01T09:10Z
+
+observation mentioned-pandas
+  The user mentioned working in pandas every day.
+  observed-at 2026-06-01T09:12Z
+
+assistant infers prefers-python from asked-for-python mentioned-pandas
+  kind memory
+  The user prefers Python for code examples.
+  confidence 0.6 estimated
+
+assistant remembers prefers-python
+  source uri:session/2026-06-01
+  asserted-at 2026-06-01T09:13Z
+
+observation asked-for-rust
+  Later the user asked for a Rust version, explicitly.
+  observed-at 2026-06-01T09:40Z
+
+link asked-for-rust undercuts prefers-python
+
+assistant revises prefers-python
+  because asked-for-rust
+  confidence ?
+  note The preference looks task-specific, not a global default — downgrading to unknown.

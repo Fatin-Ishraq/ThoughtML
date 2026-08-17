@@ -1,0 +1,28 @@
+# triage-742 — the smallest complete piece of reasoning.
+#
+# An on-call team notices a metric move, opens a question about the cause,
+# records a suspicion (a stance over a `causes` edge, confidence as a range),
+# and makes a decision that is blocked until the question is answered. Dated,
+# so the viewer's play button replays it in the order it actually happened.
+
+scope incident-742
+
+team noticed error-rate-up
+  Checkout error rate jumped from 0.2% to 3% right after the 14:00 deploy.
+  observed-at 2026-03-04T14:12+06:00
+
+question what-caused-it
+  What caused the error-rate spike?
+  expects cause
+  status open
+  asserted-at 2026-03-04T14:15+06:00
+
+team suspects deploy-1487 causes error-rate-up as deploy-cause
+  confidence 0.3..0.7
+  answers what-caused-it
+  asserted-at 2026-03-04T14:20+06:00
+
+team holds rollback
+  Roll back deploy-1487 and freeze further releases.
+  until what-caused-it answered
+  asserted-at 2026-03-04T14:25+06:00
