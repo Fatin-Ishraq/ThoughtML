@@ -52,6 +52,7 @@
 
 # Appendix
 
+- [Upgrading](appendix/upgrading.md)
 - [Glossary](appendix/glossary.md)
 - [Example gallery](appendix/examples.md)
 - [FAQ](appendix/faq.md)
