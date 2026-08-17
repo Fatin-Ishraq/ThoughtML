@@ -5,8 +5,13 @@
 //! desugars to an identical canonical model before writing, so formatting can never
 //! change meaning.
 //!
-//! Limitation: comments are dropped by the lexer before the AST exists, so `fmt`
-//! does not preserve them (v1).
+//! Comments are preserved. A comment belongs to whatever it sits above, so an
+//! unindented block is re-emitted immediately above its record and a trailing one
+//! stays at the end of the file. The blank line authors often leave between a
+//! file-header comment and the first record is normalized away — the comment is
+//! attached to what it introduces. Comments *inside* a block are kept but move to
+//! the top of that block, because the formatter reorders a block's contents and
+//! there is no stable position to return them to.
 
 use crate::surface::{ActionForm, Block, EvidenceEntry, Header, Record, SurfaceFile};
 
@@ -18,6 +23,16 @@ pub fn format(file: &SurfaceFile) -> String {
     for rec in &file.records {
         render_record(rec, 0, &mut out);
     }
+    // Comments that trailed the last record belong to no record; keep them last.
+    if !file.trailing_comments.is_empty() {
+        if !out.is_empty() {
+            out.push('\n');
+        }
+        for c in &file.trailing_comments {
+            out.push_str(c.trim_end());
+            out.push('\n');
+        }
+    }
     out
 }
 
@@ -27,6 +42,13 @@ fn render_record(rec: &Record, depth: usize, out: &mut String) {
         out.push('\n');
     }
     let pad = INDENT.repeat(depth);
+    // The record's own comments sit directly above its header, at the header's
+    // indentation, so they travel with it if the record is nested or moved.
+    for c in &rec.comments {
+        out.push_str(&pad);
+        out.push_str(c.trim());
+        out.push('\n');
+    }
     out.push_str(&pad);
     out.push_str(&header_line(&rec.header));
     out.push('\n');
@@ -90,6 +112,13 @@ fn header_line(h: &Header) -> String {
 
 fn render_block(block: &Block, depth: usize, out: &mut String) {
     let pad = INDENT.repeat(depth);
+    // Kept, not placed: the block's contents get reordered below, so there is no
+    // original position to restore these to. They go at the top of the block.
+    for c in &block.comments {
+        out.push_str(&pad);
+        out.push_str(c.trim());
+        out.push('\n');
+    }
     if let Some(body) = &block.body {
         for line in body.split('\n') {
             out.push_str(&pad);

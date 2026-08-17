@@ -50,9 +50,14 @@ fn parse_lines(lines: &[Line], diags: &mut Diagnostics) -> SurfaceFile {
     // The chain of currently-open ancestor records, shallowest (column 0) first.
     let mut stack: Vec<OpenRecord> = Vec::new();
 
-    let open = |line: &Line, header: Header, indent: usize| OpenRecord {
+    // Comment lines seen since the last record; they belong to whatever comes
+    // next, which is how people write them.
+    let mut pending: Vec<String> = Vec::new();
+
+    let open = |line: &Line, header: Header, indent: usize, comments: Vec<String>| OpenRecord {
         rec: Record {
             line: line.number,
+            comments,
             header,
             block: Block::default(),
             children: Vec::new(),
@@ -63,14 +68,23 @@ fn parse_lines(lines: &[Line], diags: &mut Diagnostics) -> SurfaceFile {
 
     for line in lines {
         match &line.kind {
-            LineKind::Blank | LineKind::Comment => {}
+            LineKind::Blank => {}
+            LineKind::Comment => {
+                let indented = line.raw.starts_with([' ', '\t']);
+                match stack.last_mut() {
+                    // An indented comment sits inside a record's block.
+                    Some(top) if indented => top.rec.block.comments.push(line.raw.clone()),
+                    // Anything at column 0 introduces whatever follows it.
+                    _ => pending.push(line.raw.clone()),
+                }
+            }
             // A column-0 header closes the entire open chain, then starts fresh.
             LineKind::Header => {
                 while !stack.is_empty() {
                     close_top(&mut stack, &mut roots);
                 }
                 if let Some(header) = parse_header(line, diags) {
-                    stack.push(open(line, header, 0));
+                    stack.push(open(line, header, 0, std::mem::take(&mut pending)));
                 }
             }
             LineKind::Block { indent } => {
@@ -109,7 +123,7 @@ fn parse_lines(lines: &[Line], diags: &mut Diagnostics) -> SurfaceFile {
                         continue;
                     }
                     if let Some(header) = parse_header(line, diags) {
-                        stack.push(open(line, header, indent));
+                        stack.push(open(line, header, indent, std::mem::take(&mut pending)));
                     }
                 } else {
                     let top = stack.last_mut().unwrap();
@@ -134,7 +148,10 @@ fn parse_lines(lines: &[Line], diags: &mut Diagnostics) -> SurfaceFile {
         close_top(&mut stack, &mut roots);
     }
 
-    SurfaceFile { records: roots }
+    SurfaceFile {
+        records: roots,
+        trailing_comments: pending,
+    }
 }
 
 // --- Header parsing -------------------------------------------------------

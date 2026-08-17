@@ -3579,23 +3579,63 @@ fn ordinary_record_nesting_still_parses_clean() {
     );
 }
 
-/// `thoughtml fmt` regenerates the document from the parsed model, and the model
-/// does not carry comments — so formatting drops every `#` line. The CLI refuses
-/// to write in that case rather than deleting an author's annotations; this pins
-/// the underlying fact so the guard cannot be removed without noticing.
+/// Comments survive formatting. They used to be dropped by the lexer before the
+/// AST existed, so `fmt -w` silently deleted an author's annotations; the CLI
+/// refused the rewrite as a stopgap until the surface tree could carry them.
 #[test]
-fn formatting_is_known_to_drop_comments() {
-    let src = "# keep me\nfocus a\n  kind claim\n  # inline note\n  The claim.\n";
+fn formatting_preserves_comments() {
+    let src = "# Why this decision was made — keep this note.
+# Reviewed with the team on Tuesday.
+focus a
+  kind claim
+  # inline rationale
+  The claim.
+";
     let result = parse_str(src);
     assert!(!result.diagnostics.has_errors());
     let formatted = crate::fmt::format(&result.surface);
-    assert!(
-        !formatted.contains('#'),
-        "fmt now preserves comments — remove the CLI's refusal-to-write guard \
-         in main.rs (run_fmt) and update this test"
+
+    for expected in [
+        "# Why this decision was made — keep this note.",
+        "# Reviewed with the team on Tuesday.",
+        "# inline rationale",
+    ] {
+        assert!(
+            formatted.contains(expected),
+            "lost {expected:?}:
+{formatted}"
+        );
+    }
+    // A comment introduces what sits below it, so the header block stays above
+    // the record it belongs to.
+    let header = formatted.find("# Why this decision").unwrap();
+    assert!(header < formatted.find("focus a").unwrap());
+
+    // Formatting must remain idempotent and must not change the model.
+    let again = crate::fmt::format(&parse_str(&formatted).surface);
+    assert_eq!(formatted, again, "formatting comments is not idempotent");
+    assert_eq!(
+        serde_json::to_string(&parse_str(&formatted).canonical).unwrap(),
+        serde_json::to_string(&result.canonical).unwrap(),
+        "formatting changed the canonical model"
     );
-    // The model is still intact: only the commentary is lost.
-    assert!(formatted.contains("The claim."));
+}
+
+/// Comments that follow the last record belong to no record and must not vanish.
+#[test]
+fn formatting_keeps_trailing_comments() {
+    let src = "focus a
+  kind claim
+  The claim.
+
+# a closing thought
+";
+    let formatted = crate::fmt::format(&parse_str(src).surface);
+    assert!(formatted.contains("# a closing thought"), "{formatted}");
+    assert!(
+        formatted.trim_end().ends_with("# a closing thought"),
+        "{formatted}"
+    );
 }
 
 /// A cheap, deterministic stand-in for the fuzzer, so the "no input crashes the
