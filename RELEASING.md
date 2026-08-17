@@ -8,23 +8,25 @@ do not silently drift.
 
 - Set `[workspace.package].version` in `Cargo.toml`.
 - Update `Cargo.lock`, the README version badge and Status section, the book's
-  current-version references, `CHANGELOG.md`, and the PyPI workflow's manual
-  dispatch default.
+  current-version references, `CHANGELOG.md`, the PyPI workflow's manual
+  dispatch default, and **this file** — the version examples below go stale
+  otherwise, which is exactly how they were missed in 0.4.1.
 - Regenerate `crates/thoughtml/assets/viewer.html` with
   `cd web && npm run build:viewer` after any shared viewer change.
 - Keep local demos, generated scratch files, and private test artifacts out of
   the release commit.
 
-For v0.4.0, the expected release-facing version is:
+For v0.4.1, the expected release-facing version is:
 
 ```text
-Cargo.toml                         0.4.0
-Cargo.lock                        0.4.0 (thoughtml + thoughtml-wasm)
-README.md                         version-0.4.0 badge / v0.4.0 Status
-docs/src/introduction.md          v0.4.0
-docs/src/reference/index.md       v0.4.0
-docs/src/appendix/faq.md          v0.4.0
-.github/workflows/pypi.yml        0.4.0 manual default
+Cargo.toml                         0.4.1
+Cargo.lock                        0.4.1 (thoughtml + thoughtml-wasm)
+README.md                         version-0.4.1 badge / v0.4.1 Status
+docs/src/introduction.md          v0.4.1
+docs/src/reference/index.md       v0.4.1
+docs/src/appendix/faq.md          v0.4.1
+.github/workflows/pypi.yml        0.4.1 manual default
+RELEASING.md                       0.4.1 (this file's examples)
 ```
 
 ## 2. Run the release gate
@@ -60,9 +62,9 @@ Commit the reviewed release set, push `main`, then create and push the matching
 annotated tag:
 
 ```sh
-git tag -a v0.4.0 -m "ThoughtML v0.4.0"
+git tag -a v0.4.1 -m "ThoughtML v0.4.1"
 git push origin main
-git push origin v0.4.0
+git push origin v0.4.1
 ```
 
 Pushing the version tag starts cargo-dist. It builds macOS, Linux, and Windows
@@ -88,10 +90,10 @@ release workflow and local release gate are green.
 
 ## 5. Verify the public release
 
-- Install `thoughtml==0.4.0` into a clean Python environment and run
+- Install `thoughtml==0.4.1` into a clean Python environment and run
   `thoughtml --version`.
-- Install `thoughtml@0.4.0` with npm and run `thoughtml --version`.
-- Check the crates.io page and `cargo install thoughtml --version 0.4.0`.
+- Install `thoughtml@0.4.1` with npm and run `thoughtml --version`.
+- Check the crates.io page and `cargo install thoughtml --version 0.4.1`.
 - Download one GitHub binary archive and verify `thoughtml guide`, the Snake
   project, `--html`, and `stream` from outside the repository.
 - Open the deployed book and playground, verify the displayed release version,

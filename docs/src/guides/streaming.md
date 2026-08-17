@@ -125,8 +125,12 @@ The server refuses requests whose `Host` is a name it does not serve — only
 DNS rebinding, where a web page points its own hostname at `127.0.0.1` so the
 browser treats your stream as same-origin and lets the page read it.
 
-Binding a *public* address needs `--expose-public` on top of `--host`. `--lan`
-and any private or link-local address are unaffected.
+Exposing the stream beyond your own network needs `--expose-public`. The check is
+on where the bind *reaches*, not on what you typed — `--lan` and `--host 0.0.0.0`
+both mean "every interface I have", which is your LAN on a laptop and the open
+internet on a cloud host, so the machine's own outbound address decides. On a home
+or office network nothing changes; run the same command on a VPS and it stops and
+tells you, naming the address you would have been reachable at.
 
 `/health` answers over loopback only; it reports revision count and connected
 viewers, which is not something a whole network needs to know.
