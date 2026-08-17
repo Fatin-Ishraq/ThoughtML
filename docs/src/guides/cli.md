@@ -110,15 +110,20 @@ declines a document with parse errors. (Comments are not yet preserved.)
 
 ```sh
 thoughtml fmt <FILE>          # print the formatted document to stdout
-thoughtml fmt -w <FILE>       # rewrite the file in place (refuses if it has comments)
+thoughtml fmt -w <FILE>       # rewrite the file in place
 thoughtml fmt --check <FILE>  # exit non-zero if not already formatted (CI)
 ```
 
-> **Comments are not preserved yet.** The formatter rebuilds the document from the
-> parsed model, and the model does not carry `#` lines — so formatting would drop
-> them. Rather than delete an author's annotations, `fmt -w` refuses on a file that
-> has comments, and `fmt --check` reports it. Printing to stdout still works and
-> warns. A document with no comments formats normally.
+> **What formatting normalizes.** Comments are preserved: a comment belongs to
+> whatever it sits above, so an unindented block is re-emitted directly above its
+> record and a trailing one stays at the end of the file. A blank line left between
+> a file-header comment and the first record is closed up, since the comment
+> introduces that record. Comments written *inside* a block are kept but move to
+> the top of it — the formatter reorders a block's contents (body first, then
+> fields), so there is no stable position to return them to.
+>
+> `fmt` re-parses its own output and refuses to write if the canonical model
+> changed, so formatting can never alter meaning.
 
 
 ## `thoughtml explain` — trace a reading

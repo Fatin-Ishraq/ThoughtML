@@ -8,6 +8,9 @@ use serde::Serialize;
 #[derive(Debug, Clone, Serialize)]
 pub struct SurfaceFile {
     pub records: Vec<Record>,
+    /// Comment lines after the last record, which belong to no record.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub trailing_comments: Vec<String>,
 }
 
 /// A record: a header, its indented block, and any records nested under it.
@@ -15,6 +18,11 @@ pub struct SurfaceFile {
 pub struct Record {
     /// 1-based line number of the header.
     pub line: usize,
+    /// Unindented comment lines standing immediately above this header, verbatim
+    /// and in order. A comment belongs to whatever it sits above, which is how
+    /// people write them and what lets the formatter put them back.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub comments: Vec<String>,
     pub header: Header,
     pub block: Block,
     /// Records nested under this one by indentation (§6, Phase 5). Only a
@@ -115,6 +123,11 @@ pub struct Block {
     /// `link <source> <relation> <target>`. Empty for every other record.
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub evidence: Vec<EvidenceEntry>,
+    /// Indented comment lines found inside this block, verbatim. The formatter
+    /// reorders a block's contents, so these are re-emitted at the top of it
+    /// rather than at their original position — kept, not placed.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub comments: Vec<String>,
 }
 
 /// One member line of an evidence bundle: a source id and the optional strength
