@@ -4,6 +4,44 @@ All notable changes to ThoughtML are recorded here. The project follows
 [Semantic Versioning](https://semver.org). **v0.1.0** is the first public
 release — real and usable, but the surface may still move.
 
+## [Unreleased]
+
+Follow-ups from a review of the 0.4.1 security work, plus the first bug the new
+fuzzing found.
+
+### Fixed
+
+- **Evidence propagation could produce the wrong derived confidence.** A document
+  that reuses an id — a warning, not an error — queued that node twice while
+  propagating belief, taking an in-degree count below zero. In release builds the
+  subtraction wrapped silently, so the affected node was never resolved in
+  topological order and fell through to the cycle fallback instead. Found by the
+  new `compute` fuzz target within ninety seconds of its first run.
+- **`thoughtml fmt` deleted comments.** The formatter rebuilds the document from
+  the parsed model, which does not carry `#` lines, so `fmt -w` silently wrote a
+  comment-free file back over the author's. It now refuses that rewrite and
+  explains why; printing to stdout still works and warns. This is also why every
+  bundled example failed `fmt --check`. Preserving comments properly is still to
+  come.
+
+### Security
+
+- **The public-bind gate now catches wildcard binds.** `--lan`, `--host 0.0.0.0`
+  and `--host ::` bypassed `--expose-public`, because "unspecified" was treated as
+  a private address — and a wildcard bind is the usual way to expose something
+  from a cloud host by accident. The check now looks at where the bind actually
+  reaches. Home and office networks are unaffected. `SECURITY.md` claimed this
+  protection before it existed; that wording is corrected.
+
+### Added
+
+- **Continuous fuzzing.** Two `cargo-fuzz` targets covering the default parse path
+  and the full compute stack, run in CI on every push and weekly, with crash
+  reproducers uploaded. A deterministic generative test covers the same invariant
+  in the ordinary test suite, including on platforms where a fuzzer cannot run.
+- An **Upgrading** page in the book, covering what 0.4.1 changed for existing
+  documents.
+
 ## [0.4.1] — 2026-08-17
 
 **Security release.** A security audit of the project found issues in the parser,
