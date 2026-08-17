@@ -3691,3 +3691,61 @@ fn generated_inputs_never_crash_the_parser() {
         );
     }
 }
+
+/// Found by the `compute` fuzz target within ninety seconds of its first CI run.
+///
+/// Reusing an id across records is a *warning*, not an error, so a real document
+/// can declare the same node twice. `propagate` built its node list straight from
+/// declaration order, so the duplicate was queued twice, and each pass decremented
+/// its targets' in-degree once — taking a `usize` below zero.
+///
+/// In a normal release build that subtraction wraps silently rather than
+/// panicking, so the target's in-degree never reaches zero, it is never queued,
+/// and it falls through to the evidence-cycle fallback instead of being resolved
+/// topologically. So this was a wrong-answer bug in shipped builds, not just a
+/// crash — which is why the fuzz profile enables `overflow-checks`.
+#[test]
+fn a_reused_id_does_not_corrupt_evidence_propagation() {
+    let src = "\
+focus shared
+  kind claim
+  First.
+
+scope shared
+
+observation a
+  Some evidence.
+
+link a supports shared
+link shared supports b
+
+focus b
+  kind claim
+  Downstream.
+";
+    let result = parse_str_with(src, all_on());
+    // The reuse is reported rather than silently accepted...
+    assert!(
+        result
+            .diagnostics
+            .items
+            .iter()
+            .any(|d| d.message.contains("duplicate id `shared`")),
+        "expected a duplicate-id warning: {:?}",
+        result.diagnostics.items
+    );
+    // ...and the compute stack completes over it instead of taking the count
+    // below zero. Reaching this line at all is most of the point.
+    assert!(
+        serde_json::to_string(&result.canonical).is_ok(),
+        "canonical model must still serialize"
+    );
+    assert!(
+        result
+            .canonical
+            .objects
+            .iter()
+            .any(|o| matches!(o, Object::Focus(f) if f.id == "b")),
+        "the downstream node should survive the sweep"
+    );
+}

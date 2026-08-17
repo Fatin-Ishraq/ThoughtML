@@ -497,9 +497,17 @@ fn propagate(
     }
 
     // Declaration order of the nodes involved (deterministic tie-break).
+    //
+    // Deduplicated, and that matters: `order` is the document's declaration
+    // order, and reusing an id is a *warning*, not an error — so a real document
+    // can list the same node twice. Left as duplicates it would be queued twice,
+    // decrementing each of its targets' in-degree once per copy, and the count
+    // would run below zero.
+    let mut seen_node: HashSet<&str> = HashSet::new();
     let nodes: Vec<String> = order
         .iter()
         .filter(|id| indeg.contains_key(*id))
+        .filter(|id| seen_node.insert(id.as_str()))
         .cloned()
         .collect();
 
@@ -509,7 +517,12 @@ fn propagate(
     let mut queue: VecDeque<String> = nodes.iter().filter(|id| indeg[*id] == 0).cloned().collect();
     let mut done: HashMap<String, bool> = HashMap::new();
     while let Some(n) = queue.pop_front() {
-        done.insert(n.clone(), true);
+        // A node settles exactly once. `done` was being written and never read;
+        // reading it keeps the in-degree accounting sound no matter how a node
+        // came to be queued twice, rather than relying only on the dedupe above.
+        if done.insert(n.clone(), true).is_some() {
+            continue;
+        }
         processed += 1;
         if let Some(idxs) = incoming.get(&n) {
             derived.insert(n.clone(), node_confidence(idxs, evs, &derived, authored));
