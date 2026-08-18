@@ -3890,3 +3890,41 @@ fn the_inert_field_warning_carries_its_stable_code() {
         .any(|c| c == "TML105");
     assert!(coded, "expected TML105 on the inert-field warning");
 }
+
+// --- Time: a documented partial date must behave like a date ---------------
+
+#[test]
+fn a_bare_year_on_a_temporal_field_is_a_date() {
+    // `2026` is a legal partial date and also a legal number, and the classifier
+    // tries numbers first. On a temporal field that made `observed-at 2026` store
+    // the *number* 2026.0: absent from the timeline, invisible to `--as-of`, and
+    // rendered as `2026.0` — with no diagnostic, while the guide promised bare
+    // years were fine.
+    let src = "observation y\n  Year only.\n  observed-at 2026\n\nobservation ym\n  Year and month.\n  observed-at 2026-06\n\nlink y supports ym\n";
+    let r = parse_str(src);
+    assert!(!r.diagnostics.has_warnings(), "{:?}", r.diagnostics.items);
+    assert!(
+        matches!(focus_field(&r.canonical.objects, "y", "observed-at"), Some(Value::Time(t)) if t == "2026"),
+        "bare year should classify as a time, got {:?}",
+        focus_field(&r.canonical.objects, "y", "observed-at")
+    );
+    let timeline = r.canonical.timeline.as_ref().expect("timeline");
+    let ids: Vec<&str> = timeline.events.iter().map(|e| e.id.as_str()).collect();
+    assert_eq!(
+        ids,
+        vec!["y", "ym"],
+        "the bare year must take part in the timeline"
+    );
+}
+
+#[test]
+fn a_bare_year_elsewhere_is_still_a_number() {
+    // The coercion is scoped to temporal fields. A four-digit count is a count.
+    let src = "observation batch\n  A production batch.\n  quantity 2026 unit\n\nclaim c\n  C.\n\nlink batch supports c\n";
+    let r = parse_str(src);
+    let q = focus(&r.canonical.objects, "batch")
+        .and_then(|f| f.quantity.as_ref())
+        .expect("quantity");
+    assert_eq!(q.value, 2026.0);
+    assert_eq!(q.unit, "unit");
+}

@@ -1,0 +1,227 @@
+{
+  "objects": [
+    {
+      "type": "focus",
+      "id": "twelfth-century-dating",
+      "kind": "claim",
+      "body": "The codex was copied in the late twelfth century.",
+      "status": "superseded",
+      "fields": {
+        "asserted-at": {
+          "kind": "time",
+          "value": "2025-09-12"
+        },
+        "valid-during": {
+          "kind": "time",
+          "value": "2025-09-12..2026-02-20"
+        }
+      },
+      "superseded_by": "fourteenth-century-dating"
+    },
+    {
+      "type": "focus",
+      "id": "fourteenth-century-dating",
+      "kind": "claim",
+      "body": "The codex was copied between roughly 1320 and 1360.",
+      "fields": {
+        "asserted-at": {
+          "kind": "time",
+          "value": "2026-02-20"
+        }
+      }
+    },
+    {
+      "type": "link",
+      "id": "fourteenth-century-dating-revises-twelfth-century-dating",
+      "from": "fourteenth-century-dating",
+      "relation": "revises",
+      "to": "twelfth-century-dating"
+    },
+    {
+      "type": "focus",
+      "id": "script-is-early-gothic",
+      "kind": "observation",
+      "body": "The hand is an early gothic textualis, a script in use from the late twelfth\ncentury onward.",
+      "fields": {
+        "observed-at": {
+          "kind": "time",
+          "value": "2025-09-10"
+        }
+      }
+    },
+    {
+      "type": "focus",
+      "id": "radiocarbon-range",
+      "kind": "observation",
+      "body": "Radiocarbon dating of the parchment returned 1315 to 1365 at ninety-five per cent.",
+      "fields": {
+        "observed-at": {
+          "kind": "time",
+          "value": "2026-02-14"
+        },
+        "source": {
+          "kind": "ref",
+          "value": "lab-report-4471"
+        }
+      }
+    },
+    {
+      "type": "focus",
+      "id": "catalogue-of-1904",
+      "kind": "memory",
+      "body": "The museum's 1904 catalogue also placed the codex in the twelfth century.",
+      "fields": {
+        "source": {
+          "kind": "ref",
+          "value": "museum-catalogue-1904"
+        }
+      }
+    },
+    {
+      "type": "link",
+      "id": "script-is-early-gothic-supports-twelfth-century-dating",
+      "from": "script-is-early-gothic",
+      "relation": "supports",
+      "to": "twelfth-century-dating"
+    },
+    {
+      "type": "link",
+      "id": "catalogue-of-1904-supports-twelfth-century-dating",
+      "from": "catalogue-of-1904",
+      "relation": "supports",
+      "to": "twelfth-century-dating"
+    },
+    {
+      "type": "link",
+      "id": "radiocarbon-range-supports-fourteenth-century-dating",
+      "from": "radiocarbon-range",
+      "relation": "supports",
+      "to": "fourteenth-century-dating"
+    },
+    {
+      "type": "link",
+      "id": "radiocarbon-range-opposes-twelfth-century-dating",
+      "from": "radiocarbon-range",
+      "relation": "opposes",
+      "to": "twelfth-century-dating"
+    },
+    {
+      "type": "stance",
+      "id": "palaeographer-remembers-catalogue-of-1904",
+      "agent": "palaeographer",
+      "posture": "remembers",
+      "target": "catalogue-of-1904",
+      "fields": {
+        "note": {
+          "kind": "text",
+          "value": "Not independent evidence — the 1904 cataloguer read the same hand we did."
+        }
+      }
+    },
+    {
+      "type": "stance",
+      "id": "palaeographer-holds-twelfth-century-dating",
+      "agent": "palaeographer",
+      "posture": "holds",
+      "target": "twelfth-century-dating",
+      "confidence": {
+        "kind": "number",
+        "value": 0.7
+      },
+      "basis": "estimated",
+      "fields": {
+        "asserted-at": {
+          "kind": "time",
+          "value": "2025-09-12"
+        },
+        "note": {
+          "kind": "text",
+          "value": "On the script alone. Early gothic gives a lower bound, not a date."
+        }
+      },
+      "superseded_by": "palaeographer-revises-twelfth-century-dating"
+    },
+    {
+      "type": "stance",
+      "id": "palaeographer-revises-twelfth-century-dating",
+      "agent": "palaeographer",
+      "posture": "revises",
+      "target": "twelfth-century-dating",
+      "confidence": {
+        "kind": "number",
+        "value": 0.05
+      },
+      "basis": "measured",
+      "fields": {
+        "asserted-at": {
+          "kind": "time",
+          "value": "2026-02-21"
+        },
+        "note": {
+          "kind": "text",
+          "value": "The radiocarbon range rules it out. Kept so the reasoning stays legible."
+        }
+      }
+    },
+    {
+      "type": "stance",
+      "id": "conservator-doubts-radiocarbon-range",
+      "agent": "conservator",
+      "posture": "doubts",
+      "target": "radiocarbon-range",
+      "confidence": {
+        "kind": "unknown"
+      },
+      "fields": {
+        "note": {
+          "kind": "text",
+          "value": "I cannot judge their calibration curve, so the doubt goes down without a number."
+        }
+      }
+    }
+  ],
+  "timeline": {
+    "start": "2025-09-10",
+    "end": "2026-02-21",
+    "events": [
+      {
+        "at": "2025-09-10",
+        "seq": 3,
+        "id": "script-is-early-gothic",
+        "kind": "focus"
+      },
+      {
+        "at": "2025-09-12",
+        "seq": 0,
+        "id": "twelfth-century-dating",
+        "kind": "focus"
+      },
+      {
+        "at": "2025-09-12",
+        "seq": 11,
+        "id": "palaeographer-holds-twelfth-century-dating",
+        "kind": "stance",
+        "agent": "palaeographer"
+      },
+      {
+        "at": "2026-02-14",
+        "seq": 4,
+        "id": "radiocarbon-range",
+        "kind": "focus"
+      },
+      {
+        "at": "2026-02-20",
+        "seq": 1,
+        "id": "fourteenth-century-dating",
+        "kind": "focus"
+      },
+      {
+        "at": "2026-02-21",
+        "seq": 12,
+        "id": "palaeographer-revises-twelfth-century-dating",
+        "kind": "stance",
+        "agent": "palaeographer"
+      }
+    ]
+  }
+}

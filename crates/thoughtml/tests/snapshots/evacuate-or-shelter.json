@@ -1,0 +1,238 @@
+{
+  "objects": [
+    {
+      "type": "scope",
+      "id": "valley-fire"
+    },
+    {
+      "type": "focus",
+      "id": "nobody-is-hurt",
+      "kind": "goal",
+      "body": "Get through the next twelve hours with nobody in the valley injured."
+    },
+    {
+      "type": "focus",
+      "id": "valley-response",
+      "kind": "decision",
+      "body": "Evacuate the valley now, or hold residents in place and defend the town?"
+    },
+    {
+      "type": "focus",
+      "id": "evacuate-now",
+      "kind": "option",
+      "body": "Order the valley cleared down the single river road, starting immediately."
+    },
+    {
+      "type": "focus",
+      "id": "shelter-in-place",
+      "kind": "option",
+      "body": "Hold everyone in the town hall and the school, and defend the perimeter."
+    },
+    {
+      "type": "link",
+      "id": "evacuate-now-option-of-valley-response",
+      "from": "evacuate-now",
+      "relation": "option-of",
+      "to": "valley-response"
+    },
+    {
+      "type": "link",
+      "id": "shelter-in-place-option-of-valley-response",
+      "from": "shelter-in-place",
+      "relation": "option-of",
+      "to": "valley-response"
+    },
+    {
+      "type": "focus",
+      "id": "everyone-out",
+      "kind": "outcome",
+      "quantity": {
+        "value": 1400.0,
+        "unit": "person",
+        "dimension": "count:person",
+        "basis": "estimated"
+      },
+      "body": "The convoy clears the river road well before the fire reaches it."
+    },
+    {
+      "type": "focus",
+      "id": "road-cut-off",
+      "kind": "outcome",
+      "quantity": {
+        "value": 300.0,
+        "unit": "person",
+        "dimension": "count:person",
+        "basis": "estimated"
+      },
+      "body": "The fire crosses the road mid-convoy and strands vehicles in the gorge."
+    },
+    {
+      "type": "link",
+      "id": "evacuate-now-leads-to-everyone-out",
+      "from": "evacuate-now",
+      "relation": "leads-to",
+      "to": "everyone-out",
+      "probability": 0.6,
+      "basis": "estimated"
+    },
+    {
+      "type": "link",
+      "id": "evacuate-now-leads-to-road-cut-off",
+      "from": "evacuate-now",
+      "relation": "leads-to",
+      "to": "road-cut-off",
+      "probability": 0.4,
+      "basis": "estimated"
+    },
+    {
+      "type": "focus",
+      "id": "fire-turns-away",
+      "kind": "outcome",
+      "quantity": {
+        "value": 1400.0,
+        "unit": "person",
+        "dimension": "count:person",
+        "basis": "estimated"
+      },
+      "body": "The wind holds westerly, the front runs past the ridge, and the town is untouched."
+    },
+    {
+      "type": "focus",
+      "id": "town-overrun",
+      "kind": "outcome",
+      "quantity": {
+        "value": 200.0,
+        "unit": "person",
+        "dimension": "count:person",
+        "basis": "estimated"
+      },
+      "body": "The fire reaches the town with everybody still inside it."
+    },
+    {
+      "type": "link",
+      "id": "shelter-in-place-leads-to-fire-turns-away",
+      "from": "shelter-in-place",
+      "relation": "leads-to",
+      "to": "fire-turns-away"
+    },
+    {
+      "type": "link",
+      "id": "shelter-in-place-leads-to-town-overrun",
+      "from": "shelter-in-place",
+      "relation": "leads-to",
+      "to": "town-overrun",
+      "probability": 0.4,
+      "basis": "estimated"
+    },
+    {
+      "type": "focus",
+      "id": "wind-forecast-westerly",
+      "kind": "observation",
+      "body": "The two o'clock forecast holds the wind westerly until at least midnight.",
+      "fields": {
+        "observed-at": {
+          "kind": "time",
+          "value": "2026-08-04"
+        },
+        "source": {
+          "kind": "ref",
+          "value": "regional-met-office"
+        }
+      }
+    },
+    {
+      "type": "link",
+      "id": "wind-forecast-westerly-supports-fire-turns-away",
+      "from": "wind-forecast-westerly",
+      "relation": "supports",
+      "to": "fire-turns-away",
+      "weight": 0.5,
+      "basis": "estimated"
+    },
+    {
+      "type": "focus",
+      "id": "spotting-observed",
+      "kind": "observation",
+      "body": "Crews report embers starting spot fires four hundred metres ahead of the front,\nwhich is how a ridge gets crossed regardless of what the wind is doing.",
+      "fields": {
+        "observed-at": {
+          "kind": "time",
+          "value": "2026-08-04"
+        },
+        "source": {
+          "kind": "ref",
+          "value": "fire-line-radio"
+        }
+      }
+    },
+    {
+      "type": "link",
+      "id": "spotting-observed-opposes-fire-turns-away",
+      "from": "spotting-observed",
+      "relation": "opposes",
+      "to": "fire-turns-away",
+      "weight": 0.7,
+      "basis": "measured"
+    },
+    {
+      "type": "focus",
+      "id": "open-river-road",
+      "kind": "action",
+      "body": "Close the river road to inbound traffic and run the convoy out on both lanes."
+    },
+    {
+      "type": "link",
+      "id": "open-river-road-enables-evacuate-now",
+      "from": "open-river-road",
+      "relation": "enables",
+      "to": "evacuate-now"
+    },
+    {
+      "type": "link",
+      "id": "valley-response-enables-nobody-is-hurt",
+      "from": "valley-response",
+      "relation": "enables",
+      "to": "nobody-is-hurt"
+    },
+    {
+      "type": "stance",
+      "id": "incident-commander-holds-valley-response",
+      "agent": "incident-commander",
+      "posture": "holds",
+      "target": "valley-response",
+      "confidence": {
+        "kind": "number",
+        "value": 0.55
+      },
+      "basis": "estimated",
+      "fields": {
+        "chosen-by": {
+          "kind": "ref",
+          "value": "incident-commander"
+        },
+        "note": {
+          "kind": "text",
+          "value": "Clearing the valley, on one radio report. Reassess the moment the wind turns."
+        }
+      }
+    }
+  ],
+  "timeline": {
+    "start": "2026-08-04",
+    "end": "2026-08-04",
+    "events": [
+      {
+        "at": "2026-08-04",
+        "seq": 15,
+        "id": "wind-forecast-westerly",
+        "kind": "focus"
+      },
+      {
+        "at": "2026-08-04",
+        "seq": 17,
+        "id": "spotting-observed",
+        "kind": "focus"
+      }
+    ]
+  }
+}

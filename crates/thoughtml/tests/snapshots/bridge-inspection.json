@@ -1,0 +1,231 @@
+{
+  "objects": [
+    {
+      "type": "profile",
+      "name": "structural",
+      "kinds": [
+        "defect",
+        "remedy"
+      ],
+      "relations": [
+        "aggravates",
+        "mitigates"
+      ],
+      "fields": [
+        "severity",
+        "next-inspection"
+      ],
+      "postures": [
+        "certifies"
+      ]
+    },
+    {
+      "type": "scope",
+      "id": "bridge-b174-november"
+    },
+    {
+      "type": "focus",
+      "id": "deck-is-serviceable",
+      "kind": "claim",
+      "body": "The deck can stay open to unrestricted traffic until the next principal inspection.",
+      "fields": {
+        "next-inspection": {
+          "kind": "time",
+          "value": "2028-11"
+        }
+      }
+    },
+    {
+      "type": "focus",
+      "id": "half-joint-corrosion",
+      "kind": "defect",
+      "body": "Section loss on the reinforcement at both half joints, worst on the east abutment.",
+      "fields": {
+        "severity": {
+          "kind": "ref",
+          "value": "high"
+        },
+        "observed-at": {
+          "kind": "time",
+          "value": "2026-11-08"
+        },
+        "source": {
+          "kind": "ref",
+          "value": "inspection-b174-11"
+        }
+      }
+    },
+    {
+      "type": "focus",
+      "id": "drainage-blocked",
+      "kind": "defect",
+      "body": "The deck drains are blocked, so chloride-laden runoff sits on the half joints.",
+      "fields": {
+        "severity": {
+          "kind": "ref",
+          "value": "medium"
+        },
+        "observed-at": {
+          "kind": "time",
+          "value": "2026-11-08"
+        },
+        "source": {
+          "kind": "ref",
+          "value": "inspection-b174-11"
+        }
+      }
+    },
+    {
+      "type": "focus",
+      "id": "clear-drains-and-wash",
+      "kind": "remedy",
+      "body": "Clear all six drains and wash the joints down before the winter salting season."
+    },
+    {
+      "type": "focus",
+      "id": "cathodic-protection",
+      "kind": "remedy",
+      "body": "Install impressed-current cathodic protection across both half joint zones.",
+      "status": "open"
+    },
+    {
+      "type": "link",
+      "id": "drainage-blocked-aggravates-half-joint-corrosion",
+      "from": "drainage-blocked",
+      "relation": "aggravates",
+      "to": "half-joint-corrosion"
+    },
+    {
+      "type": "link",
+      "id": "clear-drains-and-wash-mitigates-drainage-blocked",
+      "from": "clear-drains-and-wash",
+      "relation": "mitigates",
+      "to": "drainage-blocked"
+    },
+    {
+      "type": "link",
+      "id": "cathodic-protection-mitigates-half-joint-corrosion",
+      "from": "cathodic-protection",
+      "relation": "mitigates",
+      "to": "half-joint-corrosion"
+    },
+    {
+      "type": "link",
+      "id": "half-joint-corrosion-opposes-deck-is-serviceable",
+      "from": "half-joint-corrosion",
+      "relation": "opposes",
+      "to": "deck-is-serviceable"
+    },
+    {
+      "type": "focus",
+      "id": "load-rating-unchanged",
+      "kind": "observation",
+      "quantity": {
+        "value": 40.0,
+        "unit": "tonne",
+        "dimension": "count:tonne",
+        "basis": "measured"
+      },
+      "body": "Re-derived load rating still meets the rated load with the measured section loss.",
+      "fields": {
+        "source": {
+          "kind": "ref",
+          "value": "load-assessment-b174"
+        }
+      }
+    },
+    {
+      "type": "link",
+      "id": "load-rating-unchanged-supports-deck-is-serviceable",
+      "from": "load-rating-unchanged",
+      "relation": "supports",
+      "to": "deck-is-serviceable"
+    },
+    {
+      "type": "link",
+      "id": "deck-is-serviceable-depends-on-standard.load-rating-on-record",
+      "from": "deck-is-serviceable",
+      "relation": "depends-on",
+      "to": "standard.load-rating-on-record"
+    },
+    {
+      "type": "link",
+      "id": "half-joint-corrosion-depends-on-standard.principal-inspection-every-six-years",
+      "from": "half-joint-corrosion",
+      "relation": "depends-on",
+      "to": "standard.principal-inspection-every-six-years"
+    },
+    {
+      "type": "stance",
+      "id": "inspector-certifies-deck-is-serviceable",
+      "agent": "inspector",
+      "posture": "certifies",
+      "target": "deck-is-serviceable",
+      "confidence": {
+        "kind": "number",
+        "value": 0.45
+      },
+      "basis": "measured",
+      "fields": {
+        "because": {
+          "kind": "ref",
+          "value": "load-rating-unchanged"
+        },
+        "note": {
+          "kind": "text",
+          "value": "Open, but not unconditionally — the rating holds today and the corrosion does not."
+        }
+      }
+    },
+    {
+      "type": "focus",
+      "id": "b174-scour-2019",
+      "kind": "memory",
+      "body": "Scour repair to the east pier after the 2019 flood, recorded in the last principal\ninspection.",
+      "fields": {
+        "source": {
+          "kind": "ref",
+          "value": "inspection-b174-2019"
+        }
+      }
+    },
+    {
+      "type": "stance",
+      "id": "inspector-remembers-b174-scour-2019",
+      "agent": "inspector",
+      "posture": "remembers",
+      "target": "b174-scour-2019",
+      "fields": {
+        "note": {
+          "kind": "text",
+          "value": "The 2019 flood scoured the east pier; that repair is what the joints sit on."
+        }
+      }
+    },
+    {
+      "type": "link",
+      "id": "b174-scour-2019-supports-half-joint-corrosion",
+      "from": "b174-scour-2019",
+      "relation": "supports",
+      "to": "half-joint-corrosion"
+    }
+  ],
+  "timeline": {
+    "start": "2026-11-08",
+    "end": "2026-11-08",
+    "events": [
+      {
+        "at": "2026-11-08",
+        "seq": 3,
+        "id": "half-joint-corrosion",
+        "kind": "focus"
+      },
+      {
+        "at": "2026-11-08",
+        "seq": 4,
+        "id": "drainage-blocked",
+        "kind": "focus"
+      }
+    ]
+  }
+}

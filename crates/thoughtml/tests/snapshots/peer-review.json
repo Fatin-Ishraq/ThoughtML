@@ -1,0 +1,152 @@
+{
+  "objects": [
+    {
+      "type": "focus",
+      "id": "central-claim",
+      "kind": "claim",
+      "body": "The paper claims that the tutoring programme raised exam scores.",
+      "divergent": [
+        {
+          "body": "The paper claims that students who chose tutoring scored higher than those who did not."
+        }
+      ]
+    },
+    {
+      "type": "focus",
+      "id": "scores-rose",
+      "kind": "observation",
+      "quantity": {
+        "value": 6.4,
+        "unit": "point",
+        "dimension": "count:point",
+        "basis": "measured"
+      },
+      "body": "Mean exam score in the tutored group was 6.4 points higher."
+    },
+    {
+      "type": "focus",
+      "id": "selection-not-random",
+      "kind": "observation",
+      "body": "Students opted into tutoring; the comparison group was simply everyone else."
+    },
+    {
+      "type": "focus",
+      "id": "attendance-confounded",
+      "kind": "observation",
+      "body": "The tutored students also attended twelve per cent more classes overall."
+    },
+    {
+      "type": "focus",
+      "id": "randomized-replication",
+      "kind": "observation",
+      "body": "A neighbouring district reported the same gap after a randomized rollout."
+    },
+    {
+      "type": "focus",
+      "id": "programme-works",
+      "kind": "claim",
+      "body": "Tutoring caused the improvement, so the programme is worth scaling."
+    },
+    {
+      "type": "link",
+      "id": "central-claim-supports-programme-works",
+      "from": "central-claim",
+      "relation": "supports",
+      "to": "programme-works"
+    },
+    {
+      "type": "link",
+      "id": "inference",
+      "from": "scores-rose",
+      "relation": "supports",
+      "to": "programme-works",
+      "fields": {
+        "undercut-by": {
+          "kind": "ref",
+          "value": "referee-one"
+        }
+      }
+    },
+    {
+      "type": "link",
+      "id": "selection-not-random-undercuts-inference",
+      "from": "selection-not-random",
+      "relation": "undercuts",
+      "to": "inference",
+      "weight": 0.8,
+      "basis": "estimated"
+    },
+    {
+      "type": "link",
+      "id": "attendance-confounded-opposes-programme-works",
+      "from": "attendance-confounded",
+      "relation": "opposes",
+      "to": "programme-works"
+    },
+    {
+      "type": "link",
+      "id": "randomized-replication-supports-programme-works",
+      "from": "randomized-replication",
+      "relation": "supports",
+      "to": "programme-works"
+    },
+    {
+      "type": "link",
+      "id": "randomized-replication-opposes-attendance-confounded",
+      "from": "randomized-replication",
+      "relation": "opposes",
+      "to": "attendance-confounded"
+    },
+    {
+      "type": "stance",
+      "id": "referee-one-doubts-programme-works",
+      "agent": "referee-one",
+      "posture": "doubts",
+      "target": "programme-works",
+      "confidence": {
+        "kind": "range",
+        "value": [
+          0.2,
+          0.4
+        ]
+      },
+      "basis": "estimated",
+      "fields": {
+        "because": {
+          "kind": "ref",
+          "value": "selection-not-random"
+        },
+        "note": {
+          "kind": "text",
+          "value": "The effect may well be real. This design cannot show that it is."
+        }
+      }
+    },
+    {
+      "type": "stance",
+      "id": "referee-two-accepts-programme-works",
+      "agent": "referee-two",
+      "posture": "accepts",
+      "target": "programme-works",
+      "confidence": {
+        "kind": "number",
+        "value": 0.7
+      },
+      "basis": "estimated",
+      "fields": {
+        "because": {
+          "kind": "ref",
+          "value": "randomized-replication"
+        },
+        "noted-by": {
+          "kind": "ref",
+          "value": "handling-editor"
+        },
+        "note": {
+          "kind": "text",
+          "value": "The replication is what carries it; the original comparison does not."
+        }
+      }
+    }
+  ]
+}

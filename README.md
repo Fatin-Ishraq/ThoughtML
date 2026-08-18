@@ -249,7 +249,8 @@ Card keep the playground, stream, and standalone viewer visually and behaviorall
 The core language remains compatible with v0.3.0. The full trail is in
 [CHANGELOG.md](CHANGELOG.md); the language and workflows are in the
 [book](https://fatin-ishraq.github.io/ThoughtML/). The surface may still move — hence 0.x,
-not 1.0.
+not 1.0. What 1.0 would freeze, and what it deliberately would not, is written
+down in [STABILITY.md](STABILITY.md).
 
 ## Contributing
 

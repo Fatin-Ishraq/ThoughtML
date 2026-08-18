@@ -1,0 +1,256 @@
+{
+  "objects": [
+    {
+      "type": "scope",
+      "id": "spring-panel",
+      "includes": [
+        "fund-best-science",
+        "which-proposal",
+        "spring-award",
+        "coastal-sensors",
+        "gut-microbiome",
+        "teaching-study"
+      ]
+    },
+    {
+      "type": "focus",
+      "id": "fund-best-science",
+      "kind": "goal",
+      "body": "Award the spring grant to the proposal most likely to produce usable results."
+    },
+    {
+      "type": "question",
+      "id": "which-proposal",
+      "body": "Which of the three proposals should take the spring award?",
+      "asks_about": [
+        "coastal-sensors",
+        "gut-microbiome",
+        "teaching-study"
+      ],
+      "expects": "option",
+      "status": "settled"
+    },
+    {
+      "type": "focus",
+      "id": "spring-award",
+      "kind": "decision",
+      "body": "The panel's award for the spring funding cycle.",
+      "fields": {
+        "chosen-by": {
+          "kind": "ref",
+          "value": "panel-chair"
+        }
+      }
+    },
+    {
+      "type": "focus",
+      "id": "coastal-sensors",
+      "kind": "option",
+      "body": "Deploy a low-cost sensor array along the estuary for a full tidal year."
+    },
+    {
+      "type": "focus",
+      "id": "gut-microbiome",
+      "kind": "option",
+      "body": "Sequence a longitudinal cohort of two hundred infants over eighteen months."
+    },
+    {
+      "type": "focus",
+      "id": "teaching-study",
+      "kind": "option",
+      "body": "Trial a new laboratory teaching sequence across three cohorts.",
+      "status": "abandoned",
+      "fields": {
+        "note": {
+          "kind": "text",
+          "value": "Withdrawn in week two — the lead investigator moved institution."
+        }
+      }
+    },
+    {
+      "type": "link",
+      "id": "coastal-sensors-option-of-spring-award",
+      "from": "coastal-sensors",
+      "relation": "option-of",
+      "to": "spring-award"
+    },
+    {
+      "type": "link",
+      "id": "gut-microbiome-option-of-spring-award",
+      "from": "gut-microbiome",
+      "relation": "option-of",
+      "to": "spring-award"
+    },
+    {
+      "type": "link",
+      "id": "teaching-study-option-of-spring-award",
+      "from": "teaching-study",
+      "relation": "option-of",
+      "to": "spring-award"
+    },
+    {
+      "type": "link",
+      "id": "gut-microbiome-answers-which-proposal",
+      "from": "gut-microbiome",
+      "relation": "answers",
+      "to": "which-proposal"
+    },
+    {
+      "type": "link",
+      "id": "spring-award-enables-fund-best-science",
+      "from": "spring-award",
+      "relation": "enables",
+      "to": "fund-best-science"
+    },
+    {
+      "type": "focus",
+      "id": "panel-criteria",
+      "kind": "claim",
+      "body": "What the panel agreed to weigh, before reading any of the proposals."
+    },
+    {
+      "type": "focus",
+      "id": "methods-are-sound",
+      "kind": "claim",
+      "body": "The design can actually answer the question the applicants are asking."
+    },
+    {
+      "type": "focus",
+      "id": "team-can-deliver",
+      "kind": "claim",
+      "body": "The team has the people and the equipment to finish inside the grant period."
+    },
+    {
+      "type": "focus",
+      "id": "result-is-usable",
+      "kind": "claim",
+      "body": "Somebody outside the project can use the result within about two years."
+    },
+    {
+      "type": "link",
+      "id": "methods-are-sound-part-of-panel-criteria",
+      "from": "methods-are-sound",
+      "relation": "part-of",
+      "to": "panel-criteria"
+    },
+    {
+      "type": "link",
+      "id": "team-can-deliver-part-of-panel-criteria",
+      "from": "team-can-deliver",
+      "relation": "part-of",
+      "to": "panel-criteria"
+    },
+    {
+      "type": "link",
+      "id": "result-is-usable-part-of-panel-criteria",
+      "from": "result-is-usable",
+      "relation": "part-of",
+      "to": "panel-criteria"
+    },
+    {
+      "type": "focus",
+      "id": "cohort-already-recruited",
+      "kind": "observation",
+      "body": "The infant cohort is recruited and consented; sequencing could start in June."
+    },
+    {
+      "type": "link",
+      "id": "cohort-already-recruited-supports-gut-microbiome",
+      "from": "cohort-already-recruited",
+      "relation": "supports",
+      "to": "gut-microbiome"
+    },
+    {
+      "type": "question",
+      "id": "ethics-review",
+      "body": "Has the committee cleared the revised infant cohort protocol?",
+      "expects": "claim",
+      "status": "open"
+    },
+    {
+      "type": "link",
+      "id": "ethics-review-blocks-award-letter",
+      "from": "ethics-review",
+      "relation": "blocks",
+      "to": "award-letter",
+      "fields": {
+        "status": {
+          "kind": "symbol",
+          "value": "answered"
+        }
+      }
+    },
+    {
+      "type": "focus",
+      "id": "award-letter",
+      "kind": "action",
+      "body": "Send the award letter and open the project account.",
+      "fields": {
+        "blocked-by": {
+          "kind": "ref",
+          "value": "ethics-review"
+        }
+      }
+    },
+    {
+      "type": "link",
+      "id": "award-letter-depends-on-spring-award",
+      "from": "award-letter",
+      "relation": "depends-on",
+      "to": "spring-award"
+    },
+    {
+      "type": "stance",
+      "id": "reviewer-a-considers-coastal-sensors",
+      "agent": "reviewer-a",
+      "posture": "considers",
+      "target": "coastal-sensors",
+      "confidence": {
+        "kind": "number",
+        "value": 0.6
+      },
+      "basis": "estimated",
+      "fields": {
+        "note": {
+          "kind": "text",
+          "value": "Cheap, and a full tidal year makes the dataset reusable by other groups."
+        }
+      }
+    },
+    {
+      "type": "stance",
+      "id": "reviewer-b-rejects-teaching-study",
+      "agent": "reviewer-b",
+      "posture": "rejects",
+      "target": "teaching-study",
+      "fields": {
+        "note": {
+          "kind": "text",
+          "value": "Withdrawn by the applicant. Recorded so next cycle can see why."
+        }
+      }
+    },
+    {
+      "type": "stance",
+      "id": "chair-call",
+      "agent": "panel-chair",
+      "posture": "chooses",
+      "target": "gut-microbiome",
+      "confidence": {
+        "kind": "number",
+        "value": 0.65
+      },
+      "basis": "estimated",
+      "fields": {
+        "because": {
+          "kind": "ref",
+          "value": "cohort-already-recruited"
+        },
+        "note": {
+          "kind": "text",
+          "value": "Highest expected yield of the three, and it can start almost immediately."
+        }
+      }
+    }
+  ]
+}

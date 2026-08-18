@@ -123,6 +123,33 @@ pub fn classify_token(tok: &str) -> Value {
     Value::Text(tok.to_string())
 }
 
+/// Fields whose value is a point or span in time. Their values are classified with
+/// [`classify_temporal`] so a bare year reads as a date rather than a number.
+pub const TEMPORAL_FIELDS: &[&str] = &["observed-at", "asserted-at", "valid-during"];
+
+/// Classify a field's value, knowing which field it belongs to.
+///
+/// One case needs the field name: a bare four-digit year. `2026` is a legal
+/// partial date, but it is also a legal number, and [`classify_token`] tries
+/// numbers first — so `observed-at 2026` used to store the *number* 2026.0. It
+/// then vanished from the timeline, was invisible to `--as-of` replay, and
+/// rendered as `2026.0` in every projection, all without a diagnostic. On a
+/// temporal field a bare year is a date; nowhere else does this apply.
+pub fn classify_field_value(name: &str, raw: &str) -> Value {
+    let value = classify_value(raw);
+    if !TEMPORAL_FIELDS.contains(&name) {
+        return value;
+    }
+    match &value {
+        // Only a whole four-digit year is ambiguous. Anything with a separator
+        // already classifies as a time, and a non-integer was never a year.
+        Value::Number(n) if raw.len() == 4 && is_time(raw) && n.fract() == 0.0 => {
+            Value::Time(raw.to_string())
+        }
+        _ => value,
+    }
+}
+
 /// Classify the value portion of a field line (everything after the field
 /// keyword). Handles quoted strings, comma lists, and single tokens.
 pub fn classify_value(raw: &str) -> Value {
