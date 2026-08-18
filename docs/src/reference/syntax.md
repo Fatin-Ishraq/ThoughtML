@@ -26,11 +26,20 @@ A leading UTF-8 BOM is stripped. Both `\n` and `\r\n` line endings work.
   [scope](scopes.md) — see there.)
 
 ```thml
-focus a            # header, column 0
-  kind claim       # block line, indent 2 — belongs to `a`
-  Some prose.      # block line — also belongs to `a`
-focus b            # header again — closes `a`, opens `b`
+focus a
+  kind claim
+  Some prose.
+focus b
+  kind observation
+  More prose.
 ```
+
+`focus a` is a header at column 0. The two lines indented under it are block
+lines belonging to `a` — one field, one line of prose. `focus b` returns to
+column 0, which closes `a` and opens `b`.
+
+(Those annotations are prose rather than trailing `#` comments for a reason —
+see just below.)
 
 ## Comments
 
@@ -51,7 +60,7 @@ kebab-case**: they start with a lowercase letter and contain only lowercase
 letters, digits, and hyphens.
 
 ```
-cache-is-safe       ✓
+conditions-are-fine       ✓
 conversation-2026-06-09   ✓
 Metric              ✗  (uppercase)
 -x                  ✗  (leading hyphen)
@@ -73,7 +82,7 @@ forms:
 | **Range** | `0.25..0.70` | `low..high`, inclusive. |
 | **Unknown** | `?` | The explicit "not stated" marker. |
 | **Time** | `2026-06-09`, `2026-06-14T14:05+00:00` | Loose ISO-8601. |
-| **Ref** | `cache-is-safe` | A bare identifier — a reference to another record. |
+| **Ref** | `conditions-are-fine` | A bare identifier — a reference to another record. |
 | **Symbol** | `open`, `high` | Same lexical form as a ref; intent depends on the field. |
 | **URI** | `uri:https://example.org/x` | A `uri:`-prefixed value. |
 | **List** | `a, b, c` | Comma-separated identifiers/symbols. |

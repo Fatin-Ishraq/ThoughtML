@@ -6,8 +6,74 @@ release — real and usable, but the surface may still move.
 
 ## [Unreleased]
 
+## [0.5.0] — 2026-08-18
+
+A correctness release. Most of it came from checking claims the project already
+made, rather than from adding anything: probing every field against every record
+type, running the toolchain on the platforms it ships to, and trying to falsify
+the mirror. Each of those found something.
+
+### Fixed
+
+- **A known field is no longer silently dropped.** The strict-clean contract is
+  the language's whole feedback loop: zero warnings should mean everything the
+  author wrote survived into the model. It did not. Probing all 242 (record type ×
+  field) combinations found three defects of one class. `until <id> answered` —
+  sugar for a `blocks` edge — only desugared on the three readable action forms;
+  on a focus, a typed focus, a question, or the `stance` longhand it was kept as a
+  decorative field and no edge was built. `expects` and `about` were inert outside
+  a question. A `profile` block silently swallowed all twenty non-vocabulary
+  fields. `until` now works wherever a node can actually be blocked — a blocked
+  *thing* is how people write it far more often than a blocked stance — and every
+  remaining mismatch is a warning (**`TML105`**) with a suggested fix.
+- **A bare year on a date field is a date.** `observed-at 2026` was stored as the
+  *number* 2026.0, because a four-digit year is also a legal number and the
+  classifier tried numbers first. The record then vanished from the timeline, was
+  invisible to `--as-of` replay, and rendered as `2026.0` — with no diagnostic,
+  while the guide promised partial dates were fine. Field values are now
+  classified with knowledge of their field: on `observed-at`, `asserted-at` and
+  `valid-during` a bare year is a date, and nowhere else. A four-digit `quantity`
+  is still a count.
+
+### Added
+
+- **`TML502`, circular justification.** The language refused circular *causation*
+  (`TML303`) but said nothing about circular *justification*. Falsifying the mirror
+  showed why that matters: `a supports b`, `b supports a` derives confidence above
+  0.5 for both claims from no evidence outside the loop. Advisory, under
+  `check --lint`, because mutual support is not always an error — two readings of
+  one body of evidence can genuinely reinforce each other.
+- **[STABILITY.md](STABILITY.md)** — what a future 1.0 would freeze, separated into
+  four surfaces that are not equally rigid, and written before the fact rather than
+  at release time. Three tests make it mechanical: the closed vocabulary is pinned
+  element by element, a dateless document is asserted first-class, and the canonical
+  model of all ten examples is snapshotted so a model change surfaces as a diff.
+- **A falsification suite** (`tests/falsification.rs`). Detection, restraint, and
+  blind spots, kept separate. Four reasoning errors are asserted as **misses**: a
+  false premise, one fact entered twice under two ids, evidence never written down,
+  and — until you pass `--lint` — circular justification. Those are the boundary of
+  what a self-consistency check can reach, and they are now documented next to the
+  claims they bound, in both the book and `llms.txt`.
+- **A doc-snippet guard.** Every ```thml block in the book and the language brief
+  is parsed. Four did not: `reference/syntax.md` annotated its example with trailing
+  `#` comments in the section directly above the one explaining ThoughtML has no
+  end-of-line comments; `reference/modules.md` used a profile-declared posture in
+  the readable form, which does not work; two showed bare field lines with no record
+  to hang them from. All fixed.
+
 ### Changed
 
+- **The toolchain is tested on every platform it ships a binary for.** `dist` builds
+  for macOS (both arches), Linux (both) and Windows MSVC; every CI job ran on Linux.
+  The stream server has `cfg(unix)` branches and 0600/0700 permission handling that
+  Windows reaches by a different path, so two of three platforms were unexercised in
+  security-relevant code. The parser job is now a three-OS matrix — and it caught a
+  Windows-only failure in its first hours.
+- **The book teaches the corpus that actually ships.** The tutorial told readers
+  "by the end you'll have written `pour-the-slab.thml`" and then spent seven
+  chapters building a different, retired document. The whole book is retargeted, and
+  every quoted output is regenerated from the real files rather than retyped. A test
+  asserts the tutorial's finished document is byte-identical to the shipped example.
 - **The examples corpus is rebuilt: ten documents instead of twenty.** The previous
   set had accreted through the language's growth and much of it was written against
   v0.2 idioms. It is replaced by ten fresh documents, each carrying one construct as
@@ -18,14 +84,19 @@ release — real and usable, but the surface may still move.
   reading, a failed sourdough, a waterborne-outbreak investigation, two referees on
   one paper, a re-dated manuscript, a funding panel, an orchard's water budget, a
   wildfire evacuation, and a bridge inspection against a shared standard.
-- **`thoughtml fmt` now formats the way the language reads.** Two changes, so that
-  a well-written document *is* the canonical one: `kind` is emitted directly under
-  its header rather than after the body prose, and a run of lone header lines (the
-  links closing a document, a stack of imports) stays tight instead of being spaced
-  out. A comment block the author set off with a blank line — a file header, a
-  section divider — keeps that blank line, because the gap is what marks it as
-  introducing more than the one record below it. All ten examples are `fmt --check`
-  clean, and CI now walks `examples/` to keep them that way.
+- **`thoughtml fmt` formats the way the language reads.** So that a well-written
+  document *is* the canonical one: `kind` is emitted directly under its header
+  rather than after the body prose, and a run of lone header lines (the links
+  closing a document, a stack of imports) stays tight instead of being spaced out.
+  A comment block the author set off with a blank line — a file header, a section
+  divider — keeps that blank line, because the gap is what marks it as introducing
+  more than the one record below it.
+- CI also gates the modelling lints over the corpus, and the `release.yml` drift
+  guard now prints the exact command that resolves it.
+- Playground dependencies: vite 6 → 8 (rolldown), TypeScript 5 → 7, cytoscape 3.34.
+  `cytoscape-dagre` 4 was deliberately **not** taken — it is a major on the layout
+  engine, it fails no build and no typecheck, and the rendering could not be
+  verified. It waits for the graph work.
 
 ## [0.4.2] — 2026-08-17
 

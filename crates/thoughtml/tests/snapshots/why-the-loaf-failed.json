@@ -1,0 +1,172 @@
+{
+  "objects": [
+    {
+      "type": "question",
+      "id": "why-flat-loaf",
+      "body": "Why did Sunday's sourdough come out of the oven flat?",
+      "expects": "hypothesis",
+      "status": "settled"
+    },
+    {
+      "type": "focus",
+      "id": "dead-starter",
+      "kind": "hypothesis",
+      "body": "The starter had lost its lift after three weeks unfed in the fridge."
+    },
+    {
+      "type": "focus",
+      "id": "cold-kitchen",
+      "kind": "hypothesis",
+      "body": "The kitchen sat at sixteen degrees overnight, too cold for a full rise."
+    },
+    {
+      "type": "focus",
+      "id": "over-proofed",
+      "kind": "hypothesis",
+      "body": "The dough was left well past its peak and collapsed when it went in the tin.",
+      "status": "abandoned",
+      "fields": {
+        "note": {
+          "kind": "text",
+          "value": "Ruled out by the timing, but kept on the record so the next loaf can revisit it."
+        }
+      }
+    },
+    {
+      "type": "link",
+      "id": "dead-starter-candidate-for-why-flat-loaf",
+      "from": "dead-starter",
+      "relation": "candidate-for",
+      "to": "why-flat-loaf"
+    },
+    {
+      "type": "link",
+      "id": "cold-kitchen-candidate-for-why-flat-loaf",
+      "from": "cold-kitchen",
+      "relation": "candidate-for",
+      "to": "why-flat-loaf"
+    },
+    {
+      "type": "link",
+      "id": "over-proofed-candidate-for-why-flat-loaf",
+      "from": "over-proofed",
+      "relation": "candidate-for",
+      "to": "why-flat-loaf"
+    },
+    {
+      "type": "focus",
+      "id": "float-test-failed",
+      "kind": "observation",
+      "body": "A spoonful of starter sank in a glass of water instead of floating.",
+      "fields": {
+        "observed-at": {
+          "kind": "time",
+          "value": "2026-02-15"
+        }
+      }
+    },
+    {
+      "type": "focus",
+      "id": "dough-doubled",
+      "kind": "observation",
+      "body": "The dough had visibly doubled in the bowl before it was shaped."
+    },
+    {
+      "type": "focus",
+      "id": "flat-crumb",
+      "kind": "observation",
+      "body": "The baked loaf was dense, with a tight and slightly gummy crumb."
+    },
+    {
+      "type": "link",
+      "id": "float-test-failed-supports-dead-starter",
+      "from": "float-test-failed",
+      "relation": "supports",
+      "to": "dead-starter"
+    },
+    {
+      "type": "link",
+      "id": "dough-doubled-opposes-over-proofed",
+      "from": "dough-doubled",
+      "relation": "opposes",
+      "to": "over-proofed"
+    },
+    {
+      "type": "link",
+      "id": "dead-starter-answers-why-flat-loaf",
+      "from": "dead-starter",
+      "relation": "answers",
+      "to": "why-flat-loaf"
+    },
+    {
+      "type": "stance",
+      "id": "baker-asks-why-flat-loaf",
+      "agent": "baker",
+      "posture": "asks",
+      "target": "why-flat-loaf",
+      "fields": {
+        "note": {
+          "kind": "text",
+          "value": "Third flat loaf in a row, so it is worth working out rather than guessing."
+        }
+      }
+    },
+    {
+      "type": "link",
+      "id": "starter-explains-crumb",
+      "from": "dead-starter",
+      "relation": "causes",
+      "to": "flat-crumb"
+    },
+    {
+      "type": "stance",
+      "id": "baker-suspects-starter-explains-crumb",
+      "agent": "baker",
+      "posture": "suspects",
+      "target": "starter-explains-crumb",
+      "confidence": {
+        "kind": "number",
+        "value": 0.7
+      },
+      "basis": "estimated"
+    },
+    {
+      "type": "stance",
+      "id": "baker-accepts-dead-starter",
+      "agent": "baker",
+      "posture": "accepts",
+      "target": "dead-starter",
+      "confidence": {
+        "kind": "number",
+        "value": 0.8
+      },
+      "basis": "estimated",
+      "fields": {
+        "because": {
+          "kind": "ref",
+          "value": "float-test-failed"
+        },
+        "answers": {
+          "kind": "ref",
+          "value": "why-flat-loaf"
+        },
+        "note": {
+          "kind": "text",
+          "value": "Fed the starter twice a day for three days; the next loaf rose properly."
+        }
+      }
+    }
+  ],
+  "timeline": {
+    "start": "2026-02-15",
+    "end": "2026-02-15",
+    "events": [
+      {
+        "at": "2026-02-15",
+        "seq": 7,
+        "id": "float-test-failed",
+        "kind": "focus"
+      }
+    ]
+  }
+}

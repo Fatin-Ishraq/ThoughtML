@@ -13,32 +13,38 @@ make the call.
 ## A first taste
 
 ```thml
-focus cache-is-safe
+focus conditions-are-fine
   kind claim
-  The new cache layer is safe to ship today.
+  Conditions on site are fine to pour the foundation slab this afternoon.
 
-focus load-test-passed
+focus truck-is-booked
   kind observation
-  Load test at 2x peak traffic passed with no errors.
+  The ready-mix truck is booked for 14:00 and the full crew is on site.
 
-focus stale-reads
+focus overnight-freeze
   kind observation
-  Staging showed stale reads under cache eviction.
+  The site thermometer logged minus four degrees from 02:00 to 06:00, and
+  tonight's forecast repeats it.
 
-link load-test-passed supports cache-is-safe
-link stale-reads opposes cache-is-safe
+link truck-is-booked supports conditions-are-fine
+link overnight-freeze opposes conditions-are-fine
 
-ops-agent holds cache-is-safe
-  confidence 0.9 assumed
-  note Shipping — the load test passed.
+site-engineer holds conditions-are-fine
+  confidence 0.88 assumed
+  note Pouring today. The truck is booked and the crew moves on Thursday.
 ```
 
 This document is *clean* — no errors, no warnings. But the mirror flags a
-**conflict**: the agent holds `cache-is-safe` at 0.9, while its own recorded
-evidence (`stale-reads opposes cache-is-safe`) defeats that claim. It wrote
-down the counter-observation, then shipped anyway. ThoughtML surfaces that
-disagreement; it doesn't decide for you. (And the `0.9` declares its basis —
-`assumed`, not measured — provenance you can see.)
+**conflict**: the engineer holds `conditions-are-fine` at 0.88, while their own
+recorded evidence (`overnight-freeze opposes conditions-are-fine`) defeats that
+claim. They logged the reading that says concrete will freeze before it sets,
+and poured anyway. ThoughtML surfaces that disagreement; it doesn't decide for
+you. (And the `0.88` declares its basis — `assumed`, not measured — provenance
+you can see.)
+
+This is [`examples/pour-the-slab.thml`](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/examples/pour-the-slab.thml),
+shipped with the toolchain. Every snippet in this book is a real document you
+can run.
 
 ## Why it exists
 
@@ -69,7 +75,7 @@ answer*. It's to make the reasoning legible enough that its flaws can't hide.
 
 ## A note on stability
 
-This documentation describes **v0.4.2**, the current public release. The
+This documentation describes **v0.5.0**, the current public release. The
 language is real and usable, but its surface may still move (hence 0.x, not
 1.0). Where a feature is *opt-in* or *advanced*, this book says so plainly.
 

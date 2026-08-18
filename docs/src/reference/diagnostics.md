@@ -34,7 +34,7 @@ Codes are grouped so an agent or editor can route on the family:
 | `TML2xx` | references | `TML201` unresolved reference, `TML202` illegal link endpoint |
 | `TML3xx` | graph coherence | `TML301` orphan, `TML302` contradictory stances, `TML303` cycle, `TML304` revision before its target, `TML305` decision-graph |
 | `TML4xx` | numbers | `TML401` missing basis, `TML402` out-of-range clamp |
-| `TML5xx` | lints (opt-in) | `TML501` `supports` used as a list |
+| `TML5xx` | lints (opt-in) | `TML501` `supports` used as a list, `TML502` circular justification |
 
 For the "unknown &lt;thing&gt;" family the `help` is a nearest-spelling suggestion
 from the relevant closed vocabulary — it catches typos like `supprts` → `supports`.
@@ -100,6 +100,13 @@ Codes are part of the tool's contract and are not renumbered once assigned.
   used as an enumeration. Evidence relations inflate `derived_confidence`; if these
   are list items, use [`part-of`](relations.md) instead. Off by default so
   strict-clean documents are unaffected.
+- `circular justification: a → b → a` (`TML502`) — a `supports` loop. The language
+  refuses circular *causation* by default (`TML303`); this is circular
+  *justification*, and it matters for the same reason plus one more: claims inside
+  the loop derive confidence above 0.5 from no evidence outside it. Advisory rather
+  than an error, because mutual support is not always a mistake — two readings of
+  one body of evidence can genuinely reinforce each other. Either give one of them
+  outside evidence, or merge them if they are one belief said twice.
 
 **Decision graph**
 

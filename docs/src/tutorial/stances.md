@@ -7,12 +7,12 @@ and how confidently.
 The readable form is `<agent> <posture> <target>`:
 
 ```thml
-ops-agent holds cache-is-safe
+site-engineer holds conditions-are-fine
   confidence 0.9
   note Shipping — the load test passed.
 ```
 
-This says the agent `ops-agent` **holds** the focus `cache-is-safe`, at
+This says the agent `site-engineer` **holds** the focus `conditions-are-fine`, at
 confidence `0.9`, with a `note` recording the rationale. (`confidence` and `note`
 are covered fully in [chapter 5](numbers.md) — for now, just know they ride on
 the stance.)
@@ -110,22 +110,22 @@ and `rejects`), ThoughtML warns — see [Diagnostics](../reference/diagnostics.m
 ## Our document so far
 
 ```thml
-focus cache-is-safe
+focus conditions-are-fine
   kind claim
-  The new cache layer is safe to ship today.
+  Conditions on site are fine to pour the slab this afternoon.
 
-focus load-test-passed
+focus truck-is-booked
   kind observation
-  Load test at 2x peak traffic passed with no errors.
+  The ready-mix truck is booked for 14:00 and the crew is on site.
 
-focus stale-reads
+focus overnight-freeze
   kind observation
-  Staging showed stale reads under cache eviction.
+  The thermometer logged minus four degrees overnight.
 
-link load-test-passed supports cache-is-safe
-link stale-reads opposes cache-is-safe
+link truck-is-booked supports conditions-are-fine
+link overnight-freeze opposes conditions-are-fine
 
-ops-agent holds cache-is-safe
+site-engineer holds conditions-are-fine
   confidence 0.9
   note Shipping — the load test passed.
 ```

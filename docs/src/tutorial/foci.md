@@ -8,11 +8,11 @@ You declare one with the `focus` keyword and an id, then add prose on the next
 indented line:
 
 ```thml
-focus cache-is-safe
-  The new cache layer is safe to ship today.
+focus conditions-are-fine
+  Conditions on site are fine to pour the slab this afternoon.
 ```
 
-The id (`cache-is-safe`) is how everything else in the document refers to this
+The id (`conditions-are-fine`) is how everything else in the document refers to this
 focus. The indented sentence is its **body** — free text, for humans.
 
 ## Kinds
@@ -20,13 +20,13 @@ focus. The indented sentence is its **body** — free text, for humans.
 A focus has a *kind* — its semantic category. You set it with a `kind` field:
 
 ```thml
-focus cache-is-safe
+focus conditions-are-fine
   kind claim
-  The new cache layer is safe to ship today.
+  Conditions on site are fine to pour the slab this afternoon.
 
-focus load-test-passed
+focus truck-is-booked
   kind observation
-  Load test at 2x peak traffic passed with no errors.
+  The ready-mix truck is booked for 14:00 and the crew is on site.
 ```
 
 There are ten kinds:
@@ -54,11 +54,11 @@ Most of the time you won't declare foci with the bare `focus` keyword. The
 readable [posture](stances.md) syntax creates them for you, inferring the kind:
 
 ```thml
-analyst noticed load-test-passed
-  Load test at 2x peak traffic passed with no errors.
+analyst noticed truck-is-booked
+  The ready-mix truck is booked for 14:00 and the crew is on site.
 ```
 
-`noticed` creates the focus `load-test-passed` *and* gives it the kind
+`noticed` creates the focus `truck-is-booked` *and* gives it the kind
 `observation` automatically. You'll meet the full set of postures in
 [chapter 3](stances.md). For now, the rule of thumb: declare a focus explicitly
 with `focus` when you want to set its kind precisely or when several agents will
@@ -67,17 +67,17 @@ refer to it; let a posture create it when it belongs to one agent's action.
 ## Our document so far
 
 ```thml
-focus cache-is-safe
+focus conditions-are-fine
   kind claim
-  The new cache layer is safe to ship today.
+  Conditions on site are fine to pour the slab this afternoon.
 
-focus load-test-passed
+focus truck-is-booked
   kind observation
-  Load test at 2x peak traffic passed with no errors.
+  The ready-mix truck is booked for 14:00 and the crew is on site.
 
-focus stale-reads
+focus overnight-freeze
   kind observation
-  Staging showed stale reads under cache eviction.
+  The thermometer logged minus four degrees overnight.
 ```
 
 Three foci, no connections yet. Right now ThoughtML will warn that they're

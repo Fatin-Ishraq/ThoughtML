@@ -67,13 +67,10 @@ question ethics-review
 
 action award-letter
   Send the award letter and open the project account.
+  until ethics-review answered
   blocked-by ethics-review
 
 link award-letter depends-on spring-award
-
-panel-chair holds award-letter
-  until ethics-review answered
-  note Drafted and ready. It does not go out before the committee clears the protocol.
 
 reviewer-a considers coastal-sensors
   confidence 0.6 estimated

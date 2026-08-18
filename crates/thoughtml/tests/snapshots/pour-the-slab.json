@@ -1,0 +1,92 @@
+{
+  "objects": [
+    {
+      "type": "focus",
+      "id": "conditions-are-fine",
+      "kind": "claim",
+      "body": "Conditions on site are fine to pour the foundation slab this afternoon."
+    },
+    {
+      "type": "focus",
+      "id": "truck-is-booked",
+      "kind": "observation",
+      "body": "The ready-mix truck is booked for 14:00 and the full crew is on site.",
+      "fields": {
+        "source": {
+          "kind": "ref",
+          "value": "site-diary"
+        },
+        "observed-at": {
+          "kind": "time",
+          "value": "2026-03-11"
+        }
+      }
+    },
+    {
+      "type": "focus",
+      "id": "overnight-freeze",
+      "kind": "observation",
+      "body": "The site thermometer logged minus four degrees from 02:00 to 06:00, and tonight's\nforecast repeats it. Fresh concrete that freezes before it sets never recovers.",
+      "fields": {
+        "source": {
+          "kind": "ref",
+          "value": "site-diary"
+        },
+        "observed-at": {
+          "kind": "time",
+          "value": "2026-03-11"
+        }
+      }
+    },
+    {
+      "type": "link",
+      "id": "truck-is-booked-supports-conditions-are-fine",
+      "from": "truck-is-booked",
+      "relation": "supports",
+      "to": "conditions-are-fine"
+    },
+    {
+      "type": "link",
+      "id": "overnight-freeze-opposes-conditions-are-fine",
+      "from": "overnight-freeze",
+      "relation": "opposes",
+      "to": "conditions-are-fine"
+    },
+    {
+      "type": "stance",
+      "id": "site-engineer-holds-conditions-are-fine",
+      "agent": "site-engineer",
+      "posture": "holds",
+      "target": "conditions-are-fine",
+      "confidence": {
+        "kind": "number",
+        "value": 0.88
+      },
+      "basis": "assumed",
+      "fields": {
+        "note": {
+          "kind": "text",
+          "value": "Pouring today. The truck is booked and the crew moves to another job Thursday."
+        }
+      }
+    }
+  ],
+  "timeline": {
+    "start": "2026-03-11",
+    "end": "2026-03-11",
+    "events": [
+      {
+        "at": "2026-03-11",
+        "seq": 1,
+        "id": "truck-is-booked",
+        "kind": "focus"
+      },
+      {
+        "at": "2026-03-11",
+        "seq": 2,
+        "id": "overnight-freeze",
+        "kind": "focus"
+      }
+    ]
+  }
+}

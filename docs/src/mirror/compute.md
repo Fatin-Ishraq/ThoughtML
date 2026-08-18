@@ -66,19 +66,21 @@ expected value, highest first**. Each option also reports its `downside` (the
 worst-case payoff) and `probability_mass` (Σ probability).
 
 ```thml
-link harvard option-of where-to-go
-link harvard leads-to harvard-thrive
-  probability 0.7
-link harvard leads-to harvard-coast
-  probability 0.3
+link evacuate-now option-of valley-response
+
+link evacuate-now leads-to everyone-out
+  probability 0.6 estimated
+
+link evacuate-now leads-to road-cut-off
+  probability 0.4 estimated
 ```
 
 > **It ranks; it does not crown.** There is deliberately **no `best` option and
 > no `margin`.** The mirror reports the expected values, ordered, with each
 > option's downside — and leaves the choice to you. Decisions are about risk, not
 > just the mean, and the call is yours. See
-> [`evacuate-or-shelter.thml`](../appendix/examples.md) and
-> [`orchard-water.thml`](../appendix/examples.md).
+> [`evacuate-or-shelter.thml`](../appendix/examples.md), which those edges come
+> from, and [`orchard-water.thml`](../appendix/examples.md).
 
 Diagnostics (never errors) flag the gaps: an outcome with no payoff, a `leads-to`
 with no probability and no derived confidence, mixed dimensions, or an authored

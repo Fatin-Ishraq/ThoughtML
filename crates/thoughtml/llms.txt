@@ -163,7 +163,7 @@ derived confidence and argument status (§13).
 | `enables` | source makes target possible |
 | `prevents` | source stops target |
 | `depends-on` | target is required for source (expected acyclic) |
-| `blocks` | source holds target up (what `until … answered` desugars to) |
+| `blocks` | source holds target up (what `until … answered` desugars to, §16) |
 | `answers` | source *resolves* a question (the one settled answer) |
 | `revises` | source supersedes target (nothing deleted; §11) |
 
@@ -314,9 +314,20 @@ or `?` for genuinely unknown. `quantity` is a typed measure with a unit (`quanti
 exhaustive set `measured` / `estimated` / `assumed`:
 
 ```thml
-  confidence 0.9 assumed
+focus disk-headroom
+  kind observation
+  Free space on the primary volume.
   quantity 30 GB measured
+
+focus volume-is-healthy
+  kind claim
+  The volume has room for this quarter's growth.
+
+link disk-headroom supports volume-is-healthy
   weight 0.85 estimated
+
+ops holds volume-is-healthy
+  confidence 0.9 assumed
 ```
 
 A number with no basis is silent about it; the opt-in `--strict-provenance` lint flags the
@@ -441,6 +452,7 @@ Install with `cargo install thoughtml` (or `npm install -g thoughtml`).
 | `TML102` | unknown relation | use a real relation (§6) or declare it in a `profile` |
 | `TML103` | unknown posture | use one of the twelve (§7) |
 | `TML104` | unknown field | use a known field (§16) or declare it in a `profile` |
+| `TML105` | a known field the record cannot act on | move it to the record it belongs on — e.g. `expects`/`about` onto a `question`, `until` onto the node being blocked |
 | `TML201` | unresolved reference | an id in a link/stance/bundle doesn't exist — declare it or fix the typo |
 | `TML202` | links may only connect foci/questions/links | you targeted a stance or scope |
 | `TML301` | focus not connected to anything | link it in, nest it, or drop it — every node must earn its place |
@@ -451,8 +463,9 @@ Install with `cargo install thoughtml` (or `npm install -g thoughtml`).
 | `TML401` | number declares no basis | add `measured`/`estimated`/`assumed` (only under `--strict-provenance`) |
 | `TML402` | weight/probability outside `0..1` | it was clamped — use a value in range |
 | `TML501` | `supports` used as a list (lint) | if these are items not evidence, use `part-of` (§6) — fires at ≥4 supports with no counter-evidence |
+| `TML502` | circular justification (lint) | a `supports` loop: the claims inside it derive confidence from no outside evidence — give one of them real evidence, or merge them if they are one belief said twice |
 
-`TML101`–`TML104` come with a nearest-spelling suggestion. (Note: the `definition-
+`TML101`–`TML104` come with a nearest-spelling suggestion. `TML105` is the guard against a *silent* loss: a known field in the wrong place used to be accepted and then ignored, so a document could stay strict-clean while dropping what its author wrote. Nothing the parser understands is discarded quietly. (Note: the `definition-
 divergence` audit conflict and the decision-EV warnings carry no TML code — they surface in
 `--audit` / `--compute`, not as validation diagnostics.)
 
@@ -503,6 +516,26 @@ interpret the numbers:
 When you transform prose into ThoughtML, run `--audit` afterward and check the conflicts
 are the *real* ones in the source — not artifacts of enumerations you wrote as evidence. A
 clean, meaningful conflict report is the sign you modeled the reasoning faithfully.
+
+**What the mirror cannot see.** It checks a document against *itself*, never against the
+world, and a falsification pass over it (`tests/falsification.rs`) pins exactly where that
+stops. Four errors produce a clean report and confident numbers:
+
+- **A false premise.** `earth-is-flat supports maps-are-wrong` is valid reasoning from a
+  nonsense premise. Nothing in the model can know it is nonsense; the conclusion derives
+  ≈0.73 all the same.
+- **One fact entered twice.** Two ids for one underlying observation both support the same
+  claim. Independence is assumed and never checked, so the evidence compounds — ≈0.96 from
+  a single survey cited twice.
+- **Evidence never written down.** A document records what its author chose to record. Two
+  failed trials omitted leaves a perfectly coherent graph reading ≈0.86.
+- **Circular justification**, until you ask. `a supports b`, `b supports a` derives >0.5 for
+  both from no outside evidence. This one *is* visible in the graph, so `check --lint`
+  reports it as `TML502` — but it is off by default, like every modelling lint.
+
+The first three are not bugs to fix; they are the boundary of what a self-consistency check
+can do. They are the reason the mirror reports and never decides. **Your job as the author
+is the part the tool cannot do: write down the evidence that cuts against you.**
 
 ---
 
@@ -655,6 +688,13 @@ and both audit conflicts — pinned by a test, so this list cannot quietly go st
 
 **Postures (12):** `noticed` `considers` `suspects` `infers` `asks` `holds` `chooses`
 `rejects` `revises` `remembers` `doubts` `accepts`.
+
+**Field placement.** Most fields ride on whatever record you put them under, but three
+are scoped, and using them elsewhere is `TML105`: `expects` and `about` belong to a
+`question`, and `until <id> [state]` — sugar for a `blocks` edge — belongs on the thing
+being blocked (a focus, a question, or a stance; **not** a link, scope, bundle, or profile,
+none of which is a node that can be held up). A `profile` block takes *only* `kinds`,
+`relations`, `fields`, `postures`.
 
 **Fields:** `note` `kind` `quantity` `about` `weight` `probability` `confidence` `because`
 `answers` `expects` `status` `until` `source` `observed-at` `asserted-at` `valid-during`

@@ -113,5 +113,5 @@ The bundled [`dating-the-codex.thml`](../appendix/examples.md) is built entirely
 around this — a manuscript dating superseded once the radiocarbon result lands, where
 `--as-of` makes the conflict disappear because at that date it did not exist yet.
 
-Our cache document is a single moment in time, so it needs no revision. We now
+Our pour document is a single moment in time, so it needs no revision. We now
 have every piece. Time to read it back — [the mirror](the-mirror.md).

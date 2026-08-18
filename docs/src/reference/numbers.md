@@ -56,8 +56,8 @@ trailing keyword:
 | `assumed` | taken as given, not checked |
 
 ```thml
-ops-agent holds cache-is-safe
-  confidence 0.9 assumed
+site-engineer holds conditions-are-fine
+  confidence 0.88 assumed
 
 focus disk-budget
   quantity 30 GB measured

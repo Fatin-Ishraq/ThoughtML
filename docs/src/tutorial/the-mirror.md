@@ -1,27 +1,33 @@
 # 7. The mirror — reading the conflict
 
-Here is our finished document — the same shape as the bundled example
-[`pour-the-slab.thml`](../appendix/examples.md):
+Here is our finished document. This is
+[`pour-the-slab.thml`](../appendix/examples.md) exactly as it ships — the bodies
+are fuller than the ones we typed along the way, and nothing else has changed:
 
 ```thml
-focus cache-is-safe
+focus conditions-are-fine
   kind claim
-  The new cache layer is safe to ship today.
+  Conditions on site are fine to pour the foundation slab this afternoon.
 
-focus load-test-passed
+focus truck-is-booked
   kind observation
-  Load test at 2x peak traffic passed with no errors.
+  The ready-mix truck is booked for 14:00 and the full crew is on site.
+  source site-diary
+  observed-at 2026-03-11
 
-focus stale-reads
+focus overnight-freeze
   kind observation
-  Staging showed stale reads under cache eviction.
+  The site thermometer logged minus four degrees from 02:00 to 06:00, and tonight's
+  forecast repeats it. Fresh concrete that freezes before it sets never recovers.
+  source site-diary
+  observed-at 2026-03-11
 
-link load-test-passed supports cache-is-safe
-link stale-reads opposes cache-is-safe
+link truck-is-booked supports conditions-are-fine
+link overnight-freeze opposes conditions-are-fine
 
-ops-agent holds cache-is-safe
-  confidence 0.9 assumed
-  note Shipping — the load test passed.
+site-engineer holds conditions-are-fine
+  confidence 0.88 assumed
+  note Pouring today. The truck is booked and the crew moves to another job Thursday.
 ```
 
 ## It is clean
@@ -29,7 +35,7 @@ ops-agent holds cache-is-safe
 Run it normally:
 
 ```sh
-thoughtml cache-is-safe.thml
+thoughtml pour-the-slab.thml
 ```
 
 No errors. No warnings. Every reference resolves, nothing contradicts at the
@@ -41,7 +47,7 @@ fine.
 Now turn on the **mirror** — the opt-in second reading:
 
 ```sh
-thoughtml --audit cache-is-safe.thml
+thoughtml --audit pour-the-slab.thml
 ```
 
 The canonical JSON now carries an `audit` section:
@@ -52,21 +58,21 @@ The canonical JSON now carries an `audit` section:
     {
       "kind": "confidence-vs-status",
       "severity": "error",
-      "subjects": ["ops-agent-holds-cache-is-safe", "cache-is-safe"],
-      "message": "`ops-agent` asserts confidence 0.90 in `cache-is-safe`, but your own structure defeats it (argument status: out)"
+      "subjects": ["site-engineer-holds-conditions-are-fine", "conditions-are-fine"],
+      "message": "`site-engineer` asserts confidence 0.88 in `conditions-are-fine`, but your own structure defeats it (argument status: out)"
     }
   ]
 }
 ```
 
-Read what happened. The agent holds `cache-is-safe` at **0.9**. But the document
-*also* records `stale-reads opposes cache-is-safe`. When the mirror computes the
-[argument status](../mirror/argument-status.md), `cache-is-safe` comes out
+Read what happened. The engineer holds `conditions-are-fine` at **0.88**. But the document
+*also* records `overnight-freeze opposes conditions-are-fine`. When the mirror computes the
+[argument status](../mirror/argument-status.md), `conditions-are-fine` comes out
 **`out`** — defeated by its own recorded counter-evidence. The agent wrote down
 the objection, then shipped anyway.
 
 That's the conflict: **high confidence in a claim the structure defeats.** And
-the `0.9` declared itself `assumed` — so the mirror shows not just *how sure* the
+the `0.88` declared itself `assumed` — so the mirror shows not just *how sure* the
 agent is, but *on what footing*.
 
 ## The mirror reports; it does not decide
@@ -74,7 +80,7 @@ agent is, but *on what footing*.
 Notice what ThoughtML did **not** do. It didn't lower the confidence. It didn't
 veto the ship. It didn't tell the team they were wrong — maybe the stale reads
 are acceptable, maybe the opposition is weak. It surfaced the disagreement
-between what was *said* (0.9) and what the *structure implies* (defeated), and
+between what was *said* (0.88) and what the *structure implies* (defeated), and
 left the call to a human.
 
 This is the whole philosophy in one example: **a mirror, not an oracle.**
@@ -85,7 +91,7 @@ This is the whole philosophy in one example: **a mirror, not an oracle.**
 on:
 
 ```sh
-thoughtml --compute cache-is-safe.thml
+thoughtml --compute conditions-are-fine.thml
 ```
 
 That adds [derived confidence](../mirror/derived-confidence.md) (how strong each

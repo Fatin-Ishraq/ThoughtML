@@ -534,7 +534,7 @@ fn classify_block_line(line: &Line) -> BlockLine {
 fn make_field(line: &Line, toks: &[&str], known: bool) -> Field {
     let name = toks[0].to_string();
     let args: Vec<String> = toks[1..].iter().map(|s| s.to_string()).collect();
-    let value = lex::classify_value(&args.join(" "));
+    let value = lex::classify_field_value(&name, &args.join(" "));
     Field {
         line: line.number,
         name,

@@ -3757,3 +3757,174 @@ focus b
         "the downstream node should survive the sweep"
     );
 }
+
+// --- No silent drops: a known field either acts or says it cannot -----------
+
+// The strict-clean contract is the language's whole feedback loop: a document with
+// zero warnings is supposed to mean everything the author wrote survived. A *known*
+// field landing on a record that quietly ignores it breaks exactly that — the author
+// loses an edge and the gate stays green. These tests pin the two halves of the fix:
+// `until` now works everywhere a node can be blocked, and every remaining mismatch is
+// a diagnostic instead of a silent drop.
+
+fn blocks_edges(src: &str) -> Vec<(String, String)> {
+    parse_str(src)
+        .canonical
+        .objects
+        .iter()
+        .filter_map(|o| match o {
+            Object::Link(l) if l.relation == "blocks" => Some((l.from.clone(), l.to.clone())),
+            _ => None,
+        })
+        .collect()
+}
+
+const BLOCKED_BASE: &str = "\
+question gate
+  Is it cleared?
+  expects claim
+
+claim other
+  Something else.
+
+link other candidate-for gate
+";
+
+#[test]
+fn until_blocks_the_thing_it_is_written_on() {
+    // A blocked *thing* is how people write it — far more often than a blocked
+    // stance — so every record that denotes a node honours `until`.
+    for (label, record) in [
+        (
+            "focus",
+            "focus work\n  kind action\n  Do the work.\n  until gate answered\n",
+        ),
+        (
+            "typed focus",
+            "action work\n  Do the work.\n  until gate answered\n",
+        ),
+        (
+            "question",
+            "question work\n  What now?\n  expects claim\n  until gate answered\n",
+        ),
+        (
+            "stance longhand",
+            "claim work\n  Do the work.\n\nstance lead holds work\n  until gate answered\n",
+        ),
+        (
+            "readable action",
+            "claim work\n  Do the work.\n\nlead holds work\n  until gate answered\n",
+        ),
+    ] {
+        let src = format!("{BLOCKED_BASE}\nlink work supports other\n\n{record}");
+        assert_eq!(
+            blocks_edges(&src),
+            vec![("gate".to_string(), "work".to_string())],
+            "{label}: expected `until` to desugar to a blocks edge"
+        );
+    }
+}
+
+#[test]
+fn until_is_consumed_not_also_carried_as_data() {
+    // It becomes an edge; leaving a copy behind as an inert field would report the
+    // same fact twice and invite readers to trust the decorative one.
+    let src = format!("{BLOCKED_BASE}\nlink work supports other\n\naction work\n  Do it.\n  until gate answered\n");
+    let r = parse_str(&src);
+    let carried = r.canonical.objects.iter().any(|o| match o {
+        Object::Focus(f) => f.fields.0.iter().any(|(k, _)| k == "until"),
+        _ => false,
+    });
+    assert!(!carried, "`until` was kept as a field as well as an edge");
+}
+
+#[test]
+fn a_field_a_record_cannot_act_on_is_a_diagnostic() {
+    // The point is the *absence of silence*. Each of these used to parse clean and
+    // drop what the author wrote.
+    for (label, src) in [
+        (
+            "until on a scope",
+            "scope s\n  until gate answered\n\nquestion gate\n  Cleared?\n  expects claim\n",
+        ),
+        (
+            "until on a link",
+            "claim a\n  A.\n\nclaim b\n  B.\n\nlink a supports b\n  until gate answered\n\nquestion gate\n  Cleared?\n  expects claim\n",
+        ),
+        (
+            "expects on a focus",
+            "claim a\n  A.\n  expects claim\n\nclaim b\n  B.\n\nlink a supports b\n",
+        ),
+        (
+            "about on a link",
+            "claim a\n  A.\n\nclaim b\n  B.\n\nlink a supports b\n  about a\n",
+        ),
+        (
+            "note on a profile",
+            "profile p\n  kinds widget\n  note This is not carried anywhere.\n",
+        ),
+    ] {
+        let r = parse_str(src);
+        let hit = r
+            .diagnostics
+            .items
+            .iter()
+            .any(|d| d.message.contains("has no meaning on"));
+        assert!(hit, "{label}: expected a diagnostic, got {:?}", r.diagnostics.items);
+        assert!(
+            !r.diagnostics.has_errors(),
+            "{label}: should warn, not error: {:?}",
+            r.diagnostics.items
+        );
+    }
+}
+
+#[test]
+fn the_inert_field_warning_carries_its_stable_code() {
+    let r = parse_str("claim a\n  A.\n  expects claim\n\nclaim b\n  B.\n\nlink a supports b\n");
+    let coded = r
+        .diagnostics
+        .items
+        .iter()
+        .filter_map(|d| crate::lint::code_for(&d.message))
+        .any(|c| c == "TML105");
+    assert!(coded, "expected TML105 on the inert-field warning");
+}
+
+// --- Time: a documented partial date must behave like a date ---------------
+
+#[test]
+fn a_bare_year_on_a_temporal_field_is_a_date() {
+    // `2026` is a legal partial date and also a legal number, and the classifier
+    // tries numbers first. On a temporal field that made `observed-at 2026` store
+    // the *number* 2026.0: absent from the timeline, invisible to `--as-of`, and
+    // rendered as `2026.0` — with no diagnostic, while the guide promised bare
+    // years were fine.
+    let src = "observation y\n  Year only.\n  observed-at 2026\n\nobservation ym\n  Year and month.\n  observed-at 2026-06\n\nlink y supports ym\n";
+    let r = parse_str(src);
+    assert!(!r.diagnostics.has_warnings(), "{:?}", r.diagnostics.items);
+    assert!(
+        matches!(focus_field(&r.canonical.objects, "y", "observed-at"), Some(Value::Time(t)) if t == "2026"),
+        "bare year should classify as a time, got {:?}",
+        focus_field(&r.canonical.objects, "y", "observed-at")
+    );
+    let timeline = r.canonical.timeline.as_ref().expect("timeline");
+    let ids: Vec<&str> = timeline.events.iter().map(|e| e.id.as_str()).collect();
+    assert_eq!(
+        ids,
+        vec!["y", "ym"],
+        "the bare year must take part in the timeline"
+    );
+}
+
+#[test]
+fn a_bare_year_elsewhere_is_still_a_number() {
+    // The coercion is scoped to temporal fields. A four-digit count is a count.
+    let src = "observation batch\n  A production batch.\n  quantity 2026 unit\n\nclaim c\n  C.\n\nlink batch supports c\n";
+    let r = parse_str(src);
+    let q = focus(&r.canonical.objects, "batch")
+        .and_then(|f| f.quantity.as_ref())
+        .expect("quantity");
+    assert_eq!(q.value, 2026.0);
+    assert_eq!(q.unit, "unit");
+}

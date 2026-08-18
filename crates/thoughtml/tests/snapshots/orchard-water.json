@@ -1,0 +1,168 @@
+{
+  "objects": [
+    {
+      "type": "focus",
+      "id": "orchard-survives-summer",
+      "kind": "goal",
+      "body": "Keep all twelve hundred trees alive through a dry season without buying tanker water."
+    },
+    {
+      "type": "focus",
+      "id": "well-yield",
+      "kind": "observation",
+      "quantity": {
+        "value": 30.0,
+        "unit": "L/min",
+        "dimension": "rate",
+        "basis": "measured"
+      },
+      "body": "Sustained yield of the bore well, measured over an hour with the flow meter."
+    },
+    {
+      "type": "focus",
+      "id": "pump-window",
+      "kind": "observation",
+      "quantity": {
+        "value": 480.0,
+        "unit": "min",
+        "dimension": "time",
+        "normalized": 28800.0,
+        "base_unit": "s",
+        "basis": "measured"
+      },
+      "body": "Hours the diesel pump can run each day on the fuel ration."
+    },
+    {
+      "type": "focus",
+      "id": "tree-count",
+      "kind": "observation",
+      "quantity": {
+        "value": 1200.0,
+        "unit": "tree",
+        "dimension": "count:tree",
+        "basis": "measured"
+      },
+      "body": "Bearing trees in the two blocks under irrigation."
+    },
+    {
+      "type": "focus",
+      "id": "need-per-tree",
+      "kind": "assumption",
+      "quantity": {
+        "value": 45.0,
+        "unit": "L/tree",
+        "dimension": "rate",
+        "basis": "estimated"
+      },
+      "body": "Water a bearing tree needs each day in a dry season to hold its fruit."
+    },
+    {
+      "type": "focus",
+      "id": "daily-supply",
+      "kind": "claim",
+      "formula": "well-yield * pump-window",
+      "body": "What the well and pump can actually deliver in a day."
+    },
+    {
+      "type": "focus",
+      "id": "supply-per-tree",
+      "kind": "claim",
+      "formula": "daily-supply / tree-count",
+      "body": "What that comes to for each tree."
+    },
+    {
+      "type": "focus",
+      "id": "shortfall-per-tree",
+      "kind": "claim",
+      "formula": "need-per-tree - supply-per-tree",
+      "body": "The gap each tree is short by, every day of the season."
+    },
+    {
+      "type": "link",
+      "id": "daily-supply-enables-orchard-survives-summer",
+      "from": "daily-supply",
+      "relation": "enables",
+      "to": "orchard-survives-summer"
+    },
+    {
+      "type": "link",
+      "id": "shortfall-per-tree-prevents-orchard-survives-summer",
+      "from": "shortfall-per-tree",
+      "relation": "prevents",
+      "to": "orchard-survives-summer"
+    },
+    {
+      "type": "link",
+      "id": "supply-per-tree-depends-on-well-yield",
+      "from": "supply-per-tree",
+      "relation": "depends-on",
+      "to": "well-yield"
+    },
+    {
+      "type": "focus",
+      "id": "mulch-and-drip",
+      "kind": "action",
+      "body": "Mulch both blocks and convert the flood channels to drip lines."
+    },
+    {
+      "type": "focus",
+      "id": "drip-cuts-demand",
+      "kind": "observation",
+      "body": "Drip irrigation with mulch cut daily demand by about a third in the neighbouring\norchard last season.",
+      "fields": {
+        "source": {
+          "kind": "ref",
+          "value": "grower-association-trial"
+        },
+        "observed-at": {
+          "kind": "time",
+          "value": "2025-08-19"
+        }
+      }
+    },
+    {
+      "type": "link",
+      "id": "drip-cuts-demand-supports-mulch-and-drip",
+      "from": "drip-cuts-demand",
+      "relation": "supports",
+      "to": "mulch-and-drip"
+    },
+    {
+      "type": "link",
+      "id": "mulch-and-drip-prevents-shortfall-per-tree",
+      "from": "mulch-and-drip",
+      "relation": "prevents",
+      "to": "shortfall-per-tree"
+    },
+    {
+      "type": "stance",
+      "id": "grower-holds-mulch-and-drip",
+      "agent": "grower",
+      "posture": "holds",
+      "target": "mulch-and-drip",
+      "confidence": {
+        "kind": "number",
+        "value": 0.6
+      },
+      "basis": "estimated",
+      "fields": {
+        "note": {
+          "kind": "text",
+          "value": "A third off demand still leaves a gap, but a gap the tanker budget can cover."
+        }
+      }
+    }
+  ],
+  "timeline": {
+    "start": "2025-08-19",
+    "end": "2025-08-19",
+    "events": [
+      {
+        "at": "2025-08-19",
+        "seq": 12,
+        "id": "drip-cuts-demand",
+        "kind": "focus"
+      }
+    ]
+  }
+}

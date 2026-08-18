@@ -55,6 +55,8 @@ pub fn code_for(msg: &str) -> Option<&'static str> {
         "TML103"
     } else if has("unknown field") {
         "TML104"
+    } else if has("has no meaning on") {
+        "TML105"
     } else if has("unresolved reference") || has("references unresolved") {
         "TML201"
     } else if has("links may only connect") {
@@ -75,6 +77,8 @@ pub fn code_for(msg: &str) -> Option<&'static str> {
         "TML402"
     } else if has("use `part-of`") {
         "TML501"
+    } else if has("circular justification") {
+        "TML502"
     } else {
         return None;
     })
@@ -90,6 +94,10 @@ pub fn help_for(msg: &str) -> Option<String> {
         "TML102" => suggest(msg, vocab::RELATIONS, "relation"),
         "TML103" => suggest(msg, vocab::POSTURES, "posture"),
         "TML104" => suggest(msg, vocab::FIELDS, "field"),
+        "TML502" => Some(
+            "if the loop is real, one of these claims needs evidence from outside it; if the two are restatements of one belief, merge them into one focus"
+                .into(),
+        ),
         "TML501" => Some(
             "if these are enumerated items rather than evidence, use `part-of` so they \
              do not inflate the target's confidence"
@@ -185,6 +193,101 @@ pub fn supports_as_list(canon: &Canonical) -> Vec<Diagnostic> {
                      if these are enumerated items, use `part-of` so they don't inflate its confidence"
                 ),
             ));
+        }
+    }
+    out
+}
+
+/// The opt-in "circular justification" lint.
+///
+/// The language already refuses circular *causation* (`TML303`, over `causes` and
+/// `depends-on`) but said nothing about circular *justification* — `a supports b`,
+/// `b supports a`. A falsification pass over the mirror found why that matters: two
+/// claims with no evidence outside the loop still derive confidence **above 0.5**,
+/// purely by pointing at each other. Belief manufactured from nothing is exactly the
+/// failure the mirror exists to surface, and unlike a false premise or a
+/// cherry-picked trial, this one is visible in the graph itself.
+///
+/// Advisory, like `supports_as_list`: `check --lint` only. Mutual support is not
+/// always a mistake — two readings of one body of evidence can genuinely reinforce
+/// each other — so this reports the loop and lets the author judge it.
+pub fn circular_justification(canon: &Canonical) -> Vec<Diagnostic> {
+    use std::collections::{BTreeMap, BTreeSet};
+
+    let mut adj: BTreeMap<&str, Vec<&str>> = BTreeMap::new();
+    for o in &canon.objects {
+        if let Object::Link(l) = o {
+            if l.relation == "supports" {
+                adj.entry(l.from.as_str()).or_default().push(l.to.as_str());
+            }
+        }
+    }
+
+    // Iterative DFS keeping the current path, so a found cycle can be reported as
+    // the route the author actually wrote. Recursion is avoided deliberately: a
+    // document is untrusted input and the depth is its own.
+    #[derive(Clone, Copy, PartialEq)]
+    enum Mark {
+        Open,
+        Done,
+    }
+    enum Step<'a> {
+        Enter(&'a str),
+        Leave,
+    }
+
+    let mut mark: BTreeMap<&str, Mark> = BTreeMap::new();
+    let mut reported: BTreeSet<Vec<&str>> = BTreeSet::new();
+    let mut out = Vec::new();
+    let roots: Vec<&str> = adj.keys().copied().collect();
+
+    for root in roots {
+        if mark.contains_key(root) {
+            continue;
+        }
+        let mut path: Vec<&str> = Vec::new();
+        let mut stack: Vec<Step> = vec![Step::Enter(root)];
+        while let Some(step) = stack.pop() {
+            match step {
+                Step::Leave => {
+                    if let Some(node) = path.pop() {
+                        mark.insert(node, Mark::Done);
+                    }
+                }
+                Step::Enter(node) => match mark.get(node) {
+                    Some(Mark::Done) => {}
+                    Some(Mark::Open) => {
+                        // Found a loop: take the path back to where it started.
+                        if let Some(at) = path.iter().position(|&n| n == node) {
+                            let mut cycle: Vec<&str> = path[at..].to_vec();
+                            cycle.push(node);
+                            // Canonicalize so one loop is reported once.
+                            let mut key: Vec<&str> = cycle.clone();
+                            key.sort_unstable();
+                            key.dedup();
+                            if reported.insert(key) {
+                                out.push(Diagnostic::warning(
+                                    0,
+                                    format!(
+                                        "circular justification: {} — each claim's support \
+                                         comes back to itself, so the loop derives confidence \
+                                         from no outside evidence",
+                                        cycle.join(" → ")
+                                    ),
+                                ));
+                            }
+                        }
+                    }
+                    None => {
+                        mark.insert(node, Mark::Open);
+                        path.push(node);
+                        stack.push(Step::Leave);
+                        for &next in adj.get(node).into_iter().flatten() {
+                            stack.push(Step::Enter(next));
+                        }
+                    }
+                },
+            }
         }
     }
     out

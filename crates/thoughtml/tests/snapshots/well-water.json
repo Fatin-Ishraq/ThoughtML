@@ -1,0 +1,275 @@
+{
+  "objects": [
+    {
+      "type": "scope",
+      "id": "kabir-hat-survey",
+      "includes": [
+        "cases-clustered",
+        "apron-cracked",
+        "latrines-uphill"
+      ],
+      "fields": {
+        "source": {
+          "kind": "ref",
+          "value": "district-health-survey"
+        },
+        "observed-at": {
+          "kind": "time",
+          "value": "2026-05-03"
+        }
+      }
+    },
+    {
+      "type": "focus",
+      "id": "cases-clustered",
+      "kind": "observation",
+      "body": "Nineteen of the twenty-two diarrhoeal cases live within three hundred metres of\nthe north well.",
+      "fields": {
+        "noticed-by": {
+          "kind": "ref",
+          "value": "field-nurse"
+        },
+        "source": {
+          "kind": "ref",
+          "value": "district-health-survey"
+        },
+        "observed-at": {
+          "kind": "time",
+          "value": "2026-05-03"
+        }
+      }
+    },
+    {
+      "type": "focus",
+      "id": "apron-cracked",
+      "kind": "observation",
+      "body": "The concrete apron around the north well is cracked and holds standing water.",
+      "fields": {
+        "source": {
+          "kind": "ref",
+          "value": "district-health-survey"
+        },
+        "observed-at": {
+          "kind": "time",
+          "value": "2026-05-03"
+        }
+      }
+    },
+    {
+      "type": "focus",
+      "id": "latrines-uphill",
+      "kind": "observation",
+      "body": "Two pit latrines sit nine metres uphill of the well, dug well below the wet-season\nwater table.",
+      "fields": {
+        "observed-at": {
+          "kind": "time",
+          "value": "2026-05-04"
+        },
+        "source": {
+          "kind": "ref",
+          "value": "district-health-survey"
+        }
+      }
+    },
+    {
+      "type": "focus",
+      "id": "chlorine-absent",
+      "kind": "observation",
+      "quantity": {
+        "value": 0.0,
+        "unit": "mg/L",
+        "dimension": "rate",
+        "basis": "measured"
+      },
+      "body": "Free chlorine at the well head measured zero on both visits.",
+      "fields": {
+        "source": {
+          "kind": "ref",
+          "value": "district-health-survey"
+        }
+      }
+    },
+    {
+      "type": "focus",
+      "id": "rainfall-spike",
+      "kind": "observation",
+      "quantity": {
+        "value": 60.0,
+        "unit": "mm",
+        "dimension": "count:mm",
+        "basis": "measured"
+      },
+      "body": "Sixty millimetres of rain fell in the week before the first case."
+    },
+    {
+      "type": "focus",
+      "id": "seepage-into-well",
+      "kind": "claim",
+      "body": "Surface and latrine water is reaching the well through the cracked apron.",
+      "fields": {
+        "suspected-by": {
+          "kind": "ref",
+          "value": "field-nurse"
+        }
+      }
+    },
+    {
+      "type": "focus",
+      "id": "well-is-contaminated",
+      "kind": "claim",
+      "body": "The north well is the contaminated source behind this outbreak."
+    },
+    {
+      "type": "link",
+      "id": "latrines-uphill-causes-seepage-into-well",
+      "from": "latrines-uphill",
+      "relation": "causes",
+      "to": "seepage-into-well"
+    },
+    {
+      "type": "link",
+      "id": "apron-cracked-enables-seepage-into-well",
+      "from": "apron-cracked",
+      "relation": "enables",
+      "to": "seepage-into-well"
+    },
+    {
+      "type": "link",
+      "id": "seepage-into-well-causes-well-is-contaminated",
+      "from": "seepage-into-well",
+      "relation": "causes",
+      "to": "well-is-contaminated"
+    },
+    {
+      "type": "link",
+      "id": "cases-clustered-supports-well-is-contaminated",
+      "from": "cases-clustered",
+      "relation": "supports",
+      "to": "well-is-contaminated",
+      "weight": 0.85,
+      "basis": "measured"
+    },
+    {
+      "type": "link",
+      "id": "chlorine-absent-supports-well-is-contaminated",
+      "from": "chlorine-absent",
+      "relation": "supports",
+      "to": "well-is-contaminated",
+      "weight": 0.6,
+      "basis": "measured"
+    },
+    {
+      "type": "focus",
+      "id": "chlorinate-and-seal",
+      "kind": "action",
+      "body": "Shock-chlorinate the well, recast the apron, and re-site both latrines downhill.",
+      "status": "open"
+    },
+    {
+      "type": "link",
+      "id": "chlorinate-and-seal-prevents-seepage-into-well",
+      "from": "chlorinate-and-seal",
+      "relation": "prevents",
+      "to": "seepage-into-well"
+    },
+    {
+      "type": "stance",
+      "id": "field-nurse-noticed-cases-clustered",
+      "agent": "field-nurse",
+      "posture": "noticed",
+      "target": "cases-clustered",
+      "fields": {
+        "note": {
+          "kind": "text",
+          "value": "Four households on one lane reported illness on the same morning."
+        }
+      }
+    },
+    {
+      "type": "link",
+      "id": "rain-drove-seepage",
+      "from": "rainfall-spike",
+      "relation": "causes",
+      "to": "seepage-into-well"
+    },
+    {
+      "type": "stance",
+      "id": "field-nurse-suspects-rain-drove-seepage",
+      "agent": "field-nurse",
+      "posture": "suspects",
+      "target": "rain-drove-seepage",
+      "confidence": {
+        "kind": "number",
+        "value": 0.5
+      },
+      "basis": "estimated"
+    },
+    {
+      "type": "focus",
+      "id": "outbreak-is-waterborne",
+      "kind": "claim"
+    },
+    {
+      "type": "link",
+      "id": "cases-clustered-supports-outbreak-is-waterborne",
+      "from": "cases-clustered",
+      "relation": "supports",
+      "to": "outbreak-is-waterborne"
+    },
+    {
+      "type": "link",
+      "id": "well-is-contaminated-supports-outbreak-is-waterborne",
+      "from": "well-is-contaminated",
+      "relation": "supports",
+      "to": "outbreak-is-waterborne"
+    },
+    {
+      "type": "stance",
+      "id": "epidemiologist-infers-outbreak-is-waterborne",
+      "agent": "epidemiologist",
+      "posture": "infers",
+      "target": "outbreak-is-waterborne",
+      "confidence": {
+        "kind": "number",
+        "value": 0.82
+      },
+      "basis": "estimated",
+      "fields": {
+        "note": {
+          "kind": "text",
+          "value": "Enough to act on. Stool cultures will confirm the organism, not the route."
+        }
+      }
+    }
+  ],
+  "timeline": {
+    "start": "2026-05-03",
+    "end": "2026-05-04",
+    "events": [
+      {
+        "at": "2026-05-03",
+        "seq": 0,
+        "id": "kabir-hat-survey",
+        "kind": "scope"
+      },
+      {
+        "at": "2026-05-03",
+        "seq": 1,
+        "id": "cases-clustered",
+        "kind": "focus"
+      },
+      {
+        "at": "2026-05-03",
+        "seq": 2,
+        "id": "apron-cracked",
+        "kind": "focus"
+      },
+      {
+        "at": "2026-05-04",
+        "seq": 3,
+        "id": "latrines-uphill",
+        "kind": "focus"
+      }
+    ]
+  }
+}

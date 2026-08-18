@@ -1,0 +1,115 @@
+{
+  "objects": [
+    {
+      "type": "focus",
+      "id": "structures-stay-serviceable",
+      "kind": "goal",
+      "body": "Every highway structure in the region stays safe to carry its rated load between\ninspections."
+    },
+    {
+      "type": "focus",
+      "id": "inspection-baseline",
+      "kind": "claim",
+      "body": "The minimum inspection standard every highway structure is held to."
+    },
+    {
+      "type": "focus",
+      "id": "general-inspection-every-two-years",
+      "kind": "claim",
+      "body": "A general visual inspection is carried out at most twenty-four months after the last."
+    },
+    {
+      "type": "focus",
+      "id": "principal-inspection-every-six-years",
+      "kind": "claim",
+      "body": "A principal inspection, within touching distance of every element, every six years."
+    },
+    {
+      "type": "focus",
+      "id": "scour-check-after-flood",
+      "kind": "claim",
+      "body": "Any structure over a watercourse is checked for scour after a flood above the\none-in-ten-year level."
+    },
+    {
+      "type": "focus",
+      "id": "load-rating-on-record",
+      "kind": "claim",
+      "body": "A current load rating exists on file and is re-derived whenever the deck is altered."
+    },
+    {
+      "type": "link",
+      "id": "general-inspection-every-two-years-part-of-inspection-baseline",
+      "from": "general-inspection-every-two-years",
+      "relation": "part-of",
+      "to": "inspection-baseline"
+    },
+    {
+      "type": "link",
+      "id": "principal-inspection-every-six-years-part-of-inspection-baseline",
+      "from": "principal-inspection-every-six-years",
+      "relation": "part-of",
+      "to": "inspection-baseline"
+    },
+    {
+      "type": "link",
+      "id": "scour-check-after-flood-part-of-inspection-baseline",
+      "from": "scour-check-after-flood",
+      "relation": "part-of",
+      "to": "inspection-baseline"
+    },
+    {
+      "type": "link",
+      "id": "load-rating-on-record-part-of-inspection-baseline",
+      "from": "load-rating-on-record",
+      "relation": "part-of",
+      "to": "inspection-baseline"
+    },
+    {
+      "type": "link",
+      "id": "inspection-baseline-enables-structures-stay-serviceable",
+      "from": "inspection-baseline",
+      "relation": "enables",
+      "to": "structures-stay-serviceable"
+    },
+    {
+      "type": "focus",
+      "id": "inspection-budget",
+      "kind": "assumption",
+      "quantity": {
+        "value": 2400.0,
+        "unit": "hour",
+        "dimension": "count:hour",
+        "basis": "estimated"
+      },
+      "body": "Funded inspector time available to the region for the year."
+    },
+    {
+      "type": "link",
+      "id": "inspection-baseline-depends-on-inspection-budget",
+      "from": "inspection-baseline",
+      "relation": "depends-on",
+      "to": "inspection-budget"
+    },
+    {
+      "type": "focus",
+      "id": "scour-caused-most-failures",
+      "kind": "observation",
+      "body": "Scour is the single largest cause of bridge failure in the national record.",
+      "fields": {
+        "source": {
+          "kind": "ref",
+          "value": "national-failure-register"
+        }
+      }
+    },
+    {
+      "type": "link",
+      "id": "scour-caused-most-failures-supports-scour-check-after-flood",
+      "from": "scour-caused-most-failures",
+      "relation": "supports",
+      "to": "scour-check-after-flood",
+      "weight": 0.9,
+      "basis": "measured"
+    }
+  ]
+}

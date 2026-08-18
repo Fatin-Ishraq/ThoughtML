@@ -3,8 +3,9 @@
 This tutorial teaches the language by building **one real document** up from a
 single line to a complete argument the [mirror](../mirror/index.md) can audit.
 
-The scenario: an engineering team is deciding whether to ship a new cache layer
-today. By the end you'll have written the bundled example
+The scenario: a site engineer is deciding whether to pour a concrete foundation
+slab this afternoon, with a frost forecast for tonight. By the end you'll have
+written the bundled example
 [`pour-the-slab.thml`](../appendix/examples.md) — a document that is *diagnostically
 clean* yet hides a real contradiction, which the mirror surfaces.
 
@@ -22,5 +23,5 @@ Each chapter is short. Type the examples into a file and run them with
 `thoughtml <file>.thml` (see [Installation](../getting-started/installation.md)),
 or paste them into the [playground](../guides/playground.md) to see the graph.
 
-> **Conventions.** Identifiers are lowercase kebab-case (`cache-is-safe`).
+> **Conventions.** Identifiers are lowercase kebab-case (`conditions-are-fine`).
 > Indentation is **two spaces** — tabs are an error. A `#` starts a comment line.

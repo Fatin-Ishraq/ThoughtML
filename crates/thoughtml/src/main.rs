@@ -436,6 +436,7 @@ fn run_check(args: CheckArgs) -> ExitCode {
     let mut diags = result.diagnostics.items.clone();
     if args.lint {
         diags.extend(thoughtml::lint::supports_as_list(&result.canonical));
+        diags.extend(thoughtml::lint::circular_justification(&result.canonical));
     }
     diags.sort_by_key(|d| d.line);
 
