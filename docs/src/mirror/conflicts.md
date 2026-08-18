@@ -60,6 +60,31 @@ Maybe the confidence is the honest number and the structure overstates the
 attack. The mirror can't know — *you* do. It just makes the disagreement
 impossible to miss.
 
+## What it cannot see
+
+The mirror checks a document against **itself**, never against the world. A
+falsification pass (`crates/thoughtml/tests/falsification.rs`) pins the boundary,
+and it is worth knowing precisely, because everything inside it is trustworthy
+only if you know where it ends.
+
+These produce an empty conflict report and confident-looking numbers:
+
+| Error | What happens |
+|---|---|
+| **A false premise** | `earth-is-flat supports maps-are-wrong` is valid reasoning from nonsense. The conclusion derives ≈0.73. |
+| **One fact entered twice** | Two ids for one observation both support a claim. Independence is assumed, so it compounds to ≈0.96. |
+| **Evidence never written down** | Omit the two failed trials and the graph is coherent at ≈0.86. |
+
+There is a fourth that *is* visible in the graph, and so is caught — but only if
+you ask. `a supports b` and `b supports a` derive above 0.5 for both, from no
+outside evidence at all. `thoughtml check <file> --lint` reports that as
+[`TML502`](../reference/diagnostics.md), off by default like every modelling lint.
+
+The first three are not bugs waiting to be fixed. They are the limit of what any
+self-consistency check can reach, and they are exactly why the mirror reports
+rather than decides. **The part it cannot do is yours: write down the evidence
+that cuts against you.**
+
 The bundled [`pour-the-slab.thml`](../appendix/examples.md) exists precisely to
 demonstrate this: clean document, real conflict, no verdict.
 

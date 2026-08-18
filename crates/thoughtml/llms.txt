@@ -463,6 +463,7 @@ Install with `cargo install thoughtml` (or `npm install -g thoughtml`).
 | `TML401` | number declares no basis | add `measured`/`estimated`/`assumed` (only under `--strict-provenance`) |
 | `TML402` | weight/probability outside `0..1` | it was clamped — use a value in range |
 | `TML501` | `supports` used as a list (lint) | if these are items not evidence, use `part-of` (§6) — fires at ≥4 supports with no counter-evidence |
+| `TML502` | circular justification (lint) | a `supports` loop: the claims inside it derive confidence from no outside evidence — give one of them real evidence, or merge them if they are one belief said twice |
 
 `TML101`–`TML104` come with a nearest-spelling suggestion. `TML105` is the guard against a *silent* loss: a known field in the wrong place used to be accepted and then ignored, so a document could stay strict-clean while dropping what its author wrote. Nothing the parser understands is discarded quietly. (Note: the `definition-
 divergence` audit conflict and the decision-EV warnings carry no TML code — they surface in
@@ -515,6 +516,26 @@ interpret the numbers:
 When you transform prose into ThoughtML, run `--audit` afterward and check the conflicts
 are the *real* ones in the source — not artifacts of enumerations you wrote as evidence. A
 clean, meaningful conflict report is the sign you modeled the reasoning faithfully.
+
+**What the mirror cannot see.** It checks a document against *itself*, never against the
+world, and a falsification pass over it (`tests/falsification.rs`) pins exactly where that
+stops. Four errors produce a clean report and confident numbers:
+
+- **A false premise.** `earth-is-flat supports maps-are-wrong` is valid reasoning from a
+  nonsense premise. Nothing in the model can know it is nonsense; the conclusion derives
+  ≈0.73 all the same.
+- **One fact entered twice.** Two ids for one underlying observation both support the same
+  claim. Independence is assumed and never checked, so the evidence compounds — ≈0.96 from
+  a single survey cited twice.
+- **Evidence never written down.** A document records what its author chose to record. Two
+  failed trials omitted leaves a perfectly coherent graph reading ≈0.86.
+- **Circular justification**, until you ask. `a supports b`, `b supports a` derives >0.5 for
+  both from no outside evidence. This one *is* visible in the graph, so `check --lint`
+  reports it as `TML502` — but it is off by default, like every modelling lint.
+
+The first three are not bugs to fix; they are the boundary of what a self-consistency check
+can do. They are the reason the mirror reports and never decides. **Your job as the author
+is the part the tool cannot do: write down the evidence that cuts against you.**
 
 ---
 
