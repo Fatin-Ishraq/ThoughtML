@@ -3757,3 +3757,136 @@ focus b
         "the downstream node should survive the sweep"
     );
 }
+
+// --- No silent drops: a known field either acts or says it cannot -----------
+
+// The strict-clean contract is the language's whole feedback loop: a document with
+// zero warnings is supposed to mean everything the author wrote survived. A *known*
+// field landing on a record that quietly ignores it breaks exactly that — the author
+// loses an edge and the gate stays green. These tests pin the two halves of the fix:
+// `until` now works everywhere a node can be blocked, and every remaining mismatch is
+// a diagnostic instead of a silent drop.
+
+fn blocks_edges(src: &str) -> Vec<(String, String)> {
+    parse_str(src)
+        .canonical
+        .objects
+        .iter()
+        .filter_map(|o| match o {
+            Object::Link(l) if l.relation == "blocks" => Some((l.from.clone(), l.to.clone())),
+            _ => None,
+        })
+        .collect()
+}
+
+const BLOCKED_BASE: &str = "\
+question gate
+  Is it cleared?
+  expects claim
+
+claim other
+  Something else.
+
+link other candidate-for gate
+";
+
+#[test]
+fn until_blocks_the_thing_it_is_written_on() {
+    // A blocked *thing* is how people write it — far more often than a blocked
+    // stance — so every record that denotes a node honours `until`.
+    for (label, record) in [
+        (
+            "focus",
+            "focus work\n  kind action\n  Do the work.\n  until gate answered\n",
+        ),
+        (
+            "typed focus",
+            "action work\n  Do the work.\n  until gate answered\n",
+        ),
+        (
+            "question",
+            "question work\n  What now?\n  expects claim\n  until gate answered\n",
+        ),
+        (
+            "stance longhand",
+            "claim work\n  Do the work.\n\nstance lead holds work\n  until gate answered\n",
+        ),
+        (
+            "readable action",
+            "claim work\n  Do the work.\n\nlead holds work\n  until gate answered\n",
+        ),
+    ] {
+        let src = format!("{BLOCKED_BASE}\nlink work supports other\n\n{record}");
+        assert_eq!(
+            blocks_edges(&src),
+            vec![("gate".to_string(), "work".to_string())],
+            "{label}: expected `until` to desugar to a blocks edge"
+        );
+    }
+}
+
+#[test]
+fn until_is_consumed_not_also_carried_as_data() {
+    // It becomes an edge; leaving a copy behind as an inert field would report the
+    // same fact twice and invite readers to trust the decorative one.
+    let src = format!("{BLOCKED_BASE}\nlink work supports other\n\naction work\n  Do it.\n  until gate answered\n");
+    let r = parse_str(&src);
+    let carried = r.canonical.objects.iter().any(|o| match o {
+        Object::Focus(f) => f.fields.0.iter().any(|(k, _)| k == "until"),
+        _ => false,
+    });
+    assert!(!carried, "`until` was kept as a field as well as an edge");
+}
+
+#[test]
+fn a_field_a_record_cannot_act_on_is_a_diagnostic() {
+    // The point is the *absence of silence*. Each of these used to parse clean and
+    // drop what the author wrote.
+    for (label, src) in [
+        (
+            "until on a scope",
+            "scope s\n  until gate answered\n\nquestion gate\n  Cleared?\n  expects claim\n",
+        ),
+        (
+            "until on a link",
+            "claim a\n  A.\n\nclaim b\n  B.\n\nlink a supports b\n  until gate answered\n\nquestion gate\n  Cleared?\n  expects claim\n",
+        ),
+        (
+            "expects on a focus",
+            "claim a\n  A.\n  expects claim\n\nclaim b\n  B.\n\nlink a supports b\n",
+        ),
+        (
+            "about on a link",
+            "claim a\n  A.\n\nclaim b\n  B.\n\nlink a supports b\n  about a\n",
+        ),
+        (
+            "note on a profile",
+            "profile p\n  kinds widget\n  note This is not carried anywhere.\n",
+        ),
+    ] {
+        let r = parse_str(src);
+        let hit = r
+            .diagnostics
+            .items
+            .iter()
+            .any(|d| d.message.contains("has no meaning on"));
+        assert!(hit, "{label}: expected a diagnostic, got {:?}", r.diagnostics.items);
+        assert!(
+            !r.diagnostics.has_errors(),
+            "{label}: should warn, not error: {:?}",
+            r.diagnostics.items
+        );
+    }
+}
+
+#[test]
+fn the_inert_field_warning_carries_its_stable_code() {
+    let r = parse_str("claim a\n  A.\n  expects claim\n\nclaim b\n  B.\n\nlink a supports b\n");
+    let coded = r
+        .diagnostics
+        .items
+        .iter()
+        .filter_map(|d| crate::lint::code_for(&d.message))
+        .any(|c| c == "TML105");
+    assert!(coded, "expected TML105 on the inert-field warning");
+}

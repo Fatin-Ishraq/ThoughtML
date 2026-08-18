@@ -55,6 +55,8 @@ pub fn code_for(msg: &str) -> Option<&'static str> {
         "TML103"
     } else if has("unknown field") {
         "TML104"
+    } else if has("has no meaning on") {
+        "TML105"
     } else if has("unresolved reference") || has("references unresolved") {
         "TML201"
     } else if has("links may only connect") {

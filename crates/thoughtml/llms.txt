@@ -163,7 +163,7 @@ derived confidence and argument status (§13).
 | `enables` | source makes target possible |
 | `prevents` | source stops target |
 | `depends-on` | target is required for source (expected acyclic) |
-| `blocks` | source holds target up (what `until … answered` desugars to) |
+| `blocks` | source holds target up (what `until … answered` desugars to, §16) |
 | `answers` | source *resolves* a question (the one settled answer) |
 | `revises` | source supersedes target (nothing deleted; §11) |
 
@@ -441,6 +441,7 @@ Install with `cargo install thoughtml` (or `npm install -g thoughtml`).
 | `TML102` | unknown relation | use a real relation (§6) or declare it in a `profile` |
 | `TML103` | unknown posture | use one of the twelve (§7) |
 | `TML104` | unknown field | use a known field (§16) or declare it in a `profile` |
+| `TML105` | a known field the record cannot act on | move it to the record it belongs on — e.g. `expects`/`about` onto a `question`, `until` onto the node being blocked |
 | `TML201` | unresolved reference | an id in a link/stance/bundle doesn't exist — declare it or fix the typo |
 | `TML202` | links may only connect foci/questions/links | you targeted a stance or scope |
 | `TML301` | focus not connected to anything | link it in, nest it, or drop it — every node must earn its place |
@@ -452,7 +453,7 @@ Install with `cargo install thoughtml` (or `npm install -g thoughtml`).
 | `TML402` | weight/probability outside `0..1` | it was clamped — use a value in range |
 | `TML501` | `supports` used as a list (lint) | if these are items not evidence, use `part-of` (§6) — fires at ≥4 supports with no counter-evidence |
 
-`TML101`–`TML104` come with a nearest-spelling suggestion. (Note: the `definition-
+`TML101`–`TML104` come with a nearest-spelling suggestion. `TML105` is the guard against a *silent* loss: a known field in the wrong place used to be accepted and then ignored, so a document could stay strict-clean while dropping what its author wrote. Nothing the parser understands is discarded quietly. (Note: the `definition-
 divergence` audit conflict and the decision-EV warnings carry no TML code — they surface in
 `--audit` / `--compute`, not as validation diagnostics.)
 
@@ -655,6 +656,13 @@ and both audit conflicts — pinned by a test, so this list cannot quietly go st
 
 **Postures (12):** `noticed` `considers` `suspects` `infers` `asks` `holds` `chooses`
 `rejects` `revises` `remembers` `doubts` `accepts`.
+
+**Field placement.** Most fields ride on whatever record you put them under, but three
+are scoped, and using them elsewhere is `TML105`: `expects` and `about` belong to a
+`question`, and `until <id> [state]` — sugar for a `blocks` edge — belongs on the thing
+being blocked (a focus, a question, or a stance; **not** a link, scope, bundle, or profile,
+none of which is a node that can be held up). A `profile` block takes *only* `kinds`,
+`relations`, `fields`, `postures`.
 
 **Fields:** `note` `kind` `quantity` `about` `weight` `probability` `confidence` `because`
 `answers` `expects` `status` `until` `source` `observed-at` `asserted-at` `valid-during`

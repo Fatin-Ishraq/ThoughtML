@@ -391,6 +391,16 @@ impl<'a> Desugarer<'a> {
         };
         let quantity = self.build_quantity(&rec.block, rec.line);
         fields.0.retain(|(k, _)| k != "quantity");
+        // `until` is sugar for a `blocks` edge into this node. A blocked *thing* is
+        // how people write it far more often than a blocked stance, so it is
+        // honoured here too, not only on the readable action forms.
+        for f in &rec.block.fields.clone() {
+            if f.name == "until" {
+                self.expand_until(f, id);
+            }
+        }
+        fields.0.retain(|(k, _)| k != "until");
+        self.check_question_only(&rec.block, "a focus");
         // Lift a lifecycle status onto the focus, first-class (Phase A fold marker),
         // so it isn't buried among the free-form fields.
         let status = take_field_string(&mut fields, "status");
@@ -539,6 +549,8 @@ impl<'a> Desugarer<'a> {
 
     fn scope(&mut self, rec: &Record, id: &str) {
         self.reserve_explicit(id, rec.line);
+        self.reject_until(&rec.block, "a scope");
+        self.check_question_only(&rec.block, "a scope");
         let fields = self.collect_fields(&rec.block);
         // The provenance/temporal subset this scope cascades onto its members.
         let defaults: Vec<(String, Value)> = fields
@@ -617,6 +629,15 @@ impl<'a> Desugarer<'a> {
                 f.name.as_str(),
                 "kinds" | "relations" | "fields" | "postures"
             ) {
+                // A profile declares vocabulary and nothing else. Silently dropping
+                // anything else here is how a `note` on a dialect used to disappear.
+                self.diags.warning(
+                    f.line,
+                    format!(
+                        "`{}` has no meaning on a profile; a profile declares only `kinds`, `relations`, `fields`, and `postures`",
+                        f.name
+                    ),
+                );
                 continue;
             }
             // A profile declares new vocabulary, and those names are carried into
@@ -682,7 +703,14 @@ impl<'a> Desugarer<'a> {
                         .diags
                         .warning(f.line, "`about` expects one or more ids"),
                 },
+                // Consumed above as a `blocks` edge, not carried as data.
+                "until" => {}
                 _ => fields.push(f.name.clone(), f.value.clone()),
+            }
+        }
+        for f in &rec.block.fields {
+            if f.name == "until" {
+                self.expand_until(f, id);
             }
         }
         if rec.block.body.is_none() && expects.is_none() {
@@ -724,6 +752,8 @@ impl<'a> Desugarer<'a> {
         // A `weight` field sets relation strength; a `probability` (Phase 9) is
         // the outcome likelihood on a `leads-to` edge.
         let (weight, probability, basis, fields) = self.split_link_scalars(&rec.block, rec.line);
+        self.reject_until(&rec.block, "a link");
+        self.check_question_only(&rec.block, "a link");
         self.push_link(
             id,
             from,
@@ -833,7 +863,16 @@ impl<'a> Desugarer<'a> {
             }
             None => self.idgen.stance_id(agent, posture, target),
         };
-        let (confidence, basis, fields) = self.split_confidence(&rec.block, rec.line);
+        let (confidence, basis, mut fields) = self.split_confidence(&rec.block, rec.line);
+        // `stance a holds x` and the readable `a holds x` build the same object, so
+        // they have to honour the same sugar. `until` blocks the stance's target.
+        for f in &rec.block.fields {
+            if f.name == "until" {
+                self.expand_until(f, target);
+            }
+        }
+        fields.0.retain(|(k, _)| k != "until");
+        self.check_question_only(&rec.block, "a stance");
         self.push_object(
             Object::Stance(Stance {
                 id,
@@ -865,6 +904,7 @@ impl<'a> Desugarer<'a> {
     }
 
     fn action_single(&mut self, rec: &Record, agent: &str, posture: &str, target: &str) {
+        self.check_question_only(&rec.block, "an action");
         let creates_focus = FOCUS_CREATING.contains(&posture);
         if creates_focus {
             let kind = posture_kind(posture).map(str::to_string);
@@ -967,6 +1007,7 @@ impl<'a> Desugarer<'a> {
             rec.line,
         );
 
+        self.check_question_only(&rec.block, "an action");
         let stance_id = self.idgen.stance_id(agent, "suspects", &link_id);
         let mut confidence = None;
         let mut conf_basis = None;
@@ -1009,6 +1050,7 @@ impl<'a> Desugarer<'a> {
     }
 
     fn action_infers(&mut self, rec: &Record, agent: &str, target: &str, sources: &[String]) {
+        self.check_question_only(&rec.block, "an action");
         self.ensure_focus(
             target,
             Some("claim".to_string()),
@@ -1083,6 +1125,49 @@ impl<'a> Desugarer<'a> {
     // --- Helpers ----------------------------------------------------------
 
     /// `until REF [STATUS]` -> `REF blocks <blocked>` link, status preserved.
+    /// Warn when a *known* field lands on a record that has nothing to do with it.
+    ///
+    /// An unknown field already warns (`TML104`), but a known one used in the wrong
+    /// place used to be accepted and then quietly ignored — the document stayed
+    /// strict-clean while losing what the author wrote. That breaks the contract the
+    /// whole feedback loop rests on, so it is a diagnostic now.
+    fn field_is_inert(&mut self, f: &Field, record: &str, hint: &str) {
+        self.diags.warning(
+            f.line,
+            format!("`{}` has no meaning on {record}; {hint}", f.name),
+        );
+    }
+
+    /// `expects` and `about` describe a *question*. Anywhere else they are inert.
+    fn check_question_only(&mut self, block: &Block, record: &str) {
+        for f in &block.fields {
+            match f.name.as_str() {
+                "expects" => self.field_is_inert(
+                    f,
+                    record,
+                    "it declares the kind a `question` expects as its answer",
+                ),
+                "about" => self.field_is_inert(f, record, "it names what a `question` is about"),
+                _ => {}
+            }
+        }
+    }
+
+    /// `until <id> [state]` is sugar for a `blocks` edge, so it needs a node to
+    /// block. Records that are not one (a link, a bundle, a scope, a profile) can
+    /// only drop it.
+    fn reject_until(&mut self, block: &Block, record: &str) {
+        for f in &block.fields {
+            if f.name == "until" {
+                self.field_is_inert(
+                    f,
+                    record,
+                    "put it on the focus, question, or stance that is blocked",
+                );
+            }
+        }
+    }
+
     fn expand_until(&mut self, f: &Field, blocked: &str) {
         let Some(blocker) = f.first_arg() else {
             self.diags.warning(f.line, "`until` requires a reference");
