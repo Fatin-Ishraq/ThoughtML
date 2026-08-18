@@ -148,15 +148,10 @@ fn a_dateless_document_stays_first_class() {
     assert!(!r.diagnostics.has_warnings(), "{:?}", r.diagnostics.items);
 }
 
-/// Line endings are not model changes.
+/// Line endings are not model changes. A Windows checkout hands back CRLF while
+/// serde emits LF, and a snapshot differing only in invisible bytes has not drifted.
 fn normalize(s: &str) -> String {
-    s.replace(
-        "
-", "
-",
-    )
-    .trim()
-    .to_string()
+    s.trim().chars().filter(|c| *c != '\r').collect()
 }
 
 /// Snapshot the canonical model of every bundled example.
