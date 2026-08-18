@@ -18,14 +18,16 @@ channel, in an `audit` section, and never affect strict parsing.
 "audit": {
   "conflicts": [
     { "kind": "confidence-vs-status", "severity": "error",
-      "subjects": ["ops-agent-holds-cache-is-safe", "cache-is-safe"],
-      "message": "`ops-agent` asserts confidence 0.90 in `cache-is-safe`, but your own structure defeats it (argument status: out)" }
+      "subjects": ["site-engineer-holds-conditions-are-fine", "conditions-are-fine"],
+      "message": "`site-engineer` asserts confidence 0.88 in `conditions-are-fine`, but your own structure defeats it (argument status: out)" }
   ]
 }
 ```
 
-Each conflict has a `kind`, a `severity` (`error` / `warning` / `info`), the
-`subjects` it concerns, and a human-readable `message`.
+Each conflict has a `kind`, a `severity` (`error` or `warning`), the `subjects`
+it concerns, and a human-readable `message`. That output is
+[`examples/pour-the-slab.thml`](https://github.com/Fatin-Ishraq/ThoughtML/blob/main/examples/pour-the-slab.thml)
+run with `--audit`, verbatim.
 
 ## `confidence-vs-status`
 

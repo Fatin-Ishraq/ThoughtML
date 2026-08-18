@@ -30,8 +30,8 @@ The JSON model is `{ "objects": [ … ], "timeline"?, "audit"? }`. Each object h
 ### Focus
 
 ```json
-{ "type": "focus", "id": "cache-is-safe", "kind": "claim",
-  "body": "The new cache layer is safe to ship today." }
+{ "type": "focus", "id": "conditions-are-fine", "kind": "claim",
+  "body": "Conditions on site are fine to pour the slab this afternoon." }
 ```
 
 Optional fields: `kind`, `quantity`, `formula`, `body`, free-form `fields`, and
@@ -41,8 +41,8 @@ the opt-in derived ones (`computed_quantity`, `superseded_by`,
 ### Link
 
 ```json
-{ "type": "link", "id": "stale-reads-opposes-cache-is-safe",
-  "from": "stale-reads", "relation": "opposes", "to": "cache-is-safe" }
+{ "type": "link", "id": "overnight-freeze-opposes-conditions-are-fine",
+  "from": "overnight-freeze", "relation": "opposes", "to": "conditions-are-fine" }
 ```
 
 Optional: `weight`, `probability`, `basis`, `body`, `fields`, plus derived
@@ -51,8 +51,8 @@ Optional: `weight`, `probability`, `basis`, `body`, `fields`, plus derived
 ### Stance
 
 ```json
-{ "type": "stance", "id": "ops-agent-holds-cache-is-safe",
-  "agent": "ops-agent", "posture": "holds", "target": "cache-is-safe",
+{ "type": "stance", "id": "site-engineer-holds-conditions-are-fine",
+  "agent": "site-engineer", "posture": "holds", "target": "conditions-are-fine",
   "confidence": { "kind": "number", "value": 0.9 }, "basis": "assumed" }
 ```
 
@@ -68,7 +68,7 @@ Plus `asks_about` (a list of ids).
 ### Scope
 
 ```json
-{ "type": "scope", "id": "incident-742", "includes": ["metric-shift", "…"] }
+{ "type": "scope", "id": "kabir-hat-survey", "includes": ["cases-clustered", "…"] }
 ```
 
 ### Profile
@@ -90,7 +90,7 @@ Every object has an id, used for cross-references.
 - For `focus`, `question`, `scope`, `profile` — you write the id in the header.
 - For `link` and `stance` — you can supply an **alias** (`link foo: a causes b`),
   or let the parser **generate** one:
-  - a link → `<from>-<relation>-<to>` (e.g. `deploy-change-causes-metric-shift`)
+  - a link → `<from>-<relation>-<to>` (e.g. `dead-starter-causes-flat-loaf`)
   - a stance → `<agent>-<posture>-<target>`
   - on collision, a `-2` suffix is appended.
 

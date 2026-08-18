@@ -314,9 +314,20 @@ or `?` for genuinely unknown. `quantity` is a typed measure with a unit (`quanti
 exhaustive set `measured` / `estimated` / `assumed`:
 
 ```thml
-  confidence 0.9 assumed
+focus disk-headroom
+  kind observation
+  Free space on the primary volume.
   quantity 30 GB measured
+
+focus volume-is-healthy
+  kind claim
+  The volume has room for this quarter's growth.
+
+link disk-headroom supports volume-is-healthy
   weight 0.85 estimated
+
+ops holds volume-is-healthy
+  confidence 0.9 assumed
 ```
 
 A number with no basis is silent about it; the opt-in `--strict-provenance` lint flags the

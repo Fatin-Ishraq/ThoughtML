@@ -6,12 +6,12 @@ turns a list of foci into a *graph* you can reason over.
 The syntax is `link <from> <relation> <to>`:
 
 ```thml
-link load-test-passed supports cache-is-safe
-link stale-reads opposes cache-is-safe
+link truck-is-booked supports conditions-are-fine
+link overnight-freeze opposes conditions-are-fine
 ```
 
-Read left to right: *load-test-passed supports cache-is-safe*; *stale-reads
-opposes cache-is-safe*. The direction matters — `a supports b` is not the same as
+Read left to right: *truck-is-booked supports conditions-are-fine*; *overnight-freeze
+opposes conditions-are-fine*. The direction matters — `a supports b` is not the same as
 `b supports a`.
 
 ## The relations
@@ -60,14 +60,14 @@ Give a link an **alias** (its own id) by prefixing `name:` — useful when you w
 to attack the link itself, or reference it later:
 
 ```thml
-link cache-hypothesis: cache-eviction causes latency-spike
+link delivery-hypothesis: late-delivery causes set-delayed
   The proposed mechanism: evicted hot keys force slow cold reads.
 
-link dashboard-bug undercuts cache-hypothesis
+link thermometer-misread undercuts delivery-hypothesis
 ```
 
 The indented sentence under a `link` is its **body** — prose explaining *why* the
-relation holds. Here `dashboard-bug undercuts cache-hypothesis` attacks the
+relation holds. Here `thermometer-misread undercuts delivery-hypothesis` attacks the
 inference by name.
 
 ## What can a link connect?
@@ -79,20 +79,20 @@ warning (a dangling reference — usually a typo).
 ## Our document so far
 
 ```thml
-focus cache-is-safe
+focus conditions-are-fine
   kind claim
-  The new cache layer is safe to ship today.
+  Conditions on site are fine to pour the slab this afternoon.
 
-focus load-test-passed
+focus truck-is-booked
   kind observation
-  Load test at 2x peak traffic passed with no errors.
+  The ready-mix truck is booked for 14:00 and the crew is on site.
 
-focus stale-reads
+focus overnight-freeze
   kind observation
-  Staging showed stale reads under cache eviction.
+  The thermometer logged minus four degrees overnight.
 
-link load-test-passed supports cache-is-safe
-link stale-reads opposes cache-is-safe
+link truck-is-booked supports conditions-are-fine
+link overnight-freeze opposes conditions-are-fine
 ```
 
 No more orphans: every focus is connected. Now — who actually *believes* the

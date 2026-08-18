@@ -31,7 +31,7 @@ agent reasons → emits .thml → mirror reads it back → conflicts surface →
 A concrete version:
 
 1. An agent decides to ship a change and writes a ThoughtML document: the claim
-   (`cache-is-safe`), the evidence it weighed, its confidence, and the basis of
+   (`conditions-are-fine`), the evidence it weighed, its confidence, and the basis of
    each number.
 2. CI runs `thoughtml --audit` (and maybe `--strict-provenance`).
 3. The [conflict report](../mirror/conflicts.md) catches that the agent held a

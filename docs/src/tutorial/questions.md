@@ -54,6 +54,6 @@ team holds datastore-decision
 preserved on it). So the graph literally shows the benchmark holding the decision
 up — and when you read it back, the blockers are explicit, not buried in prose.
 
-Our cache document doesn't need a question — the team has already shipped. But
+Our pour document doesn't need a question — the engineer has already decided. But
 this pattern is the backbone of [decision records](../guides/use-cases.md). Next:
 the [numbers](numbers.md) that make beliefs precise.

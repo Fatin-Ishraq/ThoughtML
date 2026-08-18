@@ -32,7 +32,7 @@ what you wrote, never on top of it.
 ### Do I have to write `focus` / `link` / `stance`?
 
 No — that's the canonical core, and you can write it directly. Most of the time
-you'll use the readable surface (`analyst noticed metric-shift`,
+you'll use the readable surface (`field-nurse noticed cases-clustered`,
 `team chooses postgres-option`), which desugars into the core for you. They
 produce the same model; [`grant-panel.thml`](examples.md) uses both side by side to
 show the equivalence.

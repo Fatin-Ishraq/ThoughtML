@@ -20,11 +20,15 @@ profile risk-analysis
 # now these are first-class in this document:
 focus port-strike
   kind risk
+  likelihood high
+
+focus weak-monitoring
+  kind risk
+  No alerting on berth occupancy.
 
 link weak-monitoring aggravates port-strike
 
-ops flags port-strike
-  likelihood high
+stance ops flags port-strike
 ```
 
 A profile declares four list-valued fields — `kinds`, `relations`, `fields`,
@@ -34,20 +38,28 @@ field/posture" warnings. The bundled
 profile itself is recorded as a `Profile` object (document metadata, not a
 referenceable node).
 
+> **A profile posture needs the `stance` longhand.** Above it is
+> `stance ops flags port-strike`, not `ops flags port-strike`. The readable
+> `<agent> <posture> …` form is resolved against the twelve core postures before
+> any profile is consulted, so a dialect's own posture is only reachable through
+> `stance`.
+
 ## Imports — multiple documents
 
 A document can pull in another and reference its records under a **namespace**:
 
 ```thml
-import shared-defs as base
+import inspection-standards as standard
 
-link my-plan depends-on base.capacity-budget
+link deck-is-serviceable depends-on standard.load-rating-on-record
 ```
 
 - `import <name> as <ns>` makes the records of document `<name>` available under
   the prefix `<ns>.`.
-- A reference like `base.capacity-budget` resolves to the `capacity-budget`
-  record in the imported `shared-defs` document.
+- A reference like `standard.load-rating-on-record` resolves to the
+  `load-rating-on-record` record in the imported `inspection-standards` document.
+  That pair ships with the toolchain: see
+  [`bridge-inspection.thml`](../appendix/examples.md) and the library it imports.
 - Imports resolve **recursively** (an imported doc may import others), and import
   **cycles** are detected, reported, and broken.
 

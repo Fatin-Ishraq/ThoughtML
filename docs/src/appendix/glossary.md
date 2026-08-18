@@ -1,7 +1,7 @@
 # Glossary
 
 **Agent** — the actor a [stance](../reference/postures.md) attributes a belief to
-(`ops-agent`, `analyst`, `team`, `me`). Just an identifier; not a defined entity.
+(`site-engineer`, `analyst`, `team`, `me`). Just an identifier; not a defined entity.
 
 **Argument status** — the grounded [Dung](../mirror/argument-status.md) label of a
 node: `in` (survives every attack), `out` (defeated), or `undecided`. Opt-in

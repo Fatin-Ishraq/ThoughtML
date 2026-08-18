@@ -3,17 +3,17 @@
 A **focus** is a node you reason about. Declared directly:
 
 ```thml
-focus cache-is-safe
+focus conditions-are-fine
   kind claim
-  The new cache layer is safe to ship today.
+  Conditions on site are fine to pour the foundation slab this afternoon.
 ```
 
 or, more concisely, with a **typed header** — a built-in kind used as the header
 word, which desugars to exactly the same `focus` + `kind`:
 
 ```thml
-claim cache-is-safe
-  The new cache layer is safe to ship today.
+claim conditions-are-fine
+  Conditions on site are fine to pour the foundation slab this afternoon.
 ```
 
 Either form works anywhere a focus does (including nested in a scope). A focus can
@@ -96,9 +96,9 @@ A focus (like a [scope](scopes.md), and like a [question](questions.md)) can
 ```thml
 focus ship-decision
   kind decision
-  Ship the new cache layer this week.
+  Pour the foundation slab this week.
 
-  focus load-test-passed
+  focus truck-is-booked
     kind observation
     p99 held under 2× peak traffic.
 

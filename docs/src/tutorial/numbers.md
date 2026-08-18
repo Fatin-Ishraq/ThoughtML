@@ -12,7 +12,7 @@ is *one* way to express each thing, and numbers can declare where they came from
 - the **unknown marker** `?` — `confidence ?` (held, but credence not stated)
 
 ```thml
-ops-agent holds cache-is-safe
+site-engineer holds conditions-are-fine
   confidence 0.9
 ```
 
@@ -67,7 +67,7 @@ Any authored number can declare its **basis** inline — one of `measured`,
 `estimated`, `assumed`:
 
 ```thml
-ops-agent holds cache-is-safe
+site-engineer holds conditions-are-fine
   confidence 0.9 assumed
 ```
 
@@ -93,7 +93,7 @@ documents stay clean.
 We add the provenance to our stance — the `0.9` is `assumed`, not measured:
 
 ```thml
-ops-agent holds cache-is-safe
+site-engineer holds conditions-are-fine
   confidence 0.9 assumed
   note Shipping — the load test passed.
 ```

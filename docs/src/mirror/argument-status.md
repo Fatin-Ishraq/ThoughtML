@@ -42,21 +42,20 @@ attack stay `undecided`.
 
 ## Worked example
 
-From the tutorial's cache document — the same shape as the bundled
-[`pour-the-slab.thml`](../appendix/examples.md):
+From the bundled [`pour-the-slab.thml`](../appendix/examples.md):
 
 ```thml
-link load-test-passed supports cache-is-safe
-link stale-reads opposes cache-is-safe
+link truck-is-booked supports conditions-are-fine
+link overnight-freeze opposes conditions-are-fine
 ```
 
-`stale-reads` has no attackers → `in`. It `opposes` `cache-is-safe`, and that
-attacker is `in`, so `cache-is-safe` → **`out`**. (The `supports` edge doesn't
-enter the status calculation — support isn't an attack; it feeds
+`overnight-freeze` has no attackers → `in`. It `opposes` `conditions-are-fine`,
+and that attacker is `in`, so `conditions-are-fine` → **`out`**. (The `supports`
+edge doesn't enter the status calculation — support isn't an attack; it feeds
 [derived confidence](derived-confidence.md) instead.)
 
 That `out` is exactly what the [conflict report](conflicts.md) compares against
-the agent's authored 0.9.
+the engineer's authored 0.88.
 
 ## Where it appears
 
@@ -64,7 +63,8 @@ the agent's authored 0.9.
 graph:
 
 ```json
-{ "type": "focus", "id": "cache-is-safe", "argument_status": "out" }
+{ "type": "focus", "id": "conditions-are-fine", "argument_status": "out" }
+{ "type": "focus", "id": "overnight-freeze",     "argument_status": "in"  }
 ```
 
 It reads as a node colour/badge in the playground's Argument lens.

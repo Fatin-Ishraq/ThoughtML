@@ -53,6 +53,9 @@ orphan.)
 **basis** keyword — `measured`, `estimated`, or `assumed`:
 
 ```thml
+focus disk-headroom
+  kind observation
+  Free space on the primary volume.
   confidence 0.9 assumed
   quantity 30 GB measured
 ```

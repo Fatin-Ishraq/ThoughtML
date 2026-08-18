@@ -7,8 +7,8 @@ link [alias:] <from> <relation> <to>
 ```
 
 ```thml
-link load-test-passed supports cache-is-safe
-link cache-hypothesis: cache-eviction causes latency-spike
+link truck-is-booked supports conditions-are-fine
+link delivery-hypothesis: late-delivery causes set-delayed
   The proposed mechanism: evicted hot keys force slow cold reads.
   weight 0.85
 ```

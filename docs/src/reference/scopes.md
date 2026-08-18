@@ -3,14 +3,14 @@
 A **scope** groups related records and can cascade context onto them.
 
 ```thml
-scope incident-742
-  source on-call-log
-  observed-at 2026-06-17
+scope kabir-hat-survey
+  source district-health-survey
+  observed-at 2026-05-03
 
-  focus metric-shift
-    Activation rose after the deploy.
+  observation cases-clustered
+    Nineteen of the twenty-two cases live within three hundred metres of the well.
 
-  analyst noticed metric-shift
+  field-nurse noticed cases-clustered
 ```
 
 ## Membership by nesting
