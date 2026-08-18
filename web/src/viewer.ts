@@ -234,7 +234,9 @@ async function boot(): Promise<void> {
       panel.hidden = !open
       status.setAttribute('aria-expanded', String(open))
     }
-    status.addEventListener('click', () => openPanel(panel.hidden))
+    // `hidden` reflects `boolean | 'until-found'`, so coerce rather than pass it
+    // straight through: anything other than plain `false` means the panel is shut.
+    status.addEventListener('click', () => openPanel(Boolean(panel.hidden)))
     closePanel.addEventListener('click', () => openPanel(false))
 
     download.addEventListener('click', () => {
