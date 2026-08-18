@@ -150,9 +150,13 @@ fn a_dateless_document_stays_first_class() {
 
 /// Line endings are not model changes.
 fn normalize(s: &str) -> String {
-    s.replace("
+    s.replace(
+        "
 ", "
-").trim().to_string()
+",
+    )
+    .trim()
+    .to_string()
 }
 
 /// Snapshot the canonical model of every bundled example.
