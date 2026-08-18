@@ -148,6 +148,13 @@ fn a_dateless_document_stays_first_class() {
     assert!(!r.diagnostics.has_warnings(), "{:?}", r.diagnostics.items);
 }
 
+/// Line endings are not model changes.
+fn normalize(s: &str) -> String {
+    s.replace("
+", "
+").trim().to_string()
+}
+
 /// Snapshot the canonical model of every bundled example.
 ///
 /// Compares against `tests/snapshots/<name>.json`. Set `UPDATE_SNAPSHOTS=1` to
@@ -184,7 +191,10 @@ fn the_corpus_model_is_stable() {
             continue;
         }
         match fs::read_to_string(&snap) {
-            Ok(expected) if expected.trim() == json.trim() => {}
+            // Compare as text with line endings normalized. serde emits LF; a
+            // Windows checkout can hand back CRLF, and a snapshot that differs only
+            // in invisible bytes is not a model change.
+            Ok(expected) if normalize(&expected) == normalize(&json) => {}
             Ok(_) => drifted.push(name),
             Err(_) => drifted.push(format!("{name} (no snapshot)")),
         }

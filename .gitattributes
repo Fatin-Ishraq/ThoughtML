@@ -12,3 +12,10 @@ crates/thoughtml/assets/viewer.html linguist-generated=true
 crates/thoughtml/assets/viewer.html eol=lf
 web/viewer.html eol=lf
 web/index.html eol=lf
+
+# The corpus and its canonical-model snapshots are compared as text by
+# `tests/stability.rs`. serde emits LF; a Windows checkout would hand the test CRLF
+# and every snapshot would read as drifted. The test normalizes line endings too —
+# this pins the inputs so the two agree by construction rather than by repair.
+examples/**/*.thml eol=lf
+crates/thoughtml/tests/snapshots/*.json eol=lf
