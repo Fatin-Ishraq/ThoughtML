@@ -16,17 +16,17 @@ do not silently drift.
 - Keep local demos, generated scratch files, and private test artifacts out of
   the release commit.
 
-For v0.4.2, the expected release-facing version is:
+For v0.5.0, the expected release-facing version is:
 
 ```text
-Cargo.toml                         0.4.2
-Cargo.lock                        0.4.2 (thoughtml + thoughtml-wasm)
-README.md                         version-0.4.2 badge / v0.4.2 Status
-docs/src/introduction.md          v0.4.2
-docs/src/reference/index.md       v0.4.2
-docs/src/appendix/faq.md          v0.4.2
-.github/workflows/pypi.yml        0.4.2 manual default
-RELEASING.md                       0.4.2 (this file's examples)
+Cargo.toml                         0.5.0
+Cargo.lock                        0.5.0 (thoughtml + thoughtml-wasm)
+README.md                         version-0.5.0 badge / v0.5.0 Status
+docs/src/introduction.md          v0.5.0
+docs/src/reference/index.md       v0.5.0
+docs/src/appendix/faq.md          v0.5.0
+.github/workflows/pypi.yml        0.5.0 manual default
+RELEASING.md                       0.5.0 (this file's examples)
 ```
 
 ## 2. Run the release gate

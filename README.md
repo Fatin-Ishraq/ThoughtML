@@ -18,7 +18,7 @@
   <a href="https://fatin-ishraq.github.io/ThoughtML/playground/"><img alt="playground" src="https://img.shields.io/badge/playground-try%20it%20live-8957e5" /></a>
   <a href="https://github.com/Fatin-Ishraq/ThoughtML/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/Fatin-Ishraq/ThoughtML/actions/workflows/ci.yml/badge.svg" /></a>
   <a href="LICENSE"><img alt="license: MIT" src="https://img.shields.io/badge/license-MIT-green" /></a>
-  <a href="CHANGELOG.md"><img alt="version" src="https://img.shields.io/badge/version-0.4.2-blueviolet" /></a>
+  <a href="CHANGELOG.md"><img alt="version" src="https://img.shields.io/badge/version-0.5.0-blueviolet" /></a>
 </p>
 
 <p align="center">
@@ -230,6 +230,12 @@ npm run dev
 More in [Use cases ↗](https://fatin-ishraq.github.io/ThoughtML/guides/use-cases.html).
 
 ## Status
+
+**v0.5.0 — correctness and coverage.** A known field now either acts or says it
+cannot, instead of being silently dropped; a bare year on a date field is a date;
+the toolchain is tested on every platform it ships a binary for; and the mirror
+has been falsified — what it catches, and what it cannot see, are both written
+down. See [STABILITY.md](STABILITY.md) for what a future 1.0 would freeze.
 
 **v0.4.2 — follow-ups.** Closes a gap in 0.4.1's stream exposure check, stops
 `thoughtml fmt` deleting comments, and fixes a wrong-answer bug in evidence
