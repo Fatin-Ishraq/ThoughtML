@@ -1,8 +1,8 @@
 # Pre-registration: Measuring AI-Authored Reasoning Traces Across Four Vendor Agent Systems
 
 **Author:** Fatin Ishraq
-**Pre-registration version:** 1.1
-**Date filed:** 2026-08-20 (v1.0) · amended 2026-08-20 (v1.1)
+**Pre-registration version:** 1.2
+**Date filed:** 2026-08-20 (v1.0) · amended 2026-08-20 (v1.1, v1.2)
 **Status:** Filed before any registered data collection. No registered experimental data exists. A discarded pilot of Experiment 2 has been run; see §13.
 
 ---
@@ -155,6 +155,18 @@ Arm D is the only arm with open weights and therefore the only arm a reader can 
 
 ## 6. Experiments
 
+**Scope, fixed in v1.2 before any data collection.** The study was reduced from ~480 model calls to ~256, and Experiment 3 was removed entirely. Experiment 3 was the most expensive in wall-clock (≈30 multi-session agentic runs), the most underpowered, and §11 already stated that this study does not establish that recorded reasoning improves task outcomes — so cutting it removes a claim the paper was never going to make. It moves to future work. Remaining sizes are stated per experiment below; the original registered sizes are recorded in §13 so the reduction is visible rather than silent.
+
+| Experiment | v1.0 | v1.2 |
+|---|---|---|
+| Exp 0 | 30 tasks × 2 conditions × 4 systems = 240 | 20 × 2 × 4 = **160** |
+| Exp 1 | 20 tasks × 4 systems × 3 samples = 240 | 12 × 4 × 2 = **96** |
+| Exp 2 | offline, no model calls | unchanged |
+| Exp 3 | ≈30 sessions | **removed** |
+| Tasks to author | 53 | **35** |
+
+The cost is width: H1's confidence interval widens, and H3 rests on 12 tasks rather than 20. All four systems are retained in both remaining experiments, since the four-vendor comparison is the study's distinguishing feature and cutting an arm would cost more than cutting tasks.
+
 ### Experiment 0 — Confidence calibration and the basis manipulation
 
 **Purpose:** RQ1. Tests H1.
@@ -240,10 +252,14 @@ Fixed before authoring the task sets.
 
 H3 is entirely at the mercy of this rule, so it is fixed now and reported under both variants. `thoughtml diff` compares two versions of the *same* document and assumes shared ids; independent authors will not share ids, so `diff` alone is insufficient and a cross-document matching path must be built.
 
-- **Rule S (strict).** Two nodes match iff their normalized ids are equal. Normalization: lowercase, strip punctuation, collapse separators to a single hyphen.
-- **Rule L (lenient).** Two nodes match iff Rule S matches, **or** the cosine similarity of their label text under a single pinned embedding model exceeds 0.80. The model identifier and version are recorded in the manifest before data collection.
-- **Reporting.** Both rules are reported for every H3 figure. If they differ by more than 15 percentage points, the metric is declared rule-sensitive in the results, not reconciled to whichever is more favourable.
-- **Adjudication.** On a random subsample of 20 document pairs, the author manually labels node correspondence **blind to both automatic results**, and Cohen's κ between manual labels and each rule is reported. This is the study's only inter-rater check and its limitation as a single-rater design is acknowledged in §12.
+**Rule S is a floor, not a co-equal rule (revised in v1.2).** A pre-data check compared a document against a structurally identical copy with every node renamed — same six links, same graph. Rule S scored **0.00** node overlap, and relation overlap was undefined because no nodes matched. Rule S therefore measures naming convention, not structure, and would have driven H3 to ~0 for every pair regardless of whether the models actually agreed. Reported alone it would have produced the false finding that "the schema underdetermines the trace." It is retained only as a lower bound.
+
+- **Rule S (floor).** Two nodes match iff their normalized ids are equal. Normalization: lowercase, strip punctuation, collapse separators to a single hyphen. Reported as a lower bound on agreement, never as the headline figure.
+- **Rule J (judge) — primary.** A model reads both documents and labels node correspondences. Fixed before data: the judge is the DeepSeek API at temperature 0, chosen because it is the only arm offering deterministic sampling and open weights, so the judging step is exactly replicable. The judge sees both documents in full; it is not asked whether the reasoning is *good*, only whether two nodes denote the same claim.
+- **Undefined case.** If zero nodes match under a rule, relation overlap is undefined and is reported as such — never as 0.00. The count of undefined pairs is reported per rule.
+- **Adjudication and validation.** On a random subsample of 20 document pairs, the author manually labels node correspondence **blind to both automatic results**. Cohen's κ between the manual labels and each rule is reported. **Rule J is only admissible as the primary matcher if κ against the manual labels exceeds 0.70**; below that, H3 is reported as inconclusive rather than rescued with a different rule. This is the study's only inter-rater check and its limitation as a single-rater design is acknowledged in §12.
+
+**Disclosed circularity.** The judge is a language model evaluating whether language-model-authored traces agree, and it is also arm D of the study. Shared failure modes could inflate measured agreement. The κ validation above is the sole check on this and is reported whatever it shows.
 
 Relation overlap is Jaccard over (matched source, relation, matched target) triples.
 
@@ -373,6 +389,9 @@ Append-only. Every departure from this document after filing is recorded here wi
 | 2 | 2026-08-20 | §0 | Re-pinned commit, binary SHA, and payload SHA. | The pilot showed `TML501` fires at ≥4 `supports`, missing 3-item enumerations — the error §6 of the spec calls "the mistake that breaks the mirror." A threshold sweep (4/3/2) gave 1/2, 2/2, 2/2 catches against 0, 0, 1 false positives on clean documents, so the threshold moved to 3. The spec table documented the old value, and the spec *is* the payload, so both hashes changed. | Pilot only. Changed inside the §8.4 revision window, before any registered run. |
 | 3 | 2026-08-20 | §0 | Added the LF line-ending requirement for payload generation. | Payload byte size shifted by exactly its line count, revealing that the frozen hash is platform-dependent. Left unstated, §7.1's hash check would exclude every run on a CRLF checkout despite identical content. | No. |
 | 4 | 2026-08-20 | §4.2b | Added per-class mutation predictions, explicitly marked not blind. | v1.0 predicted only "structural" and "semantic" against five defined classes. Resolved into per-class targets; §4.2 retained unaltered as the blind record. | Yes — written after pilot data. Flagged as such in §4.2b. |
+| 5 | 2026-08-20 | §7.3 | Demoted Rule S to a lower bound; replaced Rule L (embedding cosine) with Rule J, a temperature-0 model judge; added an undefined-case rule and a κ ≥ 0.70 admissibility gate. | A pre-data check compared a document against a structurally identical copy with every node renamed. Rule S scored 0.00 with relation overlap undefined, proving it measures naming convention rather than structure. Reported alone it would have produced a false H3 finding that the schema underdetermines the trace. | No — no experimental data. The check used the `examples/` corpus and a synthetic rename. |
+| 6 | 2026-08-20 | §6 | Reduced scope: Exp 0 to 20 tasks, Exp 1 to 12 tasks × 2 samples, Exp 3 removed entirely. ~480 model calls → ~256; 53 tasks → 35. | Solo study on consumer subscription plans. Exp 3 was the most expensive and least powered, and §11 already disclaimed the downstream-utility claim it was meant to support. All four systems retained in both remaining experiments. | No. Decided before any collection. |
+| 7 | 2026-08-20 | §7.3 | Dropped the planned `diff --json` work. | The canonical model already exposes every link as `{from, relation, to}` via `--compact`, so H3's triples need no new tool surface. `diff` was never the blocker; the cross-document matcher was. | No. |
 
 ---
 
