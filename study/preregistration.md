@@ -1,9 +1,9 @@
 # Pre-registration: Measuring AI-Authored Reasoning Traces Across Four Vendor Agent Systems
 
 **Author:** Fatin Ishraq
-**Pre-registration version:** 1.0
-**Date filed:** 2026-08-20
-**Status:** Filed before any data collection. No experimental data existed at filing time.
+**Pre-registration version:** 1.1
+**Date filed:** 2026-08-20 (v1.0) · amended 2026-08-20 (v1.1)
+**Status:** Filed before any registered data collection. No registered experimental data exists. A discarded pilot of Experiment 2 has been run; see §13.
 
 ---
 
@@ -14,11 +14,13 @@ Every number in this study is produced by the artifacts below. They do not chang
 | Artifact | Identifier |
 |---|---|
 | ThoughtML version | 0.5.0 |
-| Pinned commit | `80b8865ad9727b207c5bcb154f076ca0fccefe46` |
-| Grader binary SHA-256 | `8d1b73fde1ddc50fd587180ddcf869884167a2589360a56ecfd00a60cce8ce22` |
-| Spec payload SHA-256 | `ea9070641d64bebe2dcef7dde360cdc7768c80f01b79e6eb2967ef0b426b25ae` |
-| Spec payload size | 718 lines / 39,847 bytes / ~11k tokens |
+| Pinned commit | `6b323bfaacab44ec0aef19dfa0abfdf98503959e` |
+| Grader binary SHA-256 | `99e3afa2222a00f3eb82315e4dd251259b19ecc296769f0e35ce5ed9cd38f5b0` |
+| Spec payload SHA-256 | `1a3fd8b8dccf079c2284b59bef6ac1ceb0a84fc7d95240023c7abb6333531e9f` |
+| Spec payload size | 718 lines / 39,129 bytes / ~11k tokens |
 | Prompt template SHA-256 | recorded in `runs/manifest.json` at first run |
+
+**Line endings.** The payload is generated with LF line endings (`thoughtml guide --full`, written without CRLF translation). This is load-bearing: the same specification checked out on a platform that translates line endings produces a different SHA-256 for identical content, and §7.1 excludes any run whose payload hash does not match. Anyone reproducing this study must generate the payload with LF endings or the hash check will fail on unchanged content.
 
 **Disclosure.** The spec payload is byte-identical to `crates/thoughtml/llms.txt`, the public specification served by the project website. The document handed to models in this study is the public document verbatim. This is a property of the tool's design — one source, so the printed guide cannot drift from the implementation — and it is why the contamination probe in §9 is mandatory rather than optional.
 
@@ -94,6 +96,25 @@ Cross-system relation overlap on identical tasks, as Jaccard over matched (sourc
 | Sessions spontaneously re-reading a `.thml` (Exp 3, arm b) | < 0.20 |
 | Harness effect on attack share (optimistic ceiling) | ~10 pp |
 | Harness effect on `--strict` pass rate (optimistic ceiling) | 30–40 pp |
+
+### 4.2b Per-class mutation predictions — NOT BLIND (added in v1.1)
+
+v1.0 predicted mutation catch rates for "structural" and "semantic" defects, but §6 defines *five* classes and did not say which of the other four counted as semantic. It matters: the pilot returned 1.00 for `identity`, far outside the 0.15–0.35 semantic band, so the pooling rule changes the answer. The ambiguity is resolved here with per-class predictions.
+
+**These predictions are not blind.** They were written after seeing pilot data (§13, entry 1) and are therefore weaker evidence than §4.2. The v1.0 predictions in §4.2 stand unaltered as the blind, pre-data record and are the ones that should be scored as predictions. These are stated so the registered run still has a written target, not to replace them.
+
+| Class | Predicted (registered run) |
+|---|---|
+| structural | 0.90–1.00 |
+| relational-semantic | 0.10–0.25 |
+| — of which link-direction reversal specifically | 0.00–0.10 |
+| numeric, default flags | 0.05–0.20 |
+| numeric, under `--strict-provenance` | 0.60–0.85 |
+| enumeration | 0.70–1.00 |
+| identity | 0.80–1.00 |
+| restraint false-positive rate | 0.00–0.05 |
+
+The pooled all-defect rate is **not** predicted and will not be reported: with an unequal number of mutants per operator it is an artifact of generation counts rather than a property of the checker.
 
 ### 4.3 Outcomes that would surprise the author
 
@@ -346,9 +367,12 @@ Stated in advance so that interpretation is not authored after seeing direction.
 
 Append-only. Every departure from this document after filing is recorded here with its date, its reason, and whether it occurred before or after the relevant data was seen. Entries are never edited or removed. An empty log is a claim, and a reader is entitled to treat a suspiciously empty one with scepticism.
 
-| Date | Section | Deviation | Reason | Data already seen? |
-|---|---|---|---|---|
-| — | — | *(none at filing)* | — | — |
+| # | Date | Section | Deviation | Reason | Data already seen? |
+|---|---|---|---|---|---|
+| 1 | 2026-08-20 | §6 Exp 2 | Ran a discarded pilot of the mutation suite on the 9 clean `examples/` documents (151 mutants). | To break the harness before it counted. Three harness bugs were found and fixed; three mutation classes had silently produced zero mutants. Pilot data discarded per §8.4 and not pooled. | Pilot only. No registered data. |
+| 2 | 2026-08-20 | §0 | Re-pinned commit, binary SHA, and payload SHA. | The pilot showed `TML501` fires at ≥4 `supports`, missing 3-item enumerations — the error §6 of the spec calls "the mistake that breaks the mirror." A threshold sweep (4/3/2) gave 1/2, 2/2, 2/2 catches against 0, 0, 1 false positives on clean documents, so the threshold moved to 3. The spec table documented the old value, and the spec *is* the payload, so both hashes changed. | Pilot only. Changed inside the §8.4 revision window, before any registered run. |
+| 3 | 2026-08-20 | §0 | Added the LF line-ending requirement for payload generation. | Payload byte size shifted by exactly its line count, revealing that the frozen hash is platform-dependent. Left unstated, §7.1's hash check would exclude every run on a CRLF checkout despite identical content. | No. |
+| 4 | 2026-08-20 | §4.2b | Added per-class mutation predictions, explicitly marked not blind. | v1.0 predicted only "structural" and "semantic" against five defined classes. Resolved into per-class targets; §4.2 retained unaltered as the blind record. | Yes — written after pilot data. Flagged as such in §4.2b. |
 
 ---
 
