@@ -1,9 +1,9 @@
 # Pre-registration: Measuring AI-Authored Reasoning Traces Across Four Vendor Agent Systems
 
 **Author:** Fatin Ishraq
-**Pre-registration version:** 1.3
-**Date filed:** 2026-08-20 (v1.0) · amended 2026-08-20 (v1.1, v1.2, v1.3)
-**Status:** Filed before any registered data collection. No registered experimental data exists. A discarded pilot of Experiment 2 has been run; see §13. v1.3 incorporates an external methodological review received before any registered data collection (§13, entry 8).
+**Pre-registration version:** 1.4
+**Date filed:** 2026-08-20 (v1.0) · amended 2026-08-20 (v1.1, v1.2, v1.3, v1.4)
+**Status:** Filed before any registered data collection. No registered experimental data exists. A discarded pilot of Experiment 2 has been run; see §13. v1.3 incorporates an external methodological review, and v1.4 restores Experiment 0's sample size for power — both before any registered data collection (§13, entries 8 and 10).
 
 ---
 
@@ -20,7 +20,7 @@ Every number in this study is produced by the artifacts below. They do not chang
 | Spec payload size | 718 lines / 39,129 bytes / ~11k tokens |
 | Prompt template SHA-256 | recorded in `runs/manifest.json` at first run |
 | Control-schema payload SHA-256 (§6, Condition G) | recorded in `runs/manifest.json` before Experiment 1 begins |
-| External registration | OSF DOI — recorded here upon filing. Plan: file the pushed v1.2 state (`7951f05`) first, then this v1.3 as an amendment, so the third-party timestamp covers each version in order. |
+| External registration | OSF DOI — recorded here upon filing. **This version (v1.4) is the one to register**, before any registered data collection begins. Versions 1.0–1.3 are self-dated in the public git history (`cdcf74f`, `b8b12e4`, `7951f05`, `fece65d`) and are superseded rather than separately registered; the deviation log below reconstructs the full sequence. |
 
 **Line endings.** The payload is generated with LF line endings (`thoughtml guide --full`, written without CRLF translation). This is load-bearing: the same specification checked out on a platform that translates line endings produces a different SHA-256 for identical content, and §7.1 excludes any run whose payload hash does not match. Anyone reproducing this study must generate the payload with LF endings or the hash check will fail on unchanged content.
 
@@ -179,15 +179,15 @@ Arm D is the only arm with open weights. Arms A–C are silently updated and eve
 
 | Experiment | v1.0 | v1.3 |
 |---|---|---|
-| Exp 0 | 30 tasks × 2 conditions × 4 systems = 240 | 20 × 2 × 4 = **160** |
+| Exp 0 | 30 tasks × 2 conditions × 4 systems = 240 | 30 × 2 × 4 = **240** (restored in v1.4 for power) |
 | Exp 1, ThoughtML condition | 20 tasks × 4 systems × 3 samples = 240 | 12 × 4 × 2 = **96** |
 | Exp 1, Condition G (generic-schema control) | — | 12 × 4 × 1 = **48** |
 | RQ5: arm-D delivery contrast | — | 12 × 2 × 1 = **24** |
 | Exp 2 | offline, no model calls | unchanged |
 | Exp 3 | ≈30 sessions | **removed** |
 | Contamination probe (§9.2) | 5 × 4 = 20 | 10 × 4 = **40** |
-| Registered model calls (probe excluded) | ~480 | **~328** |
-| Tasks to author | 53 | **32** |
+| Registered model calls (probe excluded) | ~480 | **~408** |
+| Tasks to author | 53 | **42** |
 
 The cost is width: H1's confidence intervals widen, and H3 rests on 12 tasks. All four systems are retained, since the four-vendor comparison is the study's distinguishing feature and cutting an arm would cost more than cutting tasks.
 
@@ -195,8 +195,8 @@ The cost is width: H1's confidence intervals widen, and H3 rests on 12 tasks. Al
 
 | Primary | Approximate MDE at v1.3 n | Against the prediction |
 |---|---|---|
-| H1a (20 paired tasks, Wilcoxon) | standardized d_z ≈ 0.77 → ≈ 0.06–0.09 raw if the between-task SD of the B−F contrast is 0.08–0.12 | Overlaps the predicted 0.03–0.08: **H1a is powered only for the upper half of its predicted range.** Below that it is estimation-only, and will be reported as an estimate with CI, not a rejection. |
-| H1b (AUROC contrast, ~20 correct/incorrect splits per condition) | ≈ 0.15–0.20 AUROC units | Exceeds the predicted 0.02–0.08: **H1b is estimation-first.** A confirmed rejection would itself be an upside surprise. |
+| H1a (30 paired tasks, Wilcoxon) | standardized d_z ≈ 0.61 → ≈ 0.05–0.07 raw if the between-task SD of the B−F contrast is 0.08–0.12 | Overlaps the upper part of the predicted 0.03–0.08. **H1a remains underpowered for effects below ≈0.05** and will be reported as an estimate with CI, not a rejection, in that region. |
+| H1b (AUROC contrast, ~30 correct/incorrect splits per condition) | ≈ 0.12–0.16 AUROC units | Still exceeds the predicted 0.02–0.08: **H1b remains estimation-first even at 30 tasks.** A confirmed rejection would itself be an upside surprise. This is stated plainly rather than resolved, because resolving it would cost more runs than the study has. |
 | H2 (12 task clusters, ~144 documents) | CI half-width ≈ 0.05–0.08 on the share | Can reject H0 ≥ 0.15 if the true share is ≤ ~0.07; adequate for the predicted < 0.10. |
 | H3 (12 tasks × 6 system-pairs) | bootstrap CI half-width ≈ 0.06–0.10 | Adequate to separate the predicted 0.15–0.30 from the 0.35 decision bound in most of the range. |
 
@@ -204,14 +204,14 @@ The cost is width: H1's confidence intervals widen, and H3 rests on 12 tasks. Al
 
 **Purpose:** RQ1. Tests H1a, H1b; H1-lex secondary.
 
-**Design:** 20 tasks with unambiguous ground-truth answers × 2 prompt conditions × 4 systems.
+**Design:** 30 tasks with unambiguous ground-truth answers × 2 prompt conditions × 4 systems. (v1.2 cut this to 20; v1.4 restored it — see the MDE table above and §13 entry 10.)
 
 - **Condition F (free-form):** the standard prompt template.
 - **Condition B (basis-required):** identical, plus one added instruction requiring a `measured` / `estimated` / `assumed` label on every number.
 
 Condition B exists because the basis field is opt-in in ThoughtML (`TML401` fires only under `--strict-provenance`), so a free-form-only design risks having too few labelled numbers to test the basis hypotheses at all. Condition B guarantees the manipulation is present; condition F measures the spontaneous rate.
 
-**Pilot:** arm D only, 20 × 2 = 40 runs. Extension to arms A–C is contingent on the pilot completing without protocol failure, **not** on the direction of results.
+**Pilot:** arm D only, 30 × 2 = 60 runs. Extension to arms A–C is contingent on the pilot completing without protocol failure, **not** on the direction of results.
 
 **Measures:** stance confidence by condition and by basis label; accuracy against ground truth; AUROC of confidence discriminating correct from incorrect, per condition; distribution of confidence values.
 
@@ -425,6 +425,7 @@ Append-only. Every departure from this document after filing is recorded here wi
 | 6 | 2026-08-20 | §6 | Reduced scope: Exp 0 to 20 tasks, Exp 1 to 12 tasks × 2 samples, Exp 3 removed entirely. | **Cut for cost**: solo study on consumer subscription plans; Exp 3 was the most expensive and least powered. Secondary consideration: §11 already disclaimed the downstream-utility claim it was meant to support. All four systems retained. | No. Decided before any collection. |
 | 7 | 2026-08-20 | §7.3 | Dropped the planned `diff --json` work. | The canonical model already exposes every link as `{from, relation, to}` via `--compact`, so H3's triples need no new tool surface. `diff` was never the blocker; the cross-document matcher was. | No. |
 | 8 | 2026-08-20 | throughout (v1.3) | Incorporated an external methodological review: H1 restructured into H1a/H1b with the v1.0 basis-contrast demoted to secondary H1-lex; basis-conditional AUROC promoted to co-primary; generic-schema control condition added to Exp 1 (+48 runs); RQ5 funded with an explicit arm-D allocation (+24 runs); real tests and clustering units specified for all primaries; decision rules and a failure condition added; MDE table added; Exp 2 moved to a fresh corpus disjoint from `examples/`; restraint contradiction resolved; judge changed to triplicate-majority; probe enlarged to 10 prompts/system with a decision rule; multiple wording narrowings (§2, §3, §5.1, §10, §12). | The review identified design flaws (H1 did not test RQ1; no attribution control; Holm applied over hypotheses without tests), statistical gaps (pseudo-replication, no MDE), and instrument-validity issues (threshold train/test leak) — all cheaper to fix before data than after. | No registered data. Pilot data only, already logged in entries 1–4. |
+| 10 | 2026-08-20 | §6, Exp 0 | Restored Experiment 0 from 20 tasks to 30, reversing part of the v1.2 cut. Registered calls ~328 → ~408; tasks to author 32 → 42. | The v1.3 MDE table showed both RQ1 primaries underpowered at 20 tasks: H1a powered only for the upper half of its predicted range, H1b estimation-first. An underpowered primary yields an *uninformative* result, which is worse for the paper than a negative one. Exp 0 is the cheapest experiment per run (short ground-truth answers), so power is bought here more cheaply than anywhere else. H1b remains estimation-first even at 30 and the document says so rather than pretending otherwise. | No. Decided before any collection. |
 | 9 | 2026-08-20 | §13 entry 2 (addendum) | Disclosure appended to the threshold decision: the sweep contained only **2 enumeration mutants per threshold value**. | The choice of 3 is weakly supported at that n. The registered Exp 2 run tests it on a larger held-out corpus (§6), which is the actual test of the decision. | Pilot only. |
 
 ---
