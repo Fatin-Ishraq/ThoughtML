@@ -161,7 +161,11 @@ fn levenshtein(a: &str, b: &str) -> usize {
 pub fn supports_as_list(canon: &Canonical) -> Vec<Diagnostic> {
     use std::collections::{BTreeMap, BTreeSet};
 
-    const THRESHOLD: usize = 4;
+    // Three, not four: a threshold sweep over the corpus (mutating each `part-of`
+    // block into `supports`) caught 1/2 enumerations at 4 and 2/2 at 3, with no new
+    // false positives on any clean document. Dropping to 2 flags `well-water`, which
+    // gathers genuine independent evidence — so 3 is the lowest value that stays quiet.
+    const THRESHOLD: usize = 3;
 
     let mut foci: BTreeSet<&str> = BTreeSet::new();
     for o in &canon.objects {

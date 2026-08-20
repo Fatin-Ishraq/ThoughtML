@@ -3288,6 +3288,26 @@ fn lint_flags_supports_used_as_a_list() {
     assert!(crate::lint::supports_as_list(&parse_str(&src2).canonical).is_empty());
 }
 
+/// Both ends of the threshold, pinned. A sweep over the corpus — mutating every
+/// `part-of` block into `supports` — caught 1 of 2 enumerations at a threshold of
+/// 4 and 2 of 2 at 3, with no new false positives on any clean document. Dropping
+/// to 2 starts flagging genuine independent evidence. So three items is the lint's
+/// floor and two is deliberately silent; this test fails if either end moves.
+#[test]
+fn lint_threshold_sits_at_three_supports() {
+    let head = "claim s\n  Summary.\nobservation i1\n  1.\nobservation i2\n  2.\n";
+
+    let three = format!("{head}observation i3\n  3.\nsupports s\n  i1\n  i2\n  i3\n");
+    let lints = crate::lint::supports_as_list(&parse_str(&three).canonical);
+    assert_eq!(lints.len(), 1, "three supports should flag: {lints:?}");
+
+    let two = format!("{head}supports s\n  i1\n  i2\n");
+    assert!(
+        crate::lint::supports_as_list(&parse_str(&two).canonical).is_empty(),
+        "two supports is ordinary evidence and must stay quiet"
+    );
+}
+
 #[test]
 fn explain_traces_a_defeated_node() {
     let src = "claim c\n  A claim.\nobservation pro\n  For it.\nobservation con\n  Against it.\n\

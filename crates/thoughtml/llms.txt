@@ -462,7 +462,7 @@ Install with `cargo install thoughtml` (or `npm install -g thoughtml`).
 | `TML305` | malformed decision subgraph | a `leads-to` self-loop, or an option missing from the EV ranking |
 | `TML401` | number declares no basis | add `measured`/`estimated`/`assumed` (only under `--strict-provenance`) |
 | `TML402` | weight/probability outside `0..1` | it was clamped — use a value in range |
-| `TML501` | `supports` used as a list (lint) | if these are items not evidence, use `part-of` (§6) — fires at ≥4 supports with no counter-evidence |
+| `TML501` | `supports` used as a list (lint) | if these are items not evidence, use `part-of` (§6) — fires at ≥3 supports with no counter-evidence |
 | `TML502` | circular justification (lint) | a `supports` loop: the claims inside it derive confidence from no outside evidence — give one of them real evidence, or merge them if they are one belief said twice |
 
 `TML101`–`TML104` come with a nearest-spelling suggestion. `TML105` is the guard against a *silent* loss: a known field in the wrong place used to be accepted and then ignored, so a document could stay strict-clean while dropping what its author wrote. Nothing the parser understands is discarded quietly. (Note: the `definition-
