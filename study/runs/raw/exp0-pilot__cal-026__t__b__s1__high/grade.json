@@ -1,0 +1,100 @@
+{
+  "compute_succeeded": true,
+  "diagnostics": [],
+  "features": {
+    "answer_key": "A",
+    "attack_share": 0.0,
+    "audit_conflicts": [],
+    "basis_counts": {
+      "assumed": 1
+    },
+    "confidences": [
+      1.0
+    ],
+    "correct": true,
+    "final_answer_confidence": 1.0,
+    "final_answer_text": "The answer is A.",
+    "has_attack": false,
+    "node_ids": [
+      "bag-composition",
+      "red-token-count",
+      "blue-token-count",
+      "green-token-count",
+      "unordered-pairs-equally-likely",
+      "all-unordered-pair-count",
+      "no-red-unordered-pair-count",
+      "red-containing-unordered-pair-count",
+      "red-red-unordered-pair-count",
+      "conditional-probability",
+      "final-answer"
+    ],
+    "posture_counts": {
+      "holds": 1
+    },
+    "relation_counts": {
+      "part-of": 3,
+      "supports": 7
+    },
+    "relations": [
+      {
+        "from": "red-token-count",
+        "relation": "part-of",
+        "to": "bag-composition"
+      },
+      {
+        "from": "blue-token-count",
+        "relation": "part-of",
+        "to": "bag-composition"
+      },
+      {
+        "from": "green-token-count",
+        "relation": "part-of",
+        "to": "bag-composition"
+      },
+      {
+        "from": "bag-composition",
+        "relation": "supports",
+        "to": "all-unordered-pair-count"
+      },
+      {
+        "from": "bag-composition",
+        "relation": "supports",
+        "to": "no-red-unordered-pair-count"
+      },
+      {
+        "from": "bag-composition",
+        "relation": "supports",
+        "to": "red-red-unordered-pair-count"
+      },
+      {
+        "from": "unordered-pairs-equally-likely",
+        "relation": "supports",
+        "to": "red-containing-unordered-pair-count"
+      },
+      {
+        "from": "red-red-unordered-pair-count",
+        "relation": "supports",
+        "to": "conditional-probability"
+      },
+      {
+        "from": "red-containing-unordered-pair-count",
+        "relation": "supports",
+        "to": "conditional-probability"
+      },
+      {
+        "from": "conditional-probability",
+        "relation": "supports",
+        "to": "final-answer"
+      }
+    ],
+    "selected_option": "A",
+    "text_number_field_count": 7,
+    "text_number_fields_missing_basis": 0
+  },
+  "format": "thoughtml",
+  "lint_clean": true,
+  "lint_diagnostics": [],
+  "parseable": true,
+  "strict_clean": true,
+  "strict_provenance_clean": true
+}

@@ -1,0 +1,22 @@
+observation total-faces
+  There are eight equally likely upward faces.
+  quantity 8 faces assumed
+
+observation favorable-faces
+  Only labels three and six are multiples of three.
+  quantity 2 faces measured
+
+claim exact-probability
+  The favorable count divided by the total count is one quarter.
+  = favorable-faces / total-faces
+
+analyst infers exact-probability from favorable-faces total-faces
+  confidence 1 assumed
+
+claim final-answer
+  The answer is A.
+
+link exact-probability supports final-answer
+
+model holds final-answer
+  confidence 1 assumed

@@ -1,0 +1,52 @@
+claim bag-composition
+  The stated token composition.
+
+observation red-token-count
+  quantity 5 tokens assumed
+
+observation blue-token-count
+  quantity 4 tokens assumed
+
+observation green-token-count
+  quantity 3 tokens assumed
+
+part-of bag-composition
+  red-token-count
+  blue-token-count
+  green-token-count
+
+assumption unordered-pairs-equally-likely
+  Each unordered draw pair is equally likely.
+
+observation all-unordered-pair-count
+  quantity 66 pairs measured
+
+observation no-red-unordered-pair-count
+  quantity 21 pairs measured
+
+claim red-containing-unordered-pair-count
+  The conditioned sample-space count excludes pairs without a red token.
+  = all-unordered-pair-count - no-red-unordered-pair-count
+
+observation red-red-unordered-pair-count
+  quantity 10 pairs measured
+
+link bag-composition supports all-unordered-pair-count
+link bag-composition supports no-red-unordered-pair-count
+link bag-composition supports red-red-unordered-pair-count
+link unordered-pairs-equally-likely supports red-containing-unordered-pair-count
+
+claim conditional-probability
+  The favorable unordered-pair count is divided by the conditioned sample-space count.
+  = red-red-unordered-pair-count / red-containing-unordered-pair-count
+
+link red-red-unordered-pair-count supports conditional-probability
+link red-containing-unordered-pair-count supports conditional-probability
+
+claim final-answer
+  The answer is A.
+
+link conditional-probability supports final-answer
+
+model holds final-answer
+  confidence 1 assumed

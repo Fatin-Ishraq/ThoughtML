@@ -1,0 +1,18 @@
+claim low-risk-comparison
+  A succeeds for 81 of 87 patients, while B succeeds for 234 of 270; A's rate is higher.
+
+claim high-risk-comparison
+  A succeeds for 192 of 263 patients, while B succeeds for 55 of 80; A's rate is higher.
+
+claim pooled-comparison
+  Pooling groups, A succeeds for 273 of 350 patients and B succeeds for 289 of 350; B's rate is higher.
+
+decision final-answer
+  The answer is D.
+
+link low-risk-comparison supports final-answer
+link high-risk-comparison supports final-answer
+link pooled-comparison supports final-answer
+
+model holds final-answer
+  confidence 1

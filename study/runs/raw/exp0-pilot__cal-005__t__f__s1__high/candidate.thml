@@ -1,0 +1,14 @@
+observation eight-equally-likely-faces
+  The possible upward results are 1 through 8, so there are 8 equally likely outcomes.
+
+observation favorable-multiples
+  The multiples of 3 among the labels are 3 and 6, so there are 2 favorable outcomes.
+
+claim final-answer
+  The answer is A.
+
+link eight-equally-likely-faces supports final-answer
+link favorable-multiples supports final-answer
+
+model holds final-answer
+  confidence 1

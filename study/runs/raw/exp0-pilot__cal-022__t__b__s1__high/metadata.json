@@ -1,0 +1,80 @@
+{
+  "attempts": [
+    {
+      "attempt": 1,
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Users\\Fatin\\AppData\\Roaming\\npm\\node_modules\\@openai\\codex\\bin\\codex.js",
+        "exec",
+        "--skip-git-repo-check",
+        "--ephemeral",
+        "--ignore-user-config",
+        "--ignore-rules",
+        "--strict-config",
+        "--sandbox",
+        "read-only",
+        "--config",
+        "approval_policy=\"never\"",
+        "--model",
+        "gpt-5.6-terra",
+        "--config",
+        "model_reasoning_effort=\"high\"",
+        "--color",
+        "never",
+        "--json",
+        "--output-last-message",
+        "C:\\Users\\Fatin\\Downloads\\tml2\\study\\runs\\raw\\exp0-pilot__cal-022__t__b__s1__high\\attempt-1\\final.txt",
+        "-"
+      ],
+      "completed_at": "2026-08-21T15:30:16.034965Z",
+      "elapsed_seconds": 21.597,
+      "exit_code": 0,
+      "final_bytes": 857,
+      "observed_settings": {
+        "model": [],
+        "reasoning_effort": []
+      },
+      "started_at": "2026-08-21T15:29:54.436702Z",
+      "timed_out": false,
+      "tool_event": false,
+      "tool_event_hits": []
+    }
+  ],
+  "context_audit": {
+    "ephemeral": true,
+    "neutral_scratch_directory": true,
+    "project_rules_ignored": true,
+    "transcript_can_prove_absence_of_injected_hidden_context": false,
+    "user_config_ignored": true
+  },
+  "excluded": false,
+  "exclusion_reasons": [],
+  "payload_transport": "stdin-closed-after-write",
+  "prompt_sha256": "7d2dd74e5a1f9c2194280ed019bf6330ff6e8fdc88d0fb75ca4b11c05a3cf650",
+  "run": {
+    "arm": "T",
+    "condition": "B",
+    "model": "gpt-5.6-terra",
+    "phase": "exp0-pilot",
+    "prompt_bytes": 40631,
+    "prompt_sha256": "7d2dd74e5a1f9c2194280ed019bf6330ff6e8fdc88d0fb75ca4b11c05a3cf650",
+    "reasoning_effort": "high",
+    "run_id": "exp0-pilot__cal-022__t__b__s1__high",
+    "sample": 1,
+    "task_id": "cal-022",
+    "vendor": "openai"
+  },
+  "schema_version": 1,
+  "successful_attempt": 1,
+  "task_metadata": {
+    "answer": "B",
+    "difficulty": "hard",
+    "domain": "scheduling",
+    "id": "cal-022",
+    "rationale": "C ends day 8, D day 6, F day 11, E day 8, and G ends day 13; the critical path is A-C-F-G.",
+    "software_related": false,
+    "verification": {
+      "solver": "critical_path"
+    }
+  }
+}

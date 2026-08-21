@@ -69,3 +69,30 @@ all were unparseable and produced zero exposure hits. Version 2.4 changes only
 collection order; models, tasks, prompts, sample sizes, grading, hypotheses,
 inclusion rules, and analysis remain fixed. This post-probe amendment is tagged
 separately from the v2.3 pre-data baseline.
+
+## P09 — [EXP0 BLOCKER] calibration pilot exceeded the ceiling gate
+
+The complete discarded v2.4 Terra pilot produced 27/30 correct in Condition B
+and 30/30 correct in Condition F. The registered acceptance rule required each
+condition to contain 15–24 correct and at least 6 incorrect responses. Condition
+B had 3 incorrect and Condition F had none, so both failed. Of all 60 runs, 59
+were parseable, 57 were strict-clean, none was excluded, none used tools, and no
+retry occurred. Experiment 0 pilot reruns and main collection remain blocked
+until the calibration corpus is made materially harder, independently reviewed,
+documented as a post-pilot revision, and frozen under a new manifest.
+The reproducible report is generated with
+`python study/scripts/benchmark.py analyze --phase exp0-pilot --out study/runs/analysis/exp0-pilot-v2.4-summary.json`.
+
+## P10 — RESOLVED: withdraw redundant GPT-5.4 arm (v2.5)
+
+After the 20 OpenAI cued probes and the discarded 60-run Terra pilot, the author
+withdrew `gpt-5.4` from the confirmatory panel as redundant with the retained
+GPT-5.6 sibling contrast. [External Artificial Analysis results](https://artificialanalysis.ai/models/comparisons/gpt-5-6-luna-xhigh-vs-gpt-5-4)
+placed GPT-5.4 and GPT-5.6 Luna within three Intelligence Index points at xhigh (53 vs. 50),
+although the study itself uses high effort; the external score is treated as a
+panel-design heuristic, not as evidence about ThoughtML. GPT-5.4's five existing
+cued-probe records are retained unchanged and reported as withdrawn historical
+data, but are omitted from v2.5 schedules and confirmatory analyses. No
+Experiment 0 main, Experiment 1, Experiment 5, or DeepSeek response existed when
+the arm was withdrawn. The complete historical probe report is regenerated with
+`python study/scripts/benchmark.py analyze --phase probe-cued --include-withdrawn --out study/runs/analysis/probe-cued-openai-v2.4-summary.json`.

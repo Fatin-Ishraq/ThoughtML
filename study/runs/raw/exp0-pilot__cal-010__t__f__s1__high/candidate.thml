@@ -1,0 +1,23 @@
+observation prevalence-d
+  P(D) = 0.10.
+
+observation sensitivity
+  P(+ | D) = 0.80.
+
+observation false-positive-rate
+  P(+ | not-D) = 0.20.
+
+claim posterior-calculation
+  P(D | +) = (0.10 × 0.80) / ((0.10 × 0.80) + (0.90 × 0.20)) = 0.08 / 0.26 = 0.3077.
+
+link prevalence-d supports posterior-calculation
+link sensitivity supports posterior-calculation
+link false-positive-rate supports posterior-calculation
+
+claim final-answer
+  The answer is A.
+
+link posterior-calculation supports final-answer
+
+model holds final-answer
+  confidence 1 assumed

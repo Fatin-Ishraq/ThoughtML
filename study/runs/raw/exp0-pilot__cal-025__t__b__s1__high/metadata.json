@@ -1,0 +1,80 @@
+{
+  "attempts": [
+    {
+      "attempt": 1,
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Users\\Fatin\\AppData\\Roaming\\npm\\node_modules\\@openai\\codex\\bin\\codex.js",
+        "exec",
+        "--skip-git-repo-check",
+        "--ephemeral",
+        "--ignore-user-config",
+        "--ignore-rules",
+        "--strict-config",
+        "--sandbox",
+        "read-only",
+        "--config",
+        "approval_policy=\"never\"",
+        "--model",
+        "gpt-5.6-terra",
+        "--config",
+        "model_reasoning_effort=\"high\"",
+        "--color",
+        "never",
+        "--json",
+        "--output-last-message",
+        "C:\\Users\\Fatin\\Downloads\\tml2\\study\\runs\\raw\\exp0-pilot__cal-025__t__b__s1__high\\attempt-1\\final.txt",
+        "-"
+      ],
+      "completed_at": "2026-08-21T15:34:04.661416Z",
+      "elapsed_seconds": 15.95,
+      "exit_code": 0,
+      "final_bytes": 633,
+      "observed_settings": {
+        "model": [],
+        "reasoning_effort": []
+      },
+      "started_at": "2026-08-21T15:33:48.710737Z",
+      "timed_out": false,
+      "tool_event": false,
+      "tool_event_hits": []
+    }
+  ],
+  "context_audit": {
+    "ephemeral": true,
+    "neutral_scratch_directory": true,
+    "project_rules_ignored": true,
+    "transcript_can_prove_absence_of_injected_hidden_context": false,
+    "user_config_ignored": true
+  },
+  "excluded": false,
+  "exclusion_reasons": [],
+  "payload_transport": "stdin-closed-after-write",
+  "prompt_sha256": "d7f39fcca1751f8c501f877bf36b50a21edefc687ae11a76dfa808f7f8ec5525",
+  "run": {
+    "arm": "T",
+    "condition": "B",
+    "model": "gpt-5.6-terra",
+    "phase": "exp0-pilot",
+    "prompt_bytes": 40655,
+    "prompt_sha256": "d7f39fcca1751f8c501f877bf36b50a21edefc687ae11a76dfa808f7f8ec5525",
+    "reasoning_effort": "high",
+    "run_id": "exp0-pilot__cal-025__t__b__s1__high",
+    "sample": 1,
+    "task_id": "cal-025",
+    "vendor": "openai"
+  },
+  "schema_version": 1,
+  "successful_attempt": 1,
+  "task_metadata": {
+    "answer": "C",
+    "difficulty": "hard",
+    "domain": "probability",
+    "id": "cal-025",
+    "rationale": "P(Down at 2) = .8(.2) + .2(.6) = .28.",
+    "software_related": false,
+    "verification": {
+      "solver": "markov_two_step"
+    }
+  }
+}

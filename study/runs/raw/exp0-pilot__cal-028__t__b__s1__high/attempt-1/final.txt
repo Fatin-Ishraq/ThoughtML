@@ -1,0 +1,23 @@
+assumption causal-equations
+  X equals U, and Y is one precisely when X differs from U; otherwise Y is zero.
+
+observation observed-context
+  U and X are one, while Y is zero.
+
+action intervene-on-x
+  The intervention sets X to zero while leaving U fixed at one.
+
+claim counterfactual-y
+  Under the intervention, X differs from U, so Y is one.
+
+link causal-equations supports counterfactual-y
+link observed-context supports counterfactual-y
+link intervene-on-x supports counterfactual-y
+
+claim final-answer
+  The answer is D.
+
+link counterfactual-y supports final-answer
+
+model holds final-answer
+  confidence 0.99 assumed

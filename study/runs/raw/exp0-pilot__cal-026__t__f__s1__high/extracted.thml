@@ -1,0 +1,19 @@
+observation red-red-pairs
+  There are C(5,2) = 10 unordered pairs containing two red tokens.
+
+observation conditioned-pairs
+  There are C(12,2) - C(7,2) = 45 unordered pairs containing at least one red token.
+
+claim conditional-probability
+  The conditional probability is 10/45 = 2/9.
+
+link red-red-pairs supports conditional-probability
+link conditioned-pairs supports conditional-probability
+
+claim final-answer
+  The answer is A.
+
+link conditional-probability supports final-answer
+
+model holds final-answer
+  confidence 1 assumed

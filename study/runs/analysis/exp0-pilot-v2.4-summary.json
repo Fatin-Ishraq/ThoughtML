@@ -1,0 +1,96 @@
+{
+  "by_arm_condition": [
+    {
+      "accuracy": 0.9,
+      "arm": "T",
+      "condition": "B",
+      "confidence_auroc": 0.46153846153846156,
+      "documents_with_attack_rate": 0.06666666666666667,
+      "excluded": 0,
+      "included": 30,
+      "lint_clean_rate": 0.6333333333333333,
+      "mean_attack_share": 0.04655172413793104,
+      "mean_final_confidence": 0.9992857142857143,
+      "parse_rate": 0.9666666666666667,
+      "probe_exposure_hits": 0,
+      "scheduled_or_observed": 30,
+      "strict_clean_rate": 0.9
+    },
+    {
+      "accuracy": 1.0,
+      "arm": "T",
+      "condition": "F",
+      "confidence_auroc": null,
+      "documents_with_attack_rate": 0.0,
+      "excluded": 0,
+      "included": 30,
+      "lint_clean_rate": 0.8333333333333334,
+      "mean_attack_share": 0.0,
+      "mean_final_confidence": 0.999,
+      "parse_rate": 1.0,
+      "probe_exposure_hits": 0,
+      "scheduled_or_observed": 30,
+      "strict_clean_rate": 1.0
+    }
+  ],
+  "excluded_runs": 0,
+  "generated_at": "2026-08-21T15:51:07.758872Z",
+  "included_runs": 60,
+  "limitations": [
+    "This interim standard-library report is descriptive.",
+    "Primary clustered tests, Holm correction, power simulation, and Rule J are not claimed complete here."
+  ],
+  "observed_runs": 60,
+  "operations": {
+    "attempts": 60,
+    "completed_first_attempt": 60,
+    "elapsed_seconds": 1095.65,
+    "runs_with_retries": 0,
+    "tool_event_runs": 0,
+    "usage": {
+      "cached_input_tokens": 623104,
+      "input_tokens": 1444517,
+      "output_tokens": 45625,
+      "reasoning_output_tokens": 34386
+    }
+  },
+  "phase_filter": "exp0-pilot",
+  "pilot_acceptance": {
+    "conditions": {
+      "B": {
+        "correct": 27,
+        "correct_window": [
+          15,
+          24
+        ],
+        "included": 30,
+        "incorrect": 3,
+        "minimum_incorrect": 6,
+        "passed": false
+      },
+      "F": {
+        "correct": 30,
+        "correct_window": [
+          15,
+          24
+        ],
+        "included": 30,
+        "incorrect": 0,
+        "minimum_incorrect": 6,
+        "passed": false
+      }
+    },
+    "passed": false,
+    "rule": "Each condition must have 15-24 correct and at least 6 incorrect among 30 included runs."
+  },
+  "rule_s": {
+    "mean_relation_jaccard_defined_pairs": null,
+    "note": "Rule J remains pending its separately frozen judge implementation and kappa gate.",
+    "pairs": 0,
+    "rule": "S-floor",
+    "undefined_relation_pairs": 0
+  },
+  "schema_version": 1,
+  "withdrawn_models_in_raw_data": [],
+  "withdrawn_runs_omitted": 0
+}

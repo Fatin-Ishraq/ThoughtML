@@ -1,0 +1,41 @@
+scope batch-defect-calculation
+  observation line-a-output
+    Components produced by Line A.
+    quantity 120 component measured
+
+  observation line-a-defect-rate
+    Exact expected defect proportion for Line A.
+    quantity 4 percent assumed
+
+  observation line-b-output
+    Components produced by Line B.
+    quantity 80 component measured
+
+  observation line-b-defect-rate
+    Exact expected defect proportion for Line B.
+    quantity 10 percent assumed
+
+  claim total-output
+    Combined component output.
+    = line-a-output + line-b-output
+
+  claim weighted-defect-total
+    Sum of each line's output weighted by its defect percentage.
+    = line-a-output * line-a-defect-rate + line-b-output * line-b-defect-rate
+
+  claim batch-defect-percentage
+    Overall defect percentage of the combined batch.
+    = weighted-defect-total / total-output
+
+  option option-d
+    The choice corresponding to the computed batch defect percentage.
+
+  link batch-defect-percentage supports option-d
+
+  claim final-answer
+    The answer is D.
+
+  link option-d supports final-answer
+
+  model holds final-answer
+    confidence 1 assumed

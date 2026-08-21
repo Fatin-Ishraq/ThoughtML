@@ -1,0 +1,212 @@
+{
+  "compute_succeeded": true,
+  "diagnostics": [],
+  "features": {
+    "answer_key": "D",
+    "attack_share": 0.0,
+    "audit_conflicts": [],
+    "basis_counts": {
+      "assumed": 1
+    },
+    "confidences": [
+      1.0
+    ],
+    "correct": true,
+    "final_answer_confidence": 1.0,
+    "final_answer_text": "The answer is D.",
+    "has_attack": false,
+    "node_ids": [
+      "low-a-successes",
+      "low-a-patients",
+      "low-b-successes",
+      "low-b-patients",
+      "high-a-successes",
+      "high-a-patients",
+      "high-b-successes",
+      "high-b-patients",
+      "low-a-rate",
+      "low-b-rate",
+      "high-a-rate",
+      "high-b-rate",
+      "a-better-low-risk",
+      "a-better-high-risk",
+      "pooled-a-successes",
+      "pooled-a-patients",
+      "pooled-b-successes",
+      "pooled-b-patients",
+      "pooled-a-rate",
+      "pooled-b-rate",
+      "b-better-overall",
+      "final-answer"
+    ],
+    "posture_counts": {
+      "holds": 1
+    },
+    "relation_counts": {
+      "supports": 29
+    },
+    "relations": [
+      {
+        "from": "low-a-successes",
+        "relation": "supports",
+        "to": "low-a-rate"
+      },
+      {
+        "from": "low-a-patients",
+        "relation": "supports",
+        "to": "low-a-rate"
+      },
+      {
+        "from": "low-b-successes",
+        "relation": "supports",
+        "to": "low-b-rate"
+      },
+      {
+        "from": "low-b-patients",
+        "relation": "supports",
+        "to": "low-b-rate"
+      },
+      {
+        "from": "high-a-successes",
+        "relation": "supports",
+        "to": "high-a-rate"
+      },
+      {
+        "from": "high-a-patients",
+        "relation": "supports",
+        "to": "high-a-rate"
+      },
+      {
+        "from": "high-b-successes",
+        "relation": "supports",
+        "to": "high-b-rate"
+      },
+      {
+        "from": "high-b-patients",
+        "relation": "supports",
+        "to": "high-b-rate"
+      },
+      {
+        "from": "low-a-rate",
+        "relation": "supports",
+        "to": "a-better-low-risk"
+      },
+      {
+        "from": "low-b-rate",
+        "relation": "supports",
+        "to": "a-better-low-risk"
+      },
+      {
+        "from": "high-a-rate",
+        "relation": "supports",
+        "to": "a-better-high-risk"
+      },
+      {
+        "from": "high-b-rate",
+        "relation": "supports",
+        "to": "a-better-high-risk"
+      },
+      {
+        "from": "low-a-successes",
+        "relation": "supports",
+        "to": "pooled-a-successes"
+      },
+      {
+        "from": "high-a-successes",
+        "relation": "supports",
+        "to": "pooled-a-successes"
+      },
+      {
+        "from": "low-a-patients",
+        "relation": "supports",
+        "to": "pooled-a-patients"
+      },
+      {
+        "from": "high-a-patients",
+        "relation": "supports",
+        "to": "pooled-a-patients"
+      },
+      {
+        "from": "low-b-successes",
+        "relation": "supports",
+        "to": "pooled-b-successes"
+      },
+      {
+        "from": "high-b-successes",
+        "relation": "supports",
+        "to": "pooled-b-successes"
+      },
+      {
+        "from": "low-b-patients",
+        "relation": "supports",
+        "to": "pooled-b-patients"
+      },
+      {
+        "from": "high-b-patients",
+        "relation": "supports",
+        "to": "pooled-b-patients"
+      },
+      {
+        "from": "pooled-a-successes",
+        "relation": "supports",
+        "to": "pooled-a-rate"
+      },
+      {
+        "from": "pooled-a-patients",
+        "relation": "supports",
+        "to": "pooled-a-rate"
+      },
+      {
+        "from": "pooled-b-successes",
+        "relation": "supports",
+        "to": "pooled-b-rate"
+      },
+      {
+        "from": "pooled-b-patients",
+        "relation": "supports",
+        "to": "pooled-b-rate"
+      },
+      {
+        "from": "pooled-a-rate",
+        "relation": "supports",
+        "to": "b-better-overall"
+      },
+      {
+        "from": "pooled-b-rate",
+        "relation": "supports",
+        "to": "b-better-overall"
+      },
+      {
+        "from": "a-better-low-risk",
+        "relation": "supports",
+        "to": "final-answer"
+      },
+      {
+        "from": "a-better-high-risk",
+        "relation": "supports",
+        "to": "final-answer"
+      },
+      {
+        "from": "b-better-overall",
+        "relation": "supports",
+        "to": "final-answer"
+      }
+    ],
+    "selected_option": "D",
+    "text_number_field_count": 9,
+    "text_number_fields_missing_basis": 0
+  },
+  "format": "thoughtml",
+  "lint_clean": false,
+  "lint_diagnostics": [
+    {
+      "code": "TML501",
+      "help": "if these are enumerated items rather than evidence, use `part-of` so they do not inflate the target's confidence",
+      "message": "focus `final-answer` gathers 3 `supports` links and no counter-evidence — if these are enumerated items, use `part-of` so they don't inflate its confidence",
+      "severity": "warning"
+    }
+  ],
+  "parseable": true,
+  "strict_clean": true,
+  "strict_provenance_clean": true
+}

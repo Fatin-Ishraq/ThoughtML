@@ -186,8 +186,8 @@ def validate_artifacts() -> list[ValidationMessage]:
         out.append(
             ValidationMessage("error", "AUTH_COUNT", f"authoring has {len(authoring)} tasks, expected 12")
         )
-    if len(models) != 6:
-        out.append(ValidationMessage("error", "MODEL_COUNT", f"model panel has {len(models)}, expected 6"))
+    if len(models) != 5:
+        out.append(ValidationMessage("error", "MODEL_COUNT", f"model panel has {len(models)}, expected 5"))
 
     seen: set[str] = set()
     difficulties: Counter[str] = Counter()
@@ -304,10 +304,10 @@ def validate_artifacts() -> list[ValidationMessage]:
         out.append(ValidationMessage("error", "MODEL_DUPLICATE", "model arms/slugs must be unique"))
 
     benchmark = read_json(CONFIG / "benchmark.json")
-    if benchmark.get("preregistration_version") != "2.4":
+    if benchmark.get("preregistration_version") != "2.5":
         out.append(
             ValidationMessage(
-                "error", "PREREG_VERSION", "benchmark config is not pinned to protocol v2.4"
+                "error", "PREREG_VERSION", "benchmark config is not pinned to protocol v2.5"
             )
         )
     collection_order = benchmark.get("collection_order", {})
@@ -349,6 +349,14 @@ def validate_artifacts() -> list[ValidationMessage]:
                 "warning",
                 "OPEN_PROTOCOL_ISSUES",
                 "protocol-issues.md contains unresolved pre-data decisions; collection must not start",
+            )
+        )
+    if "[EXP0 BLOCKER]" in (STUDY / "protocol-issues.md").read_text(encoding="utf-8"):
+        out.append(
+            ValidationMessage(
+                "warning",
+                "EXP0_PROTOCOL_BLOCKER",
+                "Calibration corpus revision remains unresolved; Experiment 0 collection is blocked",
             )
         )
     if "[EXP1 BLOCKER]" in (STUDY / "protocol-issues.md").read_text(encoding="utf-8"):
@@ -572,12 +580,12 @@ def build_schedule(phase: str, seed: int) -> dict[str, Any]:
 
 
 EXPECTED_PHASE_COUNTS = {
-    "probe-cued": 30,
-    "probe-neutral": 30,
+    "probe-cued": 25,
+    "probe-neutral": 25,
     "exp0-pilot": 60,
-    "exp0-main": 360,
-    "exp1-thoughtml": 216,
-    "exp1-generic": 72,
+    "exp0-main": 300,
+    "exp1-thoughtml": 180,
+    "exp1-generic": 60,
     "exp5": 96,
 }
 

@@ -1,0 +1,25 @@
+observation initial-volume
+  quantity 12 L measured
+
+observation initial-salt-fraction
+  quantity 0.25 1 measured
+
+observation target-salt-fraction
+  quantity 0.15 1 assumed
+
+claim initial-salt-volume
+  = initial-volume * initial-salt-fraction
+
+claim final-volume
+  = initial-salt-volume / target-salt-fraction
+
+claim water-to-add
+  = final-volume - initial-volume
+
+claim final-answer
+  The answer is C.
+
+link water-to-add supports final-answer
+
+model holds final-answer
+  confidence 1 assumed

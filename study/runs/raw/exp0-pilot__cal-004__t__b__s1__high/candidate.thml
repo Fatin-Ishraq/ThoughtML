@@ -1,0 +1,14 @@
+claim shipment-copper-widgets-conduct
+  Every copper widget in the shipment is electrically conductive.
+
+observation widget-r-is-copper
+  Widget R is confirmed to be a copper widget from that shipment.
+
+claim final-answer
+  The answer is A.
+
+link shipment-copper-widgets-conduct supports final-answer
+link widget-r-is-copper supports final-answer
+
+model holds final-answer
+  confidence 1 assumed

@@ -1,0 +1,10 @@
+claim stock-calculation
+  The closing count is 720 - 185 + 96 - 210 + 54 = 475 filters.
+
+claim final-answer
+  The answer is D.
+
+link stock-calculation supports final-answer
+
+model holds final-answer
+  confidence 1

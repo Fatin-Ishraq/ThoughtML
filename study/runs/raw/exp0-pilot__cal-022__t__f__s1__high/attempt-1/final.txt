@@ -1,0 +1,50 @@
+scope project-schedule
+  action task-a
+    quantity 3 days measured
+    Task A starts immediately and finishes on day 3.
+
+  action task-b
+    quantity 4 days measured
+    Task B starts immediately and finishes on day 4.
+
+  action task-c
+    quantity 5 days measured
+    Task C follows A and finishes on day 8.
+
+  action task-d
+    quantity 2 days measured
+    Task D follows A and B and finishes on day 6.
+
+  action task-e
+    quantity 4 days measured
+    Task E follows B and finishes on day 8.
+
+  action task-f
+    quantity 3 days measured
+    Task F follows C and D, starts on day 8, and finishes on day 11.
+
+  action task-g
+    quantity 2 days measured
+    Task G follows E and F, starts on day 11, and finishes on day 13.
+
+  link task-c depends-on task-a
+  link task-d depends-on task-a
+  link task-d depends-on task-b
+  link task-e depends-on task-b
+  link task-f depends-on task-c
+  link task-f depends-on task-d
+  link task-g depends-on task-e
+  link task-g depends-on task-f
+
+  claim critical-path-calculation
+    The critical path is A-C-F-G: 3 + 5 + 3 + 2 = 13 days.
+
+  link task-g supports critical-path-calculation
+
+claim final-answer
+  The answer is B.
+
+link critical-path-calculation supports final-answer
+
+model holds final-answer
+  confidence 1

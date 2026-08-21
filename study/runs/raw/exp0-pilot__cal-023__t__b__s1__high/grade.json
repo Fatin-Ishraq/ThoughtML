@@ -1,0 +1,91 @@
+{
+  "compute_succeeded": true,
+  "diagnostics": [],
+  "features": {
+    "answer_key": "D",
+    "attack_share": 0.75,
+    "audit_conflicts": [],
+    "basis_counts": {
+      "assumed": 1
+    },
+    "confidences": [
+      1.0
+    ],
+    "correct": true,
+    "final_answer_confidence": 1.0,
+    "final_answer_text": "The answer is D.",
+    "has_attack": true,
+    "node_ids": [
+      "option-a",
+      "option-b",
+      "option-c",
+      "option-d",
+      "final-answer"
+    ],
+    "posture_counts": {
+      "holds": 1
+    },
+    "relation_counts": {
+      "answers": 1,
+      "candidate-for": 4,
+      "opposes": 3,
+      "supports": 1
+    },
+    "relations": [
+      {
+        "from": "option-a",
+        "relation": "candidate-for",
+        "to": "valid-schedule"
+      },
+      {
+        "from": "option-b",
+        "relation": "candidate-for",
+        "to": "valid-schedule"
+      },
+      {
+        "from": "option-c",
+        "relation": "candidate-for",
+        "to": "valid-schedule"
+      },
+      {
+        "from": "option-d",
+        "relation": "candidate-for",
+        "to": "valid-schedule"
+      },
+      {
+        "from": "option-a",
+        "relation": "opposes",
+        "to": "valid-schedule"
+      },
+      {
+        "from": "option-b",
+        "relation": "opposes",
+        "to": "valid-schedule"
+      },
+      {
+        "from": "option-c",
+        "relation": "opposes",
+        "to": "valid-schedule"
+      },
+      {
+        "from": "option-d",
+        "relation": "answers",
+        "to": "valid-schedule"
+      },
+      {
+        "from": "option-d",
+        "relation": "supports",
+        "to": "final-answer"
+      }
+    ],
+    "selected_option": "D",
+    "text_number_field_count": 1,
+    "text_number_fields_missing_basis": 0
+  },
+  "format": "thoughtml",
+  "lint_clean": true,
+  "lint_diagnostics": [],
+  "parseable": true,
+  "strict_clean": true,
+  "strict_provenance_clean": true
+}

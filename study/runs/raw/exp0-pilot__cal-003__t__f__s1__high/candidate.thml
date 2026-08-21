@@ -1,0 +1,10 @@
+observation schedule-calculation
+  The total duration is 45 + 15 + 70 + 20 = 150 minutes, so 9:35 a.m. plus 2 hours 30 minutes is 12:05 p.m.
+
+claim final-answer
+  The answer is C.
+
+link schedule-calculation supports final-answer
+
+model holds final-answer
+  confidence 1 assumed

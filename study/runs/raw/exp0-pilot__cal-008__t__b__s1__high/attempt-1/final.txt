@@ -1,0 +1,34 @@
+claim final-answer
+  The answer is C.
+
+observation tank-capacity
+  quantity 1 tank assumed
+
+observation pump-a-rate
+  quantity 1/6 tank/hour assumed
+
+observation pump-b-rate
+  quantity 1/8 tank/hour assumed
+
+observation joint-duration
+  quantity 2 hour assumed
+
+claim joint-work
+  = (pump-a-rate + pump-b-rate) * joint-duration
+
+claim remaining-work
+  = tank-capacity - joint-work
+
+claim pump-a-finish-duration
+  = remaining-work / pump-a-rate
+
+claim total-elapsed-time
+  = joint-duration + pump-a-finish-duration
+
+link joint-work supports remaining-work
+link remaining-work supports pump-a-finish-duration
+link pump-a-finish-duration supports total-elapsed-time
+link total-elapsed-time supports final-answer
+
+model holds final-answer
+  confidence 1 assumed

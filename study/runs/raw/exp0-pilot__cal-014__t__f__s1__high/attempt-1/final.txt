@@ -1,0 +1,33 @@
+scope token-puzzle
+  question token-location
+    Which box contains the token?
+    expects option
+
+  option token-in-j
+    If the token is in J, labels J and L are false while K and M are true: two labels are true.
+
+  option token-in-k
+    If the token is in K, label J is true while K, L, and M are false: exactly one label is true.
+
+  option token-in-l
+    If the token is in L, labels J and L are false while K and M are true: two labels are true.
+
+  option token-in-m
+    If the token is in M, J is false while K, L, and M are true: three labels are true.
+
+  candidate-for token-location
+    token-in-j
+    token-in-k
+    token-in-l
+    token-in-m
+
+  claim token-in-k-is-only-valid
+    Only the K location makes exactly one label true.
+
+  link token-in-k-is-only-valid supports final-answer
+
+  claim final-answer
+    The answer is B.
+
+  model holds final-answer
+    confidence 1 assumed

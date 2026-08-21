@@ -1,0 +1,10 @@
+claim loop-total
+  The iterations contribute (0) + (1 + 0) + (2 + 1 + 0) + (3 + 2 + 1 + 0) = 10.
+
+claim final-answer
+  The answer is B.
+
+link loop-total supports final-answer
+
+model holds final-answer
+  confidence 1

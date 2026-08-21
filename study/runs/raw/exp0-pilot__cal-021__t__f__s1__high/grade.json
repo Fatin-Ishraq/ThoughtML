@@ -1,0 +1,57 @@
+{
+  "compute_succeeded": true,
+  "diagnostics": [],
+  "features": {
+    "answer_key": "D",
+    "attack_share": 0.0,
+    "audit_conflicts": [],
+    "basis_counts": {
+      "assumed": 1
+    },
+    "confidences": [
+      1.0
+    ],
+    "correct": true,
+    "final_answer_confidence": 1.0,
+    "final_answer_text": "The answer is D.",
+    "has_attack": false,
+    "node_ids": [
+      "subject-counts",
+      "union-count",
+      "none-count",
+      "final-answer"
+    ],
+    "posture_counts": {
+      "holds": 1
+    },
+    "relation_counts": {
+      "supports": 3
+    },
+    "relations": [
+      {
+        "from": "subject-counts",
+        "relation": "supports",
+        "to": "union-count"
+      },
+      {
+        "from": "union-count",
+        "relation": "supports",
+        "to": "none-count"
+      },
+      {
+        "from": "none-count",
+        "relation": "supports",
+        "to": "final-answer"
+      }
+    ],
+    "selected_option": "D",
+    "text_number_field_count": 1,
+    "text_number_fields_missing_basis": 0
+  },
+  "format": "thoughtml",
+  "lint_clean": true,
+  "lint_diagnostics": [],
+  "parseable": true,
+  "strict_clean": true,
+  "strict_provenance_clean": true
+}

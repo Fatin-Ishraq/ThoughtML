@@ -1,0 +1,59 @@
+{
+  "compute_succeeded": true,
+  "diagnostics": [],
+  "features": {
+    "answer_key": "A",
+    "attack_share": 0.0,
+    "audit_conflicts": [],
+    "basis_counts": {
+      "assumed": 2
+    },
+    "confidences": [
+      1.0,
+      1.0
+    ],
+    "correct": true,
+    "final_answer_confidence": 1.0,
+    "final_answer_text": "The answer is A.",
+    "has_attack": false,
+    "node_ids": [
+      "total-faces",
+      "favorable-faces",
+      "exact-probability",
+      "final-answer"
+    ],
+    "posture_counts": {
+      "holds": 1,
+      "infers": 1
+    },
+    "relation_counts": {
+      "supports": 3
+    },
+    "relations": [
+      {
+        "from": "favorable-faces",
+        "relation": "supports",
+        "to": "exact-probability"
+      },
+      {
+        "from": "total-faces",
+        "relation": "supports",
+        "to": "exact-probability"
+      },
+      {
+        "from": "exact-probability",
+        "relation": "supports",
+        "to": "final-answer"
+      }
+    ],
+    "selected_option": "A",
+    "text_number_field_count": 4,
+    "text_number_fields_missing_basis": 0
+  },
+  "format": "thoughtml",
+  "lint_clean": true,
+  "lint_diagnostics": [],
+  "parseable": true,
+  "strict_clean": true,
+  "strict_provenance_clean": true
+}

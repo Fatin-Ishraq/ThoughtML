@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "preregistration_version": "2.4",
+  "preregistration_version": "2.5",
   "pinned_commit": "6b323bfaacab44ec0aef19dfa0abfdf98503959e",
   "thoughtml_version": "0.5.0",
   "grader_sha256": "99e3afa2222a00f3eb82315e4dd251259b19ecc296769f0e35ce5ed9cd38f5b0",

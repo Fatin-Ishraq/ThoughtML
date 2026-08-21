@@ -1,0 +1,28 @@
+observation prevalence
+  X prevalence is 1%.
+
+observation test-a-rates
+  Test A sensitivity is 90% and its false-positive rate is 5%.
+
+observation test-b-rates
+  Test B sensitivity is 70% and its false-positive rate is 1%.
+
+claim test-a-posterior
+  P(X | A+) = (0.01 × 0.90) / ((0.01 × 0.90) + (0.99 × 0.05)) = 0.153846, or about 15.4%.
+
+claim test-b-posterior
+  P(X | B+) = (0.01 × 0.70) / ((0.01 × 0.70) + (0.99 × 0.01)) = 0.414201, or about 41.4%.
+
+link prevalence supports test-a-posterior
+link test-a-rates supports test-a-posterior
+link prevalence supports test-b-posterior
+link test-b-rates supports test-b-posterior
+
+claim final-answer
+  The answer is C.
+
+link test-a-posterior supports final-answer
+link test-b-posterior supports final-answer
+
+model holds final-answer
+  confidence 1

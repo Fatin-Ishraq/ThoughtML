@@ -1,0 +1,64 @@
+{
+  "compute_succeeded": true,
+  "diagnostics": [],
+  "features": {
+    "answer_key": "B",
+    "attack_share": 0.0,
+    "audit_conflicts": [],
+    "basis_counts": {
+      "assumed": 1
+    },
+    "confidences": [
+      1.0
+    ],
+    "correct": true,
+    "final_answer_confidence": 1.0,
+    "final_answer_text": "The answer is B.",
+    "has_attack": false,
+    "node_ids": [
+      "route-a-b-c-d-e",
+      "route-a-c-d-e",
+      "route-a-b-d-e",
+      "route-comparison",
+      "final-answer"
+    ],
+    "posture_counts": {
+      "holds": 1
+    },
+    "relation_counts": {
+      "part-of": 3,
+      "supports": 1
+    },
+    "relations": [
+      {
+        "from": "route-a-b-c-d-e",
+        "relation": "part-of",
+        "to": "route-comparison"
+      },
+      {
+        "from": "route-a-c-d-e",
+        "relation": "part-of",
+        "to": "route-comparison"
+      },
+      {
+        "from": "route-a-b-d-e",
+        "relation": "part-of",
+        "to": "route-comparison"
+      },
+      {
+        "from": "route-comparison",
+        "relation": "supports",
+        "to": "final-answer"
+      }
+    ],
+    "selected_option": "B",
+    "text_number_field_count": 1,
+    "text_number_fields_missing_basis": 0
+  },
+  "format": "thoughtml",
+  "lint_clean": true,
+  "lint_diagnostics": [],
+  "parseable": true,
+  "strict_clean": true,
+  "strict_provenance_clean": true
+}

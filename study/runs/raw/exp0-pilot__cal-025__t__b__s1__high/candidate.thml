@@ -1,0 +1,20 @@
+observation up-then-down
+  The Up intermediate path contributes 0.8 measured times 0.2 measured, equaling 0.16 measured.
+
+observation down-then-down
+  The Down intermediate path contributes 0.2 measured times 0.6 measured, equaling 0.12 measured.
+
+claim probability-down-after-two-hours
+  Adding both intermediate paths gives 0.16 measured plus 0.12 measured, equaling 0.28 measured.
+
+link up-then-down supports probability-down-after-two-hours
+  weight 1 assumed
+
+link down-then-down supports probability-down-after-two-hours
+  weight 1 assumed
+
+claim final-answer
+  The answer is C.
+
+model holds final-answer
+  confidence 1 assumed

@@ -1,0 +1,10 @@
+observation state-trace
+  Starting in state A, the successive states after reading zero, one, zero, one, and one are B, C, C, A, and C.
+
+claim final-answer
+  The answer is C.
+
+link state-trace supports final-answer
+
+model holds final-answer
+  confidence 1 measured

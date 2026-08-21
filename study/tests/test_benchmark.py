@@ -91,9 +91,10 @@ class ArtifactTests(unittest.TestCase):
 
 
 class ScheduleTests(unittest.TestCase):
-    def test_rule_j_blocks_only_experiment_1(self) -> None:
+    def test_phase_blockers_are_scoped(self) -> None:
         self.assertEqual(benchmark.phase_protocol_issues("probe-cued"), [])
-        self.assertEqual(benchmark.phase_protocol_issues("exp0-pilot"), [])
+        self.assertTrue(benchmark.phase_protocol_issues("exp0-pilot"))
+        self.assertTrue(benchmark.phase_protocol_issues("exp0-main"))
         self.assertTrue(benchmark.phase_protocol_issues("exp1-thoughtml"))
         self.assertTrue(benchmark.phase_protocol_issues("exp1-generic"))
 
@@ -108,6 +109,11 @@ class ScheduleTests(unittest.TestCase):
         a = lib.build_schedule("exp1-thoughtml", 123)
         b = lib.build_schedule("exp1-thoughtml", 123)
         self.assertEqual([x["run_id"] for x in a["items"]], [x["run_id"] for x in b["items"]])
+
+    def test_withdrawn_gpt_5_4_is_not_scheduled(self) -> None:
+        for phase in ("probe-cued", "exp0-main", "exp1-thoughtml", "exp1-generic"):
+            schedule = lib.build_schedule(phase, 20260821)
+            self.assertNotIn("gpt-5.4", {item["model"] for item in schedule["items"]})
 
     def test_gpt_arms_precede_deepseek_arms(self) -> None:
         for phase in ("probe-cued", "probe-neutral", "exp0-main", "exp1-thoughtml", "exp1-generic"):
@@ -186,6 +192,49 @@ model holds final-answer
 
 
 class MetricTests(unittest.TestCase):
+    def test_pilot_acceptance_gate(self) -> None:
+        passing = []
+        failing = []
+        for condition in ("B", "F"):
+            passing.extend(
+                {"condition": condition, "correct": index < 20, "excluded": False}
+                for index in range(30)
+            )
+            failing.extend(
+                {"condition": condition, "correct": index < 27, "excluded": False}
+                for index in range(30)
+            )
+        self.assertTrue(benchmark.pilot_acceptance(passing)["passed"])
+        self.assertFalse(benchmark.pilot_acceptance(failing)["passed"])
+
+    def test_operational_summary(self) -> None:
+        rows = [
+            {
+                "attempt_count": 1,
+                "tool_event": False,
+                "elapsed_seconds": 1.25,
+                "input_tokens": 10,
+                "cached_input_tokens": 4,
+                "output_tokens": 2,
+                "reasoning_output_tokens": 1,
+            },
+            {
+                "attempt_count": 2,
+                "tool_event": True,
+                "elapsed_seconds": 2.5,
+                "input_tokens": 20,
+                "cached_input_tokens": 5,
+                "output_tokens": 3,
+                "reasoning_output_tokens": 2,
+            },
+        ]
+        summary = benchmark.operational_summary(rows)
+        self.assertEqual(summary["attempts"], 3)
+        self.assertEqual(summary["completed_first_attempt"], 1)
+        self.assertEqual(summary["runs_with_retries"], 1)
+        self.assertEqual(summary["tool_event_runs"], 1)
+        self.assertEqual(summary["usage"]["input_tokens"], 30)
+
     def test_auroc(self) -> None:
         self.assertEqual(lib.auroc([True, False], [0.9, 0.1]), 1.0)
         self.assertEqual(lib.auroc([True, False], [0.5, 0.5]), 0.5)

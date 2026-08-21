@@ -1,0 +1,18 @@
+observation subject-counts
+  Mathematics 110, physics 90, computing 80; pairwise counts 50, 45, and 35 include all-three students; all three is 20.
+
+claim union-count
+  Three-set inclusion-exclusion gives 110 + 90 + 80 - 50 - 45 - 35 + 20 = 170 students studying at least one subject.
+
+claim none-count
+  Of 200 students, 200 - 170 = 30 study none of the three subjects.
+
+claim final-answer
+  The answer is D.
+
+link subject-counts supports union-count
+link union-count supports none-count
+link none-count supports final-answer
+
+model holds final-answer
+  confidence 1 assumed

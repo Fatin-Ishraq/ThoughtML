@@ -1,0 +1,70 @@
+{
+  "compute_succeeded": true,
+  "diagnostics": [],
+  "features": {
+    "answer_key": "C",
+    "attack_share": 0.0,
+    "audit_conflicts": [],
+    "basis_counts": {
+      "assumed": 1
+    },
+    "confidences": [
+      1.0
+    ],
+    "correct": true,
+    "final_answer_confidence": 1.0,
+    "final_answer_text": "The answer is C.",
+    "has_attack": false,
+    "node_ids": [
+      "recorded-distance",
+      "recorded-time",
+      "minutes-per-hour",
+      "travel-time-hours",
+      "average-speed-calculation",
+      "final-answer"
+    ],
+    "posture_counts": {
+      "holds": 1
+    },
+    "relation_counts": {
+      "depends-on": 4,
+      "supports": 1
+    },
+    "relations": [
+      {
+        "from": "travel-time-hours",
+        "relation": "depends-on",
+        "to": "recorded-time"
+      },
+      {
+        "from": "travel-time-hours",
+        "relation": "depends-on",
+        "to": "minutes-per-hour"
+      },
+      {
+        "from": "average-speed-calculation",
+        "relation": "depends-on",
+        "to": "recorded-distance"
+      },
+      {
+        "from": "average-speed-calculation",
+        "relation": "depends-on",
+        "to": "travel-time-hours"
+      },
+      {
+        "from": "average-speed-calculation",
+        "relation": "supports",
+        "to": "final-answer"
+      }
+    ],
+    "selected_option": "C",
+    "text_number_field_count": 4,
+    "text_number_fields_missing_basis": 0
+  },
+  "format": "thoughtml",
+  "lint_clean": true,
+  "lint_diagnostics": [],
+  "parseable": true,
+  "strict_clean": true,
+  "strict_provenance_clean": true
+}

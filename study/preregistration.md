@@ -1,9 +1,9 @@
 # Pre-registration: Measuring AI-Authored Reasoning Traces Across Models in a Fixed Agent Harness
 
 **Author:** Fatin Ishraq
-**Protocol version:** 2.4
-**Date filed:** 2026-08-20 (v1.0) · amended 2026-08-20 (v1.1–v1.4) · redesigned 2026-08-20 (v2.0) · amended 2026-08-21 (v2.1–v2.3) · **post-probe sequencing amendment 2026-08-21 (v2.4)**
-**Status:** The v2.3 protocol was publicly frozen before collection. Version 2.4 was filed after the 20 GPT/OpenAI cued-probe responses, but before the Experiment 0 model pilot, any main experiment, or any DeepSeek response. The observed probe outcomes and the scope of this amendment are disclosed in §13, entry 18.
+**Protocol version:** 2.5
+**Date filed:** 2026-08-20 (v1.0) · amended 2026-08-20 (v1.1–v1.4) · redesigned 2026-08-20 (v2.0) · amended 2026-08-21 (v2.1–v2.4) · **post-pilot panel amendment 2026-08-21 (v2.5)**
+**Status:** The v2.3 protocol was publicly frozen before collection. Version 2.5 was filed after 20 GPT/OpenAI cued-probe responses and the complete discarded 60-run Terra pilot, but before any main experiment or DeepSeek response. The observed data, failed pilot gate, and withdrawn GPT-5.4 arm are disclosed in §13, entries 19–20.
 
 **v2.0 is a redesign, not an amendment.** Versions 1.0–1.4 compared four first-party vendor agent systems, in which model and harness were confounded by construction and the study could only disclose the confound rather than remove it. v2.0 holds the harness fixed and varies the model inside it. The unit of analysis, the research questions, and the arms all change. Versions 1.0–1.4 remain in the public git history (`cdcf74f`, `b8b12e4`, `7951f05`, `fece65d`, `22c4882`, `667d7e5`) and are superseded, not deleted. See §13, entry 12.
 
@@ -26,6 +26,7 @@ Every number in this study is produced by the artifacts below. They do not chang
 | Control-schema payload SHA-256 (Condition G) | recorded in a versioned frozen manifest before Experiment 1 begins |
 | Pre-data public timestamp | Annotated Git tag `study-predata-v2.3`; pushed before the first registered call |
 | Post-probe sequencing amendment | Annotated Git tag `study-protocol-v2.4`; filed with all 20 existing OpenAI probe records |
+| Post-pilot panel amendment | Annotated Git tag `study-protocol-v2.5`; filed with the 60-run pilot and all prior probe records |
 
 **Model panel, pinned by slug.** Availability was verified by live invocation on 2026-08-20; `gpt-5.6-sol` required a re-authentication before it resolved, and `gpt-5.1` was rejected under every slug tried.
 
@@ -34,9 +35,12 @@ Every number in this study is produced by the artifacts below. They do not chang
 | T | `gpt-5.6-terra` | within-generation variant |
 | L | `gpt-5.6-luna` | within-generation variant |
 | S | `gpt-5.6-sol` | within-generation variant |
-| G | `gpt-5.4` | between-generation |
 | DF | `deepseek-v4-flash` | between-vendor (lower tier) |
 | DP | `deepseek-v4-pro` | between-vendor (upper tier) |
+
+The five GPT-5.4 cued-probe records collected under v2.3–v2.4 are preserved as
+withdrawn historical data. They are not part of the v2.5 panel, schedules,
+sample sizes, or confirmatory analyses; see §13, entry 20.
 
 **Line endings.** The payload is generated with LF line endings (`thoughtml guide --full`, written without CRLF translation). The frozen SHA-256 is ending-sensitive, and §8.3 excludes any run whose payload hash does not match, so a CRLF checkout would exclude every run despite identical content.
 
@@ -48,7 +52,7 @@ Every number in this study is produced by the artifacts below. They do not chang
 
 ThoughtML is a plain-text language for recording reasoning as a machine-checkable graph: typed claims, evidence relations, agent stances carrying confidence, and a checker that derives argument status and reports internal conflicts. It is designed to be authored by AI agents rather than by hand.
 
-Whether AI agents can and do author such traces well has not been measured. This study is that measurement. Six models are run **inside a single fixed agent harness**, so that scaffolding, prompt delivery, tool policy, and sampling settings are held constant and the model is the only thing that varies. A generic minimal-schema control separates properties of the models from properties of the schema. The checker's own defect-detection ability is measured separately and offline, with no models involved.
+Whether AI agents can and do author such traces well has not been measured. This study is that measurement. Five models are run **inside a single fixed agent harness**, so that scaffolding, prompt delivery, tool policy, and sampling settings are held constant and the model is the only thing that varies. A generic minimal-schema control separates properties of the models from properties of the schema. The checker's own defect-detection ability is measured separately and offline, with no models involved.
 
 The study is designed so that its central results are informative regardless of direction. Predictions are stated numerically in §4 before any data exists.
 
@@ -129,10 +133,9 @@ Reported descriptively, without significance claims. Retained unaltered from v1.
 | ~~Harness effect on attack share~~ | ~~0–10 pp~~ *(unanswerable in v2.0; harness is fixed)* |
 | ~~Harness effect on `--strict` pass rate~~ | ~~0–40 pp~~ *(same)* |
 | **Between-vendor gap in `--strict` clean rate (GPT vs DeepSeek)** | **0–25 pp** |
-| **Between-generation gap, `gpt-5.4` vs `gpt-5.6` mean** | **0–15 pp** |
 | **Within-generation spread across Terra / Luna / Sol** | **0–10 pp** |
 
-The last three are new in v2.0 and correspond to the three contrasts in §5.2. The within-generation prediction is deliberately near zero: if Terra, Luna and Sol are lateral variants rather than a capability ladder, they should behave alike, and a large spread would be the surprise.
+The last two correspond to the two retained contrasts in §5.2. The within-generation prediction is deliberately near zero: if Terra, Luna and Sol are lateral variants rather than a capability ladder, they should behave alike, and a large spread would be the surprise. The former between-generation prediction was withdrawn with the GPT-5.4 arm in v2.5 and is not tested.
 
 ### 4.2b Per-class mutation predictions — NOT BLIND (added in v1.1)
 
@@ -163,21 +166,20 @@ The pooled all-defect rate is **not** predicted and will not be reported: with u
 
 ### 5.1 The unit is a model within a fixed harness
 
-All six arms run through **Codex CLI 0.144.6**, non-interactively, with identical invocation, identical prompt payload, identical reasoning effort (`high`), and a single-shot policy in which tool calls are forbidden and audited. Scaffolding, system prompt, prompt delivery, and sampling policy are therefore constant across arms, and **the model is the only thing that varies.**
+All five arms run through **Codex CLI 0.144.6**, non-interactively, with identical invocation, identical prompt payload, identical reasoning effort (`high`), and a single-shot policy in which tool calls are forbidden and audited. Scaffolding, system prompt, prompt delivery, and sampling policy are therefore constant across arms, and **the model is the only thing that varies.**
 
 This is the central improvement over v1.0–v1.4, which compared four different vendor harnesses and could only disclose the resulting model×harness confound in a limitations section. That confound is now removed by construction rather than apologised for.
 
 **What is gained:** any difference between arms is attributable to the model. **What is given up:** ecological breadth. Results describe models *as invoked through Codex*, not as deployed in their own vendors' products, and not as raw API endpoints. Codex contributes its own system prompt and scaffolding to every call; that contribution is constant and therefore not a confound, but it is present, and §12 states it.
 
-### 5.2 Three nested contrasts
+### 5.2 Two retained contrasts
 
-The panel is not a capability ladder and is not described as one. It supports three distinct comparisons, each answering something different:
+The panel is not a capability ladder and is not described as one. It supports two distinct comparisons:
 
 1. **Within-generation variants** — Terra / Luna / Sol, all `gpt-5.6`. Whether sibling variants of one generation author comparably. Expected near-null; a large spread would indicate the variants differ in ways relevant to structured authoring.
-2. **Between-generation** — `gpt-5.4` vs the `gpt-5.6` family. A genuine capability gap within one vendor and lineage.
-3. **Between-vendor** — GPT vs DeepSeek-v4 (Flash and Pro). Whether any finding is OpenAI-specific. DeepSeek additionally contributes a within-vendor tier contrast (Flash vs Pro).
+2. **Between-vendor** — GPT vs DeepSeek-v4 (Flash and Pro). Whether any finding is OpenAI-specific. DeepSeek additionally contributes a within-vendor tier contrast (Flash vs Pro).
 
-Because the harness is fixed, contrast 3 is a cleaner cross-vendor comparison than anything available in v1.4, where each vendor's model was inseparable from its own agent product.
+Because the harness is fixed, the between-vendor contrast is cleaner than anything available in v1.4, where each vendor's model was inseparable from its own agent product.
 
 ### 5.3 Reproducibility
 
@@ -192,14 +194,14 @@ The GPT arms are closed-weight, silently updated, and eventually retired; they a
 | Experiment | Design | Runs |
 |---|---|---|
 | Exp 0 — discarded implementation pilot | 30 tasks × 2 conditions × Terra only; never pooled | **60** |
-| Exp 0 — calibration | 30 ground-truth tasks × 2 conditions × 6 models | **360** |
-| Exp 1 — authoring | 12 reasoning tasks × 6 models × 3 samples | **216** |
-| Exp 1 — Condition G control | 12 tasks × 6 models × 1 sample | **72** |
+| Exp 0 — calibration | 30 ground-truth tasks × 2 conditions × 5 models | **300** |
+| Exp 1 — authoring | 12 reasoning tasks × 5 models × 3 samples | **180** |
+| Exp 1 — Condition G control | 12 tasks × 5 models × 1 sample | **60** |
 | Exp 5 — reasoning-effort sweep | 12 tasks × 4 efforts × `gpt-5.6-terra` × 2 samples | **96** |
 | Exp 2 — mutation testing | offline, no model calls | — |
-| **Main registered model calls** | | **744** |
-| **Total calls including discarded Exp 0 pilot** | | **804** |
-| Contamination probe (§9.2) | 5 cued prompts × 6 models | 30 |
+| **Main registered model calls** | | **636** |
+| **Total calls including discarded Exp 0 pilot** | | **696** |
+| Contamination probe (§9.2) | 5 cued prompts × 5 models | 25 |
 | **Tasks to author** | 30 ground-truth + 12 reasoning (9 tension + 3 no-tension) | **42** |
 
 Three samples per cell in Experiment 1 (up from two in v1.4) because cost no longer binds. Experiment 0 remains at 30 tasks, restored in v1.4 for power.
@@ -210,8 +212,8 @@ Three samples per cell in Experiment 1 (up from two in v1.4) because cost no lon
 |---|---|---|
 | H1a (30 paired tasks, Wilcoxon) | d_z ≈ 0.61 → ≈ 0.05–0.07 raw | Covers the upper part of the predicted 0.03–0.08. **Underpowered below ≈0.05**, and reported as an estimate with CI in that region, not a rejection. |
 | H1b (AUROC contrast, ~30 splits/condition) | ≈ 0.12–0.16 AUROC units | Exceeds the predicted 0.02–0.08: **H1b remains estimation-first.** A confirmed rejection would itself be an upside surprise. Stated rather than resolved, because resolving it would cost more tasks than the study has. |
-| H2 (12 task clusters, ~216 documents) | CI half-width ≈ 0.05–0.08 | Can reject H0 ≥ 0.15 if the true share is ≤ ~0.07; adequate for the predicted < 0.10. |
-| H3 (12 tasks × 15 model pairs) | bootstrap CI half-width ≈ 0.05–0.09 | Adequate to separate the predicted 0.15–0.30 from the 0.35 decision bound across most of the range. The six-model panel yields 15 pairs per task, more than v1.4's 6. |
+| H2 (12 task clusters, ~180 documents) | CI half-width ≈ 0.05–0.08 | Can reject H0 ≥ 0.15 if the true share is ≤ ~0.07; adequate for the predicted < 0.10. |
+| H3 (12 tasks × 10 model pairs) | bootstrap CI half-width ≈ 0.05–0.09 | Adequate to separate the predicted 0.15–0.30 from the 0.35 decision bound across most of the range. The five-model panel yields 10 pairs per task. |
 
 **H1b task-count sensitivity, run before any registered model response.** A
 Monte Carlo grid using the registered task-cluster bootstrap estimated roughly
@@ -227,20 +229,20 @@ adequately powered.
 
 **Purpose:** RQ1. Tests H1a, H1b; H1-lex secondary.
 
-30 tasks with unambiguous ground-truth answers × 2 prompt conditions × 6 models.
+30 tasks with unambiguous ground-truth answers × 2 prompt conditions × 5 models.
 
 - **Condition F (free-form):** the standard prompt template.
 - **Condition B (basis-required):** identical, plus one added instruction requiring a `measured` / `estimated` / `assumed` label on every number.
 
 Condition B exists because the basis field is opt-in (`TML401` fires only under `--strict-provenance`), so a free-form-only design risks too few labelled numbers to test the basis hypotheses at all. Condition B guarantees the manipulation is present; Condition F measures the spontaneous rate.
 
-**Pilot:** one arm only (`gpt-5.6-terra`), 30 × 2 = 60 runs. It is additional to the 744-call main collection and is never pooled. After the protocol is frozen, Terra is rerun with the other five arms in the 360-call Experiment 0 main phase. Extension is contingent on the pilot completing without protocol failure, **not** on the direction of results.
+**Pilot:** one arm only (`gpt-5.6-terra`), 30 × 2 = 60 runs. It is additional to the 636-call main collection and is never pooled. The v2.4 pilot failed the registered ceiling gate (27/30 correct in B; 30/30 in F) and is retained as discarded development data. Experiment 0 remains blocked until the calibration corpus is revised, independently reviewed, frozen, and a new complete pilot passes the same gate. After that protocol is frozen, Terra is rerun with the other four arms in the 300-call Experiment 0 main phase. Continuation depends on the gate, never on a favorable ThoughtML effect.
 
 ### Experiment 1 — The authoring benchmark, with a schema control
 
 **Purpose:** RQ2, RQ3. Tests H2 and H3.
 
-12 reasoning tasks × 6 models × 3 samples under the ThoughtML condition, plus **Condition G**: the same tasks and models with a deliberately minimal generic schema in place of the ThoughtML spec — a bare JSON structure with `claims[]` (id, text, confidence) and `relations[]` (from, type ∈ {supports, opposes}, to). Its exact text is frozen and hashed before Experiment 1 begins.
+12 reasoning tasks × 5 models × 3 samples under the ThoughtML condition, plus **Condition G**: the same tasks and models with a deliberately minimal generic schema in place of the ThoughtML spec — a bare JSON structure with `claims[]` (id, text, confidence) and `relations[]` (from, type ∈ {supports, opposes}, to). Its exact text is frozen and hashed before Experiment 1 begins.
 
 Condition G is what allows H2 and H3 to be read as "property of models under any schema" versus "property of ThoughtML": attack share and cross-model overlap are computed identically on control output. It also serves as the benchmark baseline for §14.
 
@@ -319,7 +321,7 @@ Fixed before authoring the task sets.
 - **Undefined case.** If zero nodes match under a rule, relation overlap is undefined and reported as such — never as 0.00. The count of undefined pairs is reported per rule.
 - **Adjudication and validation.** On a random subsample of 20 document pairs, node correspondence is manually labelled **blind to the automatic results** by two raters: the author, and one external rater (the collaborating researcher is the intended candidate). Cohen's κ is reported for author-vs-external, author-vs-Rule-J, and external-vs-Rule-J. **Rule J is admissible as the primary matcher only if its κ against the manual labels exceeds 0.70** — the "substantial agreement" floor of Landis & Koch (1977). Below that, H3 is reported as inconclusive rather than rescued with a different rule. If no external rater is recruited, the single-rater limitation is reported and κ author-vs-Rule-J stands alone, explicitly flagged as weaker.
 
-**Disclosed circularity.** The judge is a language model evaluating whether language-model-authored traces agree, and it shares a vendor with two of the six arms. Shared failure modes could inflate measured agreement. The κ validation is the check on this and is reported whatever it shows.
+**Disclosed circularity.** The judge is a language model evaluating whether language-model-authored traces agree, and it shares a vendor with two of the five arms. Shared failure modes could inflate measured agreement. The κ validation is the check on this and is reported whatever it shows.
 
 ### 7.4 Output extraction rule — fixed before data
 
@@ -347,9 +349,9 @@ Every hypothesis names its clustering unit; observations within a cluster are ne
 | H2 | One-sided test of H0: attack share ≥ 0.15, cluster bootstrap resampling **tasks** | task | proportion with CI |
 | H3 | **Permutation null**: relation Jaccard for same-task cross-model pairs vs. cross-task pairs. Computed under Rule S and Rule J separately | task | Jaccard with CI, per rule |
 
-Four p-values against explicit nulls; Holm–Bonferroni across them at familywise α = 0.05. Non-parametric throughout. For H3, the 15 pairwise model comparisons per task share documents; per-pair CIs come from the task-level bootstrap.
+Four p-values against explicit nulls; Holm–Bonferroni across them at familywise α = 0.05. Non-parametric throughout. For H3, the 10 pairwise model comparisons per task share documents; per-pair CIs come from the task-level bootstrap.
 
-**Contrast analyses (exploratory, §5.2):** within-generation, between-generation and between-vendor differences are tested with Kruskal–Wallis across arms followed by pre-specified pairwise contrasts, reported with CIs and without familywise claims.
+**Contrast analyses (exploratory, §5.2):** within-generation and between-vendor differences are tested with Kruskal–Wallis across arms followed by pre-specified pairwise contrasts, reported with CIs and without familywise claims.
 
 ### 8.2 Exploratory analyses
 
@@ -466,7 +468,7 @@ Stated in advance so that interpretation is not authored after seeing direction.
 7. **Rater dependence.** The κ validation rests on two raters at best, one of whom is the author. A failed recruitment leaves a single-rater design, reported as such.
 8. **Panel contrasts may not mean what §5.2 claims.** Terra, Luna and Sol are assumed to be lateral variants of one generation; if they in fact differ substantially in capability, the "within-generation" contrast is mislabelled. §4.3 registers a large within-generation spread as a downside surprise precisely so this is caught rather than absorbed.
 9. **Prompt sensitivity.** One template per condition. The degree to which results depend on its wording is unmeasured; RQ2's phrasing and §10's interpretations are scoped to "under this schema, prompt and harness" for exactly this reason. A template ablation is future work.
-10. **No capability floor is located.** All six arms are competent contemporary models. If all succeed, the study shows that capable models can author ThoughtML without identifying where the format breaks down. Experiment 5's effort sweep partially compensates by degrading deliberation rather than capability.
+10. **No capability floor is located.** All five arms are competent contemporary models. If all succeed, the study shows that capable models can author ThoughtML without identifying where the format breaks down. Experiment 5's effort sweep partially compensates by degrading deliberation rather than capability.
 11. **Author interest in the outcome.** The author designed ThoughtML and has a direct stake in a favourable result. This pre-registration, the advance predictions in §4, the decision rules in §4.1, the fixed matching rule in §7.3, the fixed exclusion rules in §8.3, the failure condition in §10, and the deviation log in §13 exist specifically to constrain that interest. They are stated so a reader can check whether they were honoured.
 
 ---
@@ -495,6 +497,8 @@ Append-only. Every departure from this document after filing is recorded with it
 | 16 | 2026-08-21 | §0, §6, §13–§14 (v2.2) | Recorded the completed human review; retained 30 calibration tasks with H1b estimation-first after a pre-data task-count sensitivity analysis; scoped the unresolved Rule J implementation as an Experiment 1 blocker; and replaced the planned OSF registration with the public annotated Git tag `study-predata-v2.2`. | The author approved the corpus, expanding to 180 tasks would add 150 tasks and 2,100 calls while powering only the optimistic +0.08 effect, Rule J is unnecessary for the probe and Experiment 0, and the author does not yet have an OSF account. Git history supplies a public timestamp but is explicitly acknowledged as weaker than immutable third-party registration. | No registered model calls or responses. |
 | 17 | 2026-08-21 | §0, §8.4 (v2.3) | Replaced whole-panel random ordering with provider-blocked ordering: GPT/OpenAI arms first, DeepSeek arms second, with deterministic shuffling inside each block. The prior v2.2 tag remains public but is superseded before data by `study-predata-v2.3`. | The author explicitly chose to begin with ChatGPT models. The first v2.2 randomized item happened to be DeepSeek; it was seen only in a dry run and was never executed. Freezing the operational preference is cleaner than selecting individual runs manually. | No registered model calls or responses. |
 | 18 | 2026-08-21 | §0, §8.4 (v2.4) | Extended provider blocking from within each phase to the whole collection: finish all GPT/OpenAI probing, pilot, and main runs before configuring and collecting DeepSeek. Models, tasks, prompts, sample sizes, grading, hypotheses, inclusion rules, and analysis are unchanged. The v2.3 pre-data tag remains the immutable baseline; v2.4 is a separately tagged post-probe amendment. | Repeatedly switching provider credentials and configuration creates avoidable operational error. One provider change is simpler to audit. | **Yes: 20/20 planned OpenAI cued probes existed (5 each for GPT-5.4, Luna, Sol, and Terra); all completed on the first attempt, none was excluded, none used tools, and all were unparseable with zero exposure hits.** No Experiment 0 model pilot, main-experiment response, or DeepSeek response existed. The decision was operational, not outcome-selective. |
+| 19 | 2026-08-21 | §6 Exp 0, protocol issue P09 | Completed the full discarded Terra pilot and applied the frozen acceptance rule. B produced 27/30 correct and F 30/30; both failed the required 15–24 correct and ≥6 incorrect window. Across all 60 calls: 59 parseable, 57 strict-clean, zero exclusions, zero tool events, and zero retries. Experiment 0 is blocked pending a harder, independently reviewed corpus and a complete replacement pilot. The mechanically reproducible report is `study/runs/analysis/exp0-pilot-v2.4-summary.json`. | A ceiling-dominated calibration experiment cannot estimate confidence discrimination or a basis effect reliably. The rule and required response were fixed before the pilot. | **Yes: the complete 60-run discarded pilot.** It is retained in full and never pooled with main results. |
+| 20 | 2026-08-21 | §0, §4.2, §5–§6, §8 (v2.5) | Withdrew `gpt-5.4` from the panel, removing the exploratory between-generation contrast and reducing the main design from six to five models (744 → 636 main calls). Its five cued-probe records remain as withdrawn historical data and are mechanically omitted from v2.5 schedules and default analyses. | The author judged the arm redundant after consulting an external model index. Artificial Analysis v4.1.1 scores GPT-5.6 Luna xhigh at 50 and GPT-5.4 xhigh at 53; this external similarity was used as a panel-design heuristic, not as evidence about ThoughtML or as an exact match to the study's high-effort setting. | **Yes: 20 OpenAI cued probes and the discarded 60-run Terra pilot existed.** GPT-5.4's own five probe results were all unparseable with zero exposure hits, identical in direction to every retained OpenAI arm; no main or DeepSeek response existed. The decision was not based on a favorable ThoughtML outcome. Source: [Artificial Analysis comparison](https://artificialanalysis.ai/models/comparisons/gpt-5-6-luna-xhigh-vs-gpt-5-4). |
 
 ---
 
@@ -513,6 +517,10 @@ reported as a limitation, not described as equivalent to OSF.
 The later global provider-order change is not described as pre-registered. It is
 published under the separate annotated tag `study-protocol-v2.4` together with
 the 20 OpenAI probe records that existed when the decision was made.
+
+The completed discarded pilot and five-model panel amendment are published under
+the separate annotated tag `study-protocol-v2.5`. Version 2.5 is post-pilot and
+is never described as pre-registered; the v2.3 tag remains the pre-data record.
 
 **Venue plan.** Target: NeurIPS Datasets & Benchmarks, which expects a runnable benchmark plus baselines. Packaging: task sets + grader + harness as the releasable benchmark; **Condition G as the baseline**; the GPT arms as a dated snapshot; the DeepSeek arms and Experiment 2 as the reproducible reference entries.
 

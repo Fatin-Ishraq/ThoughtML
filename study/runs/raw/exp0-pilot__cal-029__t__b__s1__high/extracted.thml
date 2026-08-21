@@ -1,0 +1,36 @@
+scope recurrence-trace
+  observation term-zero
+    quantity 2 units measured
+    Initial term.
+  observation term-one
+    quantity 3 units measured
+    Initial term.
+  observation term-two
+    quantity 6 units measured
+    Computed next term.
+  observation term-three
+    quantity 12 units measured
+    Computed next term.
+  observation term-four
+    quantity 22 units measured
+    Computed next term.
+  observation term-five
+    quantity 37 units measured
+    Computed next term.
+
+link term-zero enables term-two
+link term-one enables term-two
+link term-one enables term-three
+link term-two enables term-three
+link term-two enables term-four
+link term-three enables term-four
+link term-three enables term-five
+link term-four enables term-five
+
+claim final-answer
+  The answer is B.
+
+link term-five supports final-answer
+
+model holds final-answer
+  confidence 1 assumed

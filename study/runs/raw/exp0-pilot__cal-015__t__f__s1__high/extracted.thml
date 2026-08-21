@@ -1,0 +1,24 @@
+claim route-a-b-c-d-e
+  Route A-B-C-D-E takes 4 + 1 + 2 + 3 = 10 minutes.
+
+claim route-a-c-d-e
+  Route A-C-D-E takes 7 + 2 + 3 = 12 minutes.
+
+claim route-a-b-d-e
+  Route A-B-D-E takes 4 + 6 + 3 = 13 minutes.
+
+claim route-comparison
+  All roads have positive travel times, so detours or repeated towns cannot improve on the 10-minute route.
+
+part-of route-comparison
+  route-a-b-c-d-e
+  route-a-c-d-e
+  route-a-b-d-e
+
+claim final-answer
+  The answer is B.
+
+link route-comparison supports final-answer
+
+model holds final-answer
+  confidence 1 assumed

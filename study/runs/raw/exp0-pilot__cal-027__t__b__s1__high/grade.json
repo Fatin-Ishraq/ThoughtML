@@ -1,0 +1,70 @@
+{
+  "compute_succeeded": true,
+  "diagnostics": [],
+  "features": {
+    "answer_key": "A",
+    "attack_share": 0.0,
+    "audit_conflicts": [],
+    "basis_counts": {
+      "measured": 1
+    },
+    "confidences": [
+      1.0
+    ],
+    "correct": true,
+    "final_answer_confidence": 1.0,
+    "final_answer_text": "The answer is A.",
+    "has_attack": false,
+    "node_ids": [
+      "analyst-auditor-documents",
+      "contractor-cannot-document-restricted",
+      "contractor-audits-restricted",
+      "audited-contractor-is-not-analyst",
+      "final-answer"
+    ],
+    "posture_counts": {
+      "holds": 1
+    },
+    "relation_counts": {
+      "supports": 4
+    },
+    "relations": [
+      {
+        "from": "analyst-auditor-documents",
+        "relation": "supports",
+        "to": "audited-contractor-is-not-analyst"
+      },
+      {
+        "from": "contractor-cannot-document-restricted",
+        "relation": "supports",
+        "to": "audited-contractor-is-not-analyst"
+      },
+      {
+        "from": "contractor-audits-restricted",
+        "relation": "supports",
+        "to": "audited-contractor-is-not-analyst"
+      },
+      {
+        "from": "audited-contractor-is-not-analyst",
+        "relation": "supports",
+        "to": "final-answer"
+      }
+    ],
+    "selected_option": "A",
+    "text_number_field_count": 1,
+    "text_number_fields_missing_basis": 0
+  },
+  "format": "thoughtml",
+  "lint_clean": false,
+  "lint_diagnostics": [
+    {
+      "code": "TML501",
+      "help": "if these are enumerated items rather than evidence, use `part-of` so they do not inflate the target's confidence",
+      "message": "focus `audited-contractor-is-not-analyst` gathers 3 `supports` links and no counter-evidence — if these are enumerated items, use `part-of` so they don't inflate its confidence",
+      "severity": "warning"
+    }
+  ],
+  "parseable": true,
+  "strict_clean": true,
+  "strict_provenance_clean": true
+}

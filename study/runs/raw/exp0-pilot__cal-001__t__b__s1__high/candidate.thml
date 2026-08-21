@@ -1,0 +1,25 @@
+claim final-answer
+  The answer is D.
+
+  observation opening-stock
+    quantity 720 filters measured
+
+  observation first-shipment
+    quantity -185 filters measured
+
+  observation first-receipt
+    quantity 96 filters measured
+
+  observation second-shipment
+    quantity -210 filters measured
+
+  observation replacement-receipt
+    quantity 54 filters measured
+
+  claim closing-stock
+    = opening-stock + first-shipment + first-receipt + second-shipment + replacement-receipt
+
+  link closing-stock supports final-answer
+
+model holds final-answer
+  confidence 1 assumed

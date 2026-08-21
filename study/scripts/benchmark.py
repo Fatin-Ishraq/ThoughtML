@@ -98,6 +98,8 @@ def open_protocol_issues() -> list[str]:
 
 
 def phase_protocol_issues(phase: str) -> list[str]:
+    if phase in {"exp0-pilot", "exp0-main"}:
+        return protocol_headings("[EXP0 BLOCKER]")
     if phase in {"exp1-thoughtml", "exp1-generic"}:
         return protocol_headings("[EXP1 BLOCKER]")
     return []
@@ -161,6 +163,7 @@ def manifest_value(status: str) -> dict[str, Any]:
         },
         "open_protocol_issues": open_protocol_issues(),
         "phase_protocol_issues": {
+            "exp0": phase_protocol_issues("exp0-main"),
             "exp1": phase_protocol_issues("exp1-thoughtml"),
         },
     }
@@ -600,6 +603,31 @@ def load_grades() -> list[dict[str, Any]]:
         row = dict(metadata["run"])
         row["excluded"] = metadata["excluded"]
         row["exclusion_reasons"] = metadata["exclusion_reasons"]
+        attempts = metadata.get("attempts", [])
+        row["attempt_count"] = len(attempts)
+        row["tool_event"] = any(bool(attempt.get("tool_event")) for attempt in attempts)
+        row["elapsed_seconds"] = sum(float(attempt.get("elapsed_seconds", 0.0)) for attempt in attempts)
+        usage = {
+            "input_tokens": 0,
+            "cached_input_tokens": 0,
+            "output_tokens": 0,
+            "reasoning_output_tokens": 0,
+        }
+        for attempt in attempts:
+            events_path = run_dir / f"attempt-{attempt.get('attempt')}" / "events.jsonl"
+            if not events_path.exists():
+                continue
+            for line in events_path.read_text(encoding="utf-8").splitlines():
+                try:
+                    event = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                event_usage = event.get("usage") if event.get("type") == "turn.completed" else None
+                if not isinstance(event_usage, dict):
+                    continue
+                for key in usage:
+                    usage[key] += int(event_usage.get(key, 0) or 0)
+        row.update(usage)
         row.update({k: v for k, v in grade.items() if k != "features"})
         row.update(grade.get("features", {}))
         rows.append(row)
@@ -663,6 +691,7 @@ def summary_by_arm_condition(rows: list[dict[str, Any]]) -> list[dict[str, Any]]
                 "scheduled_or_observed": len(group),
                 "included": len(included),
                 "excluded": len(group) - len(included),
+                "probe_exposure_hits": sum(bool(r.get("probe_exposure_hit")) for r in included),
                 "parse_rate": lib.mean(1.0 if r.get("parseable") else 0.0 for r in included),
                 "strict_clean_rate": lib.mean(1.0 if r.get("strict_clean") else 0.0 for r in included),
                 "lint_clean_rate": lib.mean(1.0 if r.get("lint_clean") else 0.0 for r in included),
@@ -712,15 +741,62 @@ def rule_s_results(rows: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def pilot_acceptance(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    conditions: dict[str, dict[str, Any]] = {}
+    for condition in ("B", "F"):
+        group = [row for row in rows if row.get("condition") == condition and not row.get("excluded")]
+        correct = sum(1 for row in group if row.get("correct") is True)
+        incorrect = sum(1 for row in group if row.get("correct") is False)
+        conditions[condition] = {
+            "included": len(group),
+            "correct": correct,
+            "incorrect": incorrect,
+            "correct_window": [15, 24],
+            "minimum_incorrect": 6,
+            "passed": len(group) == 30 and 15 <= correct <= 24 and incorrect >= 6,
+        }
+    return {
+        "rule": "Each condition must have 15-24 correct and at least 6 incorrect among 30 included runs.",
+        "conditions": conditions,
+        "passed": all(value["passed"] for value in conditions.values()),
+    }
+
+
+def operational_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    usage_keys = (
+        "input_tokens",
+        "cached_input_tokens",
+        "output_tokens",
+        "reasoning_output_tokens",
+    )
+    return {
+        "attempts": sum(int(row.get("attempt_count", 0)) for row in rows),
+        "completed_first_attempt": sum(int(row.get("attempt_count", 0)) == 1 for row in rows),
+        "runs_with_retries": sum(int(row.get("attempt_count", 0)) > 1 for row in rows),
+        "tool_event_runs": sum(bool(row.get("tool_event")) for row in rows),
+        "elapsed_seconds": round(sum(float(row.get("elapsed_seconds", 0.0)) for row in rows), 3),
+        "usage": {key: sum(int(row.get(key, 0)) for row in rows) for key in usage_keys},
+    }
+
+
 def cmd_analyze(args: argparse.Namespace) -> int:
-    rows = load_grades()
+    all_rows = load_grades()
+    if args.phase:
+        all_rows = [row for row in all_rows if row.get("phase") == args.phase]
+    panel_models = {model["slug"] for model in lib.load_models()}
+    withdrawn = [row for row in all_rows if row.get("model") not in panel_models]
+    rows = all_rows if args.include_withdrawn else [row for row in all_rows if row.get("model") in panel_models]
     included = [r for r in rows if not r.get("excluded")]
     report = {
         "schema_version": 1,
         "generated_at": now_utc(),
+        "phase_filter": args.phase,
+        "withdrawn_models_in_raw_data": sorted({str(row.get("model")) for row in withdrawn}),
+        "withdrawn_runs_omitted": 0 if args.include_withdrawn else len(withdrawn),
         "observed_runs": len(rows),
         "included_runs": len(included),
         "excluded_runs": len(rows) - len(included),
+        "operations": operational_summary(rows),
         "by_arm_condition": summary_by_arm_condition(rows),
         "rule_s": rule_s_results(rows),
         "limitations": [
@@ -728,6 +804,8 @@ def cmd_analyze(args: argparse.Namespace) -> int:
             "Primary clustered tests, Holm correction, power simulation, and Rule J are not claimed complete here.",
         ],
     }
+    if args.phase == "exp0-pilot":
+        report["pilot_acceptance"] = pilot_acceptance(rows)
     out = Path(args.out) if args.out else lib.RUNS / "analysis" / "summary.json"
     if not out.is_absolute():
         out = lib.REPO / out
@@ -769,6 +847,8 @@ def build_parser() -> argparse.ArgumentParser:
 
     analyze = sub.add_parser("analyze", help="generate an interim descriptive analysis")
     analyze.add_argument("--out")
+    analyze.add_argument("--phase", choices=sorted(lib.EXPECTED_PHASE_COUNTS))
+    analyze.add_argument("--include-withdrawn", action="store_true")
     analyze.set_defaults(func=cmd_analyze)
     return parser
 

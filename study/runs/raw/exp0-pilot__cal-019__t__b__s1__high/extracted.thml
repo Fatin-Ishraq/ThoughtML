@@ -1,0 +1,104 @@
+observation low-a-successes
+  quantity 81 successes measured
+
+observation low-a-patients
+  quantity 87 patients measured
+
+observation low-b-successes
+  quantity 234 successes measured
+
+observation low-b-patients
+  quantity 270 patients measured
+
+observation high-a-successes
+  quantity 192 successes measured
+
+observation high-a-patients
+  quantity 263 patients measured
+
+observation high-b-successes
+  quantity 55 successes measured
+
+observation high-b-patients
+  quantity 80 patients measured
+
+claim low-a-rate
+  = low-a-successes / low-a-patients
+
+claim low-b-rate
+  = low-b-successes / low-b-patients
+
+claim high-a-rate
+  = high-a-successes / high-a-patients
+
+claim high-b-rate
+  = high-b-successes / high-b-patients
+
+link low-a-successes supports low-a-rate
+link low-a-patients supports low-a-rate
+link low-b-successes supports low-b-rate
+link low-b-patients supports low-b-rate
+link high-a-successes supports high-a-rate
+link high-a-patients supports high-a-rate
+link high-b-successes supports high-b-rate
+link high-b-patients supports high-b-rate
+
+claim a-better-low-risk
+  Treatment A has a higher success rate than treatment B in the low-risk group.
+
+link low-a-rate supports a-better-low-risk
+link low-b-rate supports a-better-low-risk
+
+claim a-better-high-risk
+  Treatment A has a higher success rate than treatment B in the high-risk group.
+
+link high-a-rate supports a-better-high-risk
+link high-b-rate supports a-better-high-risk
+
+claim pooled-a-successes
+  = low-a-successes + high-a-successes
+
+claim pooled-a-patients
+  = low-a-patients + high-a-patients
+
+claim pooled-b-successes
+  = low-b-successes + high-b-successes
+
+claim pooled-b-patients
+  = low-b-patients + high-b-patients
+
+link low-a-successes supports pooled-a-successes
+link high-a-successes supports pooled-a-successes
+link low-a-patients supports pooled-a-patients
+link high-a-patients supports pooled-a-patients
+link low-b-successes supports pooled-b-successes
+link high-b-successes supports pooled-b-successes
+link low-b-patients supports pooled-b-patients
+link high-b-patients supports pooled-b-patients
+
+claim pooled-a-rate
+  = pooled-a-successes / pooled-a-patients
+
+claim pooled-b-rate
+  = pooled-b-successes / pooled-b-patients
+
+link pooled-a-successes supports pooled-a-rate
+link pooled-a-patients supports pooled-a-rate
+link pooled-b-successes supports pooled-b-rate
+link pooled-b-patients supports pooled-b-rate
+
+claim b-better-overall
+  Treatment B has a higher success rate after pooling both groups.
+
+link pooled-a-rate supports b-better-overall
+link pooled-b-rate supports b-better-overall
+
+claim final-answer
+  The answer is D.
+
+link a-better-low-risk supports final-answer
+link a-better-high-risk supports final-answer
+link b-better-overall supports final-answer
+
+model holds final-answer
+  confidence 1 assumed
