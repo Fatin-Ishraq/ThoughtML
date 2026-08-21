@@ -1,9 +1,14 @@
 {
   "schema_version": 1,
   "test_id": "luna-handoff-v1",
-  "status": "candidate",
+  "status": "approved-for-collection",
   "exploratory_only": true,
-  "model_calls_authorized": false,
+  "model_calls_authorized": true,
+  "authorization": {
+    "authorized_by": "project author via Codex task",
+    "authorized_at": "2026-08-21",
+    "instruction": "call it"
+  },
   "model": "gpt-5.6-luna",
   "reasoning_effort": "high",
   "conditions": ["thoughtml", "markdown"],
@@ -17,4 +22,3 @@
   "timeout_seconds": 1800,
   "purpose": "Exploratory existence test of persistent revision and branch separation; never pooled with the registered benchmark."
 }
-

@@ -1,7 +1,7 @@
 {
-  "collectable": false,
+  "collectable": true,
   "count": 10,
-  "created_at": "2026-08-21T17:11:00.991676Z",
+  "created_at": "2026-08-21T17:13:49.109436Z",
   "items": [
     {
       "condition": "thoughtml",
@@ -114,8 +114,8 @@
       "stage_name": "counterfactual-branch"
     }
   ],
-  "manifest": "study\\exploratory\\luna_handoff_v1\\candidate-manifest.json",
-  "manifest_sha256": "cd3dedc259f54407c531da8b255b7af9f000ef1ee72f23dbdef8790743fa5bd1",
+  "manifest": "study\\exploratory\\luna_handoff_v1\\frozen-manifest.json",
+  "manifest_sha256": "f76a106cb1c6b6743725262c4cec7ad13b9f32c8fca35bd835de57aeef43f7ee",
   "schema_version": 1,
   "test_id": "luna-handoff-v1"
 }

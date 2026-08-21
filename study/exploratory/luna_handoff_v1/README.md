@@ -57,10 +57,10 @@ example until replicated on disjoint tasks.
 
 ## Safety state
 
-`protocol.json` currently has `model_calls_authorized: false`. The runner must
-therefore produce only a candidate manifest and a non-collectable schedule. A
-separate, explicit user instruction is required before changing that byte,
-freezing authoritatively, or making Luna calls.
+The project author explicitly instructed `call it` on 2026-08-21. That approval
+is recorded in `protocol.json` before authoritative freezing and before any Luna
+handoff response. The runner still requires a clean frozen manifest, a
+collectable regenerated schedule, and an explicit `--execute` flag.
 
 ## Local commands
 

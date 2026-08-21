@@ -72,9 +72,10 @@ class ScheduleAndSafetyTests(unittest.TestCase):
                     schedule["items"][index]["prior_run_id"], schedule["items"][index - 1]["run_id"]
                 )
 
-    def test_calls_are_not_authorized(self) -> None:
+    def test_calls_are_explicitly_authorized(self) -> None:
         protocol = json.loads((ROOT / "protocol.json").read_text(encoding="utf-8"))
-        self.assertIs(protocol["model_calls_authorized"], False)
+        self.assertIs(protocol["model_calls_authorized"], True)
+        self.assertEqual(protocol["authorization"]["instruction"], "call it")
 
 
 if __name__ == "__main__":

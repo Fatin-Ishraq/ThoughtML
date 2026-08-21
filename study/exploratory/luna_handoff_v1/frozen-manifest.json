@@ -1,0 +1,70 @@
+{
+  "codex_version": "codex-cli 0.144.6",
+  "created_at": "2026-08-21T17:13:48.871364Z",
+  "files": [
+    {
+      "bytes": 3500,
+      "path": "study\\exploratory\\luna_handoff_v1\\README.md",
+      "sha256": "f336abed0ae26b8f38c28f861d26c160e97ae8f1df44716c9852b75ab56a0204"
+    },
+    {
+      "bytes": 801,
+      "path": "study\\exploratory\\luna_handoff_v1\\protocol.json",
+      "sha256": "d2c0dcf3e39a757e0acfa532f932ce877bb9d328312f13d761d712de3375bd5a"
+    },
+    {
+      "bytes": 4126,
+      "path": "study\\exploratory\\luna_handoff_v1\\task.json",
+      "sha256": "6170585ba5e14846f270aa8c495f1cdfe351f5b93b72d2e1878b55d00057e49b"
+    },
+    {
+      "bytes": 1345,
+      "path": "study\\exploratory\\luna_handoff_v1\\answers.json",
+      "sha256": "24f14793212cd3bd823f7bdec82bb2abc9ab5e910f48a2c971d08bd39c04a776"
+    },
+    {
+      "bytes": 1049,
+      "path": "study\\exploratory\\luna_handoff_v1\\instructions\\thoughtml.txt",
+      "sha256": "78f7d8bf424b0eaf2ecc2213e0449bf6bf8ba43e231c3f1aa75b01df5987a71c"
+    },
+    {
+      "bytes": 943,
+      "path": "study\\exploratory\\luna_handoff_v1\\instructions\\thoughtml-language.txt",
+      "sha256": "06bf0a883426cb446ba4d980f6cf3a9449c2b25aa765de5bf1c8c0e00e068d07"
+    },
+    {
+      "bytes": 1078,
+      "path": "study\\exploratory\\luna_handoff_v1\\instructions\\markdown.txt",
+      "sha256": "a3a0febb410a6f8e437fd92b2d89aaeb3d00fbaec13afa161b0ff61aa6ddc07c"
+    },
+    {
+      "bytes": 3734,
+      "path": "study\\exploratory\\luna_handoff_v1\\gold\\final.thml",
+      "sha256": "6422d076fa3a92919af45ab16fb183b484219616a6ecd4e73673a10c6882de3b"
+    },
+    {
+      "bytes": 31271,
+      "path": "study\\exploratory\\luna_handoff_v1\\handoff.py",
+      "sha256": "b1599086c3a5543e1b42925c3b32b75ca03658a8e5d12c222678dd7f1d8a11cf"
+    },
+    {
+      "bytes": 3662,
+      "path": "study\\exploratory\\luna_handoff_v1\\test_handoff.py",
+      "sha256": "7393d8d5bd98a71a837a58aeb9b4c71ef5fb69b6fd05020ef4af459ebb3d2290"
+    },
+    {
+      "bytes": 39129,
+      "path": "crates\\thoughtml\\llms.txt",
+      "sha256": "1a3fd8b8dccf079c2284b59bef6ac1ceb0a84fc7d95240023c7abb6333531e9f"
+    }
+  ],
+  "manifest_content_sha256": "68e87fca22b5c9d4df04a6a1fcfe015e8adfe1b6db0cca21aea289580ec59414",
+  "model": "gpt-5.6-luna",
+  "model_calls_authorized": true,
+  "reasoning_effort": "high",
+  "schema_version": 1,
+  "status": "frozen",
+  "test_id": "luna-handoff-v1",
+  "thoughtml_sha256": "99e3afa2222a00f3eb82315e4dd251259b19ecc296769f0e35ce5ed9cd38f5b0",
+  "thoughtml_version": "thoughtml 0.5.0"
+}
