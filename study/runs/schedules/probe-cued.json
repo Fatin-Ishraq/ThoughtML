@@ -1,7 +1,7 @@
 {
-  "collectable": false,
+  "collectable": true,
   "count": 30,
-  "created_at": "2026-08-21T13:37:12.656754Z",
+  "created_at": "2026-08-21T14:12:14.570061Z",
   "items": [
     {
       "arm": "DP",
@@ -514,9 +514,10 @@
       "task_id": "probe-cued-005"
     }
   ],
-  "manifest": "study\\runs\\candidate-manifest.json",
-  "manifest_sha256": "e572ef509b65a0dd5067acdda384cd989938e3aac564d77eb04f4b54278c406d",
+  "manifest": "study\\runs\\manifests\\frozen-2321b9b50891bc22.json",
+  "manifest_sha256": "2c8d9ad5ca3beaf9f2303a33e42c5bd446c49f64e7d5750c360442ea275d1c7b",
   "phase": "probe-cued",
+  "phase_protocol_issues": [],
   "schema_version": 1,
   "seed": 20260821
 }
