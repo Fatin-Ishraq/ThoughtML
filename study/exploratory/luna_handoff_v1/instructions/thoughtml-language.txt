@@ -1,0 +1,26 @@
+Use this minimal ThoughtML subset. Every record starts at column zero. Indent its
+body by two spaces. Identifiers use lowercase letters, digits, and hyphens.
+
+observation source-id
+  A source fact or measurement.
+
+claim conclusion-id
+  A derived conclusion or calculation.
+
+link source-id supports conclusion-id
+link conclusion-id depends-on source-id
+link replacement-id revises superseded-id
+
+`supports` records positive evidence. `depends-on` records a non-evidential
+dependency. `revises` means the left node replaces, but does not delete, the
+right node. Use unique branch-prefixed ids so the corrected main branch and the
+counterfactual branch cannot collide. Use only defined ids as link endpoints.
+
+An optional final stance has this form:
+
+model holds conclusion-id
+  confidence 0.8
+
+Return a complete document, not a patch. The inherited ledger is evidence about
+prior work, but source facts in the current prompt are authoritative.
+

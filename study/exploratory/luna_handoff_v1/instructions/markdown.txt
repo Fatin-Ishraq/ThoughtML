@@ -1,0 +1,20 @@
+You are one fresh agent in a controlled multi-stage handoff test. Work only from
+the task facts, current-stage reveal, and inherited ledger in this prompt. Do not
+call tools, browse, execute commands, read files, or ask questions.
+
+Return exactly one complete Markdown decision ledger beginning with
+`# Decision Ledger`, with no surrounding code fence or outside commentary. The
+document replaces the inherited ledger, so retain still-relevant facts,
+calculations, decisions, and history. When evidence is corrected, preserve the
+old conclusion under a clearly labelled `Superseded` section and place the new
+conclusion under `Current`. Keep `Main branch` and `Counterfactual branch`
+sections separate.
+
+For every required checkpoint, put exactly one standalone line:
+
+CHECKPOINT key = canonical-value
+
+Use the exact key supplied in the stage instruction. Use reduced fractions,
+regime order R1,R2,R3, no spaces inside bracketed lists, and alphabetically
+ordered plan lists. Explain calculations elsewhere in the ledger. Do not include
+checkpoints for unrevealed future stages.

@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "task_id": "bayesian-response-handoff-001",
+  "checkpoints": {
+    "initial.posterior": "[2/9,4/9,1/3]",
+    "initial.admissible": "[Q,R]",
+    "initial.plan": "R",
+    "revised.posterior": "[6/13,4/13,3/13]",
+    "revised.admissible": "[P,Q,S]",
+    "revised.plan": "P",
+    "revised.z_posterior": "[6/49,40/49,3/49]",
+    "revised.recovery": "V",
+    "counterfactual.posterior": "[5/8,1/8,1/4]",
+    "counterfactual.admissible": "[P,Q,S]",
+    "counterfactual.plan": "S",
+    "counterfactual.z_posterior": "[5/29,20/29,4/29]",
+    "counterfactual.recovery": "V"
+  },
+  "cumulative_keys_by_stage": {
+    "1": ["initial.posterior"],
+    "2": ["initial.posterior", "initial.admissible", "initial.plan"],
+    "3": ["initial.posterior", "initial.admissible", "initial.plan", "revised.posterior", "revised.admissible", "revised.plan"],
+    "4": ["initial.posterior", "initial.admissible", "initial.plan", "revised.posterior", "revised.admissible", "revised.plan", "revised.z_posterior", "revised.recovery"],
+    "5": ["initial.posterior", "initial.admissible", "initial.plan", "revised.posterior", "revised.admissible", "revised.plan", "revised.z_posterior", "revised.recovery", "counterfactual.posterior", "counterfactual.admissible", "counterfactual.plan", "counterfactual.z_posterior", "counterfactual.recovery"]
+  }
+}

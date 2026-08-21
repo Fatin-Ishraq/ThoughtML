@@ -1,0 +1,121 @@
+{
+  "collectable": false,
+  "count": 10,
+  "created_at": "2026-08-21T17:11:00.991676Z",
+  "items": [
+    {
+      "condition": "thoughtml",
+      "model": "gpt-5.6-luna",
+      "prior_run_id": null,
+      "prompt_template_bytes": 2868,
+      "prompt_template_sha256": "d7fb53bfa9f561c5d21ab30698826fc6fa21d122555cb29d075accb03f44bcfb",
+      "reasoning_effort": "high",
+      "run_id": "luna-handoff-v1__thoughtml__stage-1",
+      "stage": 1,
+      "stage_name": "initial-diagnosis"
+    },
+    {
+      "condition": "thoughtml",
+      "model": "gpt-5.6-luna",
+      "prior_run_id": "luna-handoff-v1__thoughtml__stage-1",
+      "prompt_template_bytes": 3280,
+      "prompt_template_sha256": "ec203bae13f533f0eb49ecf57994654ce23028076c8a826388e7c25855a164a4",
+      "reasoning_effort": "high",
+      "run_id": "luna-handoff-v1__thoughtml__stage-2",
+      "stage": 2,
+      "stage_name": "initial-plan"
+    },
+    {
+      "condition": "thoughtml",
+      "model": "gpt-5.6-luna",
+      "prior_run_id": "luna-handoff-v1__thoughtml__stage-2",
+      "prompt_template_bytes": 3608,
+      "prompt_template_sha256": "bd75f771eb597312f127f852cb310b4045be29a7b24477accc6a173c87cf0b35",
+      "reasoning_effort": "high",
+      "run_id": "luna-handoff-v1__thoughtml__stage-3",
+      "stage": 3,
+      "stage_name": "source-correction"
+    },
+    {
+      "condition": "thoughtml",
+      "model": "gpt-5.6-luna",
+      "prior_run_id": "luna-handoff-v1__thoughtml__stage-3",
+      "prompt_template_bytes": 3775,
+      "prompt_template_sha256": "ee1d66e66c86f025fc0557d748c1986afa0d73b3754b70aab0cb1d3532f6b846",
+      "reasoning_effort": "high",
+      "run_id": "luna-handoff-v1__thoughtml__stage-4",
+      "stage": 4,
+      "stage_name": "follow-up-recovery"
+    },
+    {
+      "condition": "thoughtml",
+      "model": "gpt-5.6-luna",
+      "prior_run_id": "luna-handoff-v1__thoughtml__stage-4",
+      "prompt_template_bytes": 4397,
+      "prompt_template_sha256": "9befcadd21e0bc36ba94c43340bbe9ec4d967f9f1adfd79d91fecdf15ea7e8d7",
+      "reasoning_effort": "high",
+      "run_id": "luna-handoff-v1__thoughtml__stage-5",
+      "stage": 5,
+      "stage_name": "counterfactual-branch"
+    },
+    {
+      "condition": "markdown",
+      "model": "gpt-5.6-luna",
+      "prior_run_id": null,
+      "prompt_template_bytes": 1912,
+      "prompt_template_sha256": "cfda5d1f1ed0eab928349b05a940fbddc3ba4b1b12a3611de39e7a81f6347935",
+      "reasoning_effort": "high",
+      "run_id": "luna-handoff-v1__markdown__stage-1",
+      "stage": 1,
+      "stage_name": "initial-diagnosis"
+    },
+    {
+      "condition": "markdown",
+      "model": "gpt-5.6-luna",
+      "prior_run_id": "luna-handoff-v1__markdown__stage-1",
+      "prompt_template_bytes": 2323,
+      "prompt_template_sha256": "a1d6af58c6287400e875cccf49e53ea4912ab1b30d1c221eb04cb3259c6af6a6",
+      "reasoning_effort": "high",
+      "run_id": "luna-handoff-v1__markdown__stage-2",
+      "stage": 2,
+      "stage_name": "initial-plan"
+    },
+    {
+      "condition": "markdown",
+      "model": "gpt-5.6-luna",
+      "prior_run_id": "luna-handoff-v1__markdown__stage-2",
+      "prompt_template_bytes": 2651,
+      "prompt_template_sha256": "e36352c7b9ce1b43248e423d03b6ba09f03492fa72846be4ee423a6c22cad9fe",
+      "reasoning_effort": "high",
+      "run_id": "luna-handoff-v1__markdown__stage-3",
+      "stage": 3,
+      "stage_name": "source-correction"
+    },
+    {
+      "condition": "markdown",
+      "model": "gpt-5.6-luna",
+      "prior_run_id": "luna-handoff-v1__markdown__stage-3",
+      "prompt_template_bytes": 2818,
+      "prompt_template_sha256": "c0e95242856e962b8d5f68af878509e182b593d8641fee53213c36cd5eae5226",
+      "reasoning_effort": "high",
+      "run_id": "luna-handoff-v1__markdown__stage-4",
+      "stage": 4,
+      "stage_name": "follow-up-recovery"
+    },
+    {
+      "condition": "markdown",
+      "model": "gpt-5.6-luna",
+      "prior_run_id": "luna-handoff-v1__markdown__stage-4",
+      "prompt_template_bytes": 3440,
+      "prompt_template_sha256": "328d68c7b4c8c843c39e5ff39f2c61de63ba9725275e9393ba526f09b97d64fc",
+      "reasoning_effort": "high",
+      "run_id": "luna-handoff-v1__markdown__stage-5",
+      "stage": 5,
+      "stage_name": "counterfactual-branch"
+    }
+  ],
+  "manifest": "study\\exploratory\\luna_handoff_v1\\candidate-manifest.json",
+  "manifest_sha256": "cd3dedc259f54407c531da8b255b7af9f000ef1ee72f23dbdef8790743fa5bd1",
+  "schema_version": 1,
+  "test_id": "luna-handoff-v1"
+}

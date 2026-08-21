@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "test_id": "luna-handoff-v1",
+  "status": "candidate",
+  "exploratory_only": true,
+  "model_calls_authorized": false,
+  "model": "gpt-5.6-luna",
+  "reasoning_effort": "high",
+  "conditions": ["thoughtml", "markdown"],
+  "condition_order": ["thoughtml", "markdown"],
+  "stages_per_condition": 5,
+  "expected_calls": 10,
+  "fresh_session_each_stage": true,
+  "pass_raw_ledger_forward": true,
+  "tools_permitted": false,
+  "outcome_retries_permitted": false,
+  "timeout_seconds": 1800,
+  "purpose": "Exploratory existence test of persistent revision and branch separation; never pooled with the registered benchmark."
+}
+
