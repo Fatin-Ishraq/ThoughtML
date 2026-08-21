@@ -1,25 +1,8 @@
 {
-  "collectable": true,
+  "collectable": false,
   "count": 30,
-  "created_at": "2026-08-21T14:12:14.570061Z",
+  "created_at": "2026-08-21T14:18:37.962094Z",
   "items": [
-    {
-      "arm": "DP",
-      "condition": "probe",
-      "model": "deepseek-v4-pro",
-      "phase": "probe-cued",
-      "prompt_bytes": 620,
-      "prompt_sha256": "1af83eaffd6e000e6032a3cc6350acea556c639b7dd15f3b6e31f618833725d6",
-      "reasoning_effort": "high",
-      "run_id": "probe-cued__probe-cued-004__dp__probe__s1__high",
-      "sample": 1,
-      "task": {
-        "id": "probe-cued-004",
-        "prompt": "A coastal emergency team is deciding whether to order evacuation. A storm may intensify before landfall, roads could flood if departure is delayed, and evacuation itself creates risks for medically fragile residents. A newer forecast lowers the expected surge but remains uncertain. Author a ThoughtML document recording the evidence, counterevidence, options, and current decision.",
-        "topic": "coastal-evacuation"
-      },
-      "task_id": "probe-cued-004"
-    },
     {
       "arm": "T",
       "condition": "probe",
@@ -35,24 +18,8 @@
         "prompt": "A bakery investigates why a test loaf collapsed. The yeast was fresh and the oven reached its target temperature, but the dough received twice the intended amount of water. The baker believes excessive hydration caused the collapse while noting that proofing time was also slightly short. Author a ThoughtML document recording the investigation, competing evidence, and present conclusion.",
         "topic": "failed-loaf"
       },
-      "task_id": "probe-cued-001"
-    },
-    {
-      "arm": "DP",
-      "condition": "probe",
-      "model": "deepseek-v4-pro",
-      "phase": "probe-cued",
-      "prompt_bytes": 601,
-      "prompt_sha256": "264afd564702a352224539079bf187b7763bdaf545a1415362106379f1a27239",
-      "reasoning_effort": "high",
-      "run_id": "probe-cued__probe-cued-002__dp__probe__s1__high",
-      "sample": 1,
-      "task": {
-        "id": "probe-cued-002",
-        "prompt": "An inspection team must decide whether a small bridge may remain open. Surface cracking has grown since last year, but load measurements remain within the published limit and an engineer says temporary monitoring is possible. Author a ThoughtML document that records the observations, the decision question, reasons on both sides, and the team's current position.",
-        "topic": "bridge-inspection"
-      },
-      "task_id": "probe-cued-002"
+      "task_id": "probe-cued-001",
+      "vendor": "openai"
     },
     {
       "arm": "T",
@@ -69,7 +36,8 @@
         "prompt": "A school evaluates a tutoring trial. Participating students improved more than the comparison class, but participation was voluntary and the tutoring group began with more motivated families. Teachers observed better homework completion, while attendance gains were small. Author a ThoughtML document representing the findings, limitations, causal hypothesis, and confidence in adopting the program.",
         "topic": "tutoring-trial"
       },
-      "task_id": "probe-cued-005"
+      "task_id": "probe-cued-005",
+      "vendor": "openai"
     },
     {
       "arm": "L",
@@ -86,24 +54,8 @@
         "prompt": "A coastal emergency team is deciding whether to order evacuation. A storm may intensify before landfall, roads could flood if departure is delayed, and evacuation itself creates risks for medically fragile residents. A newer forecast lowers the expected surge but remains uncertain. Author a ThoughtML document recording the evidence, counterevidence, options, and current decision.",
         "topic": "coastal-evacuation"
       },
-      "task_id": "probe-cued-004"
-    },
-    {
-      "arm": "DF",
-      "condition": "probe",
-      "model": "deepseek-v4-flash",
-      "phase": "probe-cued",
-      "prompt_bytes": 627,
-      "prompt_sha256": "dac95203ac49e39496e40623553cace0380a67e8a827e1aae0aeeaa00bf2c5f5",
-      "reasoning_effort": "high",
-      "run_id": "probe-cued__probe-cued-001__df__probe__s1__high",
-      "sample": 1,
-      "task": {
-        "id": "probe-cued-001",
-        "prompt": "A bakery investigates why a test loaf collapsed. The yeast was fresh and the oven reached its target temperature, but the dough received twice the intended amount of water. The baker believes excessive hydration caused the collapse while noting that proofing time was also slightly short. Author a ThoughtML document recording the investigation, competing evidence, and present conclusion.",
-        "topic": "failed-loaf"
-      },
-      "task_id": "probe-cued-001"
+      "task_id": "probe-cued-004",
+      "vendor": "openai"
     },
     {
       "arm": "G",
@@ -120,24 +72,8 @@
         "prompt": "A research funding panel compares a technically ambitious proposal with strong preliminary evidence against a safer proposal that has clearer milestones and a more experienced delivery team. The budget supports only one award. Author a ThoughtML document representing the options, relevant evidence, panel positions, and final selection or unresolved question.",
         "topic": "grant-panel"
       },
-      "task_id": "probe-cued-003"
-    },
-    {
-      "arm": "DF",
-      "condition": "probe",
-      "model": "deepseek-v4-flash",
-      "phase": "probe-cued",
-      "prompt_bytes": 637,
-      "prompt_sha256": "d3f8cb90705d7e8168d4942b2197af0facc5956c00cdd19e05b86b9b90111320",
-      "reasoning_effort": "high",
-      "run_id": "probe-cued__probe-cued-005__df__probe__s1__high",
-      "sample": 1,
-      "task": {
-        "id": "probe-cued-005",
-        "prompt": "A school evaluates a tutoring trial. Participating students improved more than the comparison class, but participation was voluntary and the tutoring group began with more motivated families. Teachers observed better homework completion, while attendance gains were small. Author a ThoughtML document representing the findings, limitations, causal hypothesis, and confidence in adopting the program.",
-        "topic": "tutoring-trial"
-      },
-      "task_id": "probe-cued-005"
+      "task_id": "probe-cued-003",
+      "vendor": "openai"
     },
     {
       "arm": "L",
@@ -154,7 +90,8 @@
         "prompt": "A school evaluates a tutoring trial. Participating students improved more than the comparison class, but participation was voluntary and the tutoring group began with more motivated families. Teachers observed better homework completion, while attendance gains were small. Author a ThoughtML document representing the findings, limitations, causal hypothesis, and confidence in adopting the program.",
         "topic": "tutoring-trial"
       },
-      "task_id": "probe-cued-005"
+      "task_id": "probe-cued-005",
+      "vendor": "openai"
     },
     {
       "arm": "T",
@@ -171,7 +108,8 @@
         "prompt": "A coastal emergency team is deciding whether to order evacuation. A storm may intensify before landfall, roads could flood if departure is delayed, and evacuation itself creates risks for medically fragile residents. A newer forecast lowers the expected surge but remains uncertain. Author a ThoughtML document recording the evidence, counterevidence, options, and current decision.",
         "topic": "coastal-evacuation"
       },
-      "task_id": "probe-cued-004"
+      "task_id": "probe-cued-004",
+      "vendor": "openai"
     },
     {
       "arm": "L",
@@ -188,7 +126,8 @@
         "prompt": "A bakery investigates why a test loaf collapsed. The yeast was fresh and the oven reached its target temperature, but the dough received twice the intended amount of water. The baker believes excessive hydration caused the collapse while noting that proofing time was also slightly short. Author a ThoughtML document recording the investigation, competing evidence, and present conclusion.",
         "topic": "failed-loaf"
       },
-      "task_id": "probe-cued-001"
+      "task_id": "probe-cued-001",
+      "vendor": "openai"
     },
     {
       "arm": "T",
@@ -205,24 +144,8 @@
         "prompt": "An inspection team must decide whether a small bridge may remain open. Surface cracking has grown since last year, but load measurements remain within the published limit and an engineer says temporary monitoring is possible. Author a ThoughtML document that records the observations, the decision question, reasons on both sides, and the team's current position.",
         "topic": "bridge-inspection"
       },
-      "task_id": "probe-cued-002"
-    },
-    {
-      "arm": "DF",
-      "condition": "probe",
-      "model": "deepseek-v4-flash",
-      "phase": "probe-cued",
-      "prompt_bytes": 598,
-      "prompt_sha256": "b98fc2e82f6b75c942ad241b930c20174b6c8438972c528d4e2deccdfa713fa7",
-      "reasoning_effort": "high",
-      "run_id": "probe-cued__probe-cued-003__df__probe__s1__high",
-      "sample": 1,
-      "task": {
-        "id": "probe-cued-003",
-        "prompt": "A research funding panel compares a technically ambitious proposal with strong preliminary evidence against a safer proposal that has clearer milestones and a more experienced delivery team. The budget supports only one award. Author a ThoughtML document representing the options, relevant evidence, panel positions, and final selection or unresolved question.",
-        "topic": "grant-panel"
-      },
-      "task_id": "probe-cued-003"
+      "task_id": "probe-cued-002",
+      "vendor": "openai"
     },
     {
       "arm": "L",
@@ -239,7 +162,8 @@
         "prompt": "An inspection team must decide whether a small bridge may remain open. Surface cracking has grown since last year, but load measurements remain within the published limit and an engineer says temporary monitoring is possible. Author a ThoughtML document that records the observations, the decision question, reasons on both sides, and the team's current position.",
         "topic": "bridge-inspection"
       },
-      "task_id": "probe-cued-002"
+      "task_id": "probe-cued-002",
+      "vendor": "openai"
     },
     {
       "arm": "T",
@@ -256,7 +180,8 @@
         "prompt": "A research funding panel compares a technically ambitious proposal with strong preliminary evidence against a safer proposal that has clearer milestones and a more experienced delivery team. The budget supports only one award. Author a ThoughtML document representing the options, relevant evidence, panel positions, and final selection or unresolved question.",
         "topic": "grant-panel"
       },
-      "task_id": "probe-cued-003"
+      "task_id": "probe-cued-003",
+      "vendor": "openai"
     },
     {
       "arm": "G",
@@ -273,7 +198,8 @@
         "prompt": "A bakery investigates why a test loaf collapsed. The yeast was fresh and the oven reached its target temperature, but the dough received twice the intended amount of water. The baker believes excessive hydration caused the collapse while noting that proofing time was also slightly short. Author a ThoughtML document recording the investigation, competing evidence, and present conclusion.",
         "topic": "failed-loaf"
       },
-      "task_id": "probe-cued-001"
+      "task_id": "probe-cued-001",
+      "vendor": "openai"
     },
     {
       "arm": "S",
@@ -290,24 +216,8 @@
         "prompt": "A coastal emergency team is deciding whether to order evacuation. A storm may intensify before landfall, roads could flood if departure is delayed, and evacuation itself creates risks for medically fragile residents. A newer forecast lowers the expected surge but remains uncertain. Author a ThoughtML document recording the evidence, counterevidence, options, and current decision.",
         "topic": "coastal-evacuation"
       },
-      "task_id": "probe-cued-004"
-    },
-    {
-      "arm": "DF",
-      "condition": "probe",
-      "model": "deepseek-v4-flash",
-      "phase": "probe-cued",
-      "prompt_bytes": 601,
-      "prompt_sha256": "264afd564702a352224539079bf187b7763bdaf545a1415362106379f1a27239",
-      "reasoning_effort": "high",
-      "run_id": "probe-cued__probe-cued-002__df__probe__s1__high",
-      "sample": 1,
-      "task": {
-        "id": "probe-cued-002",
-        "prompt": "An inspection team must decide whether a small bridge may remain open. Surface cracking has grown since last year, but load measurements remain within the published limit and an engineer says temporary monitoring is possible. Author a ThoughtML document that records the observations, the decision question, reasons on both sides, and the team's current position.",
-        "topic": "bridge-inspection"
-      },
-      "task_id": "probe-cued-002"
+      "task_id": "probe-cued-004",
+      "vendor": "openai"
     },
     {
       "arm": "L",
@@ -324,41 +234,8 @@
         "prompt": "A research funding panel compares a technically ambitious proposal with strong preliminary evidence against a safer proposal that has clearer milestones and a more experienced delivery team. The budget supports only one award. Author a ThoughtML document representing the options, relevant evidence, panel positions, and final selection or unresolved question.",
         "topic": "grant-panel"
       },
-      "task_id": "probe-cued-003"
-    },
-    {
-      "arm": "DF",
-      "condition": "probe",
-      "model": "deepseek-v4-flash",
-      "phase": "probe-cued",
-      "prompt_bytes": 620,
-      "prompt_sha256": "1af83eaffd6e000e6032a3cc6350acea556c639b7dd15f3b6e31f618833725d6",
-      "reasoning_effort": "high",
-      "run_id": "probe-cued__probe-cued-004__df__probe__s1__high",
-      "sample": 1,
-      "task": {
-        "id": "probe-cued-004",
-        "prompt": "A coastal emergency team is deciding whether to order evacuation. A storm may intensify before landfall, roads could flood if departure is delayed, and evacuation itself creates risks for medically fragile residents. A newer forecast lowers the expected surge but remains uncertain. Author a ThoughtML document recording the evidence, counterevidence, options, and current decision.",
-        "topic": "coastal-evacuation"
-      },
-      "task_id": "probe-cued-004"
-    },
-    {
-      "arm": "DP",
-      "condition": "probe",
-      "model": "deepseek-v4-pro",
-      "phase": "probe-cued",
-      "prompt_bytes": 627,
-      "prompt_sha256": "dac95203ac49e39496e40623553cace0380a67e8a827e1aae0aeeaa00bf2c5f5",
-      "reasoning_effort": "high",
-      "run_id": "probe-cued__probe-cued-001__dp__probe__s1__high",
-      "sample": 1,
-      "task": {
-        "id": "probe-cued-001",
-        "prompt": "A bakery investigates why a test loaf collapsed. The yeast was fresh and the oven reached its target temperature, but the dough received twice the intended amount of water. The baker believes excessive hydration caused the collapse while noting that proofing time was also slightly short. Author a ThoughtML document recording the investigation, competing evidence, and present conclusion.",
-        "topic": "failed-loaf"
-      },
-      "task_id": "probe-cued-001"
+      "task_id": "probe-cued-003",
+      "vendor": "openai"
     },
     {
       "arm": "G",
@@ -375,7 +252,8 @@
         "prompt": "A coastal emergency team is deciding whether to order evacuation. A storm may intensify before landfall, roads could flood if departure is delayed, and evacuation itself creates risks for medically fragile residents. A newer forecast lowers the expected surge but remains uncertain. Author a ThoughtML document recording the evidence, counterevidence, options, and current decision.",
         "topic": "coastal-evacuation"
       },
-      "task_id": "probe-cued-004"
+      "task_id": "probe-cued-004",
+      "vendor": "openai"
     },
     {
       "arm": "S",
@@ -392,7 +270,8 @@
         "prompt": "A school evaluates a tutoring trial. Participating students improved more than the comparison class, but participation was voluntary and the tutoring group began with more motivated families. Teachers observed better homework completion, while attendance gains were small. Author a ThoughtML document representing the findings, limitations, causal hypothesis, and confidence in adopting the program.",
         "topic": "tutoring-trial"
       },
-      "task_id": "probe-cued-005"
+      "task_id": "probe-cued-005",
+      "vendor": "openai"
     },
     {
       "arm": "G",
@@ -409,24 +288,8 @@
         "prompt": "An inspection team must decide whether a small bridge may remain open. Surface cracking has grown since last year, but load measurements remain within the published limit and an engineer says temporary monitoring is possible. Author a ThoughtML document that records the observations, the decision question, reasons on both sides, and the team's current position.",
         "topic": "bridge-inspection"
       },
-      "task_id": "probe-cued-002"
-    },
-    {
-      "arm": "DP",
-      "condition": "probe",
-      "model": "deepseek-v4-pro",
-      "phase": "probe-cued",
-      "prompt_bytes": 598,
-      "prompt_sha256": "b98fc2e82f6b75c942ad241b930c20174b6c8438972c528d4e2deccdfa713fa7",
-      "reasoning_effort": "high",
-      "run_id": "probe-cued__probe-cued-003__dp__probe__s1__high",
-      "sample": 1,
-      "task": {
-        "id": "probe-cued-003",
-        "prompt": "A research funding panel compares a technically ambitious proposal with strong preliminary evidence against a safer proposal that has clearer milestones and a more experienced delivery team. The budget supports only one award. Author a ThoughtML document representing the options, relevant evidence, panel positions, and final selection or unresolved question.",
-        "topic": "grant-panel"
-      },
-      "task_id": "probe-cued-003"
+      "task_id": "probe-cued-002",
+      "vendor": "openai"
     },
     {
       "arm": "G",
@@ -443,7 +306,8 @@
         "prompt": "A school evaluates a tutoring trial. Participating students improved more than the comparison class, but participation was voluntary and the tutoring group began with more motivated families. Teachers observed better homework completion, while attendance gains were small. Author a ThoughtML document representing the findings, limitations, causal hypothesis, and confidence in adopting the program.",
         "topic": "tutoring-trial"
       },
-      "task_id": "probe-cued-005"
+      "task_id": "probe-cued-005",
+      "vendor": "openai"
     },
     {
       "arm": "S",
@@ -460,7 +324,8 @@
         "prompt": "An inspection team must decide whether a small bridge may remain open. Surface cracking has grown since last year, but load measurements remain within the published limit and an engineer says temporary monitoring is possible. Author a ThoughtML document that records the observations, the decision question, reasons on both sides, and the team's current position.",
         "topic": "bridge-inspection"
       },
-      "task_id": "probe-cued-002"
+      "task_id": "probe-cued-002",
+      "vendor": "openai"
     },
     {
       "arm": "S",
@@ -477,7 +342,8 @@
         "prompt": "A research funding panel compares a technically ambitious proposal with strong preliminary evidence against a safer proposal that has clearer milestones and a more experienced delivery team. The budget supports only one award. Author a ThoughtML document representing the options, relevant evidence, panel positions, and final selection or unresolved question.",
         "topic": "grant-panel"
       },
-      "task_id": "probe-cued-003"
+      "task_id": "probe-cued-003",
+      "vendor": "openai"
     },
     {
       "arm": "S",
@@ -494,7 +360,170 @@
         "prompt": "A bakery investigates why a test loaf collapsed. The yeast was fresh and the oven reached its target temperature, but the dough received twice the intended amount of water. The baker believes excessive hydration caused the collapse while noting that proofing time was also slightly short. Author a ThoughtML document recording the investigation, competing evidence, and present conclusion.",
         "topic": "failed-loaf"
       },
-      "task_id": "probe-cued-001"
+      "task_id": "probe-cued-001",
+      "vendor": "openai"
+    },
+    {
+      "arm": "DP",
+      "condition": "probe",
+      "model": "deepseek-v4-pro",
+      "phase": "probe-cued",
+      "prompt_bytes": 620,
+      "prompt_sha256": "1af83eaffd6e000e6032a3cc6350acea556c639b7dd15f3b6e31f618833725d6",
+      "reasoning_effort": "high",
+      "run_id": "probe-cued__probe-cued-004__dp__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-cued-004",
+        "prompt": "A coastal emergency team is deciding whether to order evacuation. A storm may intensify before landfall, roads could flood if departure is delayed, and evacuation itself creates risks for medically fragile residents. A newer forecast lowers the expected surge but remains uncertain. Author a ThoughtML document recording the evidence, counterevidence, options, and current decision.",
+        "topic": "coastal-evacuation"
+      },
+      "task_id": "probe-cued-004",
+      "vendor": "deepseek"
+    },
+    {
+      "arm": "DP",
+      "condition": "probe",
+      "model": "deepseek-v4-pro",
+      "phase": "probe-cued",
+      "prompt_bytes": 601,
+      "prompt_sha256": "264afd564702a352224539079bf187b7763bdaf545a1415362106379f1a27239",
+      "reasoning_effort": "high",
+      "run_id": "probe-cued__probe-cued-002__dp__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-cued-002",
+        "prompt": "An inspection team must decide whether a small bridge may remain open. Surface cracking has grown since last year, but load measurements remain within the published limit and an engineer says temporary monitoring is possible. Author a ThoughtML document that records the observations, the decision question, reasons on both sides, and the team's current position.",
+        "topic": "bridge-inspection"
+      },
+      "task_id": "probe-cued-002",
+      "vendor": "deepseek"
+    },
+    {
+      "arm": "DF",
+      "condition": "probe",
+      "model": "deepseek-v4-flash",
+      "phase": "probe-cued",
+      "prompt_bytes": 627,
+      "prompt_sha256": "dac95203ac49e39496e40623553cace0380a67e8a827e1aae0aeeaa00bf2c5f5",
+      "reasoning_effort": "high",
+      "run_id": "probe-cued__probe-cued-001__df__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-cued-001",
+        "prompt": "A bakery investigates why a test loaf collapsed. The yeast was fresh and the oven reached its target temperature, but the dough received twice the intended amount of water. The baker believes excessive hydration caused the collapse while noting that proofing time was also slightly short. Author a ThoughtML document recording the investigation, competing evidence, and present conclusion.",
+        "topic": "failed-loaf"
+      },
+      "task_id": "probe-cued-001",
+      "vendor": "deepseek"
+    },
+    {
+      "arm": "DF",
+      "condition": "probe",
+      "model": "deepseek-v4-flash",
+      "phase": "probe-cued",
+      "prompt_bytes": 637,
+      "prompt_sha256": "d3f8cb90705d7e8168d4942b2197af0facc5956c00cdd19e05b86b9b90111320",
+      "reasoning_effort": "high",
+      "run_id": "probe-cued__probe-cued-005__df__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-cued-005",
+        "prompt": "A school evaluates a tutoring trial. Participating students improved more than the comparison class, but participation was voluntary and the tutoring group began with more motivated families. Teachers observed better homework completion, while attendance gains were small. Author a ThoughtML document representing the findings, limitations, causal hypothesis, and confidence in adopting the program.",
+        "topic": "tutoring-trial"
+      },
+      "task_id": "probe-cued-005",
+      "vendor": "deepseek"
+    },
+    {
+      "arm": "DF",
+      "condition": "probe",
+      "model": "deepseek-v4-flash",
+      "phase": "probe-cued",
+      "prompt_bytes": 598,
+      "prompt_sha256": "b98fc2e82f6b75c942ad241b930c20174b6c8438972c528d4e2deccdfa713fa7",
+      "reasoning_effort": "high",
+      "run_id": "probe-cued__probe-cued-003__df__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-cued-003",
+        "prompt": "A research funding panel compares a technically ambitious proposal with strong preliminary evidence against a safer proposal that has clearer milestones and a more experienced delivery team. The budget supports only one award. Author a ThoughtML document representing the options, relevant evidence, panel positions, and final selection or unresolved question.",
+        "topic": "grant-panel"
+      },
+      "task_id": "probe-cued-003",
+      "vendor": "deepseek"
+    },
+    {
+      "arm": "DF",
+      "condition": "probe",
+      "model": "deepseek-v4-flash",
+      "phase": "probe-cued",
+      "prompt_bytes": 601,
+      "prompt_sha256": "264afd564702a352224539079bf187b7763bdaf545a1415362106379f1a27239",
+      "reasoning_effort": "high",
+      "run_id": "probe-cued__probe-cued-002__df__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-cued-002",
+        "prompt": "An inspection team must decide whether a small bridge may remain open. Surface cracking has grown since last year, but load measurements remain within the published limit and an engineer says temporary monitoring is possible. Author a ThoughtML document that records the observations, the decision question, reasons on both sides, and the team's current position.",
+        "topic": "bridge-inspection"
+      },
+      "task_id": "probe-cued-002",
+      "vendor": "deepseek"
+    },
+    {
+      "arm": "DF",
+      "condition": "probe",
+      "model": "deepseek-v4-flash",
+      "phase": "probe-cued",
+      "prompt_bytes": 620,
+      "prompt_sha256": "1af83eaffd6e000e6032a3cc6350acea556c639b7dd15f3b6e31f618833725d6",
+      "reasoning_effort": "high",
+      "run_id": "probe-cued__probe-cued-004__df__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-cued-004",
+        "prompt": "A coastal emergency team is deciding whether to order evacuation. A storm may intensify before landfall, roads could flood if departure is delayed, and evacuation itself creates risks for medically fragile residents. A newer forecast lowers the expected surge but remains uncertain. Author a ThoughtML document recording the evidence, counterevidence, options, and current decision.",
+        "topic": "coastal-evacuation"
+      },
+      "task_id": "probe-cued-004",
+      "vendor": "deepseek"
+    },
+    {
+      "arm": "DP",
+      "condition": "probe",
+      "model": "deepseek-v4-pro",
+      "phase": "probe-cued",
+      "prompt_bytes": 627,
+      "prompt_sha256": "dac95203ac49e39496e40623553cace0380a67e8a827e1aae0aeeaa00bf2c5f5",
+      "reasoning_effort": "high",
+      "run_id": "probe-cued__probe-cued-001__dp__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-cued-001",
+        "prompt": "A bakery investigates why a test loaf collapsed. The yeast was fresh and the oven reached its target temperature, but the dough received twice the intended amount of water. The baker believes excessive hydration caused the collapse while noting that proofing time was also slightly short. Author a ThoughtML document recording the investigation, competing evidence, and present conclusion.",
+        "topic": "failed-loaf"
+      },
+      "task_id": "probe-cued-001",
+      "vendor": "deepseek"
+    },
+    {
+      "arm": "DP",
+      "condition": "probe",
+      "model": "deepseek-v4-pro",
+      "phase": "probe-cued",
+      "prompt_bytes": 598,
+      "prompt_sha256": "b98fc2e82f6b75c942ad241b930c20174b6c8438972c528d4e2deccdfa713fa7",
+      "reasoning_effort": "high",
+      "run_id": "probe-cued__probe-cued-003__dp__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-cued-003",
+        "prompt": "A research funding panel compares a technically ambitious proposal with strong preliminary evidence against a safer proposal that has clearer milestones and a more experienced delivery team. The budget supports only one award. Author a ThoughtML document representing the options, relevant evidence, panel positions, and final selection or unresolved question.",
+        "topic": "grant-panel"
+      },
+      "task_id": "probe-cued-003",
+      "vendor": "deepseek"
     },
     {
       "arm": "DP",
@@ -511,11 +540,19 @@
         "prompt": "A school evaluates a tutoring trial. Participating students improved more than the comparison class, but participation was voluntary and the tutoring group began with more motivated families. Teachers observed better homework completion, while attendance gains were small. Author a ThoughtML document representing the findings, limitations, causal hypothesis, and confidence in adopting the program.",
         "topic": "tutoring-trial"
       },
-      "task_id": "probe-cued-005"
+      "task_id": "probe-cued-005",
+      "vendor": "deepseek"
     }
   ],
-  "manifest": "study\\runs\\manifests\\frozen-2321b9b50891bc22.json",
-  "manifest_sha256": "2c8d9ad5ca3beaf9f2303a33e42c5bd446c49f64e7d5750c360442ea275d1c7b",
+  "manifest": "study\\runs\\candidate-manifest.json",
+  "manifest_sha256": "0653c075c7bb1cdae03e009148c5b6211b35e2fe4769996228be9caa9bfb1977",
+  "order_policy": {
+    "provider_blocks": [
+      "openai",
+      "deepseek"
+    ],
+    "within_block": "deterministic shuffle"
+  },
   "phase": "probe-cued",
   "phase_protocol_issues": [],
   "schema_version": 1,

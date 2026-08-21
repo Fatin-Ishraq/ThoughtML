@@ -17,6 +17,8 @@ Updated 2026-08-21. No registered AI-model call has been made.
 - Kept 30 calibration tasks; H1b remains explicitly estimation-first.
 - OSF is unavailable, so the pre-data state will be publicly committed and
   tagged on GitHub with that limitation disclosed.
+- GPT/OpenAI arms are scheduled before DeepSeek arms, with deterministic
+  randomization inside each provider block.
 
 ## Required before any model call
 

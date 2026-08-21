@@ -304,6 +304,18 @@ def validate_artifacts() -> list[ValidationMessage]:
         out.append(ValidationMessage("error", "MODEL_DUPLICATE", "model arms/slugs must be unique"))
 
     benchmark = read_json(CONFIG / "benchmark.json")
+    if benchmark.get("preregistration_version") != "2.3":
+        out.append(
+            ValidationMessage(
+                "error", "PREREG_VERSION", "benchmark config is not pinned to preregistration v2.3"
+            )
+        )
+    if benchmark.get("collection_order", {}).get("provider_blocks") != ["openai", "deepseek"]:
+        out.append(
+            ValidationMessage(
+                "error", "COLLECTION_ORDER", "collection order must place GPT/OpenAI before DeepSeek"
+            )
+        )
     if sha256_file(SPEC) != benchmark.get("spec_sha256"):
         out.append(ValidationMessage("error", "SPEC_HASH", "llms.txt does not match frozen hash"))
 
@@ -422,6 +434,7 @@ def _run_item(
         "task": task,
         "arm": model["arm"],
         "model": model["slug"],
+        "vendor": model["vendor"],
         "condition": condition,
         "sample": sample,
         "reasoning_effort": effort,
@@ -529,10 +542,20 @@ def build_schedule(phase: str, seed: int) -> dict[str, Any]:
         raise StudyError(f"unknown phase {phase!r}")
 
     random.Random(seed).shuffle(items)
+    order = read_json(CONFIG / "benchmark.json")["collection_order"]["provider_blocks"]
+    priority = {vendor: index for index, vendor in enumerate(order)}
+    unknown = sorted({item["vendor"] for item in items if item["vendor"] not in priority})
+    if unknown:
+        raise StudyError(f"vendors missing from collection-order policy: {unknown}")
+    items.sort(key=lambda item: priority[item["vendor"]])
     return {
         "schema_version": 1,
         "phase": phase,
         "seed": seed,
+        "order_policy": {
+            "provider_blocks": order,
+            "within_block": "deterministic shuffle",
+        },
         "count": len(items),
         "items": items,
     }

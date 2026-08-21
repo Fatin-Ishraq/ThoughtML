@@ -109,6 +109,14 @@ class ScheduleTests(unittest.TestCase):
         b = lib.build_schedule("exp1-thoughtml", 123)
         self.assertEqual([x["run_id"] for x in a["items"]], [x["run_id"] for x in b["items"]])
 
+    def test_gpt_arms_precede_deepseek_arms(self) -> None:
+        for phase in ("probe-cued", "probe-neutral", "exp0-main", "exp1-thoughtml", "exp1-generic"):
+            schedule = lib.build_schedule(phase, 20260821)
+            vendors = [item["vendor"] for item in schedule["items"]]
+            self.assertEqual(vendors, sorted(vendors, key={"openai": 0, "deepseek": 1}.get))
+            if "deepseek" in vendors:
+                self.assertEqual(vendors[0], "openai")
+
     def test_thoughtml_prompt_exceeds_windows_argument_budget(self) -> None:
         schedule = lib.build_schedule("exp0-pilot", 1)
         self.assertGreater(schedule["items"][0]["prompt_bytes"], 32767)

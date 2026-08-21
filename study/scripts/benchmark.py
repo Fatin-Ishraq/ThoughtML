@@ -227,7 +227,11 @@ def active_manifest(draft: bool) -> Path | None:
     if frozen.exists():
         value = lib.read_json(frozen)
         versioned = lib.RUNS / "manifests" / f"frozen-{value['manifest_content_sha256'][:16]}.json"
-        return versioned if versioned.exists() else frozen
+        active_frozen = versioned if versioned.exists() else frozen
+        if not compare_manifest(active_frozen):
+            return active_frozen
+        if not draft:
+            return active_frozen
     if draft and candidate.exists():
         return candidate
     return None
@@ -238,6 +242,13 @@ def cmd_schedule(args: argparse.Namespace) -> int:
     if manifest is None and not args.draft:
         print("no frozen manifest; resolve protocol issues and run `freeze` first")
         return 1
+    if manifest is not None:
+        drift = compare_manifest(manifest)
+        if drift and not args.draft:
+            print("refusing schedule: authoritative manifest is stale")
+            for difference in drift:
+                print(f"- {difference}")
+            return 1
     schedule = lib.build_schedule(args.phase, args.seed)
     expected = lib.EXPECTED_PHASE_COUNTS[args.phase]
     if schedule["count"] != expected:
@@ -247,11 +258,8 @@ def cmd_schedule(args: argparse.Namespace) -> int:
     schedule["manifest_sha256"] = lib.sha256_file(manifest) if manifest else None
     blockers = phase_protocol_issues(args.phase)
     schedule["phase_protocol_issues"] = blockers
-    schedule["collectable"] = bool(
-        manifest
-        and (manifest.name == "frozen-manifest.json" or manifest.parent.name == "manifests")
-        and not blockers
-    )
+    manifest_status = lib.read_json(manifest).get("status") if manifest else None
+    schedule["collectable"] = bool(manifest and manifest_status == "frozen" and not blockers)
     out = Path(args.out) if args.out else lib.RUNS / "schedules" / f"{args.phase}.json"
     if not out.is_absolute():
         out = lib.REPO / out

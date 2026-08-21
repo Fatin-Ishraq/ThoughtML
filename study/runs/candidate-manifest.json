@@ -1,6 +1,6 @@
 {
   "codex_version": "codex-cli 0.144.6",
-  "created_at": "2026-08-21T14:10:04.863827Z",
+  "created_at": "2026-08-21T14:18:37.574995Z",
   "files": [
     {
       "bytes": 39129,
@@ -17,11 +17,11 @@
       "sha256": "8222ddcf740c65b61d875665cfbe4c1d410295d59ac2b21f435ac5bbe5f87776"
     },
     {
-      "bytes": 710,
+      "bytes": 850,
       "line_endings": "lf",
-      "lines": 25,
+      "lines": 29,
       "path": "study/config/benchmark.json",
-      "sha256": "fc7d43347e545fd0b151ea3b720b0e31509adbc2ea991f02d348bce4d65e0366"
+      "sha256": "b1cce6d08e97e06bd4d1c1723d6fbe8eefd48a393d24cf77806cd8b71ed60d56"
     },
     {
       "bytes": 710,
@@ -115,18 +115,18 @@
       "sha256": "c2923b599480370762e287bc7c1af9bb6a0e4c6f52d26cdd24267d10a666bbf6"
     },
     {
-      "bytes": 54383,
+      "bytes": 55529,
       "line_endings": "lf",
-      "lines": 495,
+      "lines": 508,
       "path": "study/preregistration.md",
-      "sha256": "743b74039d07f0be73b00adee2c138eaf74b03aeb684c165b8a58e45a0dbc37a"
+      "sha256": "45f90795d6dde3a602dfd71bc79211f674425f224ecabcb3739869d38d19c8f3"
     },
     {
-      "bytes": 2784,
+      "bytes": 3151,
       "line_endings": "lf",
-      "lines": 53,
+      "lines": 60,
       "path": "study/protocol-issues.md",
-      "sha256": "36470c56ba182b841a10186953b2d9d03279c5a67c54c8079ee06af100604e4b"
+      "sha256": "a020c10a4e1a313d974e7de92c2005d6c3b9dada3e87cd5ecc6ad8106881cd4f"
     },
     {
       "bytes": 3567,
@@ -143,11 +143,11 @@
       "sha256": "c162d295e5b328dbdd4d82c86e59cd9dad9dc74780708193ff1e226f234fb3b4"
     },
     {
-      "bytes": 31871,
+      "bytes": 32295,
       "line_endings": "lf",
-      "lines": 779,
+      "lines": 787,
       "path": "study/scripts/benchmark.py",
-      "sha256": "74be848457d2a990399603483a66ed2a03b34e19f2abc2de593134a2a40f4ca8"
+      "sha256": "37bc12789e9b726ca4a4e250309d915f0cda7ed086d66d293c1c528f305f37ef"
     },
     {
       "bytes": 3133,
@@ -171,11 +171,11 @@
       "sha256": "b5bb9dc5fa11ea98d99fab9872598163e000380ec8989389777ae77092f1a3f3"
     },
     {
-      "bytes": 32163,
+      "bytes": 33238,
       "line_endings": "lf",
-      "lines": 854,
+      "lines": 877,
       "path": "study/scripts/studylib.py",
-      "sha256": "ddf686319bbb0a2e3e78e29983e5af1f37eb1b308c1375356b5dba09496f84e0"
+      "sha256": "cc55ea24ccf4f58becd08823bb987237b807b5475c0dd9816331c3ba8da9dd2f"
     },
     {
       "bytes": 8006,
@@ -220,10 +220,10 @@
       "sha256": "05ea41471d2e5e793f5fe00470c531c6040049a01a748755d9b156eaddafa9b7"
     }
   ],
-  "git_head": "bcbd31de5d4fafdb5ae7bb702b9ed5d6eac89e08",
+  "git_head": "727bee2f0557cf139f0e9febeb86247b04b1155e",
   "grader_path": "C:\\Users\\Fatin\\Downloads\\tml2\\target\\release\\thoughtml.exe",
   "grader_sha256": "99e3afa2222a00f3eb82315e4dd251259b19ecc296769f0e35ce5ed9cd38f5b0",
-  "manifest_content_sha256": "8aa55d6c0ab159b0bee4d8d681452c40cab069653b3f8bee8cf2e81e0201967f",
+  "manifest_content_sha256": "70e376b24ce7f4762f31303d226b771d5d2f50aa34e97a2d7d870a5621bfa890",
   "open_protocol_issues": [],
   "phase_protocol_issues": {
     "exp1": [

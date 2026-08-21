@@ -48,6 +48,13 @@ the contamination probe or Experiment 0. The runner enforces that boundary.
 The author does not currently have an OSF account. The study therefore does not
 claim OSF registration. Before the first registered call, the complete pre-data
 state is committed publicly and marked with the annotated Git tag
-`study-predata-v2.2`. This is a public timestamp and an auditable history, but
+`study-predata-v2.3`. This is a public timestamp and an auditable history, but
 it is not an immutable third-party registration; that limitation is disclosed
 in the pre-registration and eventual paper.
+
+## P07 — RESOLVED: GPT models run before DeepSeek models
+
+The initial v2.2 fully randomized dry run placed `deepseek-v4-pro` first. No
+model call occurred. At the author's pre-data request, v2.3 uses deterministic
+provider blocks: all GPT/OpenAI runs precede all DeepSeek runs, with seeded
+randomization inside each block. The runner and tests enforce this order.

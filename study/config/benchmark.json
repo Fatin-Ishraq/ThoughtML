@@ -1,11 +1,15 @@
 {
-  "schema_version": 1,
-  "preregistration_version": "2.0",
+  "schema_version": 2,
+  "preregistration_version": "2.3",
   "pinned_commit": "6b323bfaacab44ec0aef19dfa0abfdf98503959e",
   "thoughtml_version": "0.5.0",
   "grader_sha256": "99e3afa2222a00f3eb82315e4dd251259b19ecc296769f0e35ce5ed9cd38f5b0",
   "spec_sha256": "1a3fd8b8dccf079c2284b59bef6ac1ceb0a84fc7d95240023c7abb6333531e9f",
-  "schedule_seed": 20260820,
+  "schedule_seed": 20260821,
+  "collection_order": {
+    "provider_blocks": ["openai", "deepseek"],
+    "within_block": "deterministic shuffle using schedule_seed"
+  },
   "retry": {
     "max_retries": 3,
     "base_delay_seconds": 5,
