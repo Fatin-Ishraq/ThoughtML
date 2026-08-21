@@ -1,0 +1,64 @@
+<thoughtml version="1.0">
+  <context>
+    <scenario>School tutoring trial evaluation</scenario>
+    <question>What do the results suggest, what are the key limitations, what causal story is most plausible, and how confident should the school be about adoption?</question>
+  </context>
+
+  <findings>
+    <finding id="f1" strength="moderate">
+      <claim>Students who participated in tutoring improved more than the comparison class.</claim>
+      <interpretation>This is consistent with a positive program effect.</interpretation>
+    </finding>
+    <finding id="f2" strength="moderate">
+      <claim>Teachers observed better homework completion among tutoring participants.</claim>
+      <interpretation>Homework completion may be one mechanism through which tutoring helps academic performance.</interpretation>
+    </finding>
+    <finding id="f3" strength="weak">
+      <claim>Attendance gains were small.</claim>
+      <interpretation>Attendance does not appear to be a major driver of the observed improvement.</interpretation>
+    </finding>
+  </findings>
+
+  <limitations>
+    <limitation id="l1" severity="high" type="selection_bias">
+      <claim>Participation was voluntary.</claim>
+      <impact>Students who chose tutoring may differ systematically from nonparticipants.</impact>
+    </limitation>
+    <limitation id="l2" severity="high" type="confounding">
+      <claim>The tutoring group began with more motivated families.</claim>
+      <impact>Family motivation could independently increase student improvement and homework completion.</impact>
+    </limitation>
+    <limitation id="l3" severity="medium" type="causal_inference">
+      <claim>The comparison does not establish random assignment.</claim>
+      <impact>The observed advantage cannot be interpreted as a clean causal estimate of tutoring alone.</impact>
+    </limitation>
+    <limitation id="l4" severity="low" type="measurement">
+      <claim>Teacher observations may contain subjective judgment.</claim>
+      <impact>Homework-related improvements are informative but not fully independent evidence.</impact>
+    </limitation>
+  </limitations>
+
+  <causal_hypothesis>
+    <primary>
+      <claim>Tutoring likely contributed to academic improvement by increasing structure, support, and homework completion.</claim>
+    </primary>
+    <alternative>
+      <claim>Part of the observed improvement may reflect preexisting family motivation rather than tutoring itself.</claim>
+    </alternative>
+    <mechanism_assessment>
+      <supported_pathway>Improved homework completion and engagement</supported_pathway>
+      <weak_pathway>Attendance change</weak_pathway>
+    </mechanism_assessment>
+    <net_judgment>The most plausible view is that tutoring helped, but the size of its effect is probably overstated by selection effects.</net_judgment>
+  </causal_hypothesis>
+
+  <adoption_confidence level="moderate" stance="guarded_adopt">
+    <summary>The program is promising enough to continue or expand cautiously, but the evidence is not strong enough to treat the current result as definitive proof.</summary>
+    <reasoning>
+      <point>Outcome patterns are directionally positive.</point>
+      <point>Observed homework improvements support a plausible mechanism.</point>
+      <point>Voluntary participation and higher initial family motivation substantially reduce causal certainty.</point>
+    </reasoning>
+    <recommendation>Adopt provisionally while running a stronger follow-up evaluation with better matching or random assignment if feasible.</recommendation>
+  </adoption_confidence>
+</thoughtml>

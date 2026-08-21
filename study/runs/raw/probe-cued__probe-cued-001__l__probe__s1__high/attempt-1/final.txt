@@ -1,0 +1,45 @@
+<thoughtml version="1.0">
+  <document title="Investigation of Collapsed Test Loaf">
+    <question>Why did the test loaf collapse?</question>
+
+    <observations>
+      <observation id="O1" status="confirmed">The yeast was fresh.</observation>
+      <observation id="O2" status="confirmed">The oven reached its target temperature.</observation>
+      <observation id="O3" status="confirmed">The dough received twice the intended amount of water.</observation>
+      <observation id="O4" status="confirmed">Proofing time was slightly shorter than intended.</observation>
+      <observation id="O5" status="inferred">The loaf collapsed during the baking process.</observation>
+    </observations>
+
+    <hypotheses>
+      <hypothesis id="H1" status="leading">
+        <claim>Excessive hydration caused the collapse.</claim>
+        <supportingEvidence ref="O3">The water amount was approximately double the formula target, which would substantially weaken the dough structure and reduce its ability to retain gas.</supportingEvidence>
+        <counterEvidence>There is no direct comparison with a correctly hydrated loaf from the same batch.</counterEvidence>
+      </hypothesis>
+
+      <hypothesis id="H2" status="possible">
+        <claim>Slightly short proofing contributed to the collapse.</claim>
+        <supportingEvidence ref="O4">Insufficient proofing may leave the dough underdeveloped and less able to expand and set properly.</supportingEvidence>
+        <counterEvidence>Short proofing alone is less consistent with the unusually large hydration error.</counterEvidence>
+      </hypothesis>
+
+      <hypothesis id="H3" status="combined">
+        <claim>Excessive hydration was the primary cause, with short proofing acting as a contributing factor.</claim>
+        <supportingEvidence>Weak structure from excess water could have been made more vulnerable by incomplete proofing.</supportingEvidence>
+      </hypothesis>
+    </hypotheses>
+
+    <ruledOutOrReducedCauses>
+      <cause ref="O1" assessment="unlikely">Fresh yeast makes yeast failure an unlikely primary cause.</cause>
+      <cause ref="O2" assessment="unlikely">Reaching the target oven temperature makes inadequate oven heat an unlikely primary cause.</cause>
+    </ruledOutOrReducedCauses>
+
+    <conclusion status="provisional">
+      Excessive hydration is presently judged the most likely primary cause of the collapse. The slightly short proofing time may have contributed, but the evidence does not support treating it as the main cause. Because hydration and proofing were both abnormal, the conclusion remains provisional until a controlled repeat is made with the intended water quantity and proofing time.
+    </conclusion>
+
+    <nextTest>
+      Repeat the loaf using fresh yeast, the target oven temperature, the intended water quantity, and the full proofing time. Compare the result with a deliberately over-hydrated batch if needed to isolate the hydration effect.
+    </nextTest>
+  </document>
+</thoughtml>

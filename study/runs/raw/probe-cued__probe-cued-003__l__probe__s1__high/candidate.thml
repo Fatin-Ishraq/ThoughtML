@@ -1,0 +1,74 @@
+<thoughtml>
+  <decision_context>
+    <question>Which proposal should receive the sole available research award?</question>
+    <constraint>Only one proposal can be funded.</constraint>
+  </decision_context>
+
+  <options>
+    <option id="A">
+      <name>Technically ambitious proposal</name>
+      <strengths>
+        <item>Strong preliminary evidence supports the core approach.</item>
+        <item>Could produce a substantial advance if successful.</item>
+      </strengths>
+      <risks>
+        <item>Technical scope and implementation complexity are high.</item>
+        <item>Delivery milestones are less clearly defined.</item>
+      </risks>
+    </option>
+
+    <option id="B">
+      <name>Safer, execution-focused proposal</name>
+      <strengths>
+        <item>Milestones are clear and readily assessable.</item>
+        <item>The delivery team has substantially more relevant experience.</item>
+        <item>Execution risk is comparatively low.</item>
+      </strengths>
+      <risks>
+        <item>The likely advance is more incremental.</item>
+        <item>Its ceiling of scientific impact may be lower than Proposal A's.</item>
+      </risks>
+    </option>
+  </options>
+
+  <evidence>
+    <evidence_item id="E1" supports="A" weight="high">
+      Strong preliminary results increase confidence that Proposal A's central hypothesis is viable.
+    </evidence_item>
+    <evidence_item id="E2" supports="B" weight="high">
+      Proposal B provides clearer milestones, making progress and failure easier to detect and manage.
+    </evidence_item>
+    <evidence_item id="E3" supports="B" weight="high">
+      The more experienced team has a stronger demonstrated record of delivering comparable work.
+    </evidence_item>
+    <evidence_item id="E4" affects="A" weight="medium">
+      Proposal A's ambitious scope creates uncertainty about schedule, integration, and resource demands.
+    </evidence_item>
+    <evidence_item id="E5" affects="both" weight="medium">
+      Because the budget permits only one award, the panel must weigh expected impact against probability of successful delivery.
+    </evidence_item>
+  </evidence>
+
+  <panel_positions>
+    <position panelist="Risk-tolerant members" favors="A">
+      The preliminary evidence materially reduces the technical risk, and the potential payoff justifies accepting execution uncertainty.
+    </position>
+    <position panelist="Execution-focused members" favors="B">
+      A single award should prioritize a credible delivery path, measurable milestones, and team capability.
+    </position>
+    <position panelist="Impact-focused members" unresolved="true">
+      The panel lacks a sufficiently comparable estimate of Proposal A's probability-adjusted impact relative to Proposal B's reliable but smaller impact.
+    </position>
+  </panel_positions>
+
+  <final_selection>
+    <selected_option>B</selected_option>
+    <rationale>
+      Proposal B is selected because its clear milestones and more experienced delivery team provide the strongest assurance that the award will yield completed, assessable outcomes within the available budget. Proposal A remains scientifically compelling, but its higher upside is not sufficiently quantified to outweigh the delivery advantage of Proposal B under a one-award constraint.
+    </rationale>
+  </final_selection>
+
+  <reservation>
+    The selection would reasonably change if Proposal A supplied a credible risk-mitigation plan, staged milestones, and evidence that its probability-adjusted impact substantially exceeds Proposal B's.
+  </reservation>
+</thoughtml>

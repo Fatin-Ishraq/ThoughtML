@@ -1,0 +1,22 @@
+<thoughtml>
+  <observations>
+    <observation id="o1">Surface cracking has grown since last year.</observation>
+    <observation id="o2">Load measurements remain within the published limit.</observation>
+    <observation id="o3">An engineer advises that temporary monitoring is possible.</observation>
+  </observations>
+  <decision-question>May the bridge remain open at this time?</decision-question>
+  <reasons>
+    <for-remaining-open>
+      <reason supports="o2">Measured loads do not exceed the published limit.</reason>
+      <reason supports="o3">Temporary monitoring offers a way to watch for further deterioration while the bridge remains in use.</reason>
+    </for-remaining-open>
+    <for-closing>
+      <reason supports="o1">Growth in surface cracking indicates deterioration and creates uncertainty about the bridge’s condition.</reason>
+      <reason>Current load compliance alone does not establish that continued use is safe.</reason>
+      <reason>Monitoring detects changes but does not itself prevent structural failure.</reason>
+    </for-closing>
+  </reasons>
+  <current-position confidence="provisional">
+    The team’s current position is that the bridge may remain open temporarily, subject to engineer-directed monitoring and prompt reassessment if cracking grows, measurements change, or other warning signs appear. This is not a final finding of long-term safety.
+  </current-position>
+</thoughtml>

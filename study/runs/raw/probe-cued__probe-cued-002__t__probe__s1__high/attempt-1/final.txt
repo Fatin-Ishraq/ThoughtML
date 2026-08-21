@@ -1,0 +1,19 @@
+<thoughtml>
+  <observations>
+    <observation>Surface cracking has increased since the previous year's inspection.</observation>
+    <observation>Measured loads remain within the published load limit.</observation>
+    <observation>An engineer has advised that temporary monitoring is feasible.</observation>
+  </observations>
+  <decision-question>May the bridge remain open at this time?</decision-question>
+  <reasons-for>
+    <reason>Current load measurements do not exceed the published limit.</reason>
+    <reason>Temporary monitoring could provide timely evidence if conditions worsen.</reason>
+  </reasons-for>
+  <reasons-against>
+    <reason>Growing surface cracking may indicate deterioration that has not yet affected load measurements.</reason>
+    <reason>Continued use could increase risk if the cracking reflects an underlying structural problem.</reason>
+  </reasons-against>
+  <current-position>
+    Keep the bridge open only on a temporary, conditional basis, with immediate monitoring, documented inspection intervals, and a prompt engineering assessment of the increased cracking. Close or restrict the bridge if monitoring identifies worsening conditions, structural concerns, or loads outside the published limit.
+  </current-position>
+</thoughtml>

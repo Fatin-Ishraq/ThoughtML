@@ -52,9 +52,20 @@ state is committed publicly and marked with the annotated Git tag
 it is not an immutable third-party registration; that limitation is disclosed
 in the pre-registration and eventual paper.
 
-## P07 — RESOLVED: GPT models run before DeepSeek models
+## P07 — RESOLVED: GPT models precede DeepSeek within each phase (v2.3)
 
 The initial v2.2 fully randomized dry run placed `deepseek-v4-pro` first. No
 model call occurred. At the author's pre-data request, v2.3 uses deterministic
 provider blocks: all GPT/OpenAI runs precede all DeepSeek runs, with seeded
 randomization inside each block. The runner and tests enforce this order.
+
+## P08 — RESOLVED: global provider blocks (v2.4)
+
+After all 20 OpenAI cued probes completed, the author chose to avoid repeated
+provider credential and configuration changes by completing the entire OpenAI
+block before configuring DeepSeek. No Experiment 0 model pilot, main response,
+or DeepSeek response existed. The 20 observed responses are disclosed in §13:
+all were unparseable and produced zero exposure hits. Version 2.4 changes only
+collection order; models, tasks, prompts, sample sizes, grading, hypotheses,
+inclusion rules, and analysis remain fixed. This post-probe amendment is tagged
+separately from the v2.3 pre-data baseline.

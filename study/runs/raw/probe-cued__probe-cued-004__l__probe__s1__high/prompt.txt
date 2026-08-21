@@ -1,0 +1,5 @@
+Author a ThoughtML document for the task below. Return only the document, with no Markdown fence or surrounding explanation. Do not call tools, browse, execute commands, read files, retrieve external material, or ask questions.
+
+# Task
+
+A coastal emergency team is deciding whether to order evacuation. A storm may intensify before landfall, roads could flood if departure is delayed, and evacuation itself creates risks for medically fragile residents. A newer forecast lowers the expected surge but remains uncertain. Author a ThoughtML document recording the evidence, counterevidence, options, and current decision.

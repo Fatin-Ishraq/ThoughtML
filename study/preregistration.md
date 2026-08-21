@@ -1,9 +1,9 @@
 # Pre-registration: Measuring AI-Authored Reasoning Traces Across Models in a Fixed Agent Harness
 
 **Author:** Fatin Ishraq
-**Pre-registration version:** 2.3
-**Date filed:** 2026-08-20 (v1.0) · amended 2026-08-20 (v1.1–v1.4) · redesigned 2026-08-20 (v2.0) · amended 2026-08-21 (v2.1–v2.2) · **pre-call ordering amendment 2026-08-21 (v2.3)**
-**Status:** Filed before any registered data collection. No registered experimental data exists. A discarded pilot of Experiment 2 has been run; see §13.
+**Protocol version:** 2.4
+**Date filed:** 2026-08-20 (v1.0) · amended 2026-08-20 (v1.1–v1.4) · redesigned 2026-08-20 (v2.0) · amended 2026-08-21 (v2.1–v2.3) · **post-probe sequencing amendment 2026-08-21 (v2.4)**
+**Status:** The v2.3 protocol was publicly frozen before collection. Version 2.4 was filed after the 20 GPT/OpenAI cued-probe responses, but before the Experiment 0 model pilot, any main experiment, or any DeepSeek response. The observed probe outcomes and the scope of this amendment are disclosed in §13, entry 18.
 
 **v2.0 is a redesign, not an amendment.** Versions 1.0–1.4 compared four first-party vendor agent systems, in which model and harness were confounded by construction and the study could only disclose the confound rather than remove it. v2.0 holds the harness fixed and varies the model inside it. The unit of analysis, the research questions, and the arms all change. Versions 1.0–1.4 remain in the public git history (`cdcf74f`, `b8b12e4`, `7951f05`, `fece65d`, `22c4882`, `667d7e5`) and are superseded, not deleted. See §13, entry 12.
 
@@ -25,6 +25,7 @@ Every number in this study is produced by the artifacts below. They do not chang
 | Prompt template SHA-256 | recorded in the versioned frozen manifest before the first run |
 | Control-schema payload SHA-256 (Condition G) | recorded in a versioned frozen manifest before Experiment 1 begins |
 | Pre-data public timestamp | Annotated Git tag `study-predata-v2.3`; pushed before the first registered call |
+| Post-probe sequencing amendment | Annotated Git tag `study-protocol-v2.4`; filed with all 20 existing OpenAI probe records |
 
 **Model panel, pinned by slug.** Availability was verified by live invocation on 2026-08-20; `gpt-5.6-sol` required a re-authentication before it resolved, and `gpt-5.1` was rejected under every slug tried.
 
@@ -372,21 +373,26 @@ A run is **never** excluded for producing unparseable, low-quality, short, or un
 
 Sample sizes are fixed in advance. There is no interim peeking followed by extension.
 
-Sequence: contamination probe → pilot (one arm, Exp 0) → **protocol revision window** → frozen protocol → main collection. The pilot exists to break the protocol; its data is **not pooled with the main run, and it informed the protocol revisions logged in §13** — the revisions are its purpose, not a contamination of it. Any protocol change after main collection begins is a deviation.
+**Global provider sequence (v2.4).** Collection is divided into two operational
+provider blocks so credentials and provider configuration are changed once, not
+between phases. The GPT/OpenAI block is completed first: cued probe → discarded
+Terra Experiment 0 pilot → protocol revision window → frozen OpenAI main
+collection. The DeepSeek block follows: cued probe (and the neutral half only if
+§9.2 triggers) → DeepSeek main collection. Experiment 2 remains offline and may
+run independently. No DeepSeek main response is collected before its own probe.
 
-**Within-phase provider order.** All GPT/OpenAI arms are collected before either
-DeepSeek arm. Items are deterministically shuffled within each provider block
-using the frozen schedule seed. This operational ordering was fixed at the
-author's request before any registered call or response. It does not change
-sample sizes, prompts, analysis, or inclusion rules, and collection must proceed
-through the frozen order rather than selecting runs by observed outcome.
+Within each provider and phase, run order remains deterministically randomized
+across arms and cells using the frozen schedule seed. The v2.4 amendment changes
+only temporal order. It does not change models, tasks, prompts, sample sizes,
+grading, hypotheses, inclusion rules, or analysis. It was adopted after 20
+OpenAI cued-probe responses had been observed; those responses were all
+unparseable, with zero exposure hits, and the amendment was motivated by avoiding
+repeated provider reconfiguration rather than by selecting an outcome.
 
-Within each provider block, run order is randomized across arms and cells.
-Provider blocking creates a disclosed temporal-order limitation: a model update
-between the GPT and DeepSeek blocks could align with vendor. Because rate limits
-force collection across several days, the date and time of every run are
-recorded, collection gaps are reported, and no temporal difference is silently
-interpreted as a vendor effect.
+Global provider blocking creates a stronger disclosed temporal-order limitation:
+a model or harness update between the OpenAI and DeepSeek blocks could align with
+vendor. Dates, versions, collection gaps, and configuration changes are recorded,
+and no temporal difference is silently interpreted as a vendor effect.
 
 ### 8.5 Reproduction requirement
 
@@ -488,6 +494,7 @@ Append-only. Every departure from this document after filing is recorded with it
 | 15 | 2026-08-21 | §5.1, §6 Exp 0, §7.1–§7.2, §8.3 (v2.1) | Clarified that the 60-call Experiment 0 pilot is discarded and additional to the 744-call main collection; changed prompt transport from a command-line argument to stdin; replaced the unachievable claim of absent tool access with a forbidden-and-audited tool-call policy; stratified calibration tasks as 6 easy, 12 medium, and 12 hard with deterministic answer checks; and made all Experiment 1 task endings and condition instructions neutral about counterevidence. | These are pre-data implementation corrections. The old total was arithmetically inconsistent, the full prompt exceeds the Windows process command-line limit, Codex exposes a shell surface, the former calibration set risked a ceiling, and the former wording directly induced the opposition behavior used by H2. | No registered model calls or responses. |
 | 16 | 2026-08-21 | §0, §6, §13–§14 (v2.2) | Recorded the completed human review; retained 30 calibration tasks with H1b estimation-first after a pre-data task-count sensitivity analysis; scoped the unresolved Rule J implementation as an Experiment 1 blocker; and replaced the planned OSF registration with the public annotated Git tag `study-predata-v2.2`. | The author approved the corpus, expanding to 180 tasks would add 150 tasks and 2,100 calls while powering only the optimistic +0.08 effect, Rule J is unnecessary for the probe and Experiment 0, and the author does not yet have an OSF account. Git history supplies a public timestamp but is explicitly acknowledged as weaker than immutable third-party registration. | No registered model calls or responses. |
 | 17 | 2026-08-21 | §0, §8.4 (v2.3) | Replaced whole-panel random ordering with provider-blocked ordering: GPT/OpenAI arms first, DeepSeek arms second, with deterministic shuffling inside each block. The prior v2.2 tag remains public but is superseded before data by `study-predata-v2.3`. | The author explicitly chose to begin with ChatGPT models. The first v2.2 randomized item happened to be DeepSeek; it was seen only in a dry run and was never executed. Freezing the operational preference is cleaner than selecting individual runs manually. | No registered model calls or responses. |
+| 18 | 2026-08-21 | §0, §8.4 (v2.4) | Extended provider blocking from within each phase to the whole collection: finish all GPT/OpenAI probing, pilot, and main runs before configuring and collecting DeepSeek. Models, tasks, prompts, sample sizes, grading, hypotheses, inclusion rules, and analysis are unchanged. The v2.3 pre-data tag remains the immutable baseline; v2.4 is a separately tagged post-probe amendment. | Repeatedly switching provider credentials and configuration creates avoidable operational error. One provider change is simpler to audit. | **Yes: 20/20 planned OpenAI cued probes existed (5 each for GPT-5.4, Luna, Sol, and Terra); all completed on the first attempt, none was excluded, none used tools, and all were unparseable with zero exposure hits.** No Experiment 0 model pilot, main-experiment response, or DeepSeek response existed. The decision was operational, not outcome-selective. |
 
 ---
 
@@ -502,6 +509,10 @@ annotated Git tag `study-predata-v2.3`. This gives readers a dated, inspectable
 baseline, but a repository owner can technically rewrite Git history or move a
 tag. It is therefore weaker than immutable third-party registration and is
 reported as a limitation, not described as equivalent to OSF.
+
+The later global provider-order change is not described as pre-registered. It is
+published under the separate annotated tag `study-protocol-v2.4` together with
+the 20 OpenAI probe records that existed when the decision was made.
 
 **Venue plan.** Target: NeurIPS Datasets & Benchmarks, which expects a runnable benchmark plus baselines. Packaging: task sets + grader + harness as the releasable benchmark; **Condition G as the baseline**; the GPT arms as a dated snapshot; the DeepSeek arms and Experiment 2 as the reproducible reference entries.
 

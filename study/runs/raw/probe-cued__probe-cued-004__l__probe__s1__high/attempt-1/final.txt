@@ -1,0 +1,65 @@
+<thoughtml version="1.0">
+  <document title="Coastal Evacuation Decision Record">
+    <context>
+      <summary>
+        A coastal emergency team is deciding whether to order evacuation before a potentially intensifying storm reaches landfall.
+      </summary>
+      <uncertainties>
+        <item>The storm may intensify before landfall.</item>
+        <item>Roads may flood if departure is delayed.</item>
+        <item>The newest forecast lowers expected storm surge but remains uncertain.</item>
+        <item>Evacuation creates medical and logistical risks for medically fragile residents.</item>
+      </uncertainties>
+    </context>
+
+    <evidence>
+      <item weight="high">Delayed departure could leave residents unable to travel once roads flood.</item>
+      <item weight="high">Storm intensity may increase before landfall, making the lower surge forecast unreliable.</item>
+      <item weight="medium">The newer forecast lowers the expected surge compared with the previous forecast.</item>
+      <item weight="high">Medically fragile residents require additional time, transport, medication, and clinical support.</item>
+      <item weight="medium">Early, organized movement may reduce congestion and allow safer transport than a last-minute evacuation.</item>
+    </evidence>
+
+    <counterevidence>
+      <item weight="medium">The updated forecast indicates a lower expected surge and may reduce the need for broad evacuation.</item>
+      <item weight="high">Moving medically fragile residents can cause health complications, exhaustion, disrupted treatment, or transport-related harm.</item>
+      <item weight="medium">A premature evacuation may impose unnecessary disruption and reduce public trust if the storm weakens.</item>
+    </counterevidence>
+
+    <options>
+      <option id="A">
+        <name>Immediate full-area evacuation</name>
+        <benefits>Maximizes time before roads flood and protects against forecast deterioration.</benefits>
+        <risks>Creates substantial medical, transport, shelter, and compliance risks, especially for fragile residents.</risks>
+      </option>
+      <option id="B">
+        <name>Delay evacuation pending another forecast</name>
+        <benefits>Avoids unnecessary movement under the lower-surge forecast and allows better information.</benefits>
+        <risks>May leave insufficient time if the storm intensifies or roads become impassable.</risks>
+      </option>
+      <option id="C">
+        <name>Targeted, phased evacuation</name>
+        <benefits>Moves medically fragile residents and people in the lowest-lying or least accessible areas first while preserving time to expand the order.</benefits>
+        <risks>Requires rapid coordination and clear communication; some residents may misunderstand the limited scope.</risks>
+      </option>
+    </options>
+
+    <currentDecision status="provisional">
+      <decision>
+        Issue a targeted, phased evacuation order now for medically fragile residents, low-lying zones, and locations with limited or single-route access. Provide assisted transport, medication continuity, clinical support, and designated shelters. Do not yet issue a full-area mandatory evacuation.
+      </decision>
+      <rationale>
+        The lower surge forecast reduces but does not remove the threat. The consequences of delayed departure could become irreversible when roads flood, while early targeted movement protects the residents most vulnerable to both storm impacts and evacuation complications.
+      </rationale>
+      <review>
+        Reassess at the next forecast update and continuously monitor storm intensity, surge projections, rainfall, road conditions, shelter capacity, and transport availability.
+      </review>
+      <escalationTriggers>
+        <trigger>Forecast confidence decreases or projected surge rises materially.</trigger>
+        <trigger>Storm intensity increases or the track shifts toward the populated coast.</trigger>
+        <trigger>Flooding begins on evacuation routes or roads are projected to become impassable.</trigger>
+        <trigger>Available transport or shelter capacity is nearing exhaustion.</trigger>
+      </escalationTriggers>
+    </currentDecision>
+  </document>
+</thoughtml>

@@ -1,0 +1,5 @@
+Author a ThoughtML document for the task below. Return only the document, with no Markdown fence or surrounding explanation. Do not call tools, browse, execute commands, read files, retrieve external material, or ask questions.
+
+# Task
+
+A research funding panel compares a technically ambitious proposal with strong preliminary evidence against a safer proposal that has clearer milestones and a more experienced delivery team. The budget supports only one award. Author a ThoughtML document representing the options, relevant evidence, panel positions, and final selection or unresolved question.

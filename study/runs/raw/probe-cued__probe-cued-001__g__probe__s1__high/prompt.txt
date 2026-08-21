@@ -1,0 +1,5 @@
+Author a ThoughtML document for the task below. Return only the document, with no Markdown fence or surrounding explanation. Do not call tools, browse, execute commands, read files, retrieve external material, or ask questions.
+
+# Task
+
+A bakery investigates why a test loaf collapsed. The yeast was fresh and the oven reached its target temperature, but the dough received twice the intended amount of water. The baker believes excessive hydration caused the collapse while noting that proofing time was also slightly short. Author a ThoughtML document recording the investigation, competing evidence, and present conclusion.

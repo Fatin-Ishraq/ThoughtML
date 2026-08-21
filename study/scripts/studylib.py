@@ -304,13 +304,20 @@ def validate_artifacts() -> list[ValidationMessage]:
         out.append(ValidationMessage("error", "MODEL_DUPLICATE", "model arms/slugs must be unique"))
 
     benchmark = read_json(CONFIG / "benchmark.json")
-    if benchmark.get("preregistration_version") != "2.3":
+    if benchmark.get("preregistration_version") != "2.4":
         out.append(
             ValidationMessage(
-                "error", "PREREG_VERSION", "benchmark config is not pinned to preregistration v2.3"
+                "error", "PREREG_VERSION", "benchmark config is not pinned to protocol v2.4"
             )
         )
-    if benchmark.get("collection_order", {}).get("provider_blocks") != ["openai", "deepseek"]:
+    collection_order = benchmark.get("collection_order", {})
+    if collection_order.get("strategy") != "global_provider_blocks":
+        out.append(
+            ValidationMessage(
+                "error", "COLLECTION_STRATEGY", "collection order must use global provider blocks"
+            )
+        )
+    if collection_order.get("provider_blocks") != ["openai", "deepseek"]:
         out.append(
             ValidationMessage(
                 "error", "COLLECTION_ORDER", "collection order must place GPT/OpenAI before DeepSeek"
@@ -542,7 +549,8 @@ def build_schedule(phase: str, seed: int) -> dict[str, Any]:
         raise StudyError(f"unknown phase {phase!r}")
 
     random.Random(seed).shuffle(items)
-    order = read_json(CONFIG / "benchmark.json")["collection_order"]["provider_blocks"]
+    collection_order = read_json(CONFIG / "benchmark.json")["collection_order"]
+    order = collection_order["provider_blocks"]
     priority = {vendor: index for index, vendor in enumerate(order)}
     unknown = sorted({item["vendor"] for item in items if item["vendor"] not in priority})
     if unknown:
@@ -553,8 +561,10 @@ def build_schedule(phase: str, seed: int) -> dict[str, Any]:
         "phase": phase,
         "seed": seed,
         "order_policy": {
+            "strategy": collection_order["strategy"],
             "provider_blocks": order,
-            "within_block": "deterministic shuffle",
+            "scope": collection_order["scope"],
+            "within_provider": collection_order["within_provider"],
         },
         "count": len(items),
         "items": items,

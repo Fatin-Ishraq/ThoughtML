@@ -1,0 +1,32 @@
+<thoughtml version="1.0">
+  <task>Bridge status review</task>
+
+  <decision_question>
+    May the small bridge remain open at this time?
+  </decision_question>
+
+  <observations>
+    <observation id="obs-1">Surface cracking has increased since last year&apos;s inspection.</observation>
+    <observation id="obs-2">Recent load measurements remain within the published limit.</observation>
+    <observation id="obs-3">A qualified engineer states that temporary monitoring is feasible.</observation>
+    <observation id="obs-4">The condition trend is negative, even though current measured loading is still compliant.</observation>
+  </observations>
+
+  <reasons>
+    <supports option="remain-open">
+      <reason id="pro-1">Measured loads are still within the bridge&apos;s published allowable limit.</reason>
+      <reason id="pro-2">Temporary monitoring could reduce immediate uncertainty and provide added oversight.</reason>
+      <reason id="pro-3">No observation in the current record states that the bridge has already exceeded its operating limit.</reason>
+    </supports>
+
+    <supports option="close">
+      <reason id="con-1">Cracking has worsened compared with last year, indicating deterioration.</reason>
+      <reason id="con-2">A worsening surface condition may signal increased risk if deterioration continues.</reason>
+      <reason id="con-3">Keeping the bridge open could rely on short-term monitoring rather than a durable fix.</reason>
+    </supports>
+  </reasons>
+
+  <current_position>
+    The team&apos;s current position is to keep the bridge open temporarily, not as a final clearance, but under active monitoring and with prompt re-evaluation if cracking progresses or any measurement approaches the published limit.
+  </current_position>
+</thoughtml>

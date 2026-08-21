@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thoughtml version="1.0">
+  <title>Coastal Evacuation Decision</title>
+
+  <situation>
+    <objective>Protect residents from storm surge, flooded evacuation routes, and evacuation-related medical harm.</objective>
+    <time_horizon>Before landfall, while evacuation routes remain usable.</time_horizon>
+    <constraints>
+      <constraint>Storm intensity and surge remain uncertain.</constraint>
+      <constraint>Delayed departure could leave roads flooded or unsafe.</constraint>
+      <constraint>Evacuation poses elevated risks to medically fragile residents.</constraint>
+    </constraints>
+  </situation>
+
+  <evidence>
+    <item id="E1" supports="early-action" confidence="medium">
+      The storm may intensify before landfall, increasing surge and wind hazards.
+    </item>
+    <item id="E2" supports="early-action" confidence="high">
+      If departure is delayed, flooding could obstruct evacuation routes and emergency access.
+    </item>
+    <item id="E3" supports="reduced-evacuation" confidence="medium">
+      The newer forecast lowers the expected storm surge.
+    </item>
+    <item id="E4" supports="targeted-evacuation" confidence="high">
+      Risk is not uniform: residents in low-lying and flood-prone areas face greater exposure.
+    </item>
+  </evidence>
+
+  <counterevidence>
+    <item id="C1" challenges="full-evacuation" confidence="high">
+      Evacuation can cause transport, continuity-of-care, medication, and stress-related harm to medically fragile residents.
+    </item>
+    <item id="C2" challenges="reliance-on-lower-forecast" confidence="medium">
+      The newer forecast remains uncertain and does not eliminate the possibility of a dangerous surge.
+    </item>
+    <item id="C3" challenges="wait-and-see" confidence="high">
+      Waiting for greater forecast certainty may consume the remaining safe travel window.
+    </item>
+  </counterevidence>
+
+  <options>
+    <option id="O1" name="Immediate full evacuation">
+      <benefits>
+        <benefit>Moves the largest number of residents before roads may flood.</benefit>
+        <benefit>Provides protection if the storm intensifies unexpectedly.</benefit>
+      </benefits>
+      <risks>
+        <risk>Exposes medically fragile residents to avoidable evacuation harm.</risk>
+        <risk>May be disproportionate if the lower surge forecast proves accurate.</risk>
+      </risks>
+    </option>
+
+    <option id="O2" name="Wait for additional forecasts">
+      <benefits>
+        <benefit>May avoid unnecessary evacuation and associated medical risks.</benefit>
+        <benefit>Allows the decision to use newer information.</benefit>
+      </benefits>
+      <risks>
+        <risk>Road flooding could make later evacuation unsafe or impossible.</risk>
+        <risk>Rapid intensification may leave insufficient time to act.</risk>
+      </risks>
+    </option>
+
+    <option id="O3" name="Phased, risk-based evacuation">
+      <benefits>
+        <benefit>Prioritizes residents in the most surge- and flood-exposed zones.</benefit>
+        <benefit>Preserves flexibility while uncertainty remains.</benefit>
+        <benefit>Allows medically supported transport or protected sheltering for fragile residents.</benefit>
+      </benefits>
+      <risks>
+        <risk>Requires clear zone-based communication and rapid coordination.</risk>
+        <risk>A broader evacuation may still become necessary on short notice.</risk>
+      </risks>
+    </option>
+  </options>
+
+  <decision status="current" selected-option="O3">
+    <action>Begin a phased evacuation now for the most exposed coastal and flood-prone zones while roads remain usable.</action>
+    <medical-protection>Individually assess medically fragile residents; use medically supported transport when evacuation is necessary and protected shelter-in-place only where the location, staffing, power, medication, and emergency-access plans are adequate.</medical-protection>
+    <readiness>Prepare transport, shelters, communications, and personnel for immediate expansion to a broader evacuation.</readiness>
+    <rationale>
+      The lower expected surge weighs against an indiscriminate full evacuation, but forecast uncertainty and the risk of losing evacuation routes make waiting unacceptable. A phased approach best balances storm exposure against evacuation-related medical harm.
+    </rationale>
+  </decision>
+
+  <reassessment>
+    <trigger>Forecasted surge or storm intensity increases.</trigger>
+    <trigger>Observed water levels rise faster than expected.</trigger>
+    <trigger>Evacuation routes approach closure thresholds.</trigger>
+    <trigger>Landfall timing or track shifts toward higher local exposure.</trigger>
+    <trigger>Medical-support capacity changes materially.</trigger>
+    <response>Expand, modify, or suspend evacuation by zone according to the updated risk and remaining safe travel time.</response>
+  </reassessment>
+
+  <uncertainties>
+    <uncertainty>Magnitude and timing of any pre-landfall intensification.</uncertainty>
+    <uncertainty>Actual surge relative to the newer forecast.</uncertainty>
+    <uncertainty>Timing and extent of road flooding.</uncertainty>
+    <uncertainty>Availability of medically appropriate transport and shelter capacity.</uncertainty>
+  </uncertainties>
+</thoughtml>

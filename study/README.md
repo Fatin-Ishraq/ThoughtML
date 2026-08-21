@@ -1,6 +1,6 @@
 # ThoughtML benchmark workspace
 
-This directory contains the executable artifacts for the pre-registered study in
+This directory contains the executable artifacts for the versioned study protocol in
 [`preregistration.md`](preregistration.md). The benchmark is deliberately split
 into three states:
 
@@ -52,8 +52,9 @@ contacting a model:
 python study/scripts/benchmark.py run --schedule study/runs/schedules/probe-cued.json --dry-run
 ```
 
-Current offline status and remaining work are tracked in
-[`pre-model-status.md`](pre-model-status.md).
+The original pre-call checklist is preserved in
+[`pre-model-status.md`](pre-model-status.md); current collection status and every
+post-freeze amendment are recorded in the pre-registration's §13 log.
 
 ## Research handoff
 

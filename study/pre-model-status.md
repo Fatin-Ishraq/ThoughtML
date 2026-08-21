@@ -1,6 +1,11 @@
 # Pre-model status
 
-Updated 2026-08-21. No registered AI-model call has been made.
+**Historical snapshot:** this file records the state immediately before the first
+registered call on 2026-08-21. It is preserved for audit and is not the current
+collection status. See `preregistration.md` §13 for v2.4 and the collected-probe
+disclosure.
+
+Updated 2026-08-21. At this snapshot, no registered AI-model call had been made.
 
 ## Completed offline
 

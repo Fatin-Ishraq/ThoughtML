@@ -1,0 +1,45 @@
+<thoughtml version="1.0">
+  <task>Evaluate whether to adopt the tutoring program.</task>
+
+  <findings>
+    <finding confidence="moderate">
+      Participating students improved more than students in the comparison class.
+    </finding>
+    <finding confidence="moderate" evidence_type="teacher_observation">
+      Teachers observed better homework completion among participating students.
+    </finding>
+    <finding confidence="high">
+      Attendance gains were small.
+    </finding>
+  </findings>
+
+  <limitations>
+    <limitation severity="high">
+      Participation was voluntary, so students were not randomly assigned.
+    </limitation>
+    <limitation severity="high">
+      The tutoring group began with more motivated families, creating selection bias and a plausible pre-existing difference between groups.
+    </limitation>
+    <limitation severity="moderate">
+      Teacher reports of homework completion are informative but may be subjective.
+    </limitation>
+    <limitation severity="moderate">
+      The small attendance change weakens the hypothesis that improved attendance was a major mechanism.
+    </limitation>
+  </limitations>
+
+  <causal_hypothesis confidence="low-to-moderate">
+    Tutoring may have improved academic outcomes partly by increasing homework completion and engagement. However, family motivation and other baseline differences could explain some or all of the observed advantage, so the trial does not establish that tutoring caused the greater improvement.
+  </causal_hypothesis>
+
+  <adoption>
+    <decision>Adopt conditionally as a monitored pilot rather than as a proven school-wide intervention.</decision>
+    <confidence>moderate</confidence>
+    <rationale>
+      The academic and homework signals are promising, but substantial selection bias limits causal confidence, and attendance gains provide little supporting evidence.
+    </rationale>
+    <next_evaluation>
+      Use random assignment if feasible, or construct a comparison group matched on baseline achievement, prior homework completion, attendance, and family motivation. Predefine outcomes and track academic progress, homework completion, attendance, participation, and implementation costs.
+    </next_evaluation>
+  </adoption>
+</thoughtml>

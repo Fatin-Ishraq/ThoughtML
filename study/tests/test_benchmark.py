@@ -112,6 +112,8 @@ class ScheduleTests(unittest.TestCase):
     def test_gpt_arms_precede_deepseek_arms(self) -> None:
         for phase in ("probe-cued", "probe-neutral", "exp0-main", "exp1-thoughtml", "exp1-generic"):
             schedule = lib.build_schedule(phase, 20260821)
+            self.assertEqual(schedule["order_policy"]["strategy"], "global_provider_blocks")
+            self.assertEqual(schedule["order_policy"]["scope"], "all model-call phases")
             vendors = [item["vendor"] for item in schedule["items"]]
             self.assertEqual(vendors, sorted(vendors, key={"openai": 0, "deepseek": 1}.get))
             if "deepseek" in vendors:
