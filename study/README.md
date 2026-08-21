@@ -31,6 +31,7 @@ resolved and the pre-registration/deviation log reflects those resolutions.
 ```powershell
 python study/scripts/benchmark.py validate
 python study/scripts/verify_answers.py
+python study/scripts/verify_answers.py --task-set pilot
 python study/scripts/benchmark.py freeze --candidate
 python -m unittest discover -s study/tests -v
 ```
@@ -40,7 +41,7 @@ After protocol resolution and an explicit freeze:
 ```powershell
 python study/scripts/benchmark.py freeze
 python study/scripts/benchmark.py schedule --phase probe-cued --seed 20260820
-python study/scripts/benchmark.py schedule --phase exp0-pilot --seed 20260820
+python study/scripts/benchmark.py schedule --phase exp0-pilot-v2.6 --seed 20260821
 ```
 
 The runner does not start unless a current authoritative manifest exists. Until
@@ -51,6 +52,10 @@ contacting a model:
 ```powershell
 python study/scripts/benchmark.py run --schedule study/runs/schedules/probe-cued.json --dry-run
 ```
+
+The v2.6 hard-pilot tasks were approved unchanged by the project author on
+2026-08-21. Its 10 pilot-only tasks and 20-call Terra schedule become collectable
+only from the authoritative manifest generated after that approval.
 
 The original pre-call checklist is preserved in
 [`pre-model-status.md`](pre-model-status.md); current collection status and every

@@ -1,6 +1,6 @@
 {
   "codex_version": "codex-cli 0.144.6",
-  "created_at": "2026-08-21T14:18:37.574995Z",
+  "created_at": "2026-08-21T16:19:29.386569Z",
   "files": [
     {
       "bytes": 39129,
@@ -17,18 +17,18 @@
       "sha256": "8222ddcf740c65b61d875665cfbe4c1d410295d59ac2b21f435ac5bbe5f87776"
     },
     {
-      "bytes": 850,
+      "bytes": 1261,
       "line_endings": "lf",
-      "lines": 29,
+      "lines": 42,
       "path": "study/config/benchmark.json",
-      "sha256": "b1cce6d08e97e06bd4d1c1723d6fbe8eefd48a393d24cf77806cd8b71ed60d56"
+      "sha256": "a80131524cf8af23445e8b1c6fea61a3d80b8e6f04d04cc244ef10fe89cc7363"
     },
     {
-      "bytes": 710,
+      "bytes": 632,
       "line_endings": "lf",
-      "lines": 17,
+      "lines": 16,
       "path": "study/config/models.json",
-      "sha256": "e8551ab3a978c60001e72e30454b1d046c18aa01c4ce9f3daf3549744759354c"
+      "sha256": "bb12fec7b1c701ea66d4e3e606f41b7cb73390e5fa3ef5312e98b7d476eb3a58"
     },
     {
       "bytes": 819,
@@ -108,6 +108,13 @@
       "sha256": "a15b3cf87804280d4f8cfc71d8875f959e967a9aad34815bffeddcbfc2b5267e"
     },
     {
+      "bytes": 2017,
+      "line_endings": "lf",
+      "lines": 90,
+      "path": "study/pilot-answer-verification-v2.6.json",
+      "sha256": "c91c09e85a63e827ed62782ccff105138b09bc04b2b7eb91fabb6c048a5e9606"
+    },
+    {
       "bytes": 2224,
       "line_endings": "lf",
       "lines": 129,
@@ -115,18 +122,18 @@
       "sha256": "c2923b599480370762e287bc7c1af9bb6a0e4c6f52d26cdd24267d10a666bbf6"
     },
     {
-      "bytes": 55529,
+      "bytes": 62393,
       "line_endings": "lf",
-      "lines": 508,
+      "lines": 542,
       "path": "study/preregistration.md",
-      "sha256": "45f90795d6dde3a602dfd71bc79211f674425f224ecabcb3739869d38d19c8f3"
+      "sha256": "2682d170cab0d2d4c9c3b1deddc71ee1faf08e2c87dc4b3c056cc05a625481e7"
     },
     {
-      "bytes": 3151,
+      "bytes": 6748,
       "line_endings": "lf",
-      "lines": 60,
+      "lines": 115,
       "path": "study/protocol-issues.md",
-      "sha256": "a020c10a4e1a313d974e7de92c2005d6c3b9dada3e87cd5ecc6ad8106881cd4f"
+      "sha256": "0cc057f13fee23cd6e1fa06391cd815e01d8a31d5bd20eba5cde6de750790ad4"
     },
     {
       "bytes": 3567,
@@ -143,11 +150,11 @@
       "sha256": "c162d295e5b328dbdd4d82c86e59cd9dad9dc74780708193ff1e226f234fb3b4"
     },
     {
-      "bytes": 32295,
+      "bytes": 37558,
       "line_endings": "lf",
-      "lines": 787,
+      "lines": 897,
       "path": "study/scripts/benchmark.py",
-      "sha256": "37bc12789e9b726ca4a4e250309d915f0cda7ed086d66d293c1c528f305f37ef"
+      "sha256": "9cefbbe3c3c7158dd30d543804b4160cdc02a7c3b9957a968c8e7dd9d36fe6f5"
     },
     {
       "bytes": 3133,
@@ -171,18 +178,18 @@
       "sha256": "b5bb9dc5fa11ea98d99fab9872598163e000380ec8989389777ae77092f1a3f3"
     },
     {
-      "bytes": 33238,
+      "bytes": 37455,
       "line_endings": "lf",
-      "lines": 877,
+      "lines": 977,
       "path": "study/scripts/studylib.py",
-      "sha256": "cc55ea24ccf4f58becd08823bb987237b807b5475c0dd9816331c3ba8da9dd2f"
+      "sha256": "aed24a09874f134c14db960b62c3d043a8ce5e871d80fcea17f73d1c8b845d6f"
     },
     {
-      "bytes": 8006,
+      "bytes": 14160,
       "line_endings": "lf",
-      "lines": 247,
+      "lines": 420,
       "path": "study/scripts/verify_answers.py",
-      "sha256": "2de299b0d61f373279038efd9ffb83e3a51fbe90abb9cab35b6aa0067de619e3"
+      "sha256": "715b7efcb508da62830e7524945677928b2b9e0853bf2e879ab61a00011cf23d"
     },
     {
       "bytes": 12222,
@@ -190,6 +197,13 @@
       "lines": 115,
       "path": "study/tasks/authoring.json",
       "sha256": "b8f91aa58a0433af1cbf0bab630b17ed76b869639beac66ad56c76b2f249b157"
+    },
+    {
+      "bytes": 11031,
+      "line_endings": "lf",
+      "lines": 106,
+      "path": "study/tasks/calibration-pilot-v2.6.json",
+      "sha256": "0e5f1f4c37fd62b078522931059e2206b02e8062becd40cb83aeab22462ebe0f"
     },
     {
       "bytes": 24861,
@@ -213,6 +227,13 @@
       "sha256": "cb0376e83de705e9732c61b9227b81fcd5fa600613190701bb2567a3db2d82fc"
     },
     {
+      "bytes": 1881,
+      "line_endings": "lf",
+      "lines": 41,
+      "path": "study/tasks/pilot-v2.6-review.md",
+      "sha256": "ca4f41e2fad7036187d9bf7780002e9c4bf3404db81c40a896ba9c461dcfd1b9"
+    },
+    {
       "bytes": 1095,
       "line_endings": "lf",
       "lines": 28,
@@ -220,12 +241,18 @@
       "sha256": "05ea41471d2e5e793f5fe00470c531c6040049a01a748755d9b156eaddafa9b7"
     }
   ],
-  "git_head": "727bee2f0557cf139f0e9febeb86247b04b1155e",
+  "git_head": "92bb34e6aef35d2ddbc42e460d747856e3d09988",
   "grader_path": "C:\\Users\\Fatin\\Downloads\\tml2\\target\\release\\thoughtml.exe",
   "grader_sha256": "99e3afa2222a00f3eb82315e4dd251259b19ecc296769f0e35ce5ed9cd38f5b0",
-  "manifest_content_sha256": "70e376b24ce7f4762f31303d226b771d5d2f50aa34e97a2d7d870a5621bfa890",
+  "manifest_content_sha256": "ca6fdfd8c35af4cb19bc84cea0abd36227cdea3252841533d513e30c13287115",
   "open_protocol_issues": [],
   "phase_protocol_issues": {
+    "exp0": [
+      "P09 — [EXP0 BLOCKER] calibration pilot exceeded the ceiling gate"
+    ],
+    "exp0_pilot_v2_6": [
+      "P11 — [EXP0 PILOT BLOCKER] v2.6 hard-pilot human review"
+    ],
     "exp1": [
       "P05 — [EXP1 BLOCKER] Rule J implementation version"
     ]
@@ -237,6 +264,7 @@
   "task_counts": {
     "authoring": 12,
     "calibration": 30,
+    "calibration_pilot_v2_6": 10,
     "probe_cued": 5,
     "probe_neutral": 5
   },

@@ -96,3 +96,20 @@ data, but are omitted from v2.5 schedules and confirmatory analyses. No
 Experiment 0 main, Experiment 1, Experiment 5, or DeepSeek response existed when
 the arm was withdrawn. The complete historical probe report is regenerated with
 `python study/scripts/benchmark.py analyze --phase probe-cued --include-withdrawn --out study/runs/analysis/probe-cued-openai-v2.4-summary.json`.
+
+## P11 — RESOLVED: v2.6 hard-pilot human review
+
+The failed 60-call pilot showed that a complete 30-task development round is too
+expensive for early difficulty tuning. Version 2.6 therefore adds a disjoint set
+of 10 materially harder pilot-only tasks and reduces the replacement pilot to
+20 Terra calls: every task once in F and once in B. Each condition passes only
+with 5–8 correct and at least 2 incorrect among all 10 included runs. These tasks
+are permanently excluded from Experiment 0 main, regardless of outcome. A failed
+round may change the task-design recipe but may not be reported as a confirmatory
+ThoughtML result.
+
+Mechanical verification is required but cannot replace ambiguity and difficulty
+review. On 2026-08-21, project author Fatin Ishraq approved all 10 tasks unchanged
+in `study/tasks/pilot-v2.6-review.md`, before authoritative freezing and before
+any v2.6 pilot model response. This resolves the pilot-only collection blocker;
+the separate Experiment 0 main-corpus blocker remains in force.

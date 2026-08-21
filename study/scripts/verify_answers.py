@@ -13,7 +13,7 @@ import math
 from fractions import Fraction
 from pathlib import Path
 
-from studylib import STUDY, load_calibration, write_json
+from studylib import STUDY, load_calibration, load_calibration_pilot, write_json
 
 
 def letter_for(value, options):
@@ -206,6 +206,148 @@ def two_stage_screening():
     return letter_for(min(values, key=lambda x: abs(x - float(posterior))), values)
 
 
+def pilot_bayes_three_tests():
+    affected = Fraction(1, 100) * Fraction(9, 10) * Fraction(17, 20) * Fraction(4, 5)
+    unaffected = Fraction(99, 100) * Fraction(1, 10) * Fraction(3, 20) * Fraction(1, 5)
+    posterior = affected / (affected + unaffected)
+    values = [0.527, 0.612, 0.673, 0.798]
+    return letter_for(min(values, key=lambda x: abs(x - float(posterior))), values)
+
+
+def pilot_integer_optimization():
+    feasible = []
+    for p in range(5):
+        for q in range(4):
+            for r in range(4):
+                if 4 * p + 6 * q + 7 * r <= 32 and 3 * p + 2 * q + 5 * r <= 24:
+                    feasible.append((11 * p + 15 * q + 18 * r, (p, q, r)))
+    best_value = max(value for value, _ in feasible)
+    best = [plan for value, plan in feasible if value == best_value]
+    options = [(3, 2, 1), (3, 1, 2), (0, 3, 2), (4, 0, 2)]
+    return letter_for(best[0], options) if len(best) == 1 else "INVALID"
+
+
+def pilot_round_robin():
+    remaining = {"A": 5, "B": 3, "C": 7, "D": 4}
+    queue = ["A", "B", "C"]
+    time = 0
+    completion = {}
+    while queue:
+        job = queue.pop(0)
+        used = min(2, remaining[job])
+        remaining[job] -= used
+        time += used
+        if time == 4:
+            queue.append("D")
+        if remaining[job]:
+            queue.append(job)
+        else:
+            completion[job] = time
+    return letter_for(completion["D"], [14, 15, 16, 17])
+
+
+def pilot_conditional_colors():
+    conditioned = 0
+    favorable = 0
+    for red in range(5):
+        for blue in range(5):
+            green = 4 - red - blue
+            if not 0 <= green <= 3 or red > 5 or blue > 4:
+                continue
+            represented = sum(value > 0 for value in (red, blue, green))
+            ways = math.comb(5, red) * math.comb(4, blue) * math.comb(3, green)
+            if green >= 1 and represented == 2:
+                conditioned += ways
+                if green == 2:
+                    favorable += ways
+    probability = Fraction(favorable, conditioned)
+    return letter_for(probability, [Fraction(8, 21), Fraction(16, 33), Fraction(1, 2), Fraction(18, 35)])
+
+
+def pilot_modular_recurrence():
+    x = 7
+    values = [x]
+    for _ in range(2028):
+        x = (3 * x + 5) % 17
+        values.append(x)
+    y = (values[2026] + values[2027] * values[2028]) % 17
+    return letter_for(y, [3, 5, 6, 8])
+
+
+def pilot_state_transitions():
+    state = (1, 0, 2)
+    for symbol in (1, 0, 2, 1, 2, 0, 1):
+        a, b, c = state
+        if symbol == 0:
+            state = (b, c, (a + b) % 5)
+        elif symbol == 1:
+            state = ((a + c) % 5, a, b)
+        else:
+            state = (c, (b + 1) % 5, a)
+    return letter_for(state, [(1, 0, 0), (0, 1, 0), (1, 0, 1), (0, 0, 1)])
+
+
+def pilot_role_logic():
+    people = "ABCD"
+    roles = ("analyst", "builder", "coordinator", "designer")
+    valid = []
+    for assignment in itertools.permutations(roles):
+        role = dict(zip(people, assignment))
+        rules = (
+            role["A"] != "analyst" or role["B"] == "designer",
+            (role["C"] == "builder") == (role["D"] == "coordinator"),
+            role["B"] != "coordinator",
+            (role["A"] == "designer") != (role["C"] == "analyst"),
+            role["D"] != "builder",
+        )
+        if all(rules):
+            valid.append(role)
+    options = [
+        lambda role: role["B"] == "builder",
+        lambda role: role["C"] != "designer",
+        lambda role: role["D"] == "coordinator",
+        lambda role: role["A"] == "designer",
+    ]
+    must_hold = [all(option(role) for role in valid) for option in options]
+    return letter_for(True, must_hold) if sum(must_hold) == 1 else "INVALID"
+
+
+def pilot_resource_critical_path():
+    finish_a, finish_b = 3, 4
+    specialist_time = 0
+    ready = {"C": finish_a, "D": max(finish_a, finish_b), "E": finish_b}
+    durations = {"C": 5, "D": 2, "E": 4}
+    finish = {}
+    pending = set(ready)
+    while pending:
+        available = sorted(task for task in pending if ready[task] <= specialist_time)
+        if not available:
+            specialist_time = min(ready[task] for task in pending)
+            available = sorted(task for task in pending if ready[task] <= specialist_time)
+        task = available[0]
+        specialist_time += durations[task]
+        finish[task] = specialist_time
+        pending.remove(task)
+    finish_f = max(finish["C"], finish["D"]) + 3
+    finish_g = max(finish["E"], finish_f) + 2
+    return letter_for(finish_g, [14, 15, 16, 17])
+
+
+def pilot_structural_counterfactual():
+    u, v, a = 1, 1, 0
+    b = a & u
+    c = b ^ v
+    d = int(a + b + c >= 2)
+    return letter_for((b, c, d), [(0, 0, 0), (0, 1, 1), (1, 0, 1), (0, 1, 0)])
+
+
+def pilot_stopping_probability():
+    probability = {5: Fraction(1), 6: Fraction(0)}
+    for position in range(4, -1, -1):
+        probability[position] = (probability[position + 1] + probability[position + 2]) / 2
+    return letter_for(probability[0], [Fraction(21, 32), Fraction(5, 8), Fraction(11, 16), Fraction(3, 4)])
+
+
 SOLVERS = {name: value for name, value in globals().copy().items() if callable(value) and name not in {"letter_for", "main"}}
 
 
@@ -233,13 +375,44 @@ def verify() -> dict:
     }
 
 
+def verify_pilot() -> dict:
+    rows = []
+    for task in load_calibration_pilot():
+        solver_name = task.get("verification", {}).get("solver")
+        solver = SOLVERS.get(solver_name)
+        computed = solver() if solver else "MISSING"
+        rows.append({
+            "task_id": task["id"],
+            "difficulty": task["difficulty"],
+            "solver": solver_name,
+            "key": task["answer"],
+            "computed": computed,
+            "passed": computed == task["answer"],
+        })
+    return {
+        "schema_version": 1,
+        "method": "deterministic standard-library reference solvers; no model calls",
+        "task_set": "v2.6-pilot-only",
+        "task_count": len(rows),
+        "passed": sum(row["passed"] for row in rows),
+        "failed": sum(not row["passed"] for row in rows),
+        "results": rows,
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--output", type=Path, default=STUDY / "answer-verification.json")
+    parser.add_argument("--task-set", choices=("main", "pilot"), default="main")
+    parser.add_argument("--output", type=Path)
     args = parser.parse_args()
-    report = verify()
-    write_json(args.output, report)
-    print(f"verified {report['passed']}/{report['task_count']} answer keys; output={args.output}")
+    report = verify_pilot() if args.task_set == "pilot" else verify()
+    output = args.output or (
+        STUDY / "pilot-answer-verification-v2.6.json"
+        if args.task_set == "pilot"
+        else STUDY / "answer-verification.json"
+    )
+    write_json(output, report)
+    print(f"verified {report['passed']}/{report['task_count']} answer keys; output={output}")
     return 0 if report["failed"] == 0 else 1
 
 

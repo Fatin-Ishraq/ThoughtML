@@ -110,6 +110,10 @@ def load_calibration() -> list[dict[str, Any]]:
     return list(read_json(TASKS / "calibration.json")["tasks"])
 
 
+def load_calibration_pilot() -> list[dict[str, Any]]:
+    return list(read_json(TASKS / "calibration-pilot-v2.6.json")["tasks"])
+
+
 def load_authoring() -> list[dict[str, Any]]:
     return list(read_json(TASKS / "authoring.json")["tasks"])
 
@@ -175,12 +179,21 @@ def _domain_messages(tasks: Sequence[dict[str, Any]], label: str) -> list[Valida
 def validate_artifacts() -> list[ValidationMessage]:
     out: list[ValidationMessage] = []
     calibration = load_calibration()
+    calibration_pilot = load_calibration_pilot()
     authoring = load_authoring()
     models = load_models()
 
     if len(calibration) != 30:
         out.append(
             ValidationMessage("error", "CAL_COUNT", f"calibration has {len(calibration)} tasks, expected 30")
+        )
+    if len(calibration_pilot) != 10:
+        out.append(
+            ValidationMessage(
+                "error",
+                "PILOT_CAL_COUNT",
+                f"v2.6 pilot calibration has {len(calibration_pilot)} tasks, expected 10",
+            )
         )
     if len(authoring) != 12:
         out.append(
@@ -247,6 +260,30 @@ def validate_artifacts() -> list[ValidationMessage]:
             )
         )
 
+    for task in calibration_pilot:
+        out.extend(_validate_task_common(task, "pilot-cal", 80, 200))
+        task_id = str(task.get("id"))
+        if task_id in seen:
+            out.append(ValidationMessage("error", "DUPLICATE_ID", task_id))
+        seen.add(task_id)
+        if task.get("answer") not in {"A", "B", "C", "D"}:
+            out.append(ValidationMessage("error", "ANSWER_KEY", f"{task_id}: invalid answer"))
+        if task.get("difficulty") != "hard":
+            out.append(
+                ValidationMessage("error", "PILOT_DIFFICULTY", f"{task_id}: expected hard")
+            )
+        if not isinstance(task.get("rationale"), str) or not task["rationale"].strip():
+            out.append(ValidationMessage("error", "RATIONALE", f"{task_id}: missing rationale"))
+        verification = task.get("verification")
+        if not isinstance(verification, dict) or not isinstance(verification.get("solver"), str):
+            out.append(ValidationMessage("error", "VERIFICATION", f"{task_id}: missing solver"))
+        prompt = str(task.get("prompt", ""))
+        for option in "ABCD":
+            if not re.search(rf"(?m)^{option}\.\s+\S", prompt):
+                out.append(
+                    ValidationMessage("error", "OPTIONS", f"{task_id}: missing option {option}")
+                )
+
     neutral_suffix = "Decide what should be done. Represent the reasoning and conclusion in the requested format."
     for task in authoring:
         if not str(task.get("prompt", "")).endswith(neutral_suffix):
@@ -283,6 +320,7 @@ def validate_artifacts() -> list[ValidationMessage]:
         )
 
     out.extend(_domain_messages(calibration, "calibration"))
+    out.extend(_domain_messages(calibration_pilot, "v2.6 pilot calibration"))
     out.extend(_domain_messages(authoring, "authoring"))
 
     probe_data = read_json(TASKS / "contamination.json")
@@ -304,10 +342,10 @@ def validate_artifacts() -> list[ValidationMessage]:
         out.append(ValidationMessage("error", "MODEL_DUPLICATE", "model arms/slugs must be unique"))
 
     benchmark = read_json(CONFIG / "benchmark.json")
-    if benchmark.get("preregistration_version") != "2.5":
+    if benchmark.get("preregistration_version") != "2.6":
         out.append(
             ValidationMessage(
-                "error", "PREREG_VERSION", "benchmark config is not pinned to protocol v2.5"
+                "error", "PREREG_VERSION", "benchmark config is not pinned to protocol v2.6"
             )
         )
     collection_order = benchmark.get("collection_order", {})
@@ -321,6 +359,24 @@ def validate_artifacts() -> list[ValidationMessage]:
         out.append(
             ValidationMessage(
                 "error", "COLLECTION_ORDER", "collection order must place GPT/OpenAI before DeepSeek"
+            )
+        )
+    pilot_config = benchmark.get("exp0_pilot_v2_6", {})
+    expected_pilot_config = {
+        "phase": "exp0-pilot-v2.6",
+        "model": "gpt-5.6-terra",
+        "task_count": 10,
+        "conditions": ["F", "B"],
+        "included_per_condition": 10,
+        "correct_min": 5,
+        "correct_max": 8,
+        "minimum_incorrect": 2,
+        "main_task_reuse": "forbidden",
+    }
+    if pilot_config != expected_pilot_config:
+        out.append(
+            ValidationMessage(
+                "error", "PILOT_CONFIG", "v2.6 pilot gate/configuration does not match protocol"
             )
         )
     if sha256_file(SPEC) != benchmark.get("spec_sha256"):
@@ -359,6 +415,14 @@ def validate_artifacts() -> list[ValidationMessage]:
                 "Calibration corpus revision remains unresolved; Experiment 0 collection is blocked",
             )
         )
+    if "[EXP0 PILOT BLOCKER]" in (STUDY / "protocol-issues.md").read_text(encoding="utf-8"):
+        out.append(
+            ValidationMessage(
+                "warning",
+                "EXP0_PILOT_PROTOCOL_BLOCKER",
+                "The v2.6 pilot awaits independent human review; collection is blocked",
+            )
+        )
     if "[EXP1 BLOCKER]" in (STUDY / "protocol-issues.md").read_text(encoding="utf-8"):
         out.append(
             ValidationMessage(
@@ -377,6 +441,7 @@ def registered_files() -> list[Path]:
         CONFIG / "benchmark.json",
         CONFIG / "models.json",
         TASKS / "calibration.json",
+        TASKS / "calibration-pilot-v2.6.json",
         TASKS / "authoring.json",
         TASKS / "contamination.json",
         PAYLOADS / "thoughtml-instruction.txt",
@@ -389,7 +454,9 @@ def registered_files() -> list[Path]:
         STUDY / "sample-size-estimation.json",
         STUDY / "h1b-boundary-estimation.json",
         STUDY / "answer-verification.json",
+        STUDY / "pilot-answer-verification-v2.6.json",
         TASKS / "reviewer-checklist.md",
+        TASKS / "pilot-v2.6-review.md",
         TASKS / "human-review-attestation.md",
         SPEC,
     ]
@@ -496,6 +563,20 @@ def build_schedule(phase: str, seed: int) -> dict[str, Any]:
                         effort=base_effort,
                     )
                 )
+    elif phase == "exp0-pilot-v2.6":
+        terra = next(m for m in models if m["arm"] == "T")
+        for task in load_calibration_pilot():
+            for condition in ("F", "B"):
+                items.append(
+                    _run_item(
+                        phase=phase,
+                        task=task,
+                        model=terra,
+                        condition=condition,
+                        sample=1,
+                        effort=base_effort,
+                    )
+                )
     elif phase == "exp0-main":
         for task in load_calibration():
             for model in models:
@@ -583,6 +664,7 @@ EXPECTED_PHASE_COUNTS = {
     "probe-cued": 25,
     "probe-neutral": 25,
     "exp0-pilot": 60,
+    "exp0-pilot-v2.6": 20,
     "exp0-main": 300,
     "exp1-thoughtml": 180,
     "exp1-generic": 60,

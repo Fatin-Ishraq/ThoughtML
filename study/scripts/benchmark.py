@@ -98,6 +98,8 @@ def open_protocol_issues() -> list[str]:
 
 
 def phase_protocol_issues(phase: str) -> list[str]:
+    if phase == "exp0-pilot-v2.6":
+        return protocol_headings("[EXP0 PILOT BLOCKER]")
     if phase in {"exp0-pilot", "exp0-main"}:
         return protocol_headings("[EXP0 BLOCKER]")
     if phase in {"exp1-thoughtml", "exp1-generic"}:
@@ -157,12 +159,14 @@ def manifest_value(status: str) -> dict[str, Any]:
         "files": files,
         "task_counts": {
             "calibration": len(lib.load_calibration()),
+            "calibration_pilot_v2_6": len(lib.load_calibration_pilot()),
             "authoring": len(lib.load_authoring()),
             "probe_cued": len(lib.load_probes("cued")),
             "probe_neutral": len(lib.load_probes("neutral")),
         },
         "open_protocol_issues": open_protocol_issues(),
         "phase_protocol_issues": {
+            "exp0_pilot_v2_6": phase_protocol_issues("exp0-pilot-v2.6"),
             "exp0": phase_protocol_issues("exp0-main"),
             "exp1": phase_protocol_issues("exp1-thoughtml"),
         },
@@ -650,7 +654,9 @@ def cmd_grade(args: argparse.Namespace) -> int:
             continue
         task_id = metadata["run"]["task_id"]
         phase = metadata["run"]["phase"]
-        if phase.startswith("exp0"):
+        if phase == "exp0-pilot-v2.6":
+            task = next(t for t in lib.load_calibration_pilot() if t["id"] == task_id)
+        elif phase.startswith("exp0"):
             task = next(t for t in lib.load_calibration() if t["id"] == task_id)
         elif phase.startswith("probe"):
             kind = "cued" if phase == "probe-cued" else "neutral"
@@ -741,7 +747,13 @@ def rule_s_results(rows: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
-def pilot_acceptance(rows: list[dict[str, Any]]) -> dict[str, Any]:
+def pilot_acceptance(
+    rows: list[dict[str, Any]],
+    *,
+    expected_per_condition: int = 30,
+    correct_window: tuple[int, int] = (15, 24),
+    minimum_incorrect: int = 6,
+) -> dict[str, Any]:
     conditions: dict[str, dict[str, Any]] = {}
     for condition in ("B", "F"):
         group = [row for row in rows if row.get("condition") == condition and not row.get("excluded")]
@@ -751,12 +763,19 @@ def pilot_acceptance(rows: list[dict[str, Any]]) -> dict[str, Any]:
             "included": len(group),
             "correct": correct,
             "incorrect": incorrect,
-            "correct_window": [15, 24],
-            "minimum_incorrect": 6,
-            "passed": len(group) == 30 and 15 <= correct <= 24 and incorrect >= 6,
+            "correct_window": list(correct_window),
+            "minimum_incorrect": minimum_incorrect,
+            "passed": (
+                len(group) == expected_per_condition
+                and correct_window[0] <= correct <= correct_window[1]
+                and incorrect >= minimum_incorrect
+            ),
         }
     return {
-        "rule": "Each condition must have 15-24 correct and at least 6 incorrect among 30 included runs.",
+        "rule": (
+            f"Each condition must have {correct_window[0]}-{correct_window[1]} correct "
+            f"and at least {minimum_incorrect} incorrect among {expected_per_condition} included runs."
+        ),
         "conditions": conditions,
         "passed": all(value["passed"] for value in conditions.values()),
     }
@@ -806,6 +825,17 @@ def cmd_analyze(args: argparse.Namespace) -> int:
     }
     if args.phase == "exp0-pilot":
         report["pilot_acceptance"] = pilot_acceptance(rows)
+    elif args.phase == "exp0-pilot-v2.6":
+        pilot_config = lib.read_json(lib.CONFIG / "benchmark.json")["exp0_pilot_v2_6"]
+        report["pilot_acceptance"] = pilot_acceptance(
+            rows,
+            expected_per_condition=int(pilot_config["included_per_condition"]),
+            correct_window=(
+                int(pilot_config["correct_min"]),
+                int(pilot_config["correct_max"]),
+            ),
+            minimum_incorrect=int(pilot_config["minimum_incorrect"]),
+        )
     out = Path(args.out) if args.out else lib.RUNS / "analysis" / "summary.json"
     if not out.is_absolute():
         out = lib.REPO / out

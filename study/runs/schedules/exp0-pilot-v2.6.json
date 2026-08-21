@@ -1,0 +1,522 @@
+{
+  "collectable": true,
+  "count": 20,
+  "created_at": "2026-08-21T16:33:11.202931Z",
+  "items": [
+    {
+      "arm": "T",
+      "condition": "B",
+      "model": "gpt-5.6-terra",
+      "phase": "exp0-pilot-v2.6",
+      "prompt_bytes": 40891,
+      "prompt_sha256": "17806395b8d735ad8e7eaf50dc37fb1c4dfbff99a9d2435333420833b8d1e0e5",
+      "reasoning_effort": "high",
+      "run_id": "exp0-pilot-v2.6__pilot-cal-007__t__b__s1__high",
+      "sample": 1,
+      "task": {
+        "answer": "B",
+        "difficulty": "hard",
+        "domain": "deductive logic",
+        "id": "pilot-cal-007",
+        "prompt": "Four people A, B, C, and D receive the four distinct roles analyst, builder, coordinator, and designer, one role per person. The assignment obeys all of these rules: if A is the analyst then B is the designer; C is the builder if and only if D is the coordinator; B is not the coordinator; exactly one of the statements ‘A is the designer’ and ‘C is the analyst’ is true; and D is not the builder. Considering every assignment that satisfies all five rules, which statement must be true? Choose exactly one answer and represent the feasible assignments or equivalent deductions and conclusion in the requested format.\n\nA. B is the builder.\nB. C is not the designer.\nC. D is the coordinator.\nD. A is the designer.",
+        "rationale": "There are three valid assignments. Across all three, C is analyst, builder, or coordinator but never designer. Each of the other options fails in at least one valid assignment.",
+        "software_related": false,
+        "verification": {
+          "solver": "pilot_role_logic"
+        }
+      },
+      "task_id": "pilot-cal-007",
+      "vendor": "openai"
+    },
+    {
+      "arm": "T",
+      "condition": "B",
+      "model": "gpt-5.6-terra",
+      "phase": "exp0-pilot-v2.6",
+      "prompt_bytes": 40913,
+      "prompt_sha256": "54cc547a9b6c3876bceb52fbc8407e77b79a477ba09d4666c9439d2114b38da1",
+      "reasoning_effort": "high",
+      "run_id": "exp0-pilot-v2.6__pilot-cal-001__t__b__s1__high",
+      "sample": 1,
+      "task": {
+        "answer": "C",
+        "difficulty": "hard",
+        "domain": "Bayesian inference",
+        "id": "pilot-cal-001",
+        "prompt": "A condition affects exactly 1% of a population. Three binary tests are conditionally independent once the person's true condition status is fixed. For affected people, their positive rates are 90%, 85%, and 80%, respectively. For unaffected people, their false-positive rates are 10%, 15%, and 20%, respectively. A randomly selected person receives a positive result on all three tests. Use the stated population prevalence rather than assuming equal prior odds. What is the posterior probability that this person is affected, rounded to the nearest tenth of one percentage point? Choose exactly one answer and represent the prior, joint likelihoods, normalization, and conclusion in the requested format.\n\nA. 52.7%\nB. 61.2%\nC. 67.3%\nD. 79.8%",
+        "rationale": "The affected-positive mass is .01(.90)(.85)(.80)=.00612 and the unaffected-positive mass is .99(.10)(.15)(.20)=.00297. Normalizing gives .00612/(.00612+.00297)=68/101, or 67.3%.",
+        "software_related": false,
+        "verification": {
+          "solver": "pilot_bayes_three_tests"
+        }
+      },
+      "task_id": "pilot-cal-001",
+      "vendor": "openai"
+    },
+    {
+      "arm": "T",
+      "condition": "B",
+      "model": "gpt-5.6-terra",
+      "phase": "exp0-pilot-v2.6",
+      "prompt_bytes": 40902,
+      "prompt_sha256": "6e484415526a7d27d881d413440e4e5240a95e8292608ecb583e77ba5f2ce497",
+      "reasoning_effort": "high",
+      "run_id": "exp0-pilot-v2.6__pilot-cal-008__t__b__s1__high",
+      "sample": 1,
+      "task": {
+        "answer": "C",
+        "difficulty": "hard",
+        "domain": "project scheduling",
+        "id": "pilot-cal-008",
+        "prompt": "A project starts at time 0. Tasks A and B take 3 and 4 hours and may run immediately in parallel. Task C takes 5 hours after A; D takes 2 hours after both A and B; E takes 4 hours after B; F takes 3 hours after both C and D; and G takes 2 hours after both E and F. Tasks C, D, and E require one shared specialist and therefore cannot overlap. Whenever that specialist becomes free, the alphabetically earliest ready task among C, D, and E starts and then runs without interruption. Other tasks use separate resources. What is the earliest project completion time under this rule? Choose exactly one answer and represent start/finish times and the conclusion in the requested format.\n\nA. 14 hours\nB. 15 hours\nC. 16 hours\nD. 17 hours",
+        "rationale": "A ends at 3 and starts C, which occupies the specialist until 8. D then runs 8–10 and E 10–14. F runs 10–13 after C and D. G waits for E and F, then runs 14–16.",
+        "software_related": false,
+        "verification": {
+          "solver": "pilot_resource_critical_path"
+        }
+      },
+      "task_id": "pilot-cal-008",
+      "vendor": "openai"
+    },
+    {
+      "arm": "T",
+      "condition": "B",
+      "model": "gpt-5.6-terra",
+      "phase": "exp0-pilot-v2.6",
+      "prompt_bytes": 40823,
+      "prompt_sha256": "4629df20154afeabab94f929648eff62e3f4072058e76654e88d12db53354e60",
+      "reasoning_effort": "high",
+      "run_id": "exp0-pilot-v2.6__pilot-cal-009__t__b__s1__high",
+      "sample": 1,
+      "task": {
+        "answer": "D",
+        "difficulty": "hard",
+        "domain": "causal reasoning",
+        "id": "pilot-cal-009",
+        "prompt": "All variables are binary. In a structural causal model, the root values are U=1 and V=0. The remaining equations are A=U XOR V, B=A AND U, C=B XOR V, and D=1 exactly when A+B+C is at least 2, otherwise D=0. Consider the counterfactual intervention that sets A directly to 0 and V directly to 1 while keeping U at 1. Under the intervention, do not reuse A's original equation; recompute B, C, and D in causal order from their equations using the intervened values. What counterfactual triple (B,C,D) results? Choose exactly one answer and represent the intervention and recomputation in the requested format.\n\nA. (0,0,0)\nB. (0,1,1)\nC. (1,0,1)\nD. (0,1,0)",
+        "rationale": "Under do(A=0,V=1) with U=1, B=0 AND 1=0, C=0 XOR 1=1, and A+B+C=1, so D=0. The result is (0,1,0).",
+        "software_related": false,
+        "verification": {
+          "solver": "pilot_structural_counterfactual"
+        }
+      },
+      "task_id": "pilot-cal-009",
+      "vendor": "openai"
+    },
+    {
+      "arm": "T",
+      "condition": "B",
+      "model": "gpt-5.6-terra",
+      "phase": "exp0-pilot-v2.6",
+      "prompt_bytes": 40790,
+      "prompt_sha256": "8d9f04e3cda2b4aef44c81fcc45aaae4c5a42646ca7140d8570c2605b36d5dc4",
+      "reasoning_effort": "high",
+      "run_id": "exp0-pilot-v2.6__pilot-cal-004__t__b__s1__high",
+      "sample": 1,
+      "task": {
+        "answer": "B",
+        "difficulty": "hard",
+        "domain": "combinatorics",
+        "id": "pilot-cal-004",
+        "prompt": "A box contains 5 red, 4 blue, and 3 green tokens. Four tokens are selected uniformly without replacement, with order ignored. You are told that the selected set contains at least one green token and contains tokens of exactly two of the three colors; both represented colors must therefore occur at least once. Conditional on that information, what is the probability that exactly two selected tokens are green? Express the result as a reduced fraction. Choose exactly one answer and represent the favorable count, conditioning count, reduction, and conclusion in the requested format.\n\nA. 8/21\nB. 16/33\nC. 1/2\nD. 18/35",
+        "rationale": "Valid green-red selections total 65 and green-blue selections total 34, giving 99 conditioned sets. Exactly two greens contributes 30 green-red and 18 green-blue sets, so the probability is 48/99=16/33.",
+        "software_related": false,
+        "verification": {
+          "solver": "pilot_conditional_colors"
+        }
+      },
+      "task_id": "pilot-cal-004",
+      "vendor": "openai"
+    },
+    {
+      "arm": "T",
+      "condition": "B",
+      "model": "gpt-5.6-terra",
+      "phase": "exp0-pilot-v2.6",
+      "prompt_bytes": 40881,
+      "prompt_sha256": "10026a444efd31d050bc7d3aa8ae0d72728e4e0369142cb37b14cae291a25154",
+      "reasoning_effort": "high",
+      "run_id": "exp0-pilot-v2.6__pilot-cal-002__t__b__s1__high",
+      "sample": 1,
+      "task": {
+        "answer": "B",
+        "difficulty": "hard",
+        "domain": "integer optimization",
+        "id": "pilot-cal-002",
+        "prompt": "A workshop may produce nonnegative whole numbers of products P, Q, and R. One unit of P uses 4 machine-hours and 3 kilograms of material and earns 11 points. Q uses 6 machine-hours and 2 kilograms and earns 15 points. R uses 7 machine-hours and 5 kilograms and earns 18 points. At most 32 machine-hours and 24 kilograms are available. Production is additionally capped at P at most 4, Q at most 3, and R at most 3. Which production plan uniquely earns the greatest total number of points while satisfying every constraint? Choose exactly one answer and represent feasibility comparisons and the maximizing conclusion in the requested format.\n\nA. P=3, Q=2, R=1\nB. P=3, Q=1, R=2\nC. P=0, Q=3, R=2\nD. P=4, Q=0, R=2",
+        "rationale": "Exhaustive enumeration of the bounded integer choices gives a unique maximum of 84 points at P=3, Q=1, R=2. The listed alternatives earn 81, 81, and 80 points.",
+        "software_related": false,
+        "verification": {
+          "solver": "pilot_integer_optimization"
+        }
+      },
+      "task_id": "pilot-cal-002",
+      "vendor": "openai"
+    },
+    {
+      "arm": "T",
+      "condition": "F",
+      "model": "gpt-5.6-terra",
+      "phase": "exp0-pilot-v2.6",
+      "prompt_bytes": 40714,
+      "prompt_sha256": "7b5851dc75a700b3d1391083d50b29da7691f222ab83fedfdea29feaa04b9605",
+      "reasoning_effort": "high",
+      "run_id": "exp0-pilot-v2.6__pilot-cal-001__t__f__s1__high",
+      "sample": 1,
+      "task": {
+        "answer": "C",
+        "difficulty": "hard",
+        "domain": "Bayesian inference",
+        "id": "pilot-cal-001",
+        "prompt": "A condition affects exactly 1% of a population. Three binary tests are conditionally independent once the person's true condition status is fixed. For affected people, their positive rates are 90%, 85%, and 80%, respectively. For unaffected people, their false-positive rates are 10%, 15%, and 20%, respectively. A randomly selected person receives a positive result on all three tests. Use the stated population prevalence rather than assuming equal prior odds. What is the posterior probability that this person is affected, rounded to the nearest tenth of one percentage point? Choose exactly one answer and represent the prior, joint likelihoods, normalization, and conclusion in the requested format.\n\nA. 52.7%\nB. 61.2%\nC. 67.3%\nD. 79.8%",
+        "rationale": "The affected-positive mass is .01(.90)(.85)(.80)=.00612 and the unaffected-positive mass is .99(.10)(.15)(.20)=.00297. Normalizing gives .00612/(.00612+.00297)=68/101, or 67.3%.",
+        "software_related": false,
+        "verification": {
+          "solver": "pilot_bayes_three_tests"
+        }
+      },
+      "task_id": "pilot-cal-001",
+      "vendor": "openai"
+    },
+    {
+      "arm": "T",
+      "condition": "F",
+      "model": "gpt-5.6-terra",
+      "phase": "exp0-pilot-v2.6",
+      "prompt_bytes": 40692,
+      "prompt_sha256": "6eb792a45135e1a45f8b527baa1b1660b34178f1cd959219254996fd94f0f29a",
+      "reasoning_effort": "high",
+      "run_id": "exp0-pilot-v2.6__pilot-cal-007__t__f__s1__high",
+      "sample": 1,
+      "task": {
+        "answer": "B",
+        "difficulty": "hard",
+        "domain": "deductive logic",
+        "id": "pilot-cal-007",
+        "prompt": "Four people A, B, C, and D receive the four distinct roles analyst, builder, coordinator, and designer, one role per person. The assignment obeys all of these rules: if A is the analyst then B is the designer; C is the builder if and only if D is the coordinator; B is not the coordinator; exactly one of the statements ‘A is the designer’ and ‘C is the analyst’ is true; and D is not the builder. Considering every assignment that satisfies all five rules, which statement must be true? Choose exactly one answer and represent the feasible assignments or equivalent deductions and conclusion in the requested format.\n\nA. B is the builder.\nB. C is not the designer.\nC. D is the coordinator.\nD. A is the designer.",
+        "rationale": "There are three valid assignments. Across all three, C is analyst, builder, or coordinator but never designer. Each of the other options fails in at least one valid assignment.",
+        "software_related": false,
+        "verification": {
+          "solver": "pilot_role_logic"
+        }
+      },
+      "task_id": "pilot-cal-007",
+      "vendor": "openai"
+    },
+    {
+      "arm": "T",
+      "condition": "B",
+      "model": "gpt-5.6-terra",
+      "phase": "exp0-pilot-v2.6",
+      "prompt_bytes": 40852,
+      "prompt_sha256": "730c54e939baab7090f166782e53e9e0963f85d3d50effb5bb4ed159d5caecde",
+      "reasoning_effort": "high",
+      "run_id": "exp0-pilot-v2.6__pilot-cal-003__t__b__s1__high",
+      "sample": 1,
+      "task": {
+        "answer": "C",
+        "difficulty": "hard",
+        "domain": "computer scheduling",
+        "id": "pilot-cal-003",
+        "prompt": "A single processor uses round-robin scheduling with a two-second quantum and zero context-switch cost. At time 0, jobs A, B, and C enter the ready queue in that order and require 5, 3, and 7 seconds of processor time. Job D requires 4 seconds and arrives exactly at time 4. At a quantum boundary, newly arrived jobs are appended before the just-preempted job is re-appended. A job that finishes early leaves immediately, and the next queued job starts without delay. At what time does job D finish? Choose exactly one answer and represent the queue evolution, remaining service times, and conclusion in the requested format.\n\nA. 14 seconds\nB. 15 seconds\nC. 16 seconds\nD. 17 seconds",
+        "rationale": "The slices are A 0–2, B 2–4, C 4–6, A 6–8, D 8–10, B 10–11, C 11–13, A 13–14, and D 14–16. Therefore D finishes at time 16.",
+        "software_related": true,
+        "verification": {
+          "solver": "pilot_round_robin"
+        }
+      },
+      "task_id": "pilot-cal-003",
+      "vendor": "openai"
+    },
+    {
+      "arm": "T",
+      "condition": "F",
+      "model": "gpt-5.6-terra",
+      "phase": "exp0-pilot-v2.6",
+      "prompt_bytes": 40591,
+      "prompt_sha256": "f88031dd2a2963fc466268b3c1feba988e87d0c2a52930bd4b8c6343ad1ddf05",
+      "reasoning_effort": "high",
+      "run_id": "exp0-pilot-v2.6__pilot-cal-004__t__f__s1__high",
+      "sample": 1,
+      "task": {
+        "answer": "B",
+        "difficulty": "hard",
+        "domain": "combinatorics",
+        "id": "pilot-cal-004",
+        "prompt": "A box contains 5 red, 4 blue, and 3 green tokens. Four tokens are selected uniformly without replacement, with order ignored. You are told that the selected set contains at least one green token and contains tokens of exactly two of the three colors; both represented colors must therefore occur at least once. Conditional on that information, what is the probability that exactly two selected tokens are green? Express the result as a reduced fraction. Choose exactly one answer and represent the favorable count, conditioning count, reduction, and conclusion in the requested format.\n\nA. 8/21\nB. 16/33\nC. 1/2\nD. 18/35",
+        "rationale": "Valid green-red selections total 65 and green-blue selections total 34, giving 99 conditioned sets. Exactly two greens contributes 30 green-red and 18 green-blue sets, so the probability is 48/99=16/33.",
+        "software_related": false,
+        "verification": {
+          "solver": "pilot_conditional_colors"
+        }
+      },
+      "task_id": "pilot-cal-004",
+      "vendor": "openai"
+    },
+    {
+      "arm": "T",
+      "condition": "F",
+      "model": "gpt-5.6-terra",
+      "phase": "exp0-pilot-v2.6",
+      "prompt_bytes": 40624,
+      "prompt_sha256": "95b9583768d3c9d859c1346cda5fd7bd1a85584c8997741469e7685912b4dd21",
+      "reasoning_effort": "high",
+      "run_id": "exp0-pilot-v2.6__pilot-cal-009__t__f__s1__high",
+      "sample": 1,
+      "task": {
+        "answer": "D",
+        "difficulty": "hard",
+        "domain": "causal reasoning",
+        "id": "pilot-cal-009",
+        "prompt": "All variables are binary. In a structural causal model, the root values are U=1 and V=0. The remaining equations are A=U XOR V, B=A AND U, C=B XOR V, and D=1 exactly when A+B+C is at least 2, otherwise D=0. Consider the counterfactual intervention that sets A directly to 0 and V directly to 1 while keeping U at 1. Under the intervention, do not reuse A's original equation; recompute B, C, and D in causal order from their equations using the intervened values. What counterfactual triple (B,C,D) results? Choose exactly one answer and represent the intervention and recomputation in the requested format.\n\nA. (0,0,0)\nB. (0,1,1)\nC. (1,0,1)\nD. (0,1,0)",
+        "rationale": "Under do(A=0,V=1) with U=1, B=0 AND 1=0, C=0 XOR 1=1, and A+B+C=1, so D=0. The result is (0,1,0).",
+        "software_related": false,
+        "verification": {
+          "solver": "pilot_structural_counterfactual"
+        }
+      },
+      "task_id": "pilot-cal-009",
+      "vendor": "openai"
+    },
+    {
+      "arm": "T",
+      "condition": "B",
+      "model": "gpt-5.6-terra",
+      "phase": "exp0-pilot-v2.6",
+      "prompt_bytes": 40802,
+      "prompt_sha256": "25ae652ed43342baa25fa4d25795f12a0f7dbd1e083e3d69bed253777fabe17e",
+      "reasoning_effort": "high",
+      "run_id": "exp0-pilot-v2.6__pilot-cal-006__t__b__s1__high",
+      "sample": 1,
+      "task": {
+        "answer": "A",
+        "difficulty": "hard",
+        "domain": "state transitions",
+        "id": "pilot-cal-006",
+        "prompt": "A machine stores an ordered triple (a,b,c), with every arithmetic result reduced modulo 5. It starts at (1,0,2). Reading symbol 0 replaces the triple with (b,c,a+b). Reading symbol 1 replaces it with (a+c,a,b). Reading symbol 2 replaces it with (c,b+1,a). The machine then reads, from left to right, the seven-symbol input 1,0,2,1,2,0,1. Each transformation uses the entire old triple, not values already updated during that transformation. What triple remains after the final symbol? Choose exactly one answer and represent the successive states and conclusion in the requested format.\n\nA. (1,0,0)\nB. (0,1,0)\nC. (1,0,1)\nD. (0,0,1)",
+        "rationale": "The successive states are (3,1,0), (1,0,4), (4,1,1), (0,4,1), (1,0,0), (0,0,1), and finally (1,0,0).",
+        "software_related": true,
+        "verification": {
+          "solver": "pilot_state_transitions"
+        }
+      },
+      "task_id": "pilot-cal-006",
+      "vendor": "openai"
+    },
+    {
+      "arm": "T",
+      "condition": "B",
+      "model": "gpt-5.6-terra",
+      "phase": "exp0-pilot-v2.6",
+      "prompt_bytes": 40765,
+      "prompt_sha256": "d1fe6442dfe5328a007235a997b8e071295e7442a106c9dbaecf2059f7a3d4bc",
+      "reasoning_effort": "high",
+      "run_id": "exp0-pilot-v2.6__pilot-cal-010__t__b__s1__high",
+      "sample": 1,
+      "task": {
+        "answer": "A",
+        "difficulty": "hard",
+        "domain": "stochastic processes",
+        "id": "pilot-cal-010",
+        "prompt": "A token begins at position 0 on the integers. At every step it independently moves forward by 1 with probability one half or forward by 2 with probability one half. The process stops as soon as the token first reaches or exceeds position 5. Reaching position 5 is a success; jumping from position 4 to position 6 is a failure, and no movement occurs after stopping. What is the probability of success, expressed as a reduced fraction? Choose exactly one answer and represent the boundary values, recurrence or path count, and conclusion in the requested format.\n\nA. 21/32\nB. 5/8\nC. 11/16\nD. 3/4",
+        "rationale": "With p(5)=1 and p(6)=0, backward recursion p(x)=[p(x+1)+p(x+2)]/2 gives p(4)=1/2, p(3)=3/4, p(2)=5/8, p(1)=11/16, and p(0)=21/32.",
+        "software_related": false,
+        "verification": {
+          "solver": "pilot_stopping_probability"
+        }
+      },
+      "task_id": "pilot-cal-010",
+      "vendor": "openai"
+    },
+    {
+      "arm": "T",
+      "condition": "F",
+      "model": "gpt-5.6-terra",
+      "phase": "exp0-pilot-v2.6",
+      "prompt_bytes": 40603,
+      "prompt_sha256": "a76750eed59b121951215067b9e4b19204f1d1e41f9e87ae547707796e290e8c",
+      "reasoning_effort": "high",
+      "run_id": "exp0-pilot-v2.6__pilot-cal-006__t__f__s1__high",
+      "sample": 1,
+      "task": {
+        "answer": "A",
+        "difficulty": "hard",
+        "domain": "state transitions",
+        "id": "pilot-cal-006",
+        "prompt": "A machine stores an ordered triple (a,b,c), with every arithmetic result reduced modulo 5. It starts at (1,0,2). Reading symbol 0 replaces the triple with (b,c,a+b). Reading symbol 1 replaces it with (a+c,a,b). Reading symbol 2 replaces it with (c,b+1,a). The machine then reads, from left to right, the seven-symbol input 1,0,2,1,2,0,1. Each transformation uses the entire old triple, not values already updated during that transformation. What triple remains after the final symbol? Choose exactly one answer and represent the successive states and conclusion in the requested format.\n\nA. (1,0,0)\nB. (0,1,0)\nC. (1,0,1)\nD. (0,0,1)",
+        "rationale": "The successive states are (3,1,0), (1,0,4), (4,1,1), (0,4,1), (1,0,0), (0,0,1), and finally (1,0,0).",
+        "software_related": true,
+        "verification": {
+          "solver": "pilot_state_transitions"
+        }
+      },
+      "task_id": "pilot-cal-006",
+      "vendor": "openai"
+    },
+    {
+      "arm": "T",
+      "condition": "F",
+      "model": "gpt-5.6-terra",
+      "phase": "exp0-pilot-v2.6",
+      "prompt_bytes": 40653,
+      "prompt_sha256": "72cdf8458f26125c480ab324e3b04078314642f13b1a869d482832ddfad59c76",
+      "reasoning_effort": "high",
+      "run_id": "exp0-pilot-v2.6__pilot-cal-003__t__f__s1__high",
+      "sample": 1,
+      "task": {
+        "answer": "C",
+        "difficulty": "hard",
+        "domain": "computer scheduling",
+        "id": "pilot-cal-003",
+        "prompt": "A single processor uses round-robin scheduling with a two-second quantum and zero context-switch cost. At time 0, jobs A, B, and C enter the ready queue in that order and require 5, 3, and 7 seconds of processor time. Job D requires 4 seconds and arrives exactly at time 4. At a quantum boundary, newly arrived jobs are appended before the just-preempted job is re-appended. A job that finishes early leaves immediately, and the next queued job starts without delay. At what time does job D finish? Choose exactly one answer and represent the queue evolution, remaining service times, and conclusion in the requested format.\n\nA. 14 seconds\nB. 15 seconds\nC. 16 seconds\nD. 17 seconds",
+        "rationale": "The slices are A 0–2, B 2–4, C 4–6, A 6–8, D 8–10, B 10–11, C 11–13, A 13–14, and D 14–16. Therefore D finishes at time 16.",
+        "software_related": true,
+        "verification": {
+          "solver": "pilot_round_robin"
+        }
+      },
+      "task_id": "pilot-cal-003",
+      "vendor": "openai"
+    },
+    {
+      "arm": "T",
+      "condition": "B",
+      "model": "gpt-5.6-terra",
+      "phase": "exp0-pilot-v2.6",
+      "prompt_bytes": 40721,
+      "prompt_sha256": "754e60a14acd240efcddbd4a22df49167d5ae4ea34128eafa75654d0b637244e",
+      "reasoning_effort": "high",
+      "run_id": "exp0-pilot-v2.6__pilot-cal-005__t__b__s1__high",
+      "sample": 1,
+      "task": {
+        "answer": "D",
+        "difficulty": "hard",
+        "domain": "number theory",
+        "id": "pilot-cal-005",
+        "prompt": "Define an integer sequence by x_0=7 and x_(n+1) equal to the remainder of 3x_n+5 after division by 17, so every x_n is in the set from 0 through 16. Let y be the remainder after division by 17 of x_2026 plus the product x_2027 times x_2028. Determine y without treating the subscripts as exponents. You may exploit any cycle you establish, but the indexing begins at x_0 exactly as stated. Choose exactly one answer and represent the recurrence cycle, index reduction, modular calculation, and conclusion in the requested format.\n\nA. 3\nB. 5\nC. 6\nD. 8",
+        "rationale": "The sequence repeats with period 16 from x_0. Since 2026 modulo 16 is 10, the needed terms are x_10=14, x_11=13, and x_12=10. Thus y=(14+13·10) mod 17=8.",
+        "software_related": false,
+        "verification": {
+          "solver": "pilot_modular_recurrence"
+        }
+      },
+      "task_id": "pilot-cal-005",
+      "vendor": "openai"
+    },
+    {
+      "arm": "T",
+      "condition": "F",
+      "model": "gpt-5.6-terra",
+      "phase": "exp0-pilot-v2.6",
+      "prompt_bytes": 40566,
+      "prompt_sha256": "6153116f29db3501dde951d316d8e16d788de681ae0ebf87f5dc1f42239356d1",
+      "reasoning_effort": "high",
+      "run_id": "exp0-pilot-v2.6__pilot-cal-010__t__f__s1__high",
+      "sample": 1,
+      "task": {
+        "answer": "A",
+        "difficulty": "hard",
+        "domain": "stochastic processes",
+        "id": "pilot-cal-010",
+        "prompt": "A token begins at position 0 on the integers. At every step it independently moves forward by 1 with probability one half or forward by 2 with probability one half. The process stops as soon as the token first reaches or exceeds position 5. Reaching position 5 is a success; jumping from position 4 to position 6 is a failure, and no movement occurs after stopping. What is the probability of success, expressed as a reduced fraction? Choose exactly one answer and represent the boundary values, recurrence or path count, and conclusion in the requested format.\n\nA. 21/32\nB. 5/8\nC. 11/16\nD. 3/4",
+        "rationale": "With p(5)=1 and p(6)=0, backward recursion p(x)=[p(x+1)+p(x+2)]/2 gives p(4)=1/2, p(3)=3/4, p(2)=5/8, p(1)=11/16, and p(0)=21/32.",
+        "software_related": false,
+        "verification": {
+          "solver": "pilot_stopping_probability"
+        }
+      },
+      "task_id": "pilot-cal-010",
+      "vendor": "openai"
+    },
+    {
+      "arm": "T",
+      "condition": "F",
+      "model": "gpt-5.6-terra",
+      "phase": "exp0-pilot-v2.6",
+      "prompt_bytes": 40522,
+      "prompt_sha256": "d6b276c239956385c84334c225e66c8e931ca5ae4e0e42921e13a284592ea642",
+      "reasoning_effort": "high",
+      "run_id": "exp0-pilot-v2.6__pilot-cal-005__t__f__s1__high",
+      "sample": 1,
+      "task": {
+        "answer": "D",
+        "difficulty": "hard",
+        "domain": "number theory",
+        "id": "pilot-cal-005",
+        "prompt": "Define an integer sequence by x_0=7 and x_(n+1) equal to the remainder of 3x_n+5 after division by 17, so every x_n is in the set from 0 through 16. Let y be the remainder after division by 17 of x_2026 plus the product x_2027 times x_2028. Determine y without treating the subscripts as exponents. You may exploit any cycle you establish, but the indexing begins at x_0 exactly as stated. Choose exactly one answer and represent the recurrence cycle, index reduction, modular calculation, and conclusion in the requested format.\n\nA. 3\nB. 5\nC. 6\nD. 8",
+        "rationale": "The sequence repeats with period 16 from x_0. Since 2026 modulo 16 is 10, the needed terms are x_10=14, x_11=13, and x_12=10. Thus y=(14+13·10) mod 17=8.",
+        "software_related": false,
+        "verification": {
+          "solver": "pilot_modular_recurrence"
+        }
+      },
+      "task_id": "pilot-cal-005",
+      "vendor": "openai"
+    },
+    {
+      "arm": "T",
+      "condition": "F",
+      "model": "gpt-5.6-terra",
+      "phase": "exp0-pilot-v2.6",
+      "prompt_bytes": 40703,
+      "prompt_sha256": "19759b432363bfd4f30da7e8d69d52e969a72a393f3da2a6fa386fec95e2497a",
+      "reasoning_effort": "high",
+      "run_id": "exp0-pilot-v2.6__pilot-cal-008__t__f__s1__high",
+      "sample": 1,
+      "task": {
+        "answer": "C",
+        "difficulty": "hard",
+        "domain": "project scheduling",
+        "id": "pilot-cal-008",
+        "prompt": "A project starts at time 0. Tasks A and B take 3 and 4 hours and may run immediately in parallel. Task C takes 5 hours after A; D takes 2 hours after both A and B; E takes 4 hours after B; F takes 3 hours after both C and D; and G takes 2 hours after both E and F. Tasks C, D, and E require one shared specialist and therefore cannot overlap. Whenever that specialist becomes free, the alphabetically earliest ready task among C, D, and E starts and then runs without interruption. Other tasks use separate resources. What is the earliest project completion time under this rule? Choose exactly one answer and represent start/finish times and the conclusion in the requested format.\n\nA. 14 hours\nB. 15 hours\nC. 16 hours\nD. 17 hours",
+        "rationale": "A ends at 3 and starts C, which occupies the specialist until 8. D then runs 8–10 and E 10–14. F runs 10–13 after C and D. G waits for E and F, then runs 14–16.",
+        "software_related": false,
+        "verification": {
+          "solver": "pilot_resource_critical_path"
+        }
+      },
+      "task_id": "pilot-cal-008",
+      "vendor": "openai"
+    },
+    {
+      "arm": "T",
+      "condition": "F",
+      "model": "gpt-5.6-terra",
+      "phase": "exp0-pilot-v2.6",
+      "prompt_bytes": 40682,
+      "prompt_sha256": "15efe142c04f49b19bccac17773ba2bd7720bdd513ae834787031780fab3c487",
+      "reasoning_effort": "high",
+      "run_id": "exp0-pilot-v2.6__pilot-cal-002__t__f__s1__high",
+      "sample": 1,
+      "task": {
+        "answer": "B",
+        "difficulty": "hard",
+        "domain": "integer optimization",
+        "id": "pilot-cal-002",
+        "prompt": "A workshop may produce nonnegative whole numbers of products P, Q, and R. One unit of P uses 4 machine-hours and 3 kilograms of material and earns 11 points. Q uses 6 machine-hours and 2 kilograms and earns 15 points. R uses 7 machine-hours and 5 kilograms and earns 18 points. At most 32 machine-hours and 24 kilograms are available. Production is additionally capped at P at most 4, Q at most 3, and R at most 3. Which production plan uniquely earns the greatest total number of points while satisfying every constraint? Choose exactly one answer and represent feasibility comparisons and the maximizing conclusion in the requested format.\n\nA. P=3, Q=2, R=1\nB. P=3, Q=1, R=2\nC. P=0, Q=3, R=2\nD. P=4, Q=0, R=2",
+        "rationale": "Exhaustive enumeration of the bounded integer choices gives a unique maximum of 84 points at P=3, Q=1, R=2. The listed alternatives earn 81, 81, and 80 points.",
+        "software_related": false,
+        "verification": {
+          "solver": "pilot_integer_optimization"
+        }
+      },
+      "task_id": "pilot-cal-002",
+      "vendor": "openai"
+    }
+  ],
+  "manifest": "study\\runs\\manifests\\frozen-8ae84ddd23671da5.json",
+  "manifest_sha256": "cff59d029405aa0796f1a523fe5652b0f975331dd1c6045d94a55118ba442e2b",
+  "order_policy": {
+    "provider_blocks": [
+      "openai",
+      "deepseek"
+    ],
+    "scope": "all model-call phases",
+    "strategy": "global_provider_blocks",
+    "within_provider": "registered phase sequence; deterministic shuffle within each phase using schedule_seed"
+  },
+  "phase": "exp0-pilot-v2.6",
+  "phase_protocol_issues": [],
+  "schema_version": 1,
+  "seed": 20260821
+}

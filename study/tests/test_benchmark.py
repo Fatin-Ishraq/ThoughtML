@@ -23,7 +23,11 @@ class ArtifactTests(unittest.TestCase):
 
     def test_registered_task_counts_and_split(self) -> None:
         calibration = lib.load_calibration()
+        pilot = lib.load_calibration_pilot()
         self.assertEqual(len(calibration), 30)
+        self.assertEqual(len(pilot), 10)
+        self.assertTrue(all(task["difficulty"] == "hard" for task in pilot))
+        self.assertTrue({task["id"] for task in calibration}.isdisjoint(task["id"] for task in pilot))
         self.assertEqual(
             {level: sum(t["difficulty"] == level for t in calibration) for level in ("easy", "medium", "hard")},
             {"easy": 6, "medium": 12, "hard": 12},
@@ -37,6 +41,9 @@ class ArtifactTests(unittest.TestCase):
         report = verify_answers.verify()
         self.assertEqual(report["task_count"], 30)
         self.assertEqual(report["failed"], 0)
+        pilot = verify_answers.verify_pilot()
+        self.assertEqual(pilot["task_count"], 10)
+        self.assertEqual(pilot["failed"], 0)
 
     def test_authoring_prompts_and_instructions_are_neutral(self) -> None:
         suffix = "Decide what should be done. Represent the reasoning and conclusion in the requested format."
@@ -50,7 +57,7 @@ class ArtifactTests(unittest.TestCase):
         self.assertNotIn("counterargument", joined)
 
     def test_task_text_stays_inside_registered_bounds(self) -> None:
-        for task in lib.load_calibration() + lib.load_authoring():
+        for task in lib.load_calibration() + lib.load_calibration_pilot() + lib.load_authoring():
             with self.subTest(task=task["id"]):
                 self.assertGreaterEqual(lib.word_count(task["prompt"]), 80)
                 self.assertLessEqual(lib.word_count(task["prompt"]), 200)
@@ -94,6 +101,7 @@ class ScheduleTests(unittest.TestCase):
     def test_phase_blockers_are_scoped(self) -> None:
         self.assertEqual(benchmark.phase_protocol_issues("probe-cued"), [])
         self.assertTrue(benchmark.phase_protocol_issues("exp0-pilot"))
+        self.assertEqual(benchmark.phase_protocol_issues("exp0-pilot-v2.6"), [])
         self.assertTrue(benchmark.phase_protocol_issues("exp0-main"))
         self.assertTrue(benchmark.phase_protocol_issues("exp1-thoughtml"))
         self.assertTrue(benchmark.phase_protocol_issues("exp1-generic"))
@@ -111,12 +119,25 @@ class ScheduleTests(unittest.TestCase):
         self.assertEqual([x["run_id"] for x in a["items"]], [x["run_id"] for x in b["items"]])
 
     def test_withdrawn_gpt_5_4_is_not_scheduled(self) -> None:
-        for phase in ("probe-cued", "exp0-main", "exp1-thoughtml", "exp1-generic"):
+        for phase in (
+            "probe-cued",
+            "exp0-pilot-v2.6",
+            "exp0-main",
+            "exp1-thoughtml",
+            "exp1-generic",
+        ):
             schedule = lib.build_schedule(phase, 20260821)
             self.assertNotIn("gpt-5.4", {item["model"] for item in schedule["items"]})
 
     def test_gpt_arms_precede_deepseek_arms(self) -> None:
-        for phase in ("probe-cued", "probe-neutral", "exp0-main", "exp1-thoughtml", "exp1-generic"):
+        for phase in (
+            "probe-cued",
+            "probe-neutral",
+            "exp0-pilot-v2.6",
+            "exp0-main",
+            "exp1-thoughtml",
+            "exp1-generic",
+        ):
             schedule = lib.build_schedule(phase, 20260821)
             self.assertEqual(schedule["order_policy"]["strategy"], "global_provider_blocks")
             self.assertEqual(schedule["order_policy"]["scope"], "all model-call phases")
@@ -126,8 +147,20 @@ class ScheduleTests(unittest.TestCase):
                 self.assertEqual(vendors[0], "openai")
 
     def test_thoughtml_prompt_exceeds_windows_argument_budget(self) -> None:
-        schedule = lib.build_schedule("exp0-pilot", 1)
+        schedule = lib.build_schedule("exp0-pilot-v2.6", 1)
         self.assertGreater(schedule["items"][0]["prompt_bytes"], 32767)
+
+    def test_v2_6_pilot_is_disjoint_and_terra_only(self) -> None:
+        schedule = lib.build_schedule("exp0-pilot-v2.6", 20260821)
+        self.assertEqual(schedule["count"], 20)
+        self.assertEqual({item["model"] for item in schedule["items"]}, {"gpt-5.6-terra"})
+        self.assertEqual({item["condition"] for item in schedule["items"]}, {"B", "F"})
+        self.assertEqual(len({item["task_id"] for item in schedule["items"]}), 10)
+        self.assertTrue(
+            {item["task_id"] for item in schedule["items"]}.isdisjoint(
+                task["id"] for task in lib.load_calibration()
+            )
+        )
 
 
 class ExtractionAndGradeTests(unittest.TestCase):
@@ -206,6 +239,25 @@ class MetricTests(unittest.TestCase):
             )
         self.assertTrue(benchmark.pilot_acceptance(passing)["passed"])
         self.assertFalse(benchmark.pilot_acceptance(failing)["passed"])
+
+        small_passing = []
+        small_failing = []
+        for condition in ("B", "F"):
+            small_passing.extend(
+                {"condition": condition, "correct": index < 7, "excluded": False}
+                for index in range(10)
+            )
+            small_failing.extend(
+                {"condition": condition, "correct": index < 9, "excluded": False}
+                for index in range(10)
+            )
+        kwargs = {
+            "expected_per_condition": 10,
+            "correct_window": (5, 8),
+            "minimum_incorrect": 2,
+        }
+        self.assertTrue(benchmark.pilot_acceptance(small_passing, **kwargs)["passed"])
+        self.assertFalse(benchmark.pilot_acceptance(small_failing, **kwargs)["passed"])
 
     def test_operational_summary(self) -> None:
         rows = [

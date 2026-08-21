@@ -1,9 +1,9 @@
 # Pre-registration: Measuring AI-Authored Reasoning Traces Across Models in a Fixed Agent Harness
 
 **Author:** Fatin Ishraq
-**Protocol version:** 2.5
-**Date filed:** 2026-08-20 (v1.0) · amended 2026-08-20 (v1.1–v1.4) · redesigned 2026-08-20 (v2.0) · amended 2026-08-21 (v2.1–v2.4) · **post-pilot panel amendment 2026-08-21 (v2.5)**
-**Status:** The v2.3 protocol was publicly frozen before collection. Version 2.5 was filed after 20 GPT/OpenAI cued-probe responses and the complete discarded 60-run Terra pilot, but before any main experiment or DeepSeek response. The observed data, failed pilot gate, and withdrawn GPT-5.4 arm are disclosed in §13, entries 19–20.
+**Protocol version:** 2.6
+**Date filed:** 2026-08-20 (v1.0) · amended 2026-08-20 (v1.1–v1.4) · redesigned 2026-08-20 (v2.0) · amended 2026-08-21 (v2.1–v2.5) · **post-pilot task-design amendment 2026-08-21 (v2.6)**
+**Status:** The v2.3 protocol was publicly frozen before collection. Version 2.6 was written after 20 GPT/OpenAI cued-probe responses and the complete discarded 60-run Terra pilot, but before any v2.6 pilot, main-experiment, or DeepSeek response. It replaces the expensive development gate with a disjoint 10-task/20-call hard pilot. The project author approved all 10 tasks unchanged on 2026-08-21 before the authoritative freeze and before any v2.6 model response. See §13, entry 21.
 
 **v2.0 is a redesign, not an amendment.** Versions 1.0–1.4 compared four first-party vendor agent systems, in which model and harness were confounded by construction and the study could only disclose the confound rather than remove it. v2.0 holds the harness fixed and varies the model inside it. The unit of analysis, the research questions, and the arms all change. Versions 1.0–1.4 remain in the public git history (`cdcf74f`, `b8b12e4`, `7951f05`, `fece65d`, `22c4882`, `667d7e5`) and are superseded, not deleted. See §13, entry 12.
 
@@ -27,6 +27,7 @@ Every number in this study is produced by the artifacts below. They do not chang
 | Pre-data public timestamp | Annotated Git tag `study-predata-v2.3`; pushed before the first registered call |
 | Post-probe sequencing amendment | Annotated Git tag `study-protocol-v2.4`; filed with all 20 existing OpenAI probe records |
 | Post-pilot panel amendment | Annotated Git tag `study-protocol-v2.5`; filed with the 60-run pilot and all prior probe records |
+| Hard-pilot redesign | v2.6 authoritative manifest frozen after project-author human review |
 
 **Model panel, pinned by slug.** Availability was verified by live invocation on 2026-08-20; `gpt-5.6-sol` required a re-authentication before it resolved, and `gpt-5.1` was rejected under every slug tried.
 
@@ -39,7 +40,7 @@ Every number in this study is produced by the artifacts below. They do not chang
 | DP | `deepseek-v4-pro` | between-vendor (upper tier) |
 
 The five GPT-5.4 cued-probe records collected under v2.3–v2.4 are preserved as
-withdrawn historical data. They are not part of the v2.5 panel, schedules,
+withdrawn historical data. They are not part of the current panel, schedules,
 sample sizes, or confirmatory analyses; see §13, entry 20.
 
 **Line endings.** The payload is generated with LF line endings (`thoughtml guide --full`, written without CRLF translation). The frozen SHA-256 is ending-sensitive, and §8.3 excludes any run whose payload hash does not match, so a CRLF checkout would exclude every run despite identical content.
@@ -193,16 +194,18 @@ The GPT arms are closed-weight, silently updated, and eventually retired; they a
 
 | Experiment | Design | Runs |
 |---|---|---|
-| Exp 0 — discarded implementation pilot | 30 tasks × 2 conditions × Terra only; never pooled | **60** |
+| Exp 0 — discarded v2.4 pilot | 30 tasks × 2 conditions × Terra only; never pooled | **60** |
+| Exp 0 — v2.6 hard development pilot | 10 disjoint tasks × 2 conditions × Terra only; never pooled or reused | **20** |
 | Exp 0 — calibration | 30 ground-truth tasks × 2 conditions × 5 models | **300** |
 | Exp 1 — authoring | 12 reasoning tasks × 5 models × 3 samples | **180** |
 | Exp 1 — Condition G control | 12 tasks × 5 models × 1 sample | **60** |
 | Exp 5 — reasoning-effort sweep | 12 tasks × 4 efforts × `gpt-5.6-terra` × 2 samples | **96** |
 | Exp 2 — mutation testing | offline, no model calls | — |
 | **Main registered model calls** | | **636** |
-| **Total calls including discarded Exp 0 pilot** | | **696** |
+| **Total calls including both discarded Exp 0 pilots** | | **716** |
 | Contamination probe (§9.2) | 5 cued prompts × 5 models | 25 |
-| **Tasks to author** | 30 ground-truth + 12 reasoning (9 tension + 3 no-tension) | **42** |
+| **Final benchmark tasks** | 30 replacement ground-truth + 12 reasoning (9 tension + 3 no-tension) | **42** |
+| **Additional pilot-only tasks** | permanently excluded from the final benchmark | **10** |
 
 Three samples per cell in Experiment 1 (up from two in v1.4) because cost no longer binds. Experiment 0 remains at 30 tasks, restored in v1.4 for power.
 
@@ -236,7 +239,11 @@ adequately powered.
 
 Condition B exists because the basis field is opt-in (`TML401` fires only under `--strict-provenance`), so a free-form-only design risks too few labelled numbers to test the basis hypotheses at all. Condition B guarantees the manipulation is present; Condition F measures the spontaneous rate.
 
-**Pilot:** one arm only (`gpt-5.6-terra`), 30 × 2 = 60 runs. It is additional to the 636-call main collection and is never pooled. The v2.4 pilot failed the registered ceiling gate (27/30 correct in B; 30/30 in F) and is retained as discarded development data. Experiment 0 remains blocked until the calibration corpus is revised, independently reviewed, frozen, and a new complete pilot passes the same gate. After that protocol is frozen, Terra is rerun with the other four arms in the 300-call Experiment 0 main phase. Continuation depends on the gate, never on a favorable ThoughtML effect.
+**Discarded v2.4 pilot:** one arm only (`gpt-5.6-terra`), 30 × 2 = 60 runs. It is additional to the 636-call main collection and is never pooled. It failed the registered ceiling gate (27/30 correct in B; 30/30 in F) and remains preserved as development data.
+
+**Replacement v2.6 hard pilot:** 10 newly authored, pilot-only tasks × the same two conditions × Terra = 20 calls. All 20 calls are completed before inspecting the gate; there is no decision after the first condition or a partial batch. Each condition passes only with 5–8 correct and at least 2 incorrect among all 10 included runs. The complete round fails if either condition falls outside that window. These 10 tasks are never reused in Experiment 0 main, even if the gate passes.
+
+If the hard pilot passes, a separate 30-task main corpus is authored from the validated difficulty recipe, deterministically verified, independently reviewed, and frozen in a new disclosed amendment before any main call. If it fails, the round remains discarded and a new disjoint development set is required; individual favorable tasks are never selected into the main corpus. The existing v2.4 `calibration.json` is not admissible for main collection. Experiment 0 main remains blocked until its replacement corpus exists and the hard pilot has passed.
 
 ### Experiment 1 — The authoring benchmark, with a schema control
 
@@ -307,7 +314,7 @@ Fixed before authoring the task sets.
 3. **Domain spread.** No more than 25% from any single domain, and no more than 25% software-related.
 4. **Ground truth** (Exp 0 only). A single defensible answer verifiable independently of the model's reasoning.
 5. **Length bounded.** 80–200 words, to hold prompt length roughly constant.
-6. **Calibration difficulty.** Experiment 0 contains exactly 6 easy, 12 medium, and 12 hard tasks. Every answer key must pass a deterministic reference solver and a human ambiguity review before the probe.
+6. **Calibration difficulty.** The v2.4 6-easy/12-medium/12-hard corpus is retired after its ceiling failure. The v2.6 development set contains 10 pilot-only hard tasks, each with a deterministic reference solver and a human ambiguity/difficulty review. The final 30-task distribution is fixed only after this development gate and is disclosed in the next pre-main amendment; none of the 10 pilot tasks may enter it.
 7. **Neutral decision wording.** Every Experiment 1 task ends with the same request to decide what should be done and represent the reasoning and conclusion. Task prompts and condition instructions do not require counterarguments, counterevidence, or opposition links.
 
 **Manipulation check for H2.** Three of Experiment 1's 12 tasks are deliberately constructed *without* genuine tension. If attack share is equally low on tension and no-tension tasks, task design is not driving H2. If it is measurably higher on tension tasks, models are responsive to task structure and the overall rate is meaningful. Directional only at 3 vs. 9; reported whichever way it resolves.
@@ -373,12 +380,15 @@ A run is **never** excluded for producing unparseable, low-quality, short, or un
 
 ### 8.4 Stopping and sequencing
 
-Sample sizes are fixed in advance. There is no interim peeking followed by extension.
+Main-experiment sample sizes are fixed in advance. Development pilots are always
+completed in full and discarded before their gate is applied; there is no
+partial-batch peeking, extension, or movement of favorable pilot tasks into the
+main corpus.
 
 **Global provider sequence (v2.4).** Collection is divided into two operational
 provider blocks so credentials and provider configuration are changed once, not
 between phases. The GPT/OpenAI block is completed first: cued probe → discarded
-Terra Experiment 0 pilot → protocol revision window → frozen OpenAI main
+Terra Experiment 0 development pilot → protocol revision window → frozen OpenAI main
 collection. The DeepSeek block follows: cued probe (and the neutral half only if
 §9.2 triggers) → DeepSeek main collection. Experiment 2 remains offline and may
 run independently. No DeepSeek main response is collected before its own probe.
@@ -499,6 +509,7 @@ Append-only. Every departure from this document after filing is recorded with it
 | 18 | 2026-08-21 | §0, §8.4 (v2.4) | Extended provider blocking from within each phase to the whole collection: finish all GPT/OpenAI probing, pilot, and main runs before configuring and collecting DeepSeek. Models, tasks, prompts, sample sizes, grading, hypotheses, inclusion rules, and analysis are unchanged. The v2.3 pre-data tag remains the immutable baseline; v2.4 is a separately tagged post-probe amendment. | Repeatedly switching provider credentials and configuration creates avoidable operational error. One provider change is simpler to audit. | **Yes: 20/20 planned OpenAI cued probes existed (5 each for GPT-5.4, Luna, Sol, and Terra); all completed on the first attempt, none was excluded, none used tools, and all were unparseable with zero exposure hits.** No Experiment 0 model pilot, main-experiment response, or DeepSeek response existed. The decision was operational, not outcome-selective. |
 | 19 | 2026-08-21 | §6 Exp 0, protocol issue P09 | Completed the full discarded Terra pilot and applied the frozen acceptance rule. B produced 27/30 correct and F 30/30; both failed the required 15–24 correct and ≥6 incorrect window. Across all 60 calls: 59 parseable, 57 strict-clean, zero exclusions, zero tool events, and zero retries. Experiment 0 is blocked pending a harder, independently reviewed corpus and a complete replacement pilot. The mechanically reproducible report is `study/runs/analysis/exp0-pilot-v2.4-summary.json`. | A ceiling-dominated calibration experiment cannot estimate confidence discrimination or a basis effect reliably. The rule and required response were fixed before the pilot. | **Yes: the complete 60-run discarded pilot.** It is retained in full and never pooled with main results. |
 | 20 | 2026-08-21 | §0, §4.2, §5–§6, §8 (v2.5) | Withdrew `gpt-5.4` from the panel, removing the exploratory between-generation contrast and reducing the main design from six to five models (744 → 636 main calls). Its five cued-probe records remain as withdrawn historical data and are mechanically omitted from v2.5 schedules and default analyses. | The author judged the arm redundant after consulting an external model index. Artificial Analysis v4.1.1 scores GPT-5.6 Luna xhigh at 50 and GPT-5.4 xhigh at 53; this external similarity was used as a panel-design heuristic, not as evidence about ThoughtML or as an exact match to the study's high-effort setting. | **Yes: 20 OpenAI cued probes and the discarded 60-run Terra pilot existed.** GPT-5.4's own five probe results were all unparseable with zero exposure hits, identical in direction to every retained OpenAI arm; no main or DeepSeek response existed. The decision was not based on a favorable ThoughtML outcome. Source: [Artificial Analysis comparison](https://artificialanalysis.ai/models/comparisons/gpt-5-6-luna-xhigh-vs-gpt-5-4). |
+| 21 | 2026-08-21 | §0, §6 Exp 0, §7.2, §8.4 (v2.6) | Added 10 disjoint hard pilot-only tasks and reduced the replacement Terra development pilot from 60 to 20 calls. Registered a 5–8 correct and at least 2 incorrect gate per condition; prohibited partial-batch decisions and reuse of pilot tasks in main; retired the v2.4 calibration corpus from main eligibility. Project author Fatin Ishraq then reviewed and approved all 10 tasks unchanged before authoritative freezing. | The complete v2.4 pilot proved that the old corpus had a ceiling and that a 60-call round is unnecessarily expensive for task-recipe development. A small disjoint pilot can detect another gross ceiling or floor before 300 main calls, while permanent separation prevents outcome-selected tasks entering the final benchmark. | **Yes: the 20 OpenAI probes and discarded 60-run Terra pilot described in entries 18–20.** No v2.6 pilot, main, Experiment 1, Experiment 5, or DeepSeek response existed at approval or freeze time. |
 
 ---
 
@@ -521,6 +532,11 @@ the 20 OpenAI probe records that existed when the decision was made.
 The completed discarded pilot and five-model panel amendment are published under
 the separate annotated tag `study-protocol-v2.5`. Version 2.5 is post-pilot and
 is never described as pre-registered; the v2.3 tag remains the pre-data record.
+
+The v2.6 hard-pilot redesign was first prepared as a non-collectable candidate.
+After the project author approved all 10 tasks unchanged, it received an
+authoritative manifest before any v2.6 pilot response. This is an author review,
+not an external-rater review.
 
 **Venue plan.** Target: NeurIPS Datasets & Benchmarks, which expects a runnable benchmark plus baselines. Packaging: task sets + grader + harness as the releasable benchmark; **Condition G as the baseline**; the GPT arms as a dated snapshot; the DeepSeek arms and Experiment 2 as the reproducible reference entries.
 
