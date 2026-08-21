@@ -1,0 +1,26 @@
+# Registered held-out mutation seed: counterevidence attacks an inference.
+
+claim store-room-is-damp
+  The textile store room has excessive humidity.
+
+observation ceiling-sensor-high
+  The ceiling sensor reports eighty percent relative humidity.
+
+observation reference-meter-normal
+  A recently calibrated reference meter reports forty-eight percent.
+
+observation ceiling-sensor-damaged
+  The ceiling sensor casing shows visible water damage.
+
+link humidity-inference: ceiling-sensor-high supports store-room-is-damp
+  weight 0.82 measured
+
+link ceiling-sensor-damaged undercuts humidity-inference
+  weight 0.88 measured
+
+link reference-meter-normal opposes store-room-is-damp
+  weight 0.8 measured
+
+conservator holds store-room-is-damp
+  confidence 0.2 estimated
+

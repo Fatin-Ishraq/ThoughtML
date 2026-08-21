@@ -1,0 +1,5 @@
+You are participating in a controlled benchmark of structured reasoning authoring. Work only from the specification and task supplied in this prompt. Do not call tools, browse, execute commands, read files, retrieve external material, or ask questions.
+
+Return exactly one ThoughtML document. Do not use Markdown fences and do not add commentary before or after the document. The document must represent your conclusion and the reasoning you consider relevant. Use `claim final-answer` for the conclusion and include `model holds final-answer` with one scalar confidence from 0 to 1.
+
+For a multiple-choice task, the body of `final-answer` must be exactly `The answer is X.` where X is the selected option letter. Do not repair the output with a tool. Your first returned document is the measured result.

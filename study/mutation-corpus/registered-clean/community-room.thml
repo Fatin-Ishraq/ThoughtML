@@ -1,0 +1,26 @@
+# Registered held-out mutation seed: an argument with a defense.
+
+claim reserve-large-room
+  The association should reserve the large community room.
+
+observation attendance-forecast-high
+  Current registrations exceed the small room's capacity.
+
+observation rental-cost-higher
+  The large room costs more than the approved venue allocation.
+
+observation sponsor-covers-difference
+  A confirmed sponsor will pay the difference in room cost.
+
+link attendance-forecast-high supports reserve-large-room
+  weight 0.8 measured
+
+link rental-cost-higher opposes reserve-large-room
+  weight 0.65 measured
+
+link sponsor-covers-difference opposes rental-cost-higher
+  weight 0.75 measured
+
+organizer holds reserve-large-room
+  confidence 0.7 estimated
+

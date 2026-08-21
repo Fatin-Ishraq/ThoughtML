@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "experiment": "contamination-probe",
+  "decision_rule": "Flag an arm if at least one of five cued responses parses as ThoughtML and uses at least one correct core relation name.",
+  "cued": [
+    {
+      "id": "probe-cued-001",
+      "topic": "failed-loaf",
+      "prompt": "A bakery investigates why a test loaf collapsed. The yeast was fresh and the oven reached its target temperature, but the dough received twice the intended amount of water. The baker believes excessive hydration caused the collapse while noting that proofing time was also slightly short. Author a ThoughtML document recording the investigation, competing evidence, and present conclusion."
+    },
+    {
+      "id": "probe-cued-002",
+      "topic": "bridge-inspection",
+      "prompt": "An inspection team must decide whether a small bridge may remain open. Surface cracking has grown since last year, but load measurements remain within the published limit and an engineer says temporary monitoring is possible. Author a ThoughtML document that records the observations, the decision question, reasons on both sides, and the team's current position."
+    },
+    {
+      "id": "probe-cued-003",
+      "topic": "grant-panel",
+      "prompt": "A research funding panel compares a technically ambitious proposal with strong preliminary evidence against a safer proposal that has clearer milestones and a more experienced delivery team. The budget supports only one award. Author a ThoughtML document representing the options, relevant evidence, panel positions, and final selection or unresolved question."
+    },
+    {
+      "id": "probe-cued-004",
+      "topic": "coastal-evacuation",
+      "prompt": "A coastal emergency team is deciding whether to order evacuation. A storm may intensify before landfall, roads could flood if departure is delayed, and evacuation itself creates risks for medically fragile residents. A newer forecast lowers the expected surge but remains uncertain. Author a ThoughtML document recording the evidence, counterevidence, options, and current decision."
+    },
+    {
+      "id": "probe-cued-005",
+      "topic": "tutoring-trial",
+      "prompt": "A school evaluates a tutoring trial. Participating students improved more than the comparison class, but participation was voluntary and the tutoring group began with more motivated families. Teachers observed better homework completion, while attendance gains were small. Author a ThoughtML document representing the findings, limitations, causal hypothesis, and confidence in adopting the program."
+    }
+  ],
+  "neutral": [
+    {
+      "id": "probe-neutral-001",
+      "topic": "museum-acquisition",
+      "prompt": "A museum considers buying an unsigned landscape. Pigment analysis matches the claimed century and the ownership record is continuous after 1920, but two specialists disagree about the brushwork and no earlier record exists. Author a ThoughtML document representing the authenticity question, observations, disagreement, and current acquisition decision."
+    },
+    {
+      "id": "probe-neutral-002",
+      "topic": "office-relocation",
+      "prompt": "A nonprofit considers moving offices. The new site has lower rent and better public transport but less meeting space and a five-year lease. Most staff favor the commute, while the community team fears reduced room for workshops. Author a ThoughtML document representing the options, evidence, counterevidence, and current choice."
+    },
+    {
+      "id": "probe-neutral-003",
+      "topic": "archive-digitization",
+      "prompt": "An archive must choose whether to digitize fragile recordings now using available equipment or wait two years for a higher-quality scanner. Waiting may improve fidelity, but some tapes are deteriorating and could become unreadable. Author a ThoughtML document representing the goal, options, risks, dependencies, and present recommendation."
+    },
+    {
+      "id": "probe-neutral-004",
+      "topic": "festival-location",
+      "prompt": "Organizers compare two sites for a neighborhood festival. The central plaza is accessible by transit but has strict noise limits. A riverside field allows longer performances but requires shuttle buses and has little shelter from rain. Author a ThoughtML document representing the options, observations, expected outcomes, and decision."
+    },
+    {
+      "id": "probe-neutral-005",
+      "topic": "collection-preservation",
+      "prompt": "A private collection contains photographs stored in acidic sleeves. Rehousing all items immediately is expensive, while sampling shows the oldest sleeves are degrading fastest. A conservator proposes treating the oldest third now and monitoring the rest. Author a ThoughtML document representing the evidence, staged option, alternatives, and current conclusion."
+    }
+  ]
+}

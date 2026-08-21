@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "experiment": "exp1",
+  "description": "Twelve decision and assessment tasks: nine genuine-tension tasks and three no-tension manipulation checks.",
+  "tasks": [
+    {
+      "id": "auth-001",
+      "domain": "workplace",
+      "software_related": false,
+      "tension": true,
+      "prompt": "A 70-person design firm tested a four-day, 32-hour workweek for three months while keeping salaries unchanged. Completed project milestones rose by 6%, self-reported burnout fell, and voluntary departures stopped. However, two major clients complained that Friday coverage was inconsistent, junior staff reported fewer opportunities to observe senior colleagues, and the trial coincided with an unusually light sales period. Management can make the schedule permanent, extend the trial with revised Friday coverage, or return immediately to five days. Decide what should be done. Represent the reasoning and conclusion in the requested format.",
+      "acceptable_positions": ["make permanent", "extend with safeguards", "return to five days"],
+      "construction_note": "Benefits, external-validity uncertainty, client service, and mentorship create defensible competing positions."
+    },
+    {
+      "id": "auth-002",
+      "domain": "workplace",
+      "software_related": false,
+      "tension": true,
+      "prompt": "A small appliance manufacturer can renew its current motor supplier or switch to a new supplier. The new supplier is 14% cheaper and promises delivery in half the time, which would relieve a serious cash-flow problem. During a limited trial, 2 of 200 new motors failed inspection, compared with 1 of 1,800 from the incumbent. The new supplier says both failures came from a corrected calibration issue, but has only six months of operating history. The incumbent will not match the price. Decide what should be done. Represent the reasoning and conclusion in the requested format.",
+      "acceptable_positions": ["switch", "stay", "staged dual sourcing"],
+      "construction_note": "Cost and lead-time gains conflict with sparse but materially worse reliability evidence."
+    },
+    {
+      "id": "auth-003",
+      "domain": "education",
+      "software_related": false,
+      "tension": true,
+      "prompt": "A university department is redesigning a first-year economics exam. An open-book format may reward interpretation instead of memorization and better resembles professional work. In a small course last year, open-book students wrote stronger explanations but scores clustered tightly, making distinctions between levels of mastery harder. Faculty also worry that students with expensive annotated materials may gain an advantage, while disability advisers say reduced memorization pressure improves access. The department can adopt open-book exams, retain closed-book exams, or use a mixed format. Decide what should be done. Represent the reasoning and conclusion in the requested format.",
+      "acceptable_positions": ["open book", "closed book", "mixed format"],
+      "construction_note": "Validity, discrimination, equity, authenticity, and accessibility genuinely conflict."
+    },
+    {
+      "id": "auth-004",
+      "domain": "education",
+      "software_related": false,
+      "tension": true,
+      "prompt": "A public school district is considering an adaptive tutoring service for ninth-grade mathematics. A six-week demonstration raised practice completion and helped teachers identify misconceptions earlier. The vendor requires student interaction logs for model improvement, will retain pseudonymized records for three years, and has not agreed to an independent bias audit. Schools with fewer counselors expect the largest benefit, but several families say consent would not be meaningful if the service becomes part of ordinary classwork. The district may deploy district-wide, reject the service, or conduct a smaller opt-in evaluation with contractual limits. Decide what should be done. Represent the reasoning and conclusion in the requested format.",
+      "acceptable_positions": ["deploy", "reject", "limited opt-in evaluation"],
+      "construction_note": "Learning support and capacity gains conflict with privacy, consent, and unverified bias."
+    },
+    {
+      "id": "auth-005",
+      "domain": "public-policy",
+      "software_related": false,
+      "tension": true,
+      "prompt": "A congested city is considering a weekday charge for cars entering its central district. Transport models predict shorter bus journeys and a 12% reduction in peak traffic. Revenue would fund additional buses. Most central commuters have rail alternatives, but night-shift hospital and hospitality workers often do not, and lower-income residents are more likely to own older cars that cannot receive the clean-vehicle discount. Exemptions would improve fairness but reduce traffic effects and complicate enforcement. The city can adopt the charge as proposed, adopt it with targeted exemptions, or postpone it. Decide what should be done. Represent the reasoning and conclusion in the requested format.",
+      "acceptable_positions": ["adopt as proposed", "adopt with exemptions", "postpone"],
+      "construction_note": "Congestion and public-transit benefits conflict with distributional burdens and implementation tradeoffs."
+    },
+    {
+      "id": "auth-006",
+      "domain": "public-policy",
+      "software_related": false,
+      "tension": true,
+      "prompt": "A municipal library is deciding whether to eliminate overdue fines. Neighboring systems that removed fines recovered more long-overdue books and saw increased borrowing among low-income families. This library receives 3% of its operating budget from fines, and staff fear that popular items will circulate more slowly without a monetary consequence. A reminder-and-replacement-fee system could preserve accountability, but implementing it would require new staff time during a hiring freeze. The library can remove fines now, retain them, or run a one-year trial for children's materials only. Decide what should be done. Represent the reasoning and conclusion in the requested format.",
+      "acceptable_positions": ["remove fines", "retain fines", "limited trial"],
+      "construction_note": "Access and recovery evidence conflict with revenue, circulation, and implementation constraints."
+    },
+    {
+      "id": "auth-007",
+      "domain": "environment",
+      "software_related": false,
+      "tension": true,
+      "prompt": "A coastal town owns an unused paved lot beside its commercial center. One proposal converts it into a shaded public park with permeable ground, reducing summer heat and local flooding. Another leases it for 90 apartments, including 18 below-market units, in a town with rapidly rising rents. The apartment plan would preserve only a narrow green strip; the park plan produces no direct housing. A third option builds fewer apartments around a smaller park but requires a public subsidy and yields only 10 below-market units. Decide what should be done. Represent the reasoning and conclusion in the requested format.",
+      "acceptable_positions": ["full park", "housing", "mixed development"],
+      "construction_note": "Climate resilience and public space conflict with housing supply and affordability."
+    },
+    {
+      "id": "auth-008",
+      "domain": "healthcare",
+      "software_related": false,
+      "tension": true,
+      "prompt": "A regional clinic is considering making video consultation the default first appointment for stable adult patients. During a six-month trial, missed appointments fell from 18% to 9%, rural patients saved substantial travel time, and clinicians completed more visits. Yet 7% of trial consultations required an additional in-person visit because examination was necessary, some older patients struggled with the platform, and private internet access is uneven. Patients could request an in-person visit, but staff worry that a default shapes choices. Decide what should be done. Represent the reasoning and conclusion in the requested format.",
+      "acceptable_positions": ["video first", "in-person first", "targeted hybrid"],
+      "construction_note": "Access and efficiency conflict with diagnostic, digital-access, and default-effect concerns."
+    },
+    {
+      "id": "auth-009",
+      "domain": "software",
+      "software_related": true,
+      "tension": true,
+      "prompt": "A subscription company relies on a twelve-year-old billing service. It causes frequent developer delays and has sparse tests, but it currently processes payments reliably. A complete rewrite is estimated to take nine months and would simplify future product work; two prior partial rewrites in other teams overran their schedules. Incremental replacement would deliver value sooner and reduce migration risk, but may preserve awkward interfaces for years and requires maintaining two systems. A major pricing launch is planned in six months. Decide what should be done. Represent the reasoning and conclusion in the requested format.",
+      "acceptable_positions": ["full rewrite", "incremental replacement", "defer"],
+      "construction_note": "Long-term maintainability conflicts with migration risk, timing, and dual-system cost."
+    },
+    {
+      "id": "auth-010",
+      "domain": "environment",
+      "software_related": false,
+      "tension": false,
+      "prompt": "A laboratory stores a volatile solvent in a cabinet whose ventilation fan has stopped. The cabinet's temperature alarm also failed its weekly test. The solvent's safety sheet requires active ventilation and a functioning alarm whenever containers are stored there. A certified secondary cabinet in the next building is empty, compatible with the solvent, and available immediately. Moving the sealed containers would take twenty minutes using the laboratory's standard hazardous-material procedure. No experiment currently needs the solvent, and there is no operational benefit to leaving it in the faulty cabinet. Decide what should be done. Represent the reasoning and conclusion in the requested format.",
+      "acceptable_positions": ["move the solvent to the certified cabinet"],
+      "construction_note": "No genuine countervailing consideration is supplied; this is an H2 no-tension manipulation check."
+    },
+    {
+      "id": "auth-011",
+      "domain": "healthcare",
+      "software_related": false,
+      "tension": false,
+      "prompt": "A ward discovers that one infusion pump sometimes fails to sound its occlusion alarm. Biomedical engineering reproduces the fault twice and labels the pump unsafe pending repair. Two fully tested spare pumps are available on the ward, and replacing the faulty unit will not delay any patient's treatment. Hospital policy requires removing equipment from clinical use after a reproducible safety-alarm failure. No clinician has identified a benefit from continuing to use this particular unit. Decide what should be done. Represent the reasoning and conclusion in the requested format.",
+      "acceptable_positions": ["remove the faulty pump from service and use a tested spare"],
+      "construction_note": "The safety rule, reproduced fault, and available substitute make this deliberately no-tension."
+    },
+    {
+      "id": "auth-012",
+      "domain": "software",
+      "software_related": true,
+      "tension": false,
+      "prompt": "A developer accidentally pasted a production database credential into a public issue. The issue was visible for eleven minutes before deletion, and access logs cannot prove that nobody copied it. The organization has an automated credential-rotation procedure that takes under five minutes, causes no downtime, and is the documented response to public exposure. The current credential is not needed for any irreversible job, and rotating it does not destroy evidence because the audit log is retained separately. Decide what should be done. Represent the reasoning and conclusion in the requested format.",
+      "acceptable_positions": ["rotate or revoke the exposed credential immediately"],
+      "construction_note": "A costless documented mitigation and plausible exposure make this deliberately no-tension."
+    }
+  ]
+}

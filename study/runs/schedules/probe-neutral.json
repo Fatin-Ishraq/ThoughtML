@@ -1,0 +1,522 @@
+{
+  "collectable": false,
+  "count": 30,
+  "created_at": "2026-08-21T13:37:12.786211Z",
+  "items": [
+    {
+      "arm": "DP",
+      "condition": "probe",
+      "model": "deepseek-v4-pro",
+      "phase": "probe-neutral",
+      "prompt_bytes": 574,
+      "prompt_sha256": "1a0d474587ca5afca758dfd0166bd4e984fba5555f50005398cd05302e7a9b55",
+      "reasoning_effort": "high",
+      "run_id": "probe-neutral__probe-neutral-004__dp__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-neutral-004",
+        "prompt": "Organizers compare two sites for a neighborhood festival. The central plaza is accessible by transit but has strict noise limits. A riverside field allows longer performances but requires shuttle buses and has little shelter from rain. Author a ThoughtML document representing the options, observations, expected outcomes, and decision.",
+        "topic": "festival-location"
+      },
+      "task_id": "probe-neutral-004"
+    },
+    {
+      "arm": "T",
+      "condition": "probe",
+      "model": "gpt-5.6-terra",
+      "phase": "probe-neutral",
+      "prompt_bytes": 591,
+      "prompt_sha256": "d38efe4d6e1bfa2adc0d458f0a6b05dd1e44c9e9d83d178c98c99fc80c3e89c8",
+      "reasoning_effort": "high",
+      "run_id": "probe-neutral__probe-neutral-001__t__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-neutral-001",
+        "prompt": "A museum considers buying an unsigned landscape. Pigment analysis matches the claimed century and the ownership record is continuous after 1920, but two specialists disagree about the brushwork and no earlier record exists. Author a ThoughtML document representing the authenticity question, observations, disagreement, and current acquisition decision.",
+        "topic": "museum-acquisition"
+      },
+      "task_id": "probe-neutral-001"
+    },
+    {
+      "arm": "DP",
+      "condition": "probe",
+      "model": "deepseek-v4-pro",
+      "phase": "probe-neutral",
+      "prompt_bytes": 567,
+      "prompt_sha256": "90c555e782378223c5062518db3af36d9cd31bbadf0e2b1c9bb984768e13f006",
+      "reasoning_effort": "high",
+      "run_id": "probe-neutral__probe-neutral-002__dp__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-neutral-002",
+        "prompt": "A nonprofit considers moving offices. The new site has lower rent and better public transport but less meeting space and a five-year lease. Most staff favor the commute, while the community team fears reduced room for workshops. Author a ThoughtML document representing the options, evidence, counterevidence, and current choice.",
+        "topic": "office-relocation"
+      },
+      "task_id": "probe-neutral-002"
+    },
+    {
+      "arm": "T",
+      "condition": "probe",
+      "model": "gpt-5.6-terra",
+      "phase": "probe-neutral",
+      "prompt_bytes": 600,
+      "prompt_sha256": "e1e88688e9ef3c8a26ecb47315e56c22ea6d477b7bf727a2aac8ce2a4230255f",
+      "reasoning_effort": "high",
+      "run_id": "probe-neutral__probe-neutral-005__t__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-neutral-005",
+        "prompt": "A private collection contains photographs stored in acidic sleeves. Rehousing all items immediately is expensive, while sampling shows the oldest sleeves are degrading fastest. A conservator proposes treating the oldest third now and monitoring the rest. Author a ThoughtML document representing the evidence, staged option, alternatives, and current conclusion.",
+        "topic": "collection-preservation"
+      },
+      "task_id": "probe-neutral-005"
+    },
+    {
+      "arm": "L",
+      "condition": "probe",
+      "model": "gpt-5.6-luna",
+      "phase": "probe-neutral",
+      "prompt_bytes": 574,
+      "prompt_sha256": "1a0d474587ca5afca758dfd0166bd4e984fba5555f50005398cd05302e7a9b55",
+      "reasoning_effort": "high",
+      "run_id": "probe-neutral__probe-neutral-004__l__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-neutral-004",
+        "prompt": "Organizers compare two sites for a neighborhood festival. The central plaza is accessible by transit but has strict noise limits. A riverside field allows longer performances but requires shuttle buses and has little shelter from rain. Author a ThoughtML document representing the options, observations, expected outcomes, and decision.",
+        "topic": "festival-location"
+      },
+      "task_id": "probe-neutral-004"
+    },
+    {
+      "arm": "DF",
+      "condition": "probe",
+      "model": "deepseek-v4-flash",
+      "phase": "probe-neutral",
+      "prompt_bytes": 591,
+      "prompt_sha256": "d38efe4d6e1bfa2adc0d458f0a6b05dd1e44c9e9d83d178c98c99fc80c3e89c8",
+      "reasoning_effort": "high",
+      "run_id": "probe-neutral__probe-neutral-001__df__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-neutral-001",
+        "prompt": "A museum considers buying an unsigned landscape. Pigment analysis matches the claimed century and the ownership record is continuous after 1920, but two specialists disagree about the brushwork and no earlier record exists. Author a ThoughtML document representing the authenticity question, observations, disagreement, and current acquisition decision.",
+        "topic": "museum-acquisition"
+      },
+      "task_id": "probe-neutral-001"
+    },
+    {
+      "arm": "G",
+      "condition": "probe",
+      "model": "gpt-5.4",
+      "phase": "probe-neutral",
+      "prompt_bytes": 578,
+      "prompt_sha256": "ee1274d4bea1ba731b16ef3d7351e63cd3adf96ed405fef31e039bf208793beb",
+      "reasoning_effort": "high",
+      "run_id": "probe-neutral__probe-neutral-003__g__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-neutral-003",
+        "prompt": "An archive must choose whether to digitize fragile recordings now using available equipment or wait two years for a higher-quality scanner. Waiting may improve fidelity, but some tapes are deteriorating and could become unreadable. Author a ThoughtML document representing the goal, options, risks, dependencies, and present recommendation.",
+        "topic": "archive-digitization"
+      },
+      "task_id": "probe-neutral-003"
+    },
+    {
+      "arm": "DF",
+      "condition": "probe",
+      "model": "deepseek-v4-flash",
+      "phase": "probe-neutral",
+      "prompt_bytes": 600,
+      "prompt_sha256": "e1e88688e9ef3c8a26ecb47315e56c22ea6d477b7bf727a2aac8ce2a4230255f",
+      "reasoning_effort": "high",
+      "run_id": "probe-neutral__probe-neutral-005__df__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-neutral-005",
+        "prompt": "A private collection contains photographs stored in acidic sleeves. Rehousing all items immediately is expensive, while sampling shows the oldest sleeves are degrading fastest. A conservator proposes treating the oldest third now and monitoring the rest. Author a ThoughtML document representing the evidence, staged option, alternatives, and current conclusion.",
+        "topic": "collection-preservation"
+      },
+      "task_id": "probe-neutral-005"
+    },
+    {
+      "arm": "L",
+      "condition": "probe",
+      "model": "gpt-5.6-luna",
+      "phase": "probe-neutral",
+      "prompt_bytes": 600,
+      "prompt_sha256": "e1e88688e9ef3c8a26ecb47315e56c22ea6d477b7bf727a2aac8ce2a4230255f",
+      "reasoning_effort": "high",
+      "run_id": "probe-neutral__probe-neutral-005__l__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-neutral-005",
+        "prompt": "A private collection contains photographs stored in acidic sleeves. Rehousing all items immediately is expensive, while sampling shows the oldest sleeves are degrading fastest. A conservator proposes treating the oldest third now and monitoring the rest. Author a ThoughtML document representing the evidence, staged option, alternatives, and current conclusion.",
+        "topic": "collection-preservation"
+      },
+      "task_id": "probe-neutral-005"
+    },
+    {
+      "arm": "T",
+      "condition": "probe",
+      "model": "gpt-5.6-terra",
+      "phase": "probe-neutral",
+      "prompt_bytes": 574,
+      "prompt_sha256": "1a0d474587ca5afca758dfd0166bd4e984fba5555f50005398cd05302e7a9b55",
+      "reasoning_effort": "high",
+      "run_id": "probe-neutral__probe-neutral-004__t__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-neutral-004",
+        "prompt": "Organizers compare two sites for a neighborhood festival. The central plaza is accessible by transit but has strict noise limits. A riverside field allows longer performances but requires shuttle buses and has little shelter from rain. Author a ThoughtML document representing the options, observations, expected outcomes, and decision.",
+        "topic": "festival-location"
+      },
+      "task_id": "probe-neutral-004"
+    },
+    {
+      "arm": "L",
+      "condition": "probe",
+      "model": "gpt-5.6-luna",
+      "phase": "probe-neutral",
+      "prompt_bytes": 591,
+      "prompt_sha256": "d38efe4d6e1bfa2adc0d458f0a6b05dd1e44c9e9d83d178c98c99fc80c3e89c8",
+      "reasoning_effort": "high",
+      "run_id": "probe-neutral__probe-neutral-001__l__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-neutral-001",
+        "prompt": "A museum considers buying an unsigned landscape. Pigment analysis matches the claimed century and the ownership record is continuous after 1920, but two specialists disagree about the brushwork and no earlier record exists. Author a ThoughtML document representing the authenticity question, observations, disagreement, and current acquisition decision.",
+        "topic": "museum-acquisition"
+      },
+      "task_id": "probe-neutral-001"
+    },
+    {
+      "arm": "T",
+      "condition": "probe",
+      "model": "gpt-5.6-terra",
+      "phase": "probe-neutral",
+      "prompt_bytes": 567,
+      "prompt_sha256": "90c555e782378223c5062518db3af36d9cd31bbadf0e2b1c9bb984768e13f006",
+      "reasoning_effort": "high",
+      "run_id": "probe-neutral__probe-neutral-002__t__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-neutral-002",
+        "prompt": "A nonprofit considers moving offices. The new site has lower rent and better public transport but less meeting space and a five-year lease. Most staff favor the commute, while the community team fears reduced room for workshops. Author a ThoughtML document representing the options, evidence, counterevidence, and current choice.",
+        "topic": "office-relocation"
+      },
+      "task_id": "probe-neutral-002"
+    },
+    {
+      "arm": "DF",
+      "condition": "probe",
+      "model": "deepseek-v4-flash",
+      "phase": "probe-neutral",
+      "prompt_bytes": 578,
+      "prompt_sha256": "ee1274d4bea1ba731b16ef3d7351e63cd3adf96ed405fef31e039bf208793beb",
+      "reasoning_effort": "high",
+      "run_id": "probe-neutral__probe-neutral-003__df__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-neutral-003",
+        "prompt": "An archive must choose whether to digitize fragile recordings now using available equipment or wait two years for a higher-quality scanner. Waiting may improve fidelity, but some tapes are deteriorating and could become unreadable. Author a ThoughtML document representing the goal, options, risks, dependencies, and present recommendation.",
+        "topic": "archive-digitization"
+      },
+      "task_id": "probe-neutral-003"
+    },
+    {
+      "arm": "L",
+      "condition": "probe",
+      "model": "gpt-5.6-luna",
+      "phase": "probe-neutral",
+      "prompt_bytes": 567,
+      "prompt_sha256": "90c555e782378223c5062518db3af36d9cd31bbadf0e2b1c9bb984768e13f006",
+      "reasoning_effort": "high",
+      "run_id": "probe-neutral__probe-neutral-002__l__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-neutral-002",
+        "prompt": "A nonprofit considers moving offices. The new site has lower rent and better public transport but less meeting space and a five-year lease. Most staff favor the commute, while the community team fears reduced room for workshops. Author a ThoughtML document representing the options, evidence, counterevidence, and current choice.",
+        "topic": "office-relocation"
+      },
+      "task_id": "probe-neutral-002"
+    },
+    {
+      "arm": "T",
+      "condition": "probe",
+      "model": "gpt-5.6-terra",
+      "phase": "probe-neutral",
+      "prompt_bytes": 578,
+      "prompt_sha256": "ee1274d4bea1ba731b16ef3d7351e63cd3adf96ed405fef31e039bf208793beb",
+      "reasoning_effort": "high",
+      "run_id": "probe-neutral__probe-neutral-003__t__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-neutral-003",
+        "prompt": "An archive must choose whether to digitize fragile recordings now using available equipment or wait two years for a higher-quality scanner. Waiting may improve fidelity, but some tapes are deteriorating and could become unreadable. Author a ThoughtML document representing the goal, options, risks, dependencies, and present recommendation.",
+        "topic": "archive-digitization"
+      },
+      "task_id": "probe-neutral-003"
+    },
+    {
+      "arm": "G",
+      "condition": "probe",
+      "model": "gpt-5.4",
+      "phase": "probe-neutral",
+      "prompt_bytes": 591,
+      "prompt_sha256": "d38efe4d6e1bfa2adc0d458f0a6b05dd1e44c9e9d83d178c98c99fc80c3e89c8",
+      "reasoning_effort": "high",
+      "run_id": "probe-neutral__probe-neutral-001__g__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-neutral-001",
+        "prompt": "A museum considers buying an unsigned landscape. Pigment analysis matches the claimed century and the ownership record is continuous after 1920, but two specialists disagree about the brushwork and no earlier record exists. Author a ThoughtML document representing the authenticity question, observations, disagreement, and current acquisition decision.",
+        "topic": "museum-acquisition"
+      },
+      "task_id": "probe-neutral-001"
+    },
+    {
+      "arm": "S",
+      "condition": "probe",
+      "model": "gpt-5.6-sol",
+      "phase": "probe-neutral",
+      "prompt_bytes": 574,
+      "prompt_sha256": "1a0d474587ca5afca758dfd0166bd4e984fba5555f50005398cd05302e7a9b55",
+      "reasoning_effort": "high",
+      "run_id": "probe-neutral__probe-neutral-004__s__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-neutral-004",
+        "prompt": "Organizers compare two sites for a neighborhood festival. The central plaza is accessible by transit but has strict noise limits. A riverside field allows longer performances but requires shuttle buses and has little shelter from rain. Author a ThoughtML document representing the options, observations, expected outcomes, and decision.",
+        "topic": "festival-location"
+      },
+      "task_id": "probe-neutral-004"
+    },
+    {
+      "arm": "DF",
+      "condition": "probe",
+      "model": "deepseek-v4-flash",
+      "phase": "probe-neutral",
+      "prompt_bytes": 567,
+      "prompt_sha256": "90c555e782378223c5062518db3af36d9cd31bbadf0e2b1c9bb984768e13f006",
+      "reasoning_effort": "high",
+      "run_id": "probe-neutral__probe-neutral-002__df__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-neutral-002",
+        "prompt": "A nonprofit considers moving offices. The new site has lower rent and better public transport but less meeting space and a five-year lease. Most staff favor the commute, while the community team fears reduced room for workshops. Author a ThoughtML document representing the options, evidence, counterevidence, and current choice.",
+        "topic": "office-relocation"
+      },
+      "task_id": "probe-neutral-002"
+    },
+    {
+      "arm": "L",
+      "condition": "probe",
+      "model": "gpt-5.6-luna",
+      "phase": "probe-neutral",
+      "prompt_bytes": 578,
+      "prompt_sha256": "ee1274d4bea1ba731b16ef3d7351e63cd3adf96ed405fef31e039bf208793beb",
+      "reasoning_effort": "high",
+      "run_id": "probe-neutral__probe-neutral-003__l__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-neutral-003",
+        "prompt": "An archive must choose whether to digitize fragile recordings now using available equipment or wait two years for a higher-quality scanner. Waiting may improve fidelity, but some tapes are deteriorating and could become unreadable. Author a ThoughtML document representing the goal, options, risks, dependencies, and present recommendation.",
+        "topic": "archive-digitization"
+      },
+      "task_id": "probe-neutral-003"
+    },
+    {
+      "arm": "DF",
+      "condition": "probe",
+      "model": "deepseek-v4-flash",
+      "phase": "probe-neutral",
+      "prompt_bytes": 574,
+      "prompt_sha256": "1a0d474587ca5afca758dfd0166bd4e984fba5555f50005398cd05302e7a9b55",
+      "reasoning_effort": "high",
+      "run_id": "probe-neutral__probe-neutral-004__df__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-neutral-004",
+        "prompt": "Organizers compare two sites for a neighborhood festival. The central plaza is accessible by transit but has strict noise limits. A riverside field allows longer performances but requires shuttle buses and has little shelter from rain. Author a ThoughtML document representing the options, observations, expected outcomes, and decision.",
+        "topic": "festival-location"
+      },
+      "task_id": "probe-neutral-004"
+    },
+    {
+      "arm": "DP",
+      "condition": "probe",
+      "model": "deepseek-v4-pro",
+      "phase": "probe-neutral",
+      "prompt_bytes": 591,
+      "prompt_sha256": "d38efe4d6e1bfa2adc0d458f0a6b05dd1e44c9e9d83d178c98c99fc80c3e89c8",
+      "reasoning_effort": "high",
+      "run_id": "probe-neutral__probe-neutral-001__dp__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-neutral-001",
+        "prompt": "A museum considers buying an unsigned landscape. Pigment analysis matches the claimed century and the ownership record is continuous after 1920, but two specialists disagree about the brushwork and no earlier record exists. Author a ThoughtML document representing the authenticity question, observations, disagreement, and current acquisition decision.",
+        "topic": "museum-acquisition"
+      },
+      "task_id": "probe-neutral-001"
+    },
+    {
+      "arm": "G",
+      "condition": "probe",
+      "model": "gpt-5.4",
+      "phase": "probe-neutral",
+      "prompt_bytes": 574,
+      "prompt_sha256": "1a0d474587ca5afca758dfd0166bd4e984fba5555f50005398cd05302e7a9b55",
+      "reasoning_effort": "high",
+      "run_id": "probe-neutral__probe-neutral-004__g__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-neutral-004",
+        "prompt": "Organizers compare two sites for a neighborhood festival. The central plaza is accessible by transit but has strict noise limits. A riverside field allows longer performances but requires shuttle buses and has little shelter from rain. Author a ThoughtML document representing the options, observations, expected outcomes, and decision.",
+        "topic": "festival-location"
+      },
+      "task_id": "probe-neutral-004"
+    },
+    {
+      "arm": "S",
+      "condition": "probe",
+      "model": "gpt-5.6-sol",
+      "phase": "probe-neutral",
+      "prompt_bytes": 600,
+      "prompt_sha256": "e1e88688e9ef3c8a26ecb47315e56c22ea6d477b7bf727a2aac8ce2a4230255f",
+      "reasoning_effort": "high",
+      "run_id": "probe-neutral__probe-neutral-005__s__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-neutral-005",
+        "prompt": "A private collection contains photographs stored in acidic sleeves. Rehousing all items immediately is expensive, while sampling shows the oldest sleeves are degrading fastest. A conservator proposes treating the oldest third now and monitoring the rest. Author a ThoughtML document representing the evidence, staged option, alternatives, and current conclusion.",
+        "topic": "collection-preservation"
+      },
+      "task_id": "probe-neutral-005"
+    },
+    {
+      "arm": "G",
+      "condition": "probe",
+      "model": "gpt-5.4",
+      "phase": "probe-neutral",
+      "prompt_bytes": 567,
+      "prompt_sha256": "90c555e782378223c5062518db3af36d9cd31bbadf0e2b1c9bb984768e13f006",
+      "reasoning_effort": "high",
+      "run_id": "probe-neutral__probe-neutral-002__g__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-neutral-002",
+        "prompt": "A nonprofit considers moving offices. The new site has lower rent and better public transport but less meeting space and a five-year lease. Most staff favor the commute, while the community team fears reduced room for workshops. Author a ThoughtML document representing the options, evidence, counterevidence, and current choice.",
+        "topic": "office-relocation"
+      },
+      "task_id": "probe-neutral-002"
+    },
+    {
+      "arm": "DP",
+      "condition": "probe",
+      "model": "deepseek-v4-pro",
+      "phase": "probe-neutral",
+      "prompt_bytes": 578,
+      "prompt_sha256": "ee1274d4bea1ba731b16ef3d7351e63cd3adf96ed405fef31e039bf208793beb",
+      "reasoning_effort": "high",
+      "run_id": "probe-neutral__probe-neutral-003__dp__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-neutral-003",
+        "prompt": "An archive must choose whether to digitize fragile recordings now using available equipment or wait two years for a higher-quality scanner. Waiting may improve fidelity, but some tapes are deteriorating and could become unreadable. Author a ThoughtML document representing the goal, options, risks, dependencies, and present recommendation.",
+        "topic": "archive-digitization"
+      },
+      "task_id": "probe-neutral-003"
+    },
+    {
+      "arm": "G",
+      "condition": "probe",
+      "model": "gpt-5.4",
+      "phase": "probe-neutral",
+      "prompt_bytes": 600,
+      "prompt_sha256": "e1e88688e9ef3c8a26ecb47315e56c22ea6d477b7bf727a2aac8ce2a4230255f",
+      "reasoning_effort": "high",
+      "run_id": "probe-neutral__probe-neutral-005__g__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-neutral-005",
+        "prompt": "A private collection contains photographs stored in acidic sleeves. Rehousing all items immediately is expensive, while sampling shows the oldest sleeves are degrading fastest. A conservator proposes treating the oldest third now and monitoring the rest. Author a ThoughtML document representing the evidence, staged option, alternatives, and current conclusion.",
+        "topic": "collection-preservation"
+      },
+      "task_id": "probe-neutral-005"
+    },
+    {
+      "arm": "S",
+      "condition": "probe",
+      "model": "gpt-5.6-sol",
+      "phase": "probe-neutral",
+      "prompt_bytes": 567,
+      "prompt_sha256": "90c555e782378223c5062518db3af36d9cd31bbadf0e2b1c9bb984768e13f006",
+      "reasoning_effort": "high",
+      "run_id": "probe-neutral__probe-neutral-002__s__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-neutral-002",
+        "prompt": "A nonprofit considers moving offices. The new site has lower rent and better public transport but less meeting space and a five-year lease. Most staff favor the commute, while the community team fears reduced room for workshops. Author a ThoughtML document representing the options, evidence, counterevidence, and current choice.",
+        "topic": "office-relocation"
+      },
+      "task_id": "probe-neutral-002"
+    },
+    {
+      "arm": "S",
+      "condition": "probe",
+      "model": "gpt-5.6-sol",
+      "phase": "probe-neutral",
+      "prompt_bytes": 578,
+      "prompt_sha256": "ee1274d4bea1ba731b16ef3d7351e63cd3adf96ed405fef31e039bf208793beb",
+      "reasoning_effort": "high",
+      "run_id": "probe-neutral__probe-neutral-003__s__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-neutral-003",
+        "prompt": "An archive must choose whether to digitize fragile recordings now using available equipment or wait two years for a higher-quality scanner. Waiting may improve fidelity, but some tapes are deteriorating and could become unreadable. Author a ThoughtML document representing the goal, options, risks, dependencies, and present recommendation.",
+        "topic": "archive-digitization"
+      },
+      "task_id": "probe-neutral-003"
+    },
+    {
+      "arm": "S",
+      "condition": "probe",
+      "model": "gpt-5.6-sol",
+      "phase": "probe-neutral",
+      "prompt_bytes": 591,
+      "prompt_sha256": "d38efe4d6e1bfa2adc0d458f0a6b05dd1e44c9e9d83d178c98c99fc80c3e89c8",
+      "reasoning_effort": "high",
+      "run_id": "probe-neutral__probe-neutral-001__s__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-neutral-001",
+        "prompt": "A museum considers buying an unsigned landscape. Pigment analysis matches the claimed century and the ownership record is continuous after 1920, but two specialists disagree about the brushwork and no earlier record exists. Author a ThoughtML document representing the authenticity question, observations, disagreement, and current acquisition decision.",
+        "topic": "museum-acquisition"
+      },
+      "task_id": "probe-neutral-001"
+    },
+    {
+      "arm": "DP",
+      "condition": "probe",
+      "model": "deepseek-v4-pro",
+      "phase": "probe-neutral",
+      "prompt_bytes": 600,
+      "prompt_sha256": "e1e88688e9ef3c8a26ecb47315e56c22ea6d477b7bf727a2aac8ce2a4230255f",
+      "reasoning_effort": "high",
+      "run_id": "probe-neutral__probe-neutral-005__dp__probe__s1__high",
+      "sample": 1,
+      "task": {
+        "id": "probe-neutral-005",
+        "prompt": "A private collection contains photographs stored in acidic sleeves. Rehousing all items immediately is expensive, while sampling shows the oldest sleeves are degrading fastest. A conservator proposes treating the oldest third now and monitoring the rest. Author a ThoughtML document representing the evidence, staged option, alternatives, and current conclusion.",
+        "topic": "collection-preservation"
+      },
+      "task_id": "probe-neutral-005"
+    }
+  ],
+  "manifest": "study\\runs\\candidate-manifest.json",
+  "manifest_sha256": "e572ef509b65a0dd5067acdda384cd989938e3aac564d77eb04f4b54278c406d",
+  "phase": "probe-neutral",
+  "schema_version": 1,
+  "seed": 20260821
+}

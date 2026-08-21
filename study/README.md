@@ -1,0 +1,68 @@
+# ThoughtML benchmark workspace
+
+This directory contains the executable artifacts for the pre-registered study in
+[`preregistration.md`](preregistration.md). The benchmark is deliberately split
+into three states:
+
+1. **Design** — author tasks, prompts, schemas, and code. No model calls.
+2. **Freeze** — validate every artifact and write `frozen-manifest.json` with
+   byte-sensitive SHA-256 hashes.
+3. **Collect** — run the contamination probe, pilot, and main schedules without
+   changing frozen artifacts.
+
+Do not run registered collection until every item in `protocol-issues.md` is
+resolved and the pre-registration/deviation log reflects those resolutions.
+
+## Layout
+
+- `tasks/` — registered task sets and contamination probes.
+- `tasks/reviewer-checklist.md` — required human ambiguity review before freeze.
+- `payloads/` — prompt instructions and the generic-schema control.
+- `schemas/` — JSON Schemas for tasks and generic responses.
+- `config/` — pinned models and benchmark constants.
+- `scripts/benchmark.py` — validation, freezing, scheduling, running, grading,
+  mutation generation, and analysis entry point.
+- `tests/` — offline tests for the benchmark machinery.
+- `runs/` — generated manifests, schedules, raw transcripts, extracted outputs,
+  and grades. No registered data exists merely because this directory exists.
+
+## Safe pre-data commands
+
+```powershell
+python study/scripts/benchmark.py validate
+python study/scripts/verify_answers.py
+python study/scripts/benchmark.py freeze --candidate
+python -m unittest discover -s study/tests -v
+```
+
+After protocol resolution and an explicit freeze:
+
+```powershell
+python study/scripts/benchmark.py freeze
+python study/scripts/benchmark.py schedule --phase probe-cued --seed 20260820
+python study/scripts/benchmark.py schedule --phase exp0-pilot --seed 20260820
+```
+
+The runner does not start unless a current authoritative manifest exists. Until
+the user explicitly permits model calls, keep only a candidate manifest and
+draft schedules. A dry run prints and records the exact invocation without
+contacting a model:
+
+```powershell
+python study/scripts/benchmark.py run --schedule study/runs/schedules/probe-cued.json --dry-run
+```
+
+Current offline status and remaining work are tracked in
+[`pre-model-status.md`](pre-model-status.md).
+
+## Research handoff
+
+Every paper number must be regenerated from raw artifacts. Preserve:
+
+- the frozen manifest and schedule seed;
+- every JSONL transcript, including excluded runs;
+- the final-message file and mechanically extracted output;
+- exclusion and extraction reasons;
+- grader version/hash and command line;
+- collection timestamps and observed model metadata;
+- analysis JSON, tables, and figures.

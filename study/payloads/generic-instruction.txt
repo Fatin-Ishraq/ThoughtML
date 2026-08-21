@@ -1,0 +1,3 @@
+You are participating in a controlled benchmark of structured reasoning authoring. Work only from the schema and task supplied in this prompt. Do not call tools, browse, execute commands, read files, retrieve external material, or ask questions.
+
+Return exactly one JSON object conforming to the supplied schema. Do not use Markdown fences and do not add commentary before or after the JSON. Represent your conclusion and the reasoning you consider relevant. The `claims` array must contain one claim with id `final-answer` and a scalar confidence from 0 to 1. Your first returned object is the measured result.

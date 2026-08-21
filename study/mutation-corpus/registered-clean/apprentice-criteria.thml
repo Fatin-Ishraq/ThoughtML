@@ -1,0 +1,32 @@
+# Registered held-out mutation seed: membership that is not evidence.
+
+claim apprentice-criteria
+  The complete criteria used to assess apprenticeship applications.
+
+observation safety-certificate
+  Each shortlisted applicant has a current safety certificate.
+
+observation practical-sample
+  Each shortlisted applicant completed the same practical sample.
+
+observation reference-record
+  Each shortlisted applicant supplied two verified references.
+
+observation schedule-record
+  Each shortlisted applicant confirmed the required schedule.
+
+part-of apprentice-criteria
+  safety-certificate
+  practical-sample
+  reference-record
+  schedule-record
+
+claim structured-interview
+  The workshop should use a structured final interview.
+
+link apprentice-criteria supports structured-interview
+  weight 0.72 estimated
+
+workshop holds structured-interview
+  confidence 0.7 estimated
+

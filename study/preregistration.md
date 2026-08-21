@@ -1,8 +1,8 @@
 # Pre-registration: Measuring AI-Authored Reasoning Traces Across Models in a Fixed Agent Harness
 
 **Author:** Fatin Ishraq
-**Pre-registration version:** 2.0
-**Date filed:** 2026-08-20 (v1.0) · amended 2026-08-20 (v1.1–v1.4) · **redesigned 2026-08-20 (v2.0)**
+**Pre-registration version:** 2.2
+**Date filed:** 2026-08-20 (v1.0) · amended 2026-08-20 (v1.1–v1.4) · redesigned 2026-08-20 (v2.0) · amended 2026-08-21 (v2.1) · **pre-data freeze amendment 2026-08-21 (v2.2)**
 **Status:** Filed before any registered data collection. No registered experimental data exists. A discarded pilot of Experiment 2 has been run; see §13.
 
 **v2.0 is a redesign, not an amendment.** Versions 1.0–1.4 compared four first-party vendor agent systems, in which model and harness were confounded by construction and the study could only disclose the confound rather than remove it. v2.0 holds the harness fixed and varies the model inside it. The unit of analysis, the research questions, and the arms all change. Versions 1.0–1.4 remain in the public git history (`cdcf74f`, `b8b12e4`, `7951f05`, `fece65d`, `22c4882`, `667d7e5`) and are superseded, not deleted. See §13, entry 12.
@@ -22,9 +22,9 @@ Every number in this study is produced by the artifacts below. They do not chang
 | Spec payload size | 718 lines / 39,129 bytes / ~11k tokens |
 | **Harness** | **Codex CLI 0.144.6, `codex exec --skip-git-repo-check`, non-interactive** |
 | **Reasoning effort** | **`high` for the model panel; swept only in the §6 effort experiment** |
-| Prompt template SHA-256 | recorded in `runs/manifest.json` at first run |
-| Control-schema payload SHA-256 (Condition G) | recorded in `runs/manifest.json` before Experiment 1 begins |
-| External registration | OSF DOI — recorded here upon filing. **v2.0 is the version to register.** |
+| Prompt template SHA-256 | recorded in the versioned frozen manifest before the first run |
+| Control-schema payload SHA-256 (Condition G) | recorded in a versioned frozen manifest before Experiment 1 begins |
+| Pre-data public timestamp | Annotated Git tag `study-predata-v2.2`; pushed before the first registered call |
 
 **Model panel, pinned by slug.** Availability was verified by live invocation on 2026-08-20; `gpt-5.6-sol` required a re-authentication before it resolved, and `gpt-5.1` was rejected under every slug tried.
 
@@ -162,7 +162,7 @@ The pooled all-defect rate is **not** predicted and will not be reported: with u
 
 ### 5.1 The unit is a model within a fixed harness
 
-All six arms run through **Codex CLI 0.144.6**, non-interactively, with identical invocation, identical prompt payload, identical reasoning effort (`high`), and no tool access. Scaffolding, system prompt, prompt delivery, and sampling policy are therefore constant across arms, and **the model is the only thing that varies.**
+All six arms run through **Codex CLI 0.144.6**, non-interactively, with identical invocation, identical prompt payload, identical reasoning effort (`high`), and a single-shot policy in which tool calls are forbidden and audited. Scaffolding, system prompt, prompt delivery, and sampling policy are therefore constant across arms, and **the model is the only thing that varies.**
 
 This is the central improvement over v1.0–v1.4, which compared four different vendor harnesses and could only disclose the resulting model×harness confound in a limitations section. That confound is now removed by construction rather than apologised for.
 
@@ -190,12 +190,14 @@ The GPT arms are closed-weight, silently updated, and eventually retired; they a
 
 | Experiment | Design | Runs |
 |---|---|---|
+| Exp 0 — discarded implementation pilot | 30 tasks × 2 conditions × Terra only; never pooled | **60** |
 | Exp 0 — calibration | 30 ground-truth tasks × 2 conditions × 6 models | **360** |
 | Exp 1 — authoring | 12 reasoning tasks × 6 models × 3 samples | **216** |
 | Exp 1 — Condition G control | 12 tasks × 6 models × 1 sample | **72** |
 | Exp 5 — reasoning-effort sweep | 12 tasks × 4 efforts × `gpt-5.6-terra` × 2 samples | **96** |
 | Exp 2 — mutation testing | offline, no model calls | — |
-| **Total registered model calls** | | **744** |
+| **Main registered model calls** | | **744** |
+| **Total calls including discarded Exp 0 pilot** | | **804** |
 | Contamination probe (§9.2) | 5 cued prompts × 6 models | 30 |
 | **Tasks to author** | 30 ground-truth + 12 reasoning (9 tension + 3 no-tension) | **42** |
 
@@ -210,6 +212,16 @@ Three samples per cell in Experiment 1 (up from two in v1.4) because cost no lon
 | H2 (12 task clusters, ~216 documents) | CI half-width ≈ 0.05–0.08 | Can reject H0 ≥ 0.15 if the true share is ≤ ~0.07; adequate for the predicted < 0.10. |
 | H3 (12 tasks × 15 model pairs) | bootstrap CI half-width ≈ 0.05–0.09 | Adequate to separate the predicted 0.15–0.30 from the 0.35 decision bound across most of the range. The six-model panel yields 15 pairs per task, more than v1.4's 6. |
 
+**H1b task-count sensitivity, run before any registered model response.** A
+Monte Carlo grid using the registered task-cluster bootstrap estimated roughly
+29% power at 30 tasks for a +0.08 AUROC contrast. Higher-precision boundary runs
+estimated 68% at 120 tasks, 79% at 150, and 87% at 180. Expanding to 180 would
+require 150 additional independently reviewed tasks and 2,100 additional model
+calls, while still targeting only the optimistic top of the predicted range.
+The study therefore retains 30 tasks and the already-declared
+**estimation-first** interpretation for H1b rather than presenting it as
+adequately powered.
+
 ### Experiment 0 — Confidence calibration and the basis manipulation
 
 **Purpose:** RQ1. Tests H1a, H1b; H1-lex secondary.
@@ -221,7 +233,7 @@ Three samples per cell in Experiment 1 (up from two in v1.4) because cost no lon
 
 Condition B exists because the basis field is opt-in (`TML401` fires only under `--strict-provenance`), so a free-form-only design risks too few labelled numbers to test the basis hypotheses at all. Condition B guarantees the manipulation is present; Condition F measures the spontaneous rate.
 
-**Pilot:** one arm only (`gpt-5.6-terra`), 30 × 2 = 60 runs. Extension to the remaining five arms is contingent on the pilot completing without protocol failure, **not** on the direction of results.
+**Pilot:** one arm only (`gpt-5.6-terra`), 30 × 2 = 60 runs. It is additional to the 744-call main collection and is never pooled. After the protocol is frozen, Terra is rerun with the other five arms in the 360-call Experiment 0 main phase. Extension is contingent on the pilot completing without protocol failure, **not** on the direction of results.
 
 ### Experiment 1 — The authoring benchmark, with a schema control
 
@@ -233,7 +245,7 @@ Condition G is what allows H2 and H3 to be read as "property of models under any
 
 **Task composition:** 9 tasks with genuine tension and 3 deliberate no-tension manipulation checks (§7.2). The check is directional only at 3 vs. 9 and is reported as such. H3 is computed over all 12.
 
-**Single-shot, no tool access.** If a model can run `thoughtml check` and repair its own output, the measurement becomes one of tool-loop competence rather than authoring competence. Absence of tool calls is verified per run from the transcript, not assumed from a flag.
+**Single-shot, no tool calls permitted.** If a model runs `thoughtml check` and repairs its own output, the measurement becomes one of tool-loop competence rather than authoring competence. Codex CLI exposes a shell surface that cannot be removed by the pinned interface, so the prompt explicitly forbids every tool call. Runs use an empty neutral directory, ephemeral state, ignored user configuration and rules, a read-only sandbox, and approval policy `never`. Absence of tool calls is verified from the transcript; any run containing one is excluded.
 
 ### Experiment 5 — Reasoning-effort sweep (new in v2.0)
 
@@ -276,10 +288,10 @@ This experiment tests the **tool**. Experiment 1 tests the **model**. They are r
 Every run is a single non-interactive invocation:
 
 ```
-codex exec --skip-git-repo-check -m <slug> -c model_reasoning_effort=<level> "<prompt>"
+codex exec --skip-git-repo-check --ephemeral --ignore-user-config --ignore-rules --strict-config --sandbox read-only -c approval_policy="never" -m <slug> -c model_reasoning_effort=<level> --json -o <response-path> -
 ```
 
-executed from a neutral working directory outside the ThoughtML repository, with stdin closed. The prompt is assembled as: instruction block + full spec payload (Condition G substitutes the control-schema payload) + one task. The payload hash is logged per run and verified at analysis time; any run whose logged hash differs from the frozen hash is excluded under §8.3.
+executed from an empty neutral working directory outside the ThoughtML repository. The prompt is assembled as instruction block + full spec payload (Condition G substitutes the control-schema payload) + one task, written once to stdin, and stdin is then closed. This avoids the Windows command-line length limit without changing prompt bytes. The complete prompt bytes and SHA-256 are logged per run and verified at analysis time; any run whose hash differs from the frozen schedule is excluded under §8.3.
 
 `model` is deliberately unset in `~/.codex/config.toml` so that every run specifies its slug explicitly and no result depends on whatever the account default happens to be.
 
@@ -292,6 +304,8 @@ Fixed before authoring the task sets.
 3. **Domain spread.** No more than 25% from any single domain, and no more than 25% software-related.
 4. **Ground truth** (Exp 0 only). A single defensible answer verifiable independently of the model's reasoning.
 5. **Length bounded.** 80–200 words, to hold prompt length roughly constant.
+6. **Calibration difficulty.** Experiment 0 contains exactly 6 easy, 12 medium, and 12 hard tasks. Every answer key must pass a deterministic reference solver and a human ambiguity review before the probe.
+7. **Neutral decision wording.** Every Experiment 1 task ends with the same request to decide what should be done and represent the reasoning and conclusion. Task prompts and condition instructions do not require counterarguments, counterevidence, or opposition links.
 
 **Manipulation check for H2.** Three of Experiment 1's 12 tasks are deliberately constructed *without* genuine tension. If attack share is equally low on tension and no-tension tasks, task design is not driving H2. If it is measurably higher on tension tasks, models are responsive to task structure and the overall rate is meaningful. Directional only at 3 vs. 9; reported whichever way it resolves.
 
@@ -346,7 +360,7 @@ A run is excluded if and only if:
 
 1. The harness returned an error, an empty response, or a rate-limit failure that did not resolve on the pre-specified retry policy (three retries, exponential backoff);
 2. Transcript audit reveals injected context beyond the frozen payload (project memory, agent instruction files, retrieved documents);
-3. Tool calls occurred in a condition specifying no tool access;
+3. Tool calls occurred in a condition specifying that no tool calls are permitted;
 4. The logged payload hash does not match the frozen hash;
 5. The logged model slug or reasoning effort does not match the intended cell.
 
@@ -458,6 +472,9 @@ Append-only. Every departure from this document after filing is recorded with it
 | 11 | 2026-08-20 | §9.2 | Split the zero-shot probe prompts into 5 cued and 5 neutral, reported separately. | The first prompt set unintentionally drew 5–6 topics from `examples/`. Corpus-adjacent topics raise sensitivity, which is wanted, but pooling them with neutral prompts would confound topic-cued recall with knowledge of the format. | No. Prompts frozen before any were sent. |
 | 12 | 2026-08-20 | **whole document (v2.0)** | **Redesigned the study: one fixed harness (Codex CLI), six models varying inside it, replacing four vendor agent systems. Unit of analysis, arms, RQ5 and several threats all change.** New: three named contrasts (within-generation, between-generation, between-vendor) replacing the vendor-panel framing; Experiment 5, a reasoning-effort sweep, added as the only fully unconfounded manipulation; Exp 1 samples raised 2 → 3; probe moved into the harness and staged to cued-first with a ≥1/5 rule. | Model and harness were confounded by construction in v1.0–v1.4 and could only be disclosed, never removed. Holding the harness fixed removes the study's deepest flaw. The redesign also became free rather than metered, which lifted the sample-size constraint, and fully scriptable, which removes manual-collection error. Availability of every slug was verified by live invocation before pinning. | No registered data. |
 | 13 | 2026-08-20 | §0, §5.1 | Recorded that `gpt-5.6-sol` initially failed and resolved only after re-authentication, and that `gpt-5.1` was rejected under every slug tried. | Availability is an empirical property of the account, not a documented one. Recording the failures prevents a later reader assuming the panel was chosen freely rather than constrained by what actually resolved. | No. |
+| 14 | 2026-08-21 | §6 Exp 2 | Ran a second discarded implementation pilot of the mutation generator on five newly authored development documents (51 applicable mutants). The documents and complete output are retained under `study/mutation-corpus/development/` and `study/runs/pilot-mutations-20260821/`; neither is admissible in the registered result. A separate `registered-clean/` corpus was authored afterward and the runner blocks it until the protocol is frozen. | To exercise every new operator, baseline-differencing logic, detector mode, and restraint control end to end before freezing the harness. No operator or prediction is tuned to the registered corpus. | Development-pilot results only. No registered data. |
+| 15 | 2026-08-21 | §5.1, §6 Exp 0, §7.1–§7.2, §8.3 (v2.1) | Clarified that the 60-call Experiment 0 pilot is discarded and additional to the 744-call main collection; changed prompt transport from a command-line argument to stdin; replaced the unachievable claim of absent tool access with a forbidden-and-audited tool-call policy; stratified calibration tasks as 6 easy, 12 medium, and 12 hard with deterministic answer checks; and made all Experiment 1 task endings and condition instructions neutral about counterevidence. | These are pre-data implementation corrections. The old total was arithmetically inconsistent, the full prompt exceeds the Windows process command-line limit, Codex exposes a shell surface, the former calibration set risked a ceiling, and the former wording directly induced the opposition behavior used by H2. | No registered model calls or responses. |
+| 16 | 2026-08-21 | §0, §6, §13–§14 (v2.2) | Recorded the completed human review; retained 30 calibration tasks with H1b estimation-first after a pre-data task-count sensitivity analysis; scoped the unresolved Rule J implementation as an Experiment 1 blocker; and replaced the planned OSF registration with the public annotated Git tag `study-predata-v2.2`. | The author approved the corpus, expanding to 180 tasks would add 150 tasks and 2,100 calls while powering only the optimistic +0.08 effect, Rule J is unnecessary for the probe and Experiment 0, and the author does not yet have an OSF account. Git history supplies a public timestamp but is explicitly acknowledged as weaker than immutable third-party registration. | No registered model calls or responses. |
 
 ---
 
@@ -465,8 +482,14 @@ Append-only. Every departure from this document after filing is recorded with it
 
 **Artifacts.** On publication: the pinned commit tagged and archived for a DOI; all task sets; the frozen prompt template, spec payload and control-schema payload; every raw response and transcript; the run harness and analysis pipeline; and this pre-registration with its complete deviation log. Raw responses are released in full, including excluded runs and runs that produced unparseable output.
 
-**External registration.** Registered on OSF (DOI in §0 upon filing) so that the deviation log's append-only property is anchored to a third-party timestamp rather than to a git history the author controls.
+**Pre-data timestamp and limitation.** The author does not currently have an OSF
+account, so this study is not registered on OSF and claims no DOI. Before the
+first registered call, the complete pre-data state is pushed publicly under the
+annotated Git tag `study-predata-v2.2`. This gives readers a dated, inspectable
+baseline, but a repository owner can technically rewrite Git history or move a
+tag. It is therefore weaker than immutable third-party registration and is
+reported as a limitation, not described as equivalent to OSF.
 
 **Venue plan.** Target: NeurIPS Datasets & Benchmarks, which expects a runnable benchmark plus baselines. Packaging: task sets + grader + harness as the releasable benchmark; **Condition G as the baseline**; the GPT arms as a dated snapshot; the DeepSeek arms and Experiment 2 as the reproducible reference entries.
 
-**Anonymization plan, decided now rather than at submission week.** The payload is the public spec of a named repository and §8.5 requires regenerating every number from it. For double-blind review: an anonymized repository mirror serving the pinned commit; the author's name scrubbed from the copy included in the submission; the OSF registration cited as an anonymized view. The de-anonymizing history remains intact on the public repository and is linked on acceptance.
+**Anonymization plan, decided now rather than at submission week.** The payload is the public spec of a named repository and §8.5 requires regenerating every number from it. For double-blind review: an anonymized repository mirror serving the pinned commit; the author's name scrubbed from the copy included in the submission; and the public pre-data tag disclosed only where venue policy permits. The de-anonymizing history remains intact on the public repository and is linked on acceptance.

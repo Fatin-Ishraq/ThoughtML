@@ -1,0 +1,1766 @@
+{
+  "generated_at": "2026-08-21T12:31:55.733681Z",
+  "grader_sha256": "99e3afa2222a00f3eb82315e4dd251259b19ecc296769f0e35ce5ed9cd38f5b0",
+  "include_model_runs": false,
+  "mutants": [
+    {
+      "class": "structural",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": true,
+        "caught_audit": false,
+        "caught_default": true,
+        "caught_lint": true,
+        "caught_strict_provenance": true,
+        "new_audit_signatures": [],
+        "new_default_signatures": [
+          "TML201"
+        ],
+        "new_lint_signatures": [
+          "TML201"
+        ],
+        "new_strict_provenance_failure": true
+      },
+      "description": "Replace one link target with an undeclared id.",
+      "grade": {
+        "audit": [],
+        "default": [
+          "TML201"
+        ],
+        "lint": [
+          "TML201"
+        ],
+        "parse_failed": false,
+        "strict_provenance_failed": true
+      },
+      "mutant_id": "source-001-equipment-lease__dangling-target",
+      "operator": "dangling-target",
+      "path": "study/runs/mutations/files/source-001-equipment-lease__dangling-target.thml",
+      "sha256": "283c146fa5e3e9571e28aa93116f0a317232468406b6b33754f7a59188a4f384",
+      "source_id": "source-001-equipment-lease"
+    },
+    {
+      "class": "structural",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": true,
+        "caught_audit": false,
+        "caught_default": true,
+        "caught_lint": true,
+        "caught_strict_provenance": true,
+        "new_audit_signatures": [],
+        "new_default_signatures": [
+          "TML102"
+        ],
+        "new_lint_signatures": [
+          "TML102"
+        ],
+        "new_strict_provenance_failure": true
+      },
+      "description": "Replace one relation with an out-of-vocabulary word.",
+      "grade": {
+        "audit": [],
+        "default": [
+          "TML102"
+        ],
+        "lint": [
+          "TML102"
+        ],
+        "parse_failed": false,
+        "strict_provenance_failed": true
+      },
+      "mutant_id": "source-001-equipment-lease__unknown-relation",
+      "operator": "unknown-relation",
+      "path": "study/runs/mutations/files/source-001-equipment-lease__unknown-relation.thml",
+      "sha256": "74aa0e91d55b0e9cd6982e4d237b2c5eb3bc34ee26226cd74b13471b6e49bcd2",
+      "source_id": "source-001-equipment-lease"
+    },
+    {
+      "class": "relational-semantic",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": false,
+        "caught_audit": false,
+        "caught_default": false,
+        "caught_lint": false,
+        "caught_strict_provenance": false,
+        "new_audit_signatures": [],
+        "new_default_signatures": [],
+        "new_lint_signatures": [],
+        "new_strict_provenance_failure": false
+      },
+      "description": "Reverse one directed link.",
+      "grade": {
+        "audit": [],
+        "default": [],
+        "lint": [],
+        "parse_failed": false,
+        "strict_provenance_failed": false
+      },
+      "mutant_id": "source-001-equipment-lease__reverse-link",
+      "operator": "reverse-link",
+      "path": "study/runs/mutations/files/source-001-equipment-lease__reverse-link.thml",
+      "sha256": "cd18e3727449f061006b728a989e5715b96082803495d74e59bff68e62c40433",
+      "source_id": "source-001-equipment-lease"
+    },
+    {
+      "class": "numeric",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": false,
+        "caught_audit": false,
+        "caught_default": false,
+        "caught_lint": false,
+        "caught_strict_provenance": false,
+        "new_audit_signatures": [],
+        "new_default_signatures": [],
+        "new_lint_signatures": [],
+        "new_strict_provenance_failure": false
+      },
+      "description": "Replace one confidence c with 1-c.",
+      "grade": {
+        "audit": [],
+        "default": [],
+        "lint": [],
+        "parse_failed": false,
+        "strict_provenance_failed": false
+      },
+      "mutant_id": "source-001-equipment-lease__invert-confidence",
+      "operator": "invert-confidence",
+      "path": "study/runs/mutations/files/source-001-equipment-lease__invert-confidence.thml",
+      "sha256": "66080ea04b353fe769579785fa486397764451c9149593589794e0205f4a4520",
+      "source_id": "source-001-equipment-lease"
+    },
+    {
+      "class": "numeric",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": true,
+        "caught_audit": false,
+        "caught_default": false,
+        "caught_lint": false,
+        "caught_strict_provenance": true,
+        "new_audit_signatures": [],
+        "new_default_signatures": [],
+        "new_lint_signatures": [],
+        "new_strict_provenance_failure": true
+      },
+      "description": "Remove one measured/estimated/assumed label.",
+      "grade": {
+        "audit": [],
+        "default": [],
+        "lint": [],
+        "parse_failed": false,
+        "strict_provenance_failed": true
+      },
+      "mutant_id": "source-001-equipment-lease__strip-basis",
+      "operator": "strip-basis",
+      "path": "study/runs/mutations/files/source-001-equipment-lease__strip-basis.thml",
+      "sha256": "2c1a079842887dc358c62cc378e4992c74b544df467a54d878f79a95e7eb4b59",
+      "source_id": "source-001-equipment-lease"
+    },
+    {
+      "class": "numeric",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": true,
+        "caught_audit": false,
+        "caught_default": true,
+        "caught_lint": true,
+        "caught_strict_provenance": true,
+        "new_audit_signatures": [],
+        "new_default_signatures": [
+          "a `<id>` on a `<id>` link is ignored; use `<id>` (§10.6)"
+        ],
+        "new_lint_signatures": [
+          "a `<id>` on a `<id>` link is ignored; use `<id>` (§10.6)"
+        ],
+        "new_strict_provenance_failure": true
+      },
+      "description": "Put weight where a leads-to probability belongs.",
+      "grade": {
+        "audit": [],
+        "default": [
+          "a `<id>` on a `<id>` link is ignored; use `<id>` (§10.6)"
+        ],
+        "lint": [
+          "a `<id>` on a `<id>` link is ignored; use `<id>` (§10.6)"
+        ],
+        "parse_failed": false,
+        "strict_provenance_failed": true
+      },
+      "mutant_id": "source-001-equipment-lease__probability-to-weight",
+      "operator": "probability-to-weight",
+      "path": "study/runs/mutations/files/source-001-equipment-lease__probability-to-weight.thml",
+      "sha256": "25ebf57663cf2fc8df751cca2cf28692048d64fbbb7ccd235e9078d044e8a228",
+      "source_id": "source-001-equipment-lease"
+    },
+    {
+      "class": "identity",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": true,
+        "caught_audit": false,
+        "caught_default": true,
+        "caught_lint": true,
+        "caught_strict_provenance": true,
+        "new_audit_signatures": [],
+        "new_default_signatures": [
+          "TML201",
+          "TML301"
+        ],
+        "new_lint_signatures": [
+          "TML201",
+          "TML301"
+        ],
+        "new_strict_provenance_failure": true
+      },
+      "description": "Rename a declaration without updating its references.",
+      "grade": {
+        "audit": [],
+        "default": [
+          "TML201",
+          "TML301"
+        ],
+        "lint": [
+          "TML201",
+          "TML301"
+        ],
+        "parse_failed": false,
+        "strict_provenance_failed": true
+      },
+      "mutant_id": "source-001-equipment-lease__split-identity",
+      "operator": "split-identity",
+      "path": "study/runs/mutations/files/source-001-equipment-lease__split-identity.thml",
+      "sha256": "716808be253b7fcbf575146cdfe95becaff6dfc37c23e08af857aa377cd35d92",
+      "source_id": "source-001-equipment-lease"
+    },
+    {
+      "class": "identity",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": true,
+        "caught_audit": true,
+        "caught_default": true,
+        "caught_lint": true,
+        "caught_strict_provenance": true,
+        "new_audit_signatures": [
+          "definition-divergence"
+        ],
+        "new_default_signatures": [
+          "focus `<id>` was declared as kind `<id>` but redeclared as `<id>`; keeping `<id>`"
+        ],
+        "new_lint_signatures": [
+          "focus `<id>` was declared as kind `<id>` but redeclared as `<id>`; keeping `<id>`"
+        ],
+        "new_strict_provenance_failure": true
+      },
+      "description": "Merge two distinct declared ids.",
+      "grade": {
+        "audit": [
+          "definition-divergence"
+        ],
+        "default": [
+          "focus `<id>` was declared as kind `<id>` but redeclared as `<id>`; keeping `<id>`"
+        ],
+        "lint": [
+          "focus `<id>` was declared as kind `<id>` but redeclared as `<id>`; keeping `<id>`"
+        ],
+        "parse_failed": false,
+        "strict_provenance_failed": true
+      },
+      "mutant_id": "source-001-equipment-lease__merge-identities",
+      "operator": "merge-identities",
+      "path": "study/runs/mutations/files/source-001-equipment-lease__merge-identities.thml",
+      "sha256": "9e6d8a5d9db7a1a6883dd962d421be6b2a786cfaeb85353d7e7fe317e54fd621",
+      "source_id": "source-001-equipment-lease"
+    },
+    {
+      "class": "restraint",
+      "control_or_defect": "control",
+      "delta": {
+        "caught_any": false,
+        "caught_audit": false,
+        "caught_default": false,
+        "caught_lint": false,
+        "caught_strict_provenance": false,
+        "new_audit_signatures": [],
+        "new_default_signatures": [],
+        "new_lint_signatures": [],
+        "new_strict_provenance_failure": false
+      },
+      "description": "Change whitespace without changing semantics.",
+      "grade": {
+        "audit": [],
+        "default": [],
+        "lint": [],
+        "parse_failed": false,
+        "strict_provenance_failed": false
+      },
+      "mutant_id": "source-001-equipment-lease__whitespace-only",
+      "operator": "whitespace-only",
+      "path": "study/runs/mutations/files/source-001-equipment-lease__whitespace-only.thml",
+      "sha256": "be9406d344d7575847a036eff450d9a26088a89b8537d0dd4b6358cdaf3e1d32",
+      "source_id": "source-001-equipment-lease"
+    },
+    {
+      "class": "restraint",
+      "control_or_defect": "control",
+      "delta": {
+        "caught_any": false,
+        "caught_audit": false,
+        "caught_default": false,
+        "caught_lint": false,
+        "caught_strict_provenance": false,
+        "new_audit_signatures": [],
+        "new_default_signatures": [],
+        "new_lint_signatures": [],
+        "new_strict_provenance_failure": false
+      },
+      "description": "Rename one id and all references consistently.",
+      "grade": {
+        "audit": [],
+        "default": [],
+        "lint": [],
+        "parse_failed": false,
+        "strict_provenance_failed": false
+      },
+      "mutant_id": "source-001-equipment-lease__consistent-rename",
+      "operator": "consistent-rename",
+      "path": "study/runs/mutations/files/source-001-equipment-lease__consistent-rename.thml",
+      "sha256": "9011dad3372ae4f57550cec0974787792e223a42d5361439ac0eb4b6744e5fb7",
+      "source_id": "source-001-equipment-lease"
+    },
+    {
+      "class": "structural",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": true,
+        "caught_audit": false,
+        "caught_default": true,
+        "caught_lint": true,
+        "caught_strict_provenance": true,
+        "new_audit_signatures": [],
+        "new_default_signatures": [
+          "TML201"
+        ],
+        "new_lint_signatures": [
+          "TML201"
+        ],
+        "new_strict_provenance_failure": true
+      },
+      "description": "Replace one link target with an undeclared id.",
+      "grade": {
+        "audit": [],
+        "default": [
+          "TML201"
+        ],
+        "lint": [
+          "TML201"
+        ],
+        "parse_failed": false,
+        "strict_provenance_failed": true
+      },
+      "mutant_id": "source-002-rehearsal-booking__dangling-target",
+      "operator": "dangling-target",
+      "path": "study/runs/mutations/files/source-002-rehearsal-booking__dangling-target.thml",
+      "sha256": "7360117cb160ae626da4a06bc4c026d18978124bab8498e48a90a2704a0e305c",
+      "source_id": "source-002-rehearsal-booking"
+    },
+    {
+      "class": "structural",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": true,
+        "caught_audit": false,
+        "caught_default": true,
+        "caught_lint": true,
+        "caught_strict_provenance": true,
+        "new_audit_signatures": [],
+        "new_default_signatures": [
+          "TML102"
+        ],
+        "new_lint_signatures": [
+          "TML102"
+        ],
+        "new_strict_provenance_failure": true
+      },
+      "description": "Replace one relation with an out-of-vocabulary word.",
+      "grade": {
+        "audit": [],
+        "default": [
+          "TML102"
+        ],
+        "lint": [
+          "TML102"
+        ],
+        "parse_failed": false,
+        "strict_provenance_failed": true
+      },
+      "mutant_id": "source-002-rehearsal-booking__unknown-relation",
+      "operator": "unknown-relation",
+      "path": "study/runs/mutations/files/source-002-rehearsal-booking__unknown-relation.thml",
+      "sha256": "5f9e1bdfed3f360aedc34ccf992b2bd61f489f31f84d6db644b0d639a0e0c36a",
+      "source_id": "source-002-rehearsal-booking"
+    },
+    {
+      "class": "relational-semantic",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": false,
+        "caught_audit": false,
+        "caught_default": false,
+        "caught_lint": false,
+        "caught_strict_provenance": false,
+        "new_audit_signatures": [],
+        "new_default_signatures": [],
+        "new_lint_signatures": [],
+        "new_strict_provenance_failure": false
+      },
+      "description": "Flip one supports/opposes relation.",
+      "grade": {
+        "audit": [],
+        "default": [],
+        "lint": [],
+        "parse_failed": false,
+        "strict_provenance_failed": false
+      },
+      "mutant_id": "source-002-rehearsal-booking__flip-polarity",
+      "operator": "flip-polarity",
+      "path": "study/runs/mutations/files/source-002-rehearsal-booking__flip-polarity.thml",
+      "sha256": "8e29e1e2d4639a4d32d7f31c69a0c32e9a05c6f036db088ab14adbacf90d0c9a",
+      "source_id": "source-002-rehearsal-booking"
+    },
+    {
+      "class": "relational-semantic",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": false,
+        "caught_audit": false,
+        "caught_default": false,
+        "caught_lint": false,
+        "caught_strict_provenance": false,
+        "new_audit_signatures": [],
+        "new_default_signatures": [],
+        "new_lint_signatures": [],
+        "new_strict_provenance_failure": false
+      },
+      "description": "Reverse one directed link.",
+      "grade": {
+        "audit": [],
+        "default": [],
+        "lint": [],
+        "parse_failed": false,
+        "strict_provenance_failed": false
+      },
+      "mutant_id": "source-002-rehearsal-booking__reverse-link",
+      "operator": "reverse-link",
+      "path": "study/runs/mutations/files/source-002-rehearsal-booking__reverse-link.thml",
+      "sha256": "63c49881b99c30ae17df3f0d945f11e2bf08d1bf02c850d111f288599a429957",
+      "source_id": "source-002-rehearsal-booking"
+    },
+    {
+      "class": "numeric",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": false,
+        "caught_audit": false,
+        "caught_default": false,
+        "caught_lint": false,
+        "caught_strict_provenance": false,
+        "new_audit_signatures": [],
+        "new_default_signatures": [],
+        "new_lint_signatures": [],
+        "new_strict_provenance_failure": false
+      },
+      "description": "Replace one confidence c with 1-c.",
+      "grade": {
+        "audit": [],
+        "default": [],
+        "lint": [],
+        "parse_failed": false,
+        "strict_provenance_failed": false
+      },
+      "mutant_id": "source-002-rehearsal-booking__invert-confidence",
+      "operator": "invert-confidence",
+      "path": "study/runs/mutations/files/source-002-rehearsal-booking__invert-confidence.thml",
+      "sha256": "f95e90f8350d902dc45efb23e6a0beffb988ece1a306dfb49f5375988f65f880",
+      "source_id": "source-002-rehearsal-booking"
+    },
+    {
+      "class": "numeric",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": true,
+        "caught_audit": false,
+        "caught_default": false,
+        "caught_lint": false,
+        "caught_strict_provenance": true,
+        "new_audit_signatures": [],
+        "new_default_signatures": [],
+        "new_lint_signatures": [],
+        "new_strict_provenance_failure": true
+      },
+      "description": "Remove one measured/estimated/assumed label.",
+      "grade": {
+        "audit": [],
+        "default": [],
+        "lint": [],
+        "parse_failed": false,
+        "strict_provenance_failed": true
+      },
+      "mutant_id": "source-002-rehearsal-booking__strip-basis",
+      "operator": "strip-basis",
+      "path": "study/runs/mutations/files/source-002-rehearsal-booking__strip-basis.thml",
+      "sha256": "00c6f7c4101fb1f75f2883e05d6e56f8c86e4d6dc318be66d611f73e94c90b9d",
+      "source_id": "source-002-rehearsal-booking"
+    },
+    {
+      "class": "identity",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": true,
+        "caught_audit": false,
+        "caught_default": true,
+        "caught_lint": true,
+        "caught_strict_provenance": true,
+        "new_audit_signatures": [],
+        "new_default_signatures": [
+          "TML301"
+        ],
+        "new_lint_signatures": [
+          "TML301"
+        ],
+        "new_strict_provenance_failure": true
+      },
+      "description": "Rename a declaration without updating its references.",
+      "grade": {
+        "audit": [],
+        "default": [
+          "TML301"
+        ],
+        "lint": [
+          "TML301"
+        ],
+        "parse_failed": false,
+        "strict_provenance_failed": true
+      },
+      "mutant_id": "source-002-rehearsal-booking__split-identity",
+      "operator": "split-identity",
+      "path": "study/runs/mutations/files/source-002-rehearsal-booking__split-identity.thml",
+      "sha256": "dd28e782dbd436e56172e5936cb19463852a632253e1b68989bc4070068b311e",
+      "source_id": "source-002-rehearsal-booking"
+    },
+    {
+      "class": "identity",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": true,
+        "caught_audit": true,
+        "caught_default": true,
+        "caught_lint": true,
+        "caught_strict_provenance": true,
+        "new_audit_signatures": [
+          "definition-divergence"
+        ],
+        "new_default_signatures": [
+          "focus `<id>` was declared as kind `<id>` but redeclared as `<id>`; keeping `<id>`"
+        ],
+        "new_lint_signatures": [
+          "TML502",
+          "focus `<id>` was declared as kind `<id>` but redeclared as `<id>`; keeping `<id>`"
+        ],
+        "new_strict_provenance_failure": true
+      },
+      "description": "Merge two distinct declared ids.",
+      "grade": {
+        "audit": [
+          "definition-divergence"
+        ],
+        "default": [
+          "focus `<id>` was declared as kind `<id>` but redeclared as `<id>`; keeping `<id>`"
+        ],
+        "lint": [
+          "TML502",
+          "focus `<id>` was declared as kind `<id>` but redeclared as `<id>`; keeping `<id>`"
+        ],
+        "parse_failed": false,
+        "strict_provenance_failed": true
+      },
+      "mutant_id": "source-002-rehearsal-booking__merge-identities",
+      "operator": "merge-identities",
+      "path": "study/runs/mutations/files/source-002-rehearsal-booking__merge-identities.thml",
+      "sha256": "acca784802eca3a3e09bf89c4e9ad7205c5255fe7799f6a7228ddc65c3e5498e",
+      "source_id": "source-002-rehearsal-booking"
+    },
+    {
+      "class": "restraint",
+      "control_or_defect": "control",
+      "delta": {
+        "caught_any": false,
+        "caught_audit": false,
+        "caught_default": false,
+        "caught_lint": false,
+        "caught_strict_provenance": false,
+        "new_audit_signatures": [],
+        "new_default_signatures": [],
+        "new_lint_signatures": [],
+        "new_strict_provenance_failure": false
+      },
+      "description": "Change whitespace without changing semantics.",
+      "grade": {
+        "audit": [],
+        "default": [],
+        "lint": [],
+        "parse_failed": false,
+        "strict_provenance_failed": false
+      },
+      "mutant_id": "source-002-rehearsal-booking__whitespace-only",
+      "operator": "whitespace-only",
+      "path": "study/runs/mutations/files/source-002-rehearsal-booking__whitespace-only.thml",
+      "sha256": "07524f5bfbb9643bae57ddec6f7bd88bc13d90e00ce1c9b550b48c086963454d",
+      "source_id": "source-002-rehearsal-booking"
+    },
+    {
+      "class": "restraint",
+      "control_or_defect": "control",
+      "delta": {
+        "caught_any": false,
+        "caught_audit": false,
+        "caught_default": false,
+        "caught_lint": false,
+        "caught_strict_provenance": false,
+        "new_audit_signatures": [],
+        "new_default_signatures": [],
+        "new_lint_signatures": [],
+        "new_strict_provenance_failure": false
+      },
+      "description": "Rename one id and all references consistently.",
+      "grade": {
+        "audit": [],
+        "default": [],
+        "lint": [],
+        "parse_failed": false,
+        "strict_provenance_failed": false
+      },
+      "mutant_id": "source-002-rehearsal-booking__consistent-rename",
+      "operator": "consistent-rename",
+      "path": "study/runs/mutations/files/source-002-rehearsal-booking__consistent-rename.thml",
+      "sha256": "2d794e22f978be7ce869d2d0dea0047ad9b77022d5b98f90a3881ced80d7d984",
+      "source_id": "source-002-rehearsal-booking"
+    },
+    {
+      "class": "structural",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": true,
+        "caught_audit": false,
+        "caught_default": true,
+        "caught_lint": true,
+        "caught_strict_provenance": true,
+        "new_audit_signatures": [],
+        "new_default_signatures": [
+          "TML201"
+        ],
+        "new_lint_signatures": [
+          "TML201"
+        ],
+        "new_strict_provenance_failure": true
+      },
+      "description": "Replace one link target with an undeclared id.",
+      "grade": {
+        "audit": [],
+        "default": [
+          "TML201"
+        ],
+        "lint": [
+          "TML201"
+        ],
+        "parse_failed": false,
+        "strict_provenance_failed": true
+      },
+      "mutant_id": "source-003-sensor-inference__dangling-target",
+      "operator": "dangling-target",
+      "path": "study/runs/mutations/files/source-003-sensor-inference__dangling-target.thml",
+      "sha256": "419b491c54acaef4fb06448685794f67377c856138f32e5e7ae30137b9f8fdcc",
+      "source_id": "source-003-sensor-inference"
+    },
+    {
+      "class": "structural",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": true,
+        "caught_audit": false,
+        "caught_default": true,
+        "caught_lint": true,
+        "caught_strict_provenance": true,
+        "new_audit_signatures": [],
+        "new_default_signatures": [
+          "TML102"
+        ],
+        "new_lint_signatures": [
+          "TML102"
+        ],
+        "new_strict_provenance_failure": true
+      },
+      "description": "Replace one relation with an out-of-vocabulary word.",
+      "grade": {
+        "audit": [],
+        "default": [
+          "TML102"
+        ],
+        "lint": [
+          "TML102"
+        ],
+        "parse_failed": false,
+        "strict_provenance_failed": true
+      },
+      "mutant_id": "source-003-sensor-inference__unknown-relation",
+      "operator": "unknown-relation",
+      "path": "study/runs/mutations/files/source-003-sensor-inference__unknown-relation.thml",
+      "sha256": "a84cfa3f0a3f501c12b1d534f16a74ee97feccaefbf08d1899090d3e92f3eb4e",
+      "source_id": "source-003-sensor-inference"
+    },
+    {
+      "class": "relational-semantic",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": false,
+        "caught_audit": false,
+        "caught_default": false,
+        "caught_lint": false,
+        "caught_strict_provenance": false,
+        "new_audit_signatures": [],
+        "new_default_signatures": [],
+        "new_lint_signatures": [],
+        "new_strict_provenance_failure": false
+      },
+      "description": "Flip one supports/opposes relation.",
+      "grade": {
+        "audit": [],
+        "default": [],
+        "lint": [],
+        "parse_failed": false,
+        "strict_provenance_failed": false
+      },
+      "mutant_id": "source-003-sensor-inference__flip-polarity",
+      "operator": "flip-polarity",
+      "path": "study/runs/mutations/files/source-003-sensor-inference__flip-polarity.thml",
+      "sha256": "252632e8ce9bb7a467db264d01238f16bba72333973437d425926551704cba54",
+      "source_id": "source-003-sensor-inference"
+    },
+    {
+      "class": "relational-semantic",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": false,
+        "caught_audit": false,
+        "caught_default": false,
+        "caught_lint": false,
+        "caught_strict_provenance": false,
+        "new_audit_signatures": [],
+        "new_default_signatures": [],
+        "new_lint_signatures": [],
+        "new_strict_provenance_failure": false
+      },
+      "description": "Reverse one directed link.",
+      "grade": {
+        "audit": [],
+        "default": [],
+        "lint": [],
+        "parse_failed": false,
+        "strict_provenance_failed": false
+      },
+      "mutant_id": "source-003-sensor-inference__reverse-link",
+      "operator": "reverse-link",
+      "path": "study/runs/mutations/files/source-003-sensor-inference__reverse-link.thml",
+      "sha256": "5ee3f4a9b693cb932eeaf1915fef9ce26f65752d7df85266af60e9e6067d6cbb",
+      "source_id": "source-003-sensor-inference"
+    },
+    {
+      "class": "numeric",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": true,
+        "caught_audit": true,
+        "caught_default": false,
+        "caught_lint": false,
+        "caught_strict_provenance": false,
+        "new_audit_signatures": [
+          "confidence-vs-status"
+        ],
+        "new_default_signatures": [],
+        "new_lint_signatures": [],
+        "new_strict_provenance_failure": false
+      },
+      "description": "Replace one confidence c with 1-c.",
+      "grade": {
+        "audit": [
+          "confidence-vs-status"
+        ],
+        "default": [],
+        "lint": [],
+        "parse_failed": false,
+        "strict_provenance_failed": false
+      },
+      "mutant_id": "source-003-sensor-inference__invert-confidence",
+      "operator": "invert-confidence",
+      "path": "study/runs/mutations/files/source-003-sensor-inference__invert-confidence.thml",
+      "sha256": "44ba75abc245d7a631b300ea66cadd8ea01f97ee1843901c23048fa8329176d4",
+      "source_id": "source-003-sensor-inference"
+    },
+    {
+      "class": "numeric",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": true,
+        "caught_audit": false,
+        "caught_default": false,
+        "caught_lint": false,
+        "caught_strict_provenance": true,
+        "new_audit_signatures": [],
+        "new_default_signatures": [],
+        "new_lint_signatures": [],
+        "new_strict_provenance_failure": true
+      },
+      "description": "Remove one measured/estimated/assumed label.",
+      "grade": {
+        "audit": [],
+        "default": [],
+        "lint": [],
+        "parse_failed": false,
+        "strict_provenance_failed": true
+      },
+      "mutant_id": "source-003-sensor-inference__strip-basis",
+      "operator": "strip-basis",
+      "path": "study/runs/mutations/files/source-003-sensor-inference__strip-basis.thml",
+      "sha256": "bcb3315d627514553a85f096b58d9ac4ba1ac36b3578d59bc15abbfb73fecae0",
+      "source_id": "source-003-sensor-inference"
+    },
+    {
+      "class": "identity",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": true,
+        "caught_audit": false,
+        "caught_default": true,
+        "caught_lint": true,
+        "caught_strict_provenance": true,
+        "new_audit_signatures": [],
+        "new_default_signatures": [
+          "TML301"
+        ],
+        "new_lint_signatures": [
+          "TML301"
+        ],
+        "new_strict_provenance_failure": true
+      },
+      "description": "Rename a declaration without updating its references.",
+      "grade": {
+        "audit": [],
+        "default": [
+          "TML301"
+        ],
+        "lint": [
+          "TML301"
+        ],
+        "parse_failed": false,
+        "strict_provenance_failed": true
+      },
+      "mutant_id": "source-003-sensor-inference__split-identity",
+      "operator": "split-identity",
+      "path": "study/runs/mutations/files/source-003-sensor-inference__split-identity.thml",
+      "sha256": "4e7fe3c14acfeb6598142bf7bf861e408504e125572eaa94fecf7b03cab2806e",
+      "source_id": "source-003-sensor-inference"
+    },
+    {
+      "class": "identity",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": true,
+        "caught_audit": true,
+        "caught_default": true,
+        "caught_lint": true,
+        "caught_strict_provenance": true,
+        "new_audit_signatures": [
+          "definition-divergence"
+        ],
+        "new_default_signatures": [
+          "focus `<id>` was declared as kind `<id>` but redeclared as `<id>`; keeping `<id>`"
+        ],
+        "new_lint_signatures": [
+          "TML502",
+          "focus `<id>` was declared as kind `<id>` but redeclared as `<id>`; keeping `<id>`"
+        ],
+        "new_strict_provenance_failure": true
+      },
+      "description": "Merge two distinct declared ids.",
+      "grade": {
+        "audit": [
+          "definition-divergence"
+        ],
+        "default": [
+          "focus `<id>` was declared as kind `<id>` but redeclared as `<id>`; keeping `<id>`"
+        ],
+        "lint": [
+          "TML502",
+          "focus `<id>` was declared as kind `<id>` but redeclared as `<id>`; keeping `<id>`"
+        ],
+        "parse_failed": false,
+        "strict_provenance_failed": true
+      },
+      "mutant_id": "source-003-sensor-inference__merge-identities",
+      "operator": "merge-identities",
+      "path": "study/runs/mutations/files/source-003-sensor-inference__merge-identities.thml",
+      "sha256": "8cc5c3494354a750f31e1d0eef52310a53c20807aed2e7c3ab831f2704254639",
+      "source_id": "source-003-sensor-inference"
+    },
+    {
+      "class": "restraint",
+      "control_or_defect": "control",
+      "delta": {
+        "caught_any": false,
+        "caught_audit": false,
+        "caught_default": false,
+        "caught_lint": false,
+        "caught_strict_provenance": false,
+        "new_audit_signatures": [],
+        "new_default_signatures": [],
+        "new_lint_signatures": [],
+        "new_strict_provenance_failure": false
+      },
+      "description": "Change whitespace without changing semantics.",
+      "grade": {
+        "audit": [],
+        "default": [],
+        "lint": [],
+        "parse_failed": false,
+        "strict_provenance_failed": false
+      },
+      "mutant_id": "source-003-sensor-inference__whitespace-only",
+      "operator": "whitespace-only",
+      "path": "study/runs/mutations/files/source-003-sensor-inference__whitespace-only.thml",
+      "sha256": "767b70b9e65060b6971dd52bfbf8ad19438c920db86be72550e6d1d147ab4637",
+      "source_id": "source-003-sensor-inference"
+    },
+    {
+      "class": "restraint",
+      "control_or_defect": "control",
+      "delta": {
+        "caught_any": false,
+        "caught_audit": false,
+        "caught_default": false,
+        "caught_lint": false,
+        "caught_strict_provenance": false,
+        "new_audit_signatures": [],
+        "new_default_signatures": [],
+        "new_lint_signatures": [],
+        "new_strict_provenance_failure": false
+      },
+      "description": "Rename one id and all references consistently.",
+      "grade": {
+        "audit": [],
+        "default": [],
+        "lint": [],
+        "parse_failed": false,
+        "strict_provenance_failed": false
+      },
+      "mutant_id": "source-003-sensor-inference__consistent-rename",
+      "operator": "consistent-rename",
+      "path": "study/runs/mutations/files/source-003-sensor-inference__consistent-rename.thml",
+      "sha256": "b76f9274dae1745f127dbee91cd147847d72c3e668e153a71b7a6a706d2db384",
+      "source_id": "source-003-sensor-inference"
+    },
+    {
+      "class": "structural",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": true,
+        "caught_audit": false,
+        "caught_default": true,
+        "caught_lint": true,
+        "caught_strict_provenance": true,
+        "new_audit_signatures": [],
+        "new_default_signatures": [
+          "TML201"
+        ],
+        "new_lint_signatures": [
+          "TML201"
+        ],
+        "new_strict_provenance_failure": true
+      },
+      "description": "Replace one link target with an undeclared id.",
+      "grade": {
+        "audit": [],
+        "default": [
+          "TML201"
+        ],
+        "lint": [
+          "TML201"
+        ],
+        "parse_failed": false,
+        "strict_provenance_failed": true
+      },
+      "mutant_id": "source-004-storage-policy-revision__dangling-target",
+      "operator": "dangling-target",
+      "path": "study/runs/mutations/files/source-004-storage-policy-revision__dangling-target.thml",
+      "sha256": "86c63a69948c709cce677c2ef6deb9b726f5868f6befc6e81ba431c74c515d8c",
+      "source_id": "source-004-storage-policy-revision"
+    },
+    {
+      "class": "structural",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": true,
+        "caught_audit": false,
+        "caught_default": true,
+        "caught_lint": true,
+        "caught_strict_provenance": true,
+        "new_audit_signatures": [],
+        "new_default_signatures": [
+          "TML102"
+        ],
+        "new_lint_signatures": [
+          "TML102"
+        ],
+        "new_strict_provenance_failure": true
+      },
+      "description": "Replace one relation with an out-of-vocabulary word.",
+      "grade": {
+        "audit": [],
+        "default": [
+          "TML102"
+        ],
+        "lint": [
+          "TML102"
+        ],
+        "parse_failed": false,
+        "strict_provenance_failed": true
+      },
+      "mutant_id": "source-004-storage-policy-revision__unknown-relation",
+      "operator": "unknown-relation",
+      "path": "study/runs/mutations/files/source-004-storage-policy-revision__unknown-relation.thml",
+      "sha256": "52ce52777f00bf4afd05167e5dfb706ec1860d4282807151366b44056f5de7b4",
+      "source_id": "source-004-storage-policy-revision"
+    },
+    {
+      "class": "relational-semantic",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": true,
+        "caught_audit": true,
+        "caught_default": false,
+        "caught_lint": false,
+        "caught_strict_provenance": false,
+        "new_audit_signatures": [
+          "confidence-vs-status"
+        ],
+        "new_default_signatures": [],
+        "new_lint_signatures": [],
+        "new_strict_provenance_failure": false
+      },
+      "description": "Flip one supports/opposes relation.",
+      "grade": {
+        "audit": [
+          "confidence-vs-status"
+        ],
+        "default": [],
+        "lint": [],
+        "parse_failed": false,
+        "strict_provenance_failed": false
+      },
+      "mutant_id": "source-004-storage-policy-revision__flip-polarity",
+      "operator": "flip-polarity",
+      "path": "study/runs/mutations/files/source-004-storage-policy-revision__flip-polarity.thml",
+      "sha256": "fc4a223a2d171476de869bff5668d6ff84c7c0b1515256f8acbe618428c7bdc2",
+      "source_id": "source-004-storage-policy-revision"
+    },
+    {
+      "class": "relational-semantic",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": false,
+        "caught_audit": false,
+        "caught_default": false,
+        "caught_lint": false,
+        "caught_strict_provenance": false,
+        "new_audit_signatures": [],
+        "new_default_signatures": [],
+        "new_lint_signatures": [],
+        "new_strict_provenance_failure": false
+      },
+      "description": "Reverse one directed link.",
+      "grade": {
+        "audit": [],
+        "default": [],
+        "lint": [],
+        "parse_failed": false,
+        "strict_provenance_failed": false
+      },
+      "mutant_id": "source-004-storage-policy-revision__reverse-link",
+      "operator": "reverse-link",
+      "path": "study/runs/mutations/files/source-004-storage-policy-revision__reverse-link.thml",
+      "sha256": "860006c826de6c9c0174033f1e6b8dbef5e40cf1aa54091d2cebec6a804086c2",
+      "source_id": "source-004-storage-policy-revision"
+    },
+    {
+      "class": "numeric",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": false,
+        "caught_audit": false,
+        "caught_default": false,
+        "caught_lint": false,
+        "caught_strict_provenance": false,
+        "new_audit_signatures": [],
+        "new_default_signatures": [],
+        "new_lint_signatures": [],
+        "new_strict_provenance_failure": false
+      },
+      "description": "Replace one confidence c with 1-c.",
+      "grade": {
+        "audit": [],
+        "default": [],
+        "lint": [],
+        "parse_failed": false,
+        "strict_provenance_failed": false
+      },
+      "mutant_id": "source-004-storage-policy-revision__invert-confidence",
+      "operator": "invert-confidence",
+      "path": "study/runs/mutations/files/source-004-storage-policy-revision__invert-confidence.thml",
+      "sha256": "31d6bde28b3087614f916cf465db731a0f30bb6c60688313bfb7e363a406b071",
+      "source_id": "source-004-storage-policy-revision"
+    },
+    {
+      "class": "numeric",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": true,
+        "caught_audit": false,
+        "caught_default": false,
+        "caught_lint": false,
+        "caught_strict_provenance": true,
+        "new_audit_signatures": [],
+        "new_default_signatures": [],
+        "new_lint_signatures": [],
+        "new_strict_provenance_failure": true
+      },
+      "description": "Remove one measured/estimated/assumed label.",
+      "grade": {
+        "audit": [],
+        "default": [],
+        "lint": [],
+        "parse_failed": false,
+        "strict_provenance_failed": true
+      },
+      "mutant_id": "source-004-storage-policy-revision__strip-basis",
+      "operator": "strip-basis",
+      "path": "study/runs/mutations/files/source-004-storage-policy-revision__strip-basis.thml",
+      "sha256": "3f06ed30ad6e2a78fdc72061418f840da021dbbbc8540c93f52911b2fe12b005",
+      "source_id": "source-004-storage-policy-revision"
+    },
+    {
+      "class": "identity",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": true,
+        "caught_audit": false,
+        "caught_default": true,
+        "caught_lint": true,
+        "caught_strict_provenance": true,
+        "new_audit_signatures": [],
+        "new_default_signatures": [
+          "TML301"
+        ],
+        "new_lint_signatures": [
+          "TML301"
+        ],
+        "new_strict_provenance_failure": true
+      },
+      "description": "Rename a declaration without updating its references.",
+      "grade": {
+        "audit": [],
+        "default": [
+          "TML301"
+        ],
+        "lint": [
+          "TML301"
+        ],
+        "parse_failed": false,
+        "strict_provenance_failed": true
+      },
+      "mutant_id": "source-004-storage-policy-revision__split-identity",
+      "operator": "split-identity",
+      "path": "study/runs/mutations/files/source-004-storage-policy-revision__split-identity.thml",
+      "sha256": "35055b65ea4380508df43d74a553223fc1837ea87b153120ab31ce1db94a0941",
+      "source_id": "source-004-storage-policy-revision"
+    },
+    {
+      "class": "identity",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": true,
+        "caught_audit": true,
+        "caught_default": true,
+        "caught_lint": true,
+        "caught_strict_provenance": true,
+        "new_audit_signatures": [
+          "definition-divergence"
+        ],
+        "new_default_signatures": [
+          "focus `<id>` was declared as kind `<id>` but redeclared as `<id>`; keeping `<id>`"
+        ],
+        "new_lint_signatures": [
+          "focus `<id>` was declared as kind `<id>` but redeclared as `<id>`; keeping `<id>`"
+        ],
+        "new_strict_provenance_failure": true
+      },
+      "description": "Merge two distinct declared ids.",
+      "grade": {
+        "audit": [
+          "definition-divergence"
+        ],
+        "default": [
+          "focus `<id>` was declared as kind `<id>` but redeclared as `<id>`; keeping `<id>`"
+        ],
+        "lint": [
+          "focus `<id>` was declared as kind `<id>` but redeclared as `<id>`; keeping `<id>`"
+        ],
+        "parse_failed": false,
+        "strict_provenance_failed": true
+      },
+      "mutant_id": "source-004-storage-policy-revision__merge-identities",
+      "operator": "merge-identities",
+      "path": "study/runs/mutations/files/source-004-storage-policy-revision__merge-identities.thml",
+      "sha256": "c67e1ed3671bb389c8b8b6a9ba10bb938f3f0c4e9abdf7cfaa6e8c8f8f4072b5",
+      "source_id": "source-004-storage-policy-revision"
+    },
+    {
+      "class": "restraint",
+      "control_or_defect": "control",
+      "delta": {
+        "caught_any": false,
+        "caught_audit": false,
+        "caught_default": false,
+        "caught_lint": false,
+        "caught_strict_provenance": false,
+        "new_audit_signatures": [],
+        "new_default_signatures": [],
+        "new_lint_signatures": [],
+        "new_strict_provenance_failure": false
+      },
+      "description": "Change whitespace without changing semantics.",
+      "grade": {
+        "audit": [],
+        "default": [],
+        "lint": [],
+        "parse_failed": false,
+        "strict_provenance_failed": false
+      },
+      "mutant_id": "source-004-storage-policy-revision__whitespace-only",
+      "operator": "whitespace-only",
+      "path": "study/runs/mutations/files/source-004-storage-policy-revision__whitespace-only.thml",
+      "sha256": "483c44caf27326a16287b2f1e3df92d044bb095714028ca4ffd6cf93154ae8d4",
+      "source_id": "source-004-storage-policy-revision"
+    },
+    {
+      "class": "restraint",
+      "control_or_defect": "control",
+      "delta": {
+        "caught_any": false,
+        "caught_audit": false,
+        "caught_default": false,
+        "caught_lint": false,
+        "caught_strict_provenance": false,
+        "new_audit_signatures": [],
+        "new_default_signatures": [],
+        "new_lint_signatures": [],
+        "new_strict_provenance_failure": false
+      },
+      "description": "Rename one id and all references consistently.",
+      "grade": {
+        "audit": [],
+        "default": [],
+        "lint": [],
+        "parse_failed": false,
+        "strict_provenance_failed": false
+      },
+      "mutant_id": "source-004-storage-policy-revision__consistent-rename",
+      "operator": "consistent-rename",
+      "path": "study/runs/mutations/files/source-004-storage-policy-revision__consistent-rename.thml",
+      "sha256": "9087d2d260b1fe66ffeaf9c58a9543743c9650f627bc6f740ca548462ab80d08",
+      "source_id": "source-004-storage-policy-revision"
+    },
+    {
+      "class": "structural",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": true,
+        "caught_audit": false,
+        "caught_default": true,
+        "caught_lint": true,
+        "caught_strict_provenance": true,
+        "new_audit_signatures": [],
+        "new_default_signatures": [
+          "TML201"
+        ],
+        "new_lint_signatures": [
+          "TML201"
+        ],
+        "new_strict_provenance_failure": true
+      },
+      "description": "Replace one link target with an undeclared id.",
+      "grade": {
+        "audit": [],
+        "default": [
+          "TML201"
+        ],
+        "lint": [
+          "TML201"
+        ],
+        "parse_failed": false,
+        "strict_provenance_failed": true
+      },
+      "mutant_id": "source-005-vendor-criteria__dangling-target",
+      "operator": "dangling-target",
+      "path": "study/runs/mutations/files/source-005-vendor-criteria__dangling-target.thml",
+      "sha256": "21c6ba7627a99f49f2444be899f651f49681e5e0d3f7cb528866f1450c5baf4c",
+      "source_id": "source-005-vendor-criteria"
+    },
+    {
+      "class": "structural",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": true,
+        "caught_audit": false,
+        "caught_default": true,
+        "caught_lint": true,
+        "caught_strict_provenance": true,
+        "new_audit_signatures": [],
+        "new_default_signatures": [
+          "TML102"
+        ],
+        "new_lint_signatures": [
+          "TML102"
+        ],
+        "new_strict_provenance_failure": true
+      },
+      "description": "Replace one relation with an out-of-vocabulary word.",
+      "grade": {
+        "audit": [],
+        "default": [
+          "TML102"
+        ],
+        "lint": [
+          "TML102"
+        ],
+        "parse_failed": false,
+        "strict_provenance_failed": true
+      },
+      "mutant_id": "source-005-vendor-criteria__unknown-relation",
+      "operator": "unknown-relation",
+      "path": "study/runs/mutations/files/source-005-vendor-criteria__unknown-relation.thml",
+      "sha256": "ad7881f0695fbe407bba3f7b9d440348533b87d69c93c1802709406294a07d1c",
+      "source_id": "source-005-vendor-criteria"
+    },
+    {
+      "class": "relational-semantic",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": true,
+        "caught_audit": true,
+        "caught_default": false,
+        "caught_lint": false,
+        "caught_strict_provenance": false,
+        "new_audit_signatures": [
+          "confidence-vs-status"
+        ],
+        "new_default_signatures": [],
+        "new_lint_signatures": [],
+        "new_strict_provenance_failure": false
+      },
+      "description": "Flip one supports/opposes relation.",
+      "grade": {
+        "audit": [
+          "confidence-vs-status"
+        ],
+        "default": [],
+        "lint": [],
+        "parse_failed": false,
+        "strict_provenance_failed": false
+      },
+      "mutant_id": "source-005-vendor-criteria__flip-polarity",
+      "operator": "flip-polarity",
+      "path": "study/runs/mutations/files/source-005-vendor-criteria__flip-polarity.thml",
+      "sha256": "77c7570bfb784ffa7cd586317ee8a49374f26d9fbd17bc6a3d1c110afd7dd03c",
+      "source_id": "source-005-vendor-criteria"
+    },
+    {
+      "class": "relational-semantic",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": false,
+        "caught_audit": false,
+        "caught_default": false,
+        "caught_lint": false,
+        "caught_strict_provenance": false,
+        "new_audit_signatures": [],
+        "new_default_signatures": [],
+        "new_lint_signatures": [],
+        "new_strict_provenance_failure": false
+      },
+      "description": "Reverse one directed link.",
+      "grade": {
+        "audit": [],
+        "default": [],
+        "lint": [],
+        "parse_failed": false,
+        "strict_provenance_failed": false
+      },
+      "mutant_id": "source-005-vendor-criteria__reverse-link",
+      "operator": "reverse-link",
+      "path": "study/runs/mutations/files/source-005-vendor-criteria__reverse-link.thml",
+      "sha256": "67eb258915e571243e649268a309094acecdf0f8ed8b47a307ffd2862bf701a9",
+      "source_id": "source-005-vendor-criteria"
+    },
+    {
+      "class": "numeric",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": false,
+        "caught_audit": false,
+        "caught_default": false,
+        "caught_lint": false,
+        "caught_strict_provenance": false,
+        "new_audit_signatures": [],
+        "new_default_signatures": [],
+        "new_lint_signatures": [],
+        "new_strict_provenance_failure": false
+      },
+      "description": "Replace one confidence c with 1-c.",
+      "grade": {
+        "audit": [],
+        "default": [],
+        "lint": [],
+        "parse_failed": false,
+        "strict_provenance_failed": false
+      },
+      "mutant_id": "source-005-vendor-criteria__invert-confidence",
+      "operator": "invert-confidence",
+      "path": "study/runs/mutations/files/source-005-vendor-criteria__invert-confidence.thml",
+      "sha256": "ce37c98b22d3024637fea29dce94d2669a725cea8a9ce5e1ba28cf5b9860156e",
+      "source_id": "source-005-vendor-criteria"
+    },
+    {
+      "class": "numeric",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": true,
+        "caught_audit": false,
+        "caught_default": false,
+        "caught_lint": false,
+        "caught_strict_provenance": true,
+        "new_audit_signatures": [],
+        "new_default_signatures": [],
+        "new_lint_signatures": [],
+        "new_strict_provenance_failure": true
+      },
+      "description": "Remove one measured/estimated/assumed label.",
+      "grade": {
+        "audit": [],
+        "default": [],
+        "lint": [],
+        "parse_failed": false,
+        "strict_provenance_failed": true
+      },
+      "mutant_id": "source-005-vendor-criteria__strip-basis",
+      "operator": "strip-basis",
+      "path": "study/runs/mutations/files/source-005-vendor-criteria__strip-basis.thml",
+      "sha256": "f6b92839f188197e41fe506dd9eccd13fc82b1450aa4a0026fede766905953eb",
+      "source_id": "source-005-vendor-criteria"
+    },
+    {
+      "class": "enumeration",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": true,
+        "caught_audit": false,
+        "caught_default": false,
+        "caught_lint": true,
+        "caught_strict_provenance": false,
+        "new_audit_signatures": [],
+        "new_default_signatures": [],
+        "new_lint_signatures": [
+          "TML501"
+        ],
+        "new_strict_provenance_failure": false
+      },
+      "description": "Turn a structural enumeration into evidence.",
+      "grade": {
+        "audit": [],
+        "default": [],
+        "lint": [
+          "TML501"
+        ],
+        "parse_failed": false,
+        "strict_provenance_failed": false
+      },
+      "mutant_id": "source-005-vendor-criteria__part-of-to-supports",
+      "operator": "part-of-to-supports",
+      "path": "study/runs/mutations/files/source-005-vendor-criteria__part-of-to-supports.thml",
+      "sha256": "64a7115dfc75b9f404059db3ae74f334f947f07da4bacb186f5b9486fce6f72f",
+      "source_id": "source-005-vendor-criteria"
+    },
+    {
+      "class": "identity",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": true,
+        "caught_audit": false,
+        "caught_default": true,
+        "caught_lint": true,
+        "caught_strict_provenance": true,
+        "new_audit_signatures": [],
+        "new_default_signatures": [
+          "TML201",
+          "TML301"
+        ],
+        "new_lint_signatures": [
+          "TML201",
+          "TML301"
+        ],
+        "new_strict_provenance_failure": true
+      },
+      "description": "Rename a declaration without updating its references.",
+      "grade": {
+        "audit": [],
+        "default": [
+          "TML201",
+          "TML301"
+        ],
+        "lint": [
+          "TML201",
+          "TML301"
+        ],
+        "parse_failed": false,
+        "strict_provenance_failed": true
+      },
+      "mutant_id": "source-005-vendor-criteria__split-identity",
+      "operator": "split-identity",
+      "path": "study/runs/mutations/files/source-005-vendor-criteria__split-identity.thml",
+      "sha256": "405593359992ab7a8ff14a7e3c850882405266305ff2d524a5d3d679b12e4f61",
+      "source_id": "source-005-vendor-criteria"
+    },
+    {
+      "class": "identity",
+      "control_or_defect": "registered",
+      "delta": {
+        "caught_any": true,
+        "caught_audit": true,
+        "caught_default": true,
+        "caught_lint": true,
+        "caught_strict_provenance": true,
+        "new_audit_signatures": [
+          "definition-divergence"
+        ],
+        "new_default_signatures": [
+          "focus `<id>` was declared as kind `<id>` but redeclared as `<id>`; keeping `<id>`"
+        ],
+        "new_lint_signatures": [
+          "focus `<id>` was declared as kind `<id>` but redeclared as `<id>`; keeping `<id>`"
+        ],
+        "new_strict_provenance_failure": true
+      },
+      "description": "Merge two distinct declared ids.",
+      "grade": {
+        "audit": [
+          "definition-divergence"
+        ],
+        "default": [
+          "focus `<id>` was declared as kind `<id>` but redeclared as `<id>`; keeping `<id>`"
+        ],
+        "lint": [
+          "focus `<id>` was declared as kind `<id>` but redeclared as `<id>`; keeping `<id>`"
+        ],
+        "parse_failed": false,
+        "strict_provenance_failed": true
+      },
+      "mutant_id": "source-005-vendor-criteria__merge-identities",
+      "operator": "merge-identities",
+      "path": "study/runs/mutations/files/source-005-vendor-criteria__merge-identities.thml",
+      "sha256": "cc9dcdc5c5468d13232925463dd725dd707864e1d980fd597aa76cc4f11f8d32",
+      "source_id": "source-005-vendor-criteria"
+    },
+    {
+      "class": "restraint",
+      "control_or_defect": "control",
+      "delta": {
+        "caught_any": false,
+        "caught_audit": false,
+        "caught_default": false,
+        "caught_lint": false,
+        "caught_strict_provenance": false,
+        "new_audit_signatures": [],
+        "new_default_signatures": [],
+        "new_lint_signatures": [],
+        "new_strict_provenance_failure": false
+      },
+      "description": "Change whitespace without changing semantics.",
+      "grade": {
+        "audit": [],
+        "default": [],
+        "lint": [],
+        "parse_failed": false,
+        "strict_provenance_failed": false
+      },
+      "mutant_id": "source-005-vendor-criteria__whitespace-only",
+      "operator": "whitespace-only",
+      "path": "study/runs/mutations/files/source-005-vendor-criteria__whitespace-only.thml",
+      "sha256": "555b48472e974ea883b324171d11a2ea58d7dce80cdae7eb5a4cf077e42121fd",
+      "source_id": "source-005-vendor-criteria"
+    },
+    {
+      "class": "restraint",
+      "control_or_defect": "control",
+      "delta": {
+        "caught_any": false,
+        "caught_audit": false,
+        "caught_default": false,
+        "caught_lint": false,
+        "caught_strict_provenance": false,
+        "new_audit_signatures": [],
+        "new_default_signatures": [],
+        "new_lint_signatures": [],
+        "new_strict_provenance_failure": false
+      },
+      "description": "Rename one id and all references consistently.",
+      "grade": {
+        "audit": [],
+        "default": [],
+        "lint": [],
+        "parse_failed": false,
+        "strict_provenance_failed": false
+      },
+      "mutant_id": "source-005-vendor-criteria__consistent-rename",
+      "operator": "consistent-rename",
+      "path": "study/runs/mutations/files/source-005-vendor-criteria__consistent-rename.thml",
+      "sha256": "baa20b4b8d36d376ff4dfb68c370f483c7d1760eda118ec284fee6a178edcd37",
+      "source_id": "source-005-vendor-criteria"
+    }
+  ],
+  "operator_source_sha256": "d182b527a9e7aa132c209f1e4f90d86fc93b4055c5aa4440ec332dbac5e8800a",
+  "pooled_all_defect_rate_reported": false,
+  "schema_version": 1,
+  "sources": [
+    {
+      "baseline": {
+        "audit": [],
+        "default": [],
+        "lint": [],
+        "parse_failed": false,
+        "strict_provenance_failed": false
+      },
+      "path": "study/mutation-corpus/clean/equipment-lease.thml",
+      "sha256": "140972ba2759d4a4f23beaa4148867f89113b9fd0d9f5cbecd69134a968cdf67",
+      "source_id": "source-001-equipment-lease"
+    },
+    {
+      "baseline": {
+        "audit": [],
+        "default": [],
+        "lint": [],
+        "parse_failed": false,
+        "strict_provenance_failed": false
+      },
+      "path": "study/mutation-corpus/clean/rehearsal-booking.thml",
+      "sha256": "c2acb079f5eb175e5c5c5631d9ad6010d328669b90c13971182e8e8170407cc2",
+      "source_id": "source-002-rehearsal-booking"
+    },
+    {
+      "baseline": {
+        "audit": [],
+        "default": [],
+        "lint": [],
+        "parse_failed": false,
+        "strict_provenance_failed": false
+      },
+      "path": "study/mutation-corpus/clean/sensor-inference.thml",
+      "sha256": "cd423fd86b0f315278562b150b4292361f45eaa7cc271de30170962250058cfa",
+      "source_id": "source-003-sensor-inference"
+    },
+    {
+      "baseline": {
+        "audit": [],
+        "default": [],
+        "lint": [],
+        "parse_failed": false,
+        "strict_provenance_failed": false
+      },
+      "path": "study/mutation-corpus/clean/storage-policy-revision.thml",
+      "sha256": "8e12b1c491552cdf8c980f1519424bdae4f7cee3204c5a8cf59d62768f84c024",
+      "source_id": "source-004-storage-policy-revision"
+    },
+    {
+      "baseline": {
+        "audit": [],
+        "default": [],
+        "lint": [],
+        "parse_failed": false,
+        "strict_provenance_failed": false
+      },
+      "path": "study/mutation-corpus/clean/vendor-criteria.thml",
+      "sha256": "6140f8ac1f060800002de5ad9d87e96cb7ea2beddf6af62ec736fe53ff72e253",
+      "source_id": "source-005-vendor-criteria"
+    }
+  ],
+  "summary_by_class": {
+    "enumeration": {
+      "caught_any": 1,
+      "caught_audit": 0,
+      "caught_default": 0,
+      "caught_lint": 1,
+      "caught_strict_provenance": 0,
+      "n": 1
+    },
+    "identity": {
+      "caught_any": 10,
+      "caught_audit": 5,
+      "caught_default": 10,
+      "caught_lint": 10,
+      "caught_strict_provenance": 10,
+      "n": 10
+    },
+    "numeric": {
+      "caught_any": 7,
+      "caught_audit": 1,
+      "caught_default": 1,
+      "caught_lint": 1,
+      "caught_strict_provenance": 6,
+      "n": 11
+    },
+    "relational-semantic": {
+      "caught_any": 2,
+      "caught_audit": 2,
+      "caught_default": 0,
+      "caught_lint": 0,
+      "caught_strict_provenance": 0,
+      "n": 9
+    },
+    "restraint": {
+      "caught_any": 0,
+      "caught_audit": 0,
+      "caught_default": 0,
+      "caught_lint": 0,
+      "caught_strict_provenance": 0,
+      "n": 10
+    },
+    "structural": {
+      "caught_any": 10,
+      "caught_audit": 0,
+      "caught_default": 10,
+      "caught_lint": 10,
+      "caught_strict_provenance": 10,
+      "n": 10
+    }
+  }
+}

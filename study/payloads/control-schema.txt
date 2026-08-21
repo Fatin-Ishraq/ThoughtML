@@ -1,0 +1,11 @@
+Return one JSON object with exactly these top-level arrays:
+
+1. `claims`: objects with exactly `id`, `text`, and `confidence`.
+   - `id` is a unique lowercase kebab-case string.
+   - `text` is a non-empty claim.
+   - `confidence` is a number from 0 to 1.
+2. `relations`: objects with exactly `from`, `type`, and `to`.
+   - `from` and `to` reference ids in `claims`.
+   - `type` is exactly `supports` or `opposes`.
+
+Use `supports` only when the source is a reason for the target. Use `opposes` only when the source is a reason against the target. Include the final conclusion as the claim whose id is `final-answer`.
