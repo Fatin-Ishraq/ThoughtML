@@ -1,7 +1,7 @@
 {
-  "collectable": false,
+  "collectable": true,
   "count": 30,
-  "created_at": "2026-08-21T14:18:37.962094Z",
+  "created_at": "2026-08-21T14:18:57.113921Z",
   "items": [
     {
       "arm": "T",
@@ -544,8 +544,8 @@
       "vendor": "deepseek"
     }
   ],
-  "manifest": "study\\runs\\candidate-manifest.json",
-  "manifest_sha256": "0653c075c7bb1cdae03e009148c5b6211b35e2fe4769996228be9caa9bfb1977",
+  "manifest": "study\\runs\\manifests\\frozen-a709286634b4918e.json",
+  "manifest_sha256": "b974edc1a9cc5a63b53be8c7a2ac2e9a44f24b9864420315f06a661559b995ae",
   "order_policy": {
     "provider_blocks": [
       "openai",
