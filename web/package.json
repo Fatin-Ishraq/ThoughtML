@@ -13,7 +13,7 @@
     "test": "node --experimental-strip-types --test tests/*.test.ts"
   },
   "dependencies": {
-    "@codemirror/commands": "^6.6.0",
+    "@codemirror/commands": "^6.11.0",
     "@codemirror/language": "^6.12.4",
     "@codemirror/lint": "^6.8.0",
     "@codemirror/state": "^6.4.0",
