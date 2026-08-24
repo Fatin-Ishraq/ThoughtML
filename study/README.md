@@ -13,6 +13,13 @@ into three states:
 Do not run registered collection until every item in `protocol-issues.md` is
 resolved and the pre-registration/deviation log reflects those resolutions.
 
+The proposed DSH agent-utility extension is documented separately in
+[`dsh-agent-utility-amendment.md`](dsh-agent-utility-amendment.md). It is a
+post-data extension, not a rewrite of the original preregistration. Its only DSH
+responses so far are explicitly excluded development diagnostics; no pilot has
+started. Pilot tasks, budgets, integration artifacts, and the authoritative
+manifest must still be frozen first.
+
 ## Layout
 
 - `tasks/` — registered task sets and contamination probes.
@@ -20,6 +27,8 @@ resolved and the pre-registration/deviation log reflects those resolutions.
 - `payloads/` — prompt instructions and the generic-schema control.
 - `schemas/` — JSON Schemas for tasks and generic responses.
 - `config/` — pinned models and benchmark constants.
+- `dsh/` — isolated candidate DSH dependency, feasibility audit, and future
+  agent-utility integration artifacts.
 - `scripts/benchmark.py` — validation, freezing, scheduling, running, grading,
   mutation generation, and analysis entry point.
 - `tests/` — offline tests for the benchmark machinery.

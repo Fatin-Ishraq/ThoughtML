@@ -1,0 +1,369 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-24T18:01:56.751Z",
+  "mode": "offline-deterministic-mock",
+  "networkModelCalls": 0,
+  "dshVersion": "0.1.1-rc.2",
+  "thoughtmlVersion": "thoughtml 0.5.0",
+  "conditions": [
+    {
+      "condition": "D",
+      "exitCode": 0,
+      "finalText": "offline mock complete (D)",
+      "eventCount": 40,
+      "eventTypes": {
+        "permission/preset": 1,
+        "sandbox/mode": 1,
+        "approval/policy": 1,
+        "agent/inbox/spliced": 2,
+        "turn/start": 1,
+        "step/start": 3,
+        "user/message": 2,
+        "session/title": 1,
+        "request/header": 1,
+        "request/context": 1,
+        "assistant/chunk": 15,
+        "assistant/message": 3,
+        "tool/call": 2,
+        "tool/result": 2,
+        "step/end": 3,
+        "turn/end": 1
+      },
+      "toolNames": [
+        "offline_operation",
+        "offline_operation"
+      ],
+      "requestProviders": [
+        "thoughtml-study-mock"
+      ],
+      "requestModels": [
+        "deterministic-v1"
+      ],
+      "state": null,
+      "stateValidation": null,
+      "metrics": {
+        "eventCount": 40,
+        "eventTypes": {
+          "permission/preset": 1,
+          "sandbox/mode": 1,
+          "approval/policy": 1,
+          "agent/inbox/spliced": 2,
+          "turn/start": 1,
+          "step/start": 3,
+          "user/message": 2,
+          "session/title": 1,
+          "request/header": 1,
+          "request/context": 1,
+          "assistant/chunk": 15,
+          "assistant/message": 3,
+          "tool/call": 2,
+          "tool/result": 2,
+          "step/end": 3,
+          "turn/end": 1
+        },
+        "turns": 1,
+        "steps": 3,
+        "requestCount": 3,
+        "requestHeaderCount": 1,
+        "modelCalls": 3,
+        "providers": [
+          "thoughtml-study-mock"
+        ],
+        "models": [
+          "deterministic-v1"
+        ],
+        "inputTokens": 303,
+        "cacheReadTokens": 0,
+        "outputTokens": 28,
+        "reasoningTokens": 0,
+        "toolCalls": 2,
+        "failedToolCalls": 1,
+        "repeatedActions": 0,
+        "repeatedFailedActions": 0,
+        "recoveryEpisodesStarted": 1,
+        "recoveryEpisodesCompleted": 1,
+        "recoveryToolDistances": [
+          1
+        ],
+        "stateReads": 0,
+        "stateCommitAttempts": 0,
+        "stateCommits": 0,
+        "stateCommitRejections": 0,
+        "stateNoopCommits": 0,
+        "stateInspections": 0,
+        "stateCheckpointsAfterFailure": 0,
+        "latestStateRevision": 0,
+        "latestStateBytes": 0,
+        "latestStateValid": null,
+        "unresolvedRecoveryEpisode": false
+      },
+      "telemetryMode": "DISABLED",
+      "deepseekCredentialPresent": false,
+      "persistedSession": true
+    },
+    {
+      "condition": "M",
+      "exitCode": 0,
+      "finalText": "offline mock complete (M)",
+      "eventCount": 74,
+      "eventTypes": {
+        "permission/preset": 1,
+        "sandbox/mode": 1,
+        "approval/policy": 1,
+        "agent/inbox/spliced": 4,
+        "turn/start": 1,
+        "step/start": 6,
+        "user/message": 4,
+        "session/title": 1,
+        "request/header": 1,
+        "request/context": 1,
+        "assistant/chunk": 30,
+        "assistant/message": 6,
+        "tool/call": 5,
+        "tool/result": 5,
+        "step/end": 6,
+        "turn/end": 1
+      },
+      "toolNames": [
+        "offline_operation",
+        "reasoning_state_commit",
+        "reasoning_state_read",
+        "reasoning_state_inspect",
+        "offline_operation"
+      ],
+      "requestProviders": [
+        "thoughtml-study-mock"
+      ],
+      "requestModels": [
+        "deterministic-v1"
+      ],
+      "state": {
+        "filename": "state.md",
+        "bytes": 616,
+        "sha256": "43934f103b1118f5506bba1ec1be55c5bfbe63a6f9dba1346cdd1373d36f7ccf"
+      },
+      "stateValidation": {
+        "revision": 1,
+        "format": "markdown",
+        "sha256": "43934f103b1118f5506bba1ec1be55c5bfbe63a6f9dba1346cdd1373d36f7ccf",
+        "bytes": 616,
+        "validation": {
+          "valid": true,
+          "diagnostics": [],
+          "summary": "valid"
+        },
+        "analysis": {
+          "itemCount": 8,
+          "relationCount": 0,
+          "conflictCount": 0
+        },
+        "history": [
+          {
+            "revision": 1,
+            "sha256": "43934f103b1118f5506bba1ec1be55c5bfbe63a6f9dba1346cdd1373d36f7ccf",
+            "bytes": 616,
+            "reason": "Checkpoint the first-attempt failure and revised recovery action."
+          },
+          {
+            "revision": 0,
+            "sha256": "481fd483e67b579fde53dfda909fb2c0a07cab46196053632114adbad5d8a6e9",
+            "bytes": 525,
+            "reason": "session state initialized"
+          }
+        ],
+        "historyTruncated": false
+      },
+      "metrics": {
+        "eventCount": 74,
+        "eventTypes": {
+          "permission/preset": 1,
+          "sandbox/mode": 1,
+          "approval/policy": 1,
+          "agent/inbox/spliced": 4,
+          "turn/start": 1,
+          "step/start": 6,
+          "user/message": 4,
+          "session/title": 1,
+          "request/header": 1,
+          "request/context": 1,
+          "assistant/chunk": 30,
+          "assistant/message": 6,
+          "tool/call": 5,
+          "tool/result": 5,
+          "step/end": 6,
+          "turn/end": 1
+        },
+        "turns": 1,
+        "steps": 6,
+        "requestCount": 6,
+        "requestHeaderCount": 1,
+        "modelCalls": 6,
+        "providers": [
+          "thoughtml-study-mock"
+        ],
+        "models": [
+          "deterministic-v1"
+        ],
+        "inputTokens": 615,
+        "cacheReadTokens": 0,
+        "outputTokens": 58,
+        "reasoningTokens": 0,
+        "toolCalls": 5,
+        "failedToolCalls": 1,
+        "repeatedActions": 0,
+        "repeatedFailedActions": 0,
+        "recoveryEpisodesStarted": 1,
+        "recoveryEpisodesCompleted": 1,
+        "recoveryToolDistances": [
+          4
+        ],
+        "stateReads": 1,
+        "stateCommitAttempts": 1,
+        "stateCommits": 1,
+        "stateCommitRejections": 0,
+        "stateNoopCommits": 0,
+        "stateInspections": 1,
+        "stateCheckpointsAfterFailure": 1,
+        "latestStateRevision": 1,
+        "latestStateBytes": 616,
+        "latestStateValid": true,
+        "unresolvedRecoveryEpisode": false
+      },
+      "telemetryMode": "DISABLED",
+      "deepseekCredentialPresent": false,
+      "persistedSession": true
+    },
+    {
+      "condition": "T",
+      "exitCode": 0,
+      "finalText": "offline mock complete (T)",
+      "eventCount": 74,
+      "eventTypes": {
+        "permission/preset": 1,
+        "sandbox/mode": 1,
+        "approval/policy": 1,
+        "agent/inbox/spliced": 4,
+        "turn/start": 1,
+        "step/start": 6,
+        "user/message": 4,
+        "session/title": 1,
+        "request/header": 1,
+        "request/context": 1,
+        "assistant/chunk": 30,
+        "assistant/message": 6,
+        "tool/call": 5,
+        "tool/result": 5,
+        "step/end": 6,
+        "turn/end": 1
+      },
+      "toolNames": [
+        "offline_operation",
+        "reasoning_state_commit",
+        "reasoning_state_read",
+        "reasoning_state_inspect",
+        "offline_operation"
+      ],
+      "requestProviders": [
+        "thoughtml-study-mock"
+      ],
+      "requestModels": [
+        "deterministic-v1"
+      ],
+      "state": {
+        "filename": "state.thml",
+        "bytes": 1091,
+        "sha256": "828aba444e5ee16ae0d9efdc31c013cf7902d678dad132ba2067196b07ae07a7"
+      },
+      "stateValidation": {
+        "revision": 1,
+        "format": "thoughtml",
+        "sha256": "828aba444e5ee16ae0d9efdc31c013cf7902d678dad132ba2067196b07ae07a7",
+        "bytes": 1091,
+        "validation": {
+          "valid": true,
+          "diagnostics": [],
+          "summary": "valid"
+        },
+        "analysis": {
+          "itemCount": 10,
+          "relationCount": 9,
+          "conflictCount": 0
+        },
+        "history": [
+          {
+            "revision": 1,
+            "sha256": "828aba444e5ee16ae0d9efdc31c013cf7902d678dad132ba2067196b07ae07a7",
+            "bytes": 1091,
+            "reason": "Checkpoint the first-attempt failure and revised recovery action."
+          },
+          {
+            "revision": 0,
+            "sha256": "90c61e393b4d938ead455c52a2b684b465cc77904adc62d9d00e697d64534731",
+            "bytes": 907,
+            "reason": "session state initialized"
+          }
+        ],
+        "historyTruncated": false
+      },
+      "metrics": {
+        "eventCount": 74,
+        "eventTypes": {
+          "permission/preset": 1,
+          "sandbox/mode": 1,
+          "approval/policy": 1,
+          "agent/inbox/spliced": 4,
+          "turn/start": 1,
+          "step/start": 6,
+          "user/message": 4,
+          "session/title": 1,
+          "request/header": 1,
+          "request/context": 1,
+          "assistant/chunk": 30,
+          "assistant/message": 6,
+          "tool/call": 5,
+          "tool/result": 5,
+          "step/end": 6,
+          "turn/end": 1
+        },
+        "turns": 1,
+        "steps": 6,
+        "requestCount": 6,
+        "requestHeaderCount": 1,
+        "modelCalls": 6,
+        "providers": [
+          "thoughtml-study-mock"
+        ],
+        "models": [
+          "deterministic-v1"
+        ],
+        "inputTokens": 615,
+        "cacheReadTokens": 0,
+        "outputTokens": 58,
+        "reasoningTokens": 0,
+        "toolCalls": 5,
+        "failedToolCalls": 1,
+        "repeatedActions": 0,
+        "repeatedFailedActions": 0,
+        "recoveryEpisodesStarted": 1,
+        "recoveryEpisodesCompleted": 1,
+        "recoveryToolDistances": [
+          4
+        ],
+        "stateReads": 1,
+        "stateCommitAttempts": 1,
+        "stateCommits": 1,
+        "stateCommitRejections": 0,
+        "stateNoopCommits": 0,
+        "stateInspections": 1,
+        "stateCheckpointsAfterFailure": 1,
+        "latestStateRevision": 1,
+        "latestStateBytes": 1091,
+        "latestStateValid": true,
+        "unresolvedRecoveryEpisode": false
+      },
+      "telemetryMode": "DISABLED",
+      "deepseekCredentialPresent": false,
+      "persistedSession": true
+    }
+  ]
+}

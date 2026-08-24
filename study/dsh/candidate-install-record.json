@@ -1,0 +1,99 @@
+{
+  "schema_version": 2,
+  "classification": "pre-pilot-engineering-record",
+  "updated_at_utc": "2026-08-24T18:04:12.7186980Z",
+  "study_collection_started": false,
+  "development_sessions": 2,
+  "development_model_requests": 5,
+  "development_sessions_included_in_study_results": false,
+  "platform": {
+    "os": "Windows 11 Pro 64-bit",
+    "node": "25.8.2",
+    "npm": "11.12.1",
+    "pnpm": "11.19.0"
+  },
+  "pins": {
+    "dsh_package": "@deepseek-ai/dsh@0.1.1-rc.2",
+    "dsh_registry_integrity": "sha512-UP1UIh6q3Gme/yXRn/QL2P8IsVlv8Shpg22TRJIZPsCRWLm4CBiA1MUvXmJAfsOEETBMLAl+xWPtFw6ICsN3wg==",
+    "observed_dsh_master_commit": "b150a551b8d465e31e418e1b2eaf5e79bbb7d28e",
+    "thoughtml": "0.5.0",
+    "provider": "deepseek-official",
+    "model": "deepseek-v4-flash",
+    "telemetry_mode": "DISABLED"
+  },
+  "files": {
+    "study/dsh/package.json": {
+      "bytes": 702,
+      "sha256": "2a74bbfe70cc8d8f9cb086c77b126e4f6d86124d377d5e988bc5120fc5b4f462"
+    },
+    "study/dsh/pnpm-lock.yaml": {
+      "bytes": 554087,
+      "sha256": "6077a26dcc77502cce252c371ff4bf87e4edce085aec9077897f7e0b92315867"
+    },
+    "integrations/dsh/package.json": {
+      "bytes": 1202,
+      "sha256": "6fbf83dd0f5ea76666b53d4b0f6ba6cb8cfa13aecb2f52c3f132b4f061a09790"
+    },
+    "integrations/dsh/pnpm-lock.yaml": {
+      "bytes": 21569,
+      "sha256": "436682739c880d39dc45c2cee514c4c4ea3ec6c15e40703bdc430f15eba365c4"
+    },
+    "integrations/dsh/src/formats.js": {
+      "bytes": 6519,
+      "sha256": "1cdb58e2f2482e7eb711f054a3971729c12ffc298b03efd8f05644847d2ccb9a"
+    },
+    "integrations/dsh/src/store.js": {
+      "bytes": 13022,
+      "sha256": "2b1d489062be789666f1e110adc826d1686ada6076794cae6d0c3d8c378c3e0f"
+    },
+    "integrations/dsh/src/index.js": {
+      "bytes": 8073,
+      "sha256": "17d8b6a60c6736c0ffcc87f66c9e029a8ff96deb1958997cace308a490be9f73"
+    },
+    "integrations/dsh/src/metrics.js": {
+      "bytes": 7569,
+      "sha256": "2d091081cd18374dd3d25562fbc13a6cfddf763dfbc9d3f15a5035a02e4c94d4"
+    },
+    "study/dsh/offline/run-mock.mjs": {
+      "bytes": 13318,
+      "sha256": "224dd820d3835e0a202052d8d63e4493856efe9fefb2ab8bf460a0af8b5b0071"
+    },
+    "study/dsh/offline/results/summary.json": {
+      "bytes": 10240,
+      "sha256": "572662c6ede86d8a352b1993af740cf1674f3d0217f6eb2fe11a04fb54e146a4"
+    },
+    "study/dsh/diagnostics/flash-key-check-result.json": {
+      "bytes": 542,
+      "sha256": "4dbe16b075f16f7571896c6006d4ae077c330298b39f68b6321ec55310e2b9ff"
+    },
+    "study/dsh/diagnostics/plugin-flash-smoke-result.json": {
+      "bytes": 1139,
+      "sha256": "65bda867ad82dd40be74ede5537054628682afcc4802e93c1bbb7485399a6a38"
+    }
+  },
+  "verification": {
+    "lifecycle_scripts_enabled": false,
+    "frozen_offline_install": "passed",
+    "package_syntax_files": 9,
+    "package_tests": 10,
+    "package_tests_passed": 10,
+    "package_dry_run": "passed",
+    "deterministic_dsh_conditions": [
+      "D",
+      "M",
+      "T"
+    ],
+    "offline_network_model_calls": 0,
+    "offline_recovery_episode_verified": true,
+    "markdown_revision_history_verified": true,
+    "thoughtml_revision_history_verified": true,
+    "thoughtml_strict_validation": "passed_zero_diagnostics",
+    "flash_credential_route": "passed",
+    "flash_plugin_read_commit_inspect": "passed",
+    "flash_plugin_final_response": "PLUGIN_READY",
+    "raw_logs_tracked": false,
+    "credential_recorded": false,
+    "native_coding_tools": "not_yet_tested",
+    "benchmark_container": "not_yet_frozen"
+  }
+}

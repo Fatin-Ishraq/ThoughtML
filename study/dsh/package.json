@@ -1,0 +1,22 @@
+{
+  "name": "thoughtml-dsh-study",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.19.0",
+  "description": "Pinned DeepSeek Harness environment for the ThoughtML agent-utility study",
+  "license": "UNLICENSED",
+  "scripts": {
+    "dsh:help": "dsh --help",
+    "dsh:version": "dsh --version",
+    "dsh:headless-help": "dsh --profile headless --help",
+    "dsh:dump-default": "dsh --profile headless --dump-default-config",
+    "test:offline": "node offline/run-mock.mjs"
+  },
+  "dependencies": {
+    "@deepseek-ai/cordis": "4.0.1",
+    "@deepseek-ai/dsh": "0.1.1-rc.2",
+    "@deepseek-ai/dsh-llm": "0.1.1-rc.2",
+    "@deepseek-ai/dsh-tools": "0.1.1-rc.2"
+  }
+}
