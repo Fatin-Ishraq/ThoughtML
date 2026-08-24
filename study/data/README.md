@@ -31,9 +31,11 @@ The archive preserves:
 - 63 files from the ten-call exploratory Luna handoff run.
 
 These groups retain their original scientific status. Withdrawn, discarded,
-exploratory, and registered data must not be pooled. In particular, the Luna
-handoff's semantic grading normalization is still pending; its archived lexical
-analysis is preserved as historical output, not endorsed as a final comparison.
+exploratory, and registered data must not be pooled. The archive preserves the
+Luna handoff's original lexical analysis as historical output. A subsequent
+post-data correction, documented under
+`study/exploratory/luna_handoff_v1/results/`, fixes its disclosed semantic
+comparison without modifying this archive or its raw responses.
 
 No API credential pattern was found in the selected data before packaging.
 Absolute local paths inside historical metadata are preserved because changing

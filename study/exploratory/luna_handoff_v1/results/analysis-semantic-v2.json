@@ -1,0 +1,59 @@
+{
+  "analysis_revision": "semantic-v2-post-data-correction",
+  "by_condition": [
+    {
+      "all_stages_usable": true,
+      "condition": "thoughtml",
+      "final_all_required_correct": true,
+      "final_format_valid": true,
+      "final_lint_clean": false,
+      "final_revision_link_count": 5,
+      "input_tokens": 74545,
+      "mean_new_checkpoint_accuracy": 1.0,
+      "observed_stages": 5,
+      "output_tokens": 14450,
+      "total_tokens": 88995
+    },
+    {
+      "all_stages_usable": true,
+      "condition": "markdown",
+      "final_all_required_correct": true,
+      "final_branches_separated": true,
+      "final_format_valid": true,
+      "final_has_current_section": true,
+      "final_has_superseded_section": true,
+      "input_tokens": 67088,
+      "mean_new_checkpoint_accuracy": 1.0,
+      "observed_stages": 5,
+      "output_tokens": 4328,
+      "total_tokens": 71416
+    }
+  ],
+  "comparison_normalization": {
+    "id": "posterior-vector-optional-r-labels-v1",
+    "post_data": true,
+    "reason": "The frozen v1 grader treated optional R1/R2/R3 component labels as different answers despite identical posterior values.",
+    "symmetric": true
+  },
+  "exploratory_only": true,
+  "generated_at": "2026-08-24T16:10:27.987065Z",
+  "interpretation": "Both final ledgers contain every required answer correctly, so this single exploratory task shows no accuracy advantage. ThoughtML preserves explicit machine-readable revision links and branch structure, with higher token use.",
+  "observed_stages": 10,
+  "provenance": {
+    "archive_index": "study/data/thoughtml-study-data-v1.index.tsv",
+    "archived_input_files_verified": 63,
+    "original_analysis": "study/exploratory/luna_handoff_v1/runs/analysis-grader-v1.json",
+    "original_analysis_sha256": "5975f41544f7ee63d3ebc47574d7ae0d8cf1c2b4740d59749a5e9e721f4ec319",
+    "raw_outputs_modified": false,
+    "semantic_grader": "study/exploratory/luna_handoff_v1/semantic_grader_v2.py",
+    "semantic_grader_sha256": "559b997a7b05e1d4576cd068669db669cfe49e674bcf6450dd737d4b297472ed"
+  },
+  "result_classification": "no_accuracy_advantage",
+  "schema_version": 2,
+  "token_comparison": {
+    "baseline": "markdown",
+    "thoughtml_input_overhead_fraction": 0.111152516098259,
+    "thoughtml_output_overhead_fraction": 2.338724584103512,
+    "thoughtml_total_overhead_fraction": 0.2461493222807214
+  }
+}

@@ -70,13 +70,18 @@ python study/exploratory/luna_handoff_v1/handoff.py freeze --candidate
 python study/exploratory/luna_handoff_v1/handoff.py schedule
 python study/exploratory/luna_handoff_v1/handoff.py run --dry-run
 python -m unittest study/exploratory/luna_handoff_v1/test_handoff.py -v
+python -m unittest study/exploratory/luna_handoff_v1/test_semantic_grader_v2.py -v
 ```
 
 ## Preserved output status
 
 All ten authorized calls are preserved in the versioned study-data archive
-documented at [`../../data/README.md`](../../data/README.md). The current lexical
-grader does not semantically normalize labelled posterior-vector entries such as
-`R1=2/9`; therefore its numerical ThoughtML-versus-Markdown comparison is not a
-paper result. The raw ledgers remain authoritative while normalization and
-reanalysis are pending.
+documented at [`../../data/README.md`](../../data/README.md). The frozen lexical
+v1 grader did not semantically normalize labelled posterior-vector entries such
+as `R1=2/9`, so its 55.3% ThoughtML score is retired as a grader artifact.
+
+The disclosed post-data semantic v2 analysis applies one narrow normalization
+symmetrically to both conditions and leaves the raw outputs and frozen v1 report
+unchanged. Both conditions score 100% after correction, so this task shows no
+accuracy advantage. See [`results/README.md`](results/README.md) for the complete
+finding, limitations, token comparison, and reproduction command.
