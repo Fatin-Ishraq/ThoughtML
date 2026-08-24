@@ -1,0 +1,48 @@
+{
+  "name": "@thoughtml/dsh-plugin",
+  "version": "0.1.0",
+  "packageManager": "pnpm@11.19.0",
+  "description": "Persistent, auditable ThoughtML reasoning state for DeepSeek Harness agents",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./metrics": "./src/metrics.js",
+    "./store": "./src/store.js",
+    "./formats": "./src/formats.js"
+  },
+  "files": [
+    "src/**/*.js",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "check": "node scripts/check.mjs",
+    "test": "node --test --test-isolation=none"
+  },
+  "keywords": [
+    "thoughtml",
+    "deepseek-harness",
+    "agent-memory",
+    "reasoning-state"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Fatin-Ishraq/ThoughtML.git",
+    "directory": "integrations/dsh"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-agent": "0.1.1-rc.2",
+    "@deepseek-ai/dsh-system-prompt": "0.1.1-rc.2",
+    "@deepseek-ai/dsh-tools": "0.1.1-rc.2"
+  },
+  "dependencies": {
+    "@deepseek-ai/dsh-llm": "0.1.1-rc.2",
+    "@deepseek-ai/dsh-tools": "0.1.1-rc.2"
+  },
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  }
+}

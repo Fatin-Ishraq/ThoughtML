@@ -48,10 +48,10 @@ The default profile contains a telemetry exporter URL, but its configured mode
 is `DSH_TELEMETRY_MODE || 'DISABLED'`. The study will still set
 `DSH_TELEMETRY_MODE=DISABLED` explicitly rather than depend on a default.
 
-The production plugin currently lives in the local `../../integrations/dsh`
-worktree and is intentionally withheld from this study commit pending separate
-review; its dependency graph is separately locked there. Consequently, the
-offline runner in this revision requires that local plugin checkout. The offline
+The production plugin is included on this research branch at
+`../../integrations/dsh`; its dependency graph is separately locked there. It
+remains research infrastructure and has not been merged into the repository's
+`main` branch or released as a standalone public package. The offline
 deterministic composition passed for all
 three study conditions. It ran the actual DSH headless loop, persisted sessions,
 collected standard events, exercised a failure and recovery, refreshed the

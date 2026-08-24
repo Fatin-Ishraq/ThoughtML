@@ -326,8 +326,8 @@ questions:
 4. the external plugin in `../integrations/dsh` supplies persistent bounded
    context, matched structured tools, strict validation, immutable revision
    history, recovery guidance, observable files, and separate metrics without
-   changing the DSH agent loop. Its source is intentionally held out of the
-   present study commit pending separate review.
+   changing the DSH agent loop. Its source is included on the research branch
+   but is not yet merged into `main` or released as a standalone package.
 
 Package tests pass for both formats. A zero-network deterministic run also
 passes inside the pinned DSH loop for D, M, and T: it observes one controlled
