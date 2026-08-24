@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"01a024f0-759a-7b13-9e24-2903b369bc13"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"observation final-price-calculation\n  The discounted price is $320.00 × 0.75 = $240.00; applying 8% sales tax gives $240.00 × 1.08 = $259.20.\n\ndecision final-answer\n  The answer is C.\n\nlink final-price-calculation supports final-answer\n\nmodel holds final-answer\n  confidence 1 assumed"}}
-{"type":"turn.completed","usage":{"input_tokens":23487,"cached_input_tokens":11008,"output_tokens":600,"reasoning_output_tokens":516}}

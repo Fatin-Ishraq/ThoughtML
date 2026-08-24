@@ -1,1 +1,0 @@
-2026-08-21T15:29:09.529364Z  WARN codex_core::shell_snapshot: Failed to create shell snapshot for powershell: Shell snapshot not supported yet for PowerShell

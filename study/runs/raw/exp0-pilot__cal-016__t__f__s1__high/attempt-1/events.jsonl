@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"01a024f3-9b99-77a0-98b4-f12d6d39b712"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"observation van-capacity\n  The van can carry at most 1,200 kilograms per trip.\n  quantity 1200 kg assumed\n\nobservation container-weight\n  Each sealed container weighs 145 kilograms.\n  quantity 145 kg assumed\n\nclaim max-containers-per-trip\n  The maximum whole number of containers per trip is floor(1200 / 145) = 8.\n\nclaim final-answer\n  The answer is B.\n\nlink van-capacity supports max-containers-per-trip\n  weight 1 assumed\n\nlink container-weight supports max-containers-per-trip\n  weight 1 assumed\n\nlink max-containers-per-trip supports final-answer\n  weight 1 assumed\n\nmodel holds final-answer\n  confidence 1 assumed"}}
-{"type":"turn.completed","usage":{"input_tokens":23489,"cached_input_tokens":11008,"output_tokens":345,"reasoning_output_tokens":191}}

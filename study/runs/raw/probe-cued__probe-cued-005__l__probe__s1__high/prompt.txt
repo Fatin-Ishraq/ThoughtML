@@ -1,5 +1,0 @@
-Author a ThoughtML document for the task below. Return only the document, with no Markdown fence or surrounding explanation. Do not call tools, browse, execute commands, read files, retrieve external material, or ask questions.
-
-# Task
-
-A school evaluates a tutoring trial. Participating students improved more than the comparison class, but participation was voluntary and the tutoring group began with more motivated families. Teachers observed better homework completion, while attendance gains were small. Author a ThoughtML document representing the findings, limitations, causal hypothesis, and confidence in adopting the program.

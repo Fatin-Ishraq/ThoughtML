@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"01a024f3-c5e5-7d93-aa08-6ed5192eb8eb"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"claim shipment-copper-widgets-conduct\n  Every copper widget in the shipment is electrically conductive.\n\nobservation widget-r-is-copper\n  Widget R is confirmed to be a copper widget from that shipment.\n\nclaim final-answer\n  The answer is A.\n\nlink shipment-copper-widgets-conduct supports final-answer\nlink widget-r-is-copper supports final-answer\n\nmodel holds final-answer\n  confidence 1 assumed"}}
-{"type":"turn.completed","usage":{"input_tokens":23510,"cached_input_tokens":11008,"output_tokens":356,"reasoning_output_tokens":266}}

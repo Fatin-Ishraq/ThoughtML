@@ -1,5 +1,0 @@
-Author a ThoughtML document for the task below. Return only the document, with no Markdown fence or surrounding explanation. Do not call tools, browse, execute commands, read files, retrieve external material, or ask questions.
-
-# Task
-
-An inspection team must decide whether a small bridge may remain open. Surface cracking has grown since last year, but load measurements remain within the published limit and an engineer says temporary monitoring is possible. Author a ThoughtML document that records the observations, the decision question, reasons on both sides, and the team's current position.

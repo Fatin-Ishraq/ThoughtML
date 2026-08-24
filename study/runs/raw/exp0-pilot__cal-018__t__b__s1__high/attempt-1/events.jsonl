@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"01a024f7-a537-7a42-85ba-281e5556b964"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"observation state-trace\n  Starting in state A, the successive states after reading zero, one, zero, one, and one are B, C, C, A, and C.\n\nclaim final-answer\n  The answer is C.\n\nlink state-trace supports final-answer\n\nmodel holds final-answer\n  confidence 1 measured"}}
-{"type":"turn.completed","usage":{"input_tokens":27253,"cached_input_tokens":8960,"output_tokens":492,"reasoning_output_tokens":419}}

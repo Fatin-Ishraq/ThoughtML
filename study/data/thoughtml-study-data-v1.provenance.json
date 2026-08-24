@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "archive_id": "thoughtml-study-data-v1",
+  "created_at": "2026-08-24T15:42:52Z",
+  "source_branch": "codex/luna-handoff-v1",
+  "source_commit": "ce2c290ce45bd6bf19f93380869a1c754e2986ad",
+  "archive": {
+    "path": "study/data/thoughtml-study-data-v1.tar.gz",
+    "format": "tar+gzip",
+    "bytes": 1580648,
+    "entries": 1012,
+    "sha256": "7ca468acadfbf46b4f2d51a81ce514cfd2e801a768cb37972fde8bc4e89a6690",
+    "index": "study/data/thoughtml-study-data-v1.index.tsv"
+  },
+  "content_groups": [
+    {
+      "prefix": "study/runs/raw/",
+      "files": 880,
+      "bytes": 4128061
+    },
+    {
+      "prefix": "study/runs/schedules/",
+      "files": 12,
+      "bytes": 1324084,
+      "note": "Byte-original schedules before semantics-preserving JSON compaction."
+    },
+    {
+      "prefix": "study/runs/analysis/",
+      "files": 4,
+      "bytes": 10240
+    },
+    {
+      "prefix": "study/runs/pilot-mutations-20260821/",
+      "files": 53,
+      "bytes": 95849,
+      "status": "discarded development pilot"
+    },
+    {
+      "prefix": "study/exploratory/luna_handoff_v1/runs/",
+      "files": 63,
+      "bytes": 147505,
+      "status": "exploratory; semantic grader normalization pending"
+    }
+  ],
+  "interpretation": [
+    "Preservation in this archive does not make a run registered or admissible.",
+    "Withdrawn, discarded, exploratory, and registered groups must not be pooled.",
+    "The Luna lexical analysis is historical output, not a final quantitative comparison."
+  ]
+}

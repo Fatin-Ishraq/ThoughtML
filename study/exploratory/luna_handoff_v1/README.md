@@ -71,3 +71,12 @@ python study/exploratory/luna_handoff_v1/handoff.py schedule
 python study/exploratory/luna_handoff_v1/handoff.py run --dry-run
 python -m unittest study/exploratory/luna_handoff_v1/test_handoff.py -v
 ```
+
+## Preserved output status
+
+All ten authorized calls are preserved in the versioned study-data archive
+documented at [`../../data/README.md`](../../data/README.md). The current lexical
+grader does not semantically normalize labelled posterior-vector entries such as
+`R1=2/9`; therefore its numerical ThoughtML-versus-Markdown comparison is not a
+paper result. The raw ledgers remain authoritative while normalization and
+reanalysis are pending.

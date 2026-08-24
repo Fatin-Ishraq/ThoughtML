@@ -1,2 +1,0 @@
-2026-08-21T15:15:00.251649Z ERROR codex_models_manager::cache: failed to load models cache: missing field `base_instructions` at line 97 column 5
-2026-08-21T15:15:00.871407Z  WARN codex_core::shell_snapshot: Failed to create shell snapshot for powershell: Shell snapshot not supported yet for PowerShell

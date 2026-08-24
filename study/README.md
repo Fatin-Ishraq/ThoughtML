@@ -23,8 +23,9 @@ resolved and the pre-registration/deviation log reflects those resolutions.
 - `scripts/benchmark.py` — validation, freezing, scheduling, running, grading,
   mutation generation, and analysis entry point.
 - `tests/` — offline tests for the benchmark machinery.
-- `runs/` — generated manifests, schedules, raw transcripts, extracted outputs,
-  and grades. No registered data exists merely because this directory exists.
+- `runs/` — generated manifests, compact schedules, and analysis summaries.
+- `data/` — the versioned, checksummed archive of raw transcripts, exact prompts,
+  original schedules, extracted outputs, grades, and discarded pilot artifacts.
 
 ## Safe pre-data commands
 
@@ -72,3 +73,7 @@ Every paper number must be regenerated from raw artifacts. Preserve:
 - grader version/hash and command line;
 - collection timestamps and observed model metadata;
 - analysis JSON, tables, and figures.
+
+The repository keeps those raw artifacts in the verified archive documented at
+[`data/README.md`](data/README.md). Extract it into a clean checkout when a
+byte-original run tree is required for reanalysis.

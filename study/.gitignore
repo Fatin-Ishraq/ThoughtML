@@ -1,2 +1,9 @@
 __pycache__/
 *.py[cod]
+
+# Bulky generated evidence is packaged in study/data/. Keep compact analyses,
+# manifests, and schedules in Git; do not silently discard local run data.
+runs/raw/
+runs/pilot-mutations-*/
+exploratory/*/runs/
+data/.*.files.txt
