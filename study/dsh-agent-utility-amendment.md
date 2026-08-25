@@ -87,6 +87,15 @@ The intended benchmark is
 It is used only for testing and evaluation; this study performs no training,
 fine-tuning, or task-specific prompt optimization.
 
+> **Dated deviation, 2026-08-25.** The exploratory one-task case study uses
+> **DeepSWE v1.1** instead of SWE-bench Verified. The reasons, the selection
+> criteria, and the full benchmark comparison are recorded in
+> [`dsh/task-selection/README.md`](dsh/task-selection/README.md) and frozen as
+> deviation D1 in [`dsh/case-study-01/protocol.md`](dsh/case-study-01/protocol.md).
+> This deviation currently covers **only** that case study. The pilot and main
+> evaluation described below still name SWE-bench Verified and would need their
+> own dated amendment before collection.
+
 Before any model call, the study must freeze:
 
 1. the exact dataset release or revision;

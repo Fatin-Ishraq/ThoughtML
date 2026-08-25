@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "record": "Development-only model calls, 2026-08-25",
+  "classification": "development-diagnostic",
+  "excluded_from_study_outcomes": true,
+  "rationale": "Pre-collection integration work for the DSH Pier adapter and the one-task case study. Recorded per dsh-agent-utility-amendment.md and case-study-01/protocol.md section 10, which require development sessions to be logged and excluded.",
+  "provider": "deepseek-official",
+  "model": "deepseek-v4-flash",
+  "prior_development_calls": {
+    "count": 5,
+    "records": [
+      "flash-key-check-result.json",
+      "plugin-flash-smoke-result.json"
+    ]
+  },
+  "totals_2026_08_25": {
+    "sessions": 7,
+    "model_calls": 152,
+    "input_tokens": 114333,
+    "cache_read_tokens": 13538304,
+    "output_tokens": 101964,
+    "reasoning_tokens": 63817
+  },
+  "sessions": [
+    {
+      "id": "smoke-1-M",
+      "condition": "M",
+      "task": "dsh-pier-smoke (synthetic)",
+      "outcome": "failed",
+      "model_calls": 0,
+      "finding": "TRANSPORT: DeepSeek API request failed. Node 22 ignores HTTP_PROXY/HTTPS_PROXY for global fetch, so DSH bypassed Pier's egress proxy and the sandbox blocked the direct connection. Fixed by moving to Node 24 with NODE_USE_ENV_PROXY=1."
+    },
+    {
+      "id": "smoke-2-M",
+      "condition": "M",
+      "task": "dsh-pier-smoke (synthetic)",
+      "outcome": "reward 1 (verifier reported 0 due to a subshell bug in the throwaway smoke verifier)",
+      "model_calls": 3,
+      "input_tokens": 8820,
+      "cache_read_tokens": 17536,
+      "output_tokens": 344,
+      "reasoning_tokens": 226,
+      "finding": "Pipeline works end to end. State tools not exercised: instruction too trivial."
+    },
+    {
+      "id": "smoke-3-M",
+      "condition": "M",
+      "task": "dsh-pier-smoke (synthetic)",
+      "outcome": "reward 1",
+      "model_calls": 6,
+      "input_tokens": 7594,
+      "cache_read_tokens": 51584,
+      "output_tokens": 1074,
+      "reasoning_tokens": 503,
+      "state_commits": 1,
+      "finding": "Markdown state tools exercised in-container: 2 reads, 1 commit, revision 1, 1139 bytes."
+    },
+    {
+      "id": "smoke-4-T",
+      "condition": "T",
+      "task": "dsh-pier-smoke (synthetic)",
+      "outcome": "reward 1",
+      "model_calls": 5,
+      "input_tokens": 2070,
+      "cache_read_tokens": 47488,
+      "output_tokens": 1082,
+      "reasoning_tokens": 390,
+      "state_commits": 1,
+      "finding": "Linux thoughtml 0.5.0 executed in-container; model-authored ledger passed the strict checker (latestStateValid true, 1446 bytes)."
+    },
+    {
+      "id": "smoke-5-D",
+      "condition": "D",
+      "task": "dsh-pier-smoke (synthetic)",
+      "outcome": "reward 1",
+      "model_calls": 3,
+      "input_tokens": 7812,
+      "cache_read_tokens": 16000,
+      "output_tokens": 398,
+      "reasoning_tokens": 279,
+      "finding": "Baseline condition completes with no state plugin loaded."
+    },
+    {
+      "id": "smoke-6-T",
+      "condition": "T",
+      "task": "dsh-pier-smoke (synthetic)",
+      "outcome": "reward 1",
+      "model_calls": 5,
+      "input_tokens": 2465,
+      "cache_read_tokens": 48000,
+      "output_tokens": 1456,
+      "reasoning_tokens": 436,
+      "state_commits": 2,
+      "finding": "Confirms the artifact-preservation fix: full immutable revision journal (3 revisions) and DSH session events survive container teardown."
+    },
+    {
+      "id": "dryrun-cattrs-D",
+      "condition": "D",
+      "task": "cattrs-partial-structuring-recovery (the frozen study task)",
+      "outcome": "agent succeeded; grading failed with RewardFileNotFoundError",
+      "model_calls": 130,
+      "steps": 130,
+      "input_tokens": 85572,
+      "cache_read_tokens": 13357696,
+      "output_tokens": 97610,
+      "reasoning_tokens": 61983,
+      "tool_calls": 131,
+      "agent_result": "Implemented partial_structure, reported 941 passed / 15 xfailed with no regressions, committed 79125db on branch partial-structure, clean working tree. Valid model.patch collected.",
+      "finding": "CRLF line endings in tests/test.sh (task repo cloned on Windows) made the shebang '#!/bin/bash\\r'; the verifier died with 'required file not found' and produced no reward.json. Root cause is the checkout, not the study code. Requirement written into protocol.md section 6. Verifier chain subsequently proven with the oracle agent at zero model cost: reward 1, f2p 69/69, p2p 7/7.",
+      "note": "Step count 130 is close to the published deepseek-v4-flash mean of 158 on this task, an independent sanity signal that the adapter drives DSH normally."
+    }
+  ],
+  "credential_handling": "DEEPSEEK_API_KEY supplied from a gitignored .env. No credential value appears in this record or any tracked file.",
+  "raw_artifacts": "Raw trajectories, event logs, and state trees are kept under the ignored diagnostics/runs/ tree, matching the existing convention of tracking compact records only."
+}

@@ -28,6 +28,8 @@ crates/thoughtml/tests/snapshots/*.json eol=lf
 # matter more than that: a CRLF shebang makes Linux look for `/bin/bash\r` and
 # the verifier dies with "required file not found" only at grading time, after a
 # full session has been spent. Pin them to LF.
+study/dsh-agent-utility-amendment.md eol=lf
+study/dsh/** eol=lf
 study/dsh/case-study-01/** eol=lf
 study/dsh/pier_agent/** eol=lf
 study/dsh/task-selection/** eol=lf

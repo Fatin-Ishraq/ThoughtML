@@ -3,6 +3,19 @@
 This directory isolates the DeepSeek Harness dependency used by the proposed
 ThoughtML agent-utility extension.
 
+## Directory map
+
+| path | contents |
+|---|---|
+| [`case-study-01/`](case-study-01/) | the frozen one-task D/M/T case study: protocol, schedule, manifest, runner |
+| [`task-selection/`](task-selection/) | how the task was chosen from DeepSWE v1.1, with the trial data and provenance |
+| [`pier_agent/`](pier_agent/) | the Pier adapter that runs DSH under the three conditions, plus its self-test |
+| [`plugins/`](plugins/) | study-side DSH plugins (event logger; the mock LLM/operation used offline only) |
+| [`diagnostics/`](diagnostics/) | compact records of development-only model calls, all excluded from results |
+| [`offline/`](offline/) | the zero-network deterministic D/M/T composition check |
+
+Start at [`case-study-01/README.md`](case-study-01/README.md).
+
 ## Candidate pin
 
 - npm package: `@deepseek-ai/dsh@0.1.1-rc.2`
@@ -78,5 +91,12 @@ On 2026-08-25, still before pilot collection, plugin version `0.2.0` added
 revision-safe `diff`, focused `explain`, and bounded `analyze` tools. Markdown
 and ThoughtML receive the same six tool names; their format-specific behavior is
 declared in the study amendment. Eleven package tests and the zero-network D/M/T
-DSH lifecycle pass. No real-model call has tested version `0.2.0`; the earlier
-Flash smoke remains evidence for version `0.1.0` only.
+DSH lifecycle pass.
+
+Later on 2026-08-25, version `0.2.0` was exercised by real Flash calls inside a
+DeepSWE container through the Pier adapter, in all three conditions. Markdown and
+ThoughtML each committed a valid revision, and the ThoughtML ledger passed the
+strict checker in-container. A full dry run on the frozen study task completed
+the agent side and produced a valid patch. These were development sessions and
+are excluded from study outcomes; see
+[`diagnostics/dev-calls-2026-08-25.json`](diagnostics/dev-calls-2026-08-25.json).

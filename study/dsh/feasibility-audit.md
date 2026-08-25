@@ -4,6 +4,20 @@
 **Status:** Candidate environment; one credential diagnostic made, no pilot
 collection started
 
+> **Superseded in part, 2026-08-25.** The blocking environment findings below no
+> longer hold. WSL was repaired (the registered Ubuntu distro pointed at a
+> deleted directory and was re-created), Docker Engine 29.7.2 was installed
+> inside WSL, and ~7.4 GB was reclaimed from gitignored Rust build directories.
+> Full local execution of a selected DeepSWE task is now **feasible and proven**:
+> the agent image builds, the task container runs, and the verifier grades. The
+> memory constraint remains real and is handled as deviation D2 (the task
+> declares 8192 MB; Docker sees 3.78 GB), so runs use
+> `memory_enforcement_policy: ignore`. See
+> [`case-study-01/protocol.md`](case-study-01/protocol.md) §6 for the frozen
+> environment and [`diagnostics/dev-calls-2026-08-25.json`](diagnostics/dev-calls-2026-08-25.json)
+> for the development sessions that established this. Rows below marked Docker
+> or WSL as blockers are historical.
+
 ## Local environment observed
 
 | Component | Observation | Assessment |
