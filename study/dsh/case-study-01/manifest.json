@@ -1,0 +1,132 @@
+{
+ "manifest": "dsh-case-study-01 authoritative byte-sensitive manifest",
+ "protocol_version": "1.0",
+ "status": "pre-collection freeze",
+ "pinned": {
+  "dsh_npm_package": "@deepseek-ai/dsh",
+  "dsh_version": "0.1.1-rc.2",
+  "dsh_registry_integrity": "sha512-UP1UIh6q3Gme/yXRn/QL2P8IsVlv8Shpg22TRJIZPsCRWLm4CBiA1MUvXmJAfsOEETBMLAl+xWPtFw6ICsN3wg==",
+  "model_provider": "deepseek-official",
+  "model": "deepseek-v4-flash",
+  "task_id": "cattrs-partial-structuring-recovery",
+  "task_base_commit": "6bc4708fb9b2ac52d9a18997e923da6a58916102",
+  "deepswe_dataset": "v1.1",
+  "deepswe_task_repo_commit": "435ee89ec2f2e2289f33b0da4f992f0b7b7266b9",
+  "agent_image": "public.ecr.aws/d3j8x8q7/swe-bench-202605:kh7f7cahc5ddm1qzpxz13kpmrh8235pc-v1.1",
+  "agent_image_manifest_digest": "sha256:443a3534dab64283e5a9dedf3b7ac8867ed7d5dabcde39bc39c77ab5a909176a",
+  "memory_enforcement_policy": "ignore",
+  "telemetry": "DSH_TELEMETRY_MODE=DISABLED"
+ },
+ "protocol_and_selection": {
+  "study/dsh/case-study-01/protocol.md": {
+   "sha256": "0a94723c8a2ea5df8053d2e9c67af53c097805e9fcfb69cf560be27be4e0d5af",
+   "bytes": 15449
+  },
+  "study/dsh/case-study-01/schedule.json": {
+   "sha256": "08b46f7752b4988823dcfd961b1d0cbad95404c3e5c4e897287f83e75d664482",
+   "bytes": 1763
+  },
+  "study/dsh/case-study-01/make_schedule.py": {
+   "sha256": "95a1653cbb1c834f2aa9500cea3d26b2a8efe12fb75de46d958c07147e8ecd5c",
+   "bytes": 2248
+  },
+  "study/dsh/case-study-01/run_case_study.py": {
+   "sha256": "83212450f5c034b4df12f8e31d19ec144f8f70d4c312abc7177499f2517eb020",
+   "bytes": 6431
+  },
+  "study/dsh-agent-utility-amendment.md": {
+   "sha256": "d61256608d29d2acbc73aada490ee41b91f2f5df44d11c2770d8d50500727e2a",
+   "bytes": 18099
+  },
+  "study/dsh/task-selection/README.md": {
+   "sha256": "5a739540e3b7f05d26d903a5ecb84a6bb141bc205231b4ee1cef237e9940ab45",
+   "bytes": 13696
+  },
+  "study/dsh/task-selection/select_candidate.py": {
+   "sha256": "30ac86c367c5801ddcff66f4942164d0607350e52501601011d1840462fd1caf",
+   "bytes": 4891
+  },
+  "study/dsh/task-selection/data/provenance.json": {
+   "sha256": "309db4848e0b52540e72a2fc676df2b811609b536f229f1ef4a71e3903f0dbfd",
+   "bytes": 2089
+  }
+ },
+ "adapter": {
+  "study/dsh/pier_agent/dsh_agent.py": {
+   "sha256": "f59ce1e55cccf4b86bbbfb840022dae649feb5e879bab1efad807ade755c81cc",
+   "bytes": 22673
+  },
+  "study/dsh/pier_agent/selftest.py": {
+   "sha256": "71caf26261883f4cd5df5c90379b3198d91c89281e9921ae59c538b02d49d7ec",
+   "bytes": 11013
+  },
+  "study/dsh/pier_agent/verify_extraction.py": {
+   "sha256": "eaaa7e1564c5f8848d2970f52dc712b4cf7dd401b29dbda80fa52c494643c9ac",
+   "bytes": 8191
+  }
+ },
+ "plugin": {
+  "integrations/dsh/src/index.js": {
+   "sha256": "c203ebf2fc249e680e431081a7c805a05caf00dbbeba5ea1760be68f8869f1ba",
+   "bytes": 11968
+  },
+  "integrations/dsh/src/metrics.js": {
+   "sha256": "a821af3d091bbdba1e711128eb02ce783c3519f5b12a72a93ea65c4773f6317d",
+   "bytes": 7862
+  },
+  "integrations/dsh/src/store.js": {
+   "sha256": "4f0d90a456b05758b6674f6a725c7f7228b8bc6679b8c9020f20cd37b5ba09fd",
+   "bytes": 18554
+  },
+  "integrations/dsh/src/formats.js": {
+   "sha256": "1d4bb3b8bc0b53f02e236cbfc2b7dfa204b85afe09e587ce86ddb65b5b6ec807",
+   "bytes": 13984
+  },
+  "integrations/dsh/package.json": {
+   "sha256": "586481bc346d74d03b857572c78da16181cd4d7ed94e6c0ed2bb6d84c8c568ef",
+   "bytes": 1202
+  },
+  "study/dsh/plugins/event-logger.js": {
+   "sha256": "963c55a9a805e08d98a08715d46cf94d03eaa65c075ecfd572bfdb8372d3f4e0",
+   "bytes": 1700
+  }
+ },
+ "toolchain_observed": {
+  "docker": "Docker version 29.7.2, build a7dcaa6",
+  "pier": "0.3.1",
+  "python": "Python 3.12.3",
+  "node": null,
+  "rustc": "rustc 1.98.0 (88d9e12ae 2026-08-18)",
+  "cargo": "cargo 1.98.0 (797e8a9bc 2026-08-05)",
+  "os_release": "PRETTY_NAME=\"Ubuntu 24.04.4 LTS\"",
+  "kernel": "Linux 6.6.87.2-microsoft-standard-WSL2"
+ },
+ "thoughtml_checker": {
+  "path": "/root/tml-bin/thoughtml",
+  "sha256": "9939daaf5f2efca66575344bc8e917faab87919f882205fafd6011dd89ff351b",
+  "bytes": 2487904,
+  "version": "thoughtml 0.5.0"
+ },
+ "task_files": {
+  "task.toml": {
+   "sha256": "ff234081a6bc21b6f12d1c7fa435fb31af5e207489c0df856db1dcd5b8878f8e",
+   "bytes": 1469
+  },
+  "instruction.md": {
+   "sha256": "13eab1ccb6c77dafa95e7e815a35fc76033aaf271076012067c3502c0c11272c",
+   "bytes": 1342
+  },
+  "tests/test.sh": {
+   "sha256": "f17974eb262c2263c538fd31d62ff40597674ce4bc70084abad190885862e481",
+   "bytes": 3331
+  },
+  "environment/Dockerfile": {
+   "sha256": "2bd6e8a1ded869b85334eebbad3c29588b71a2ee1486c06713648485c2b3560e",
+   "bytes": 1366
+  }
+ },
+ "agent_image_local_repo_digest": "public.ecr.aws/d3j8x8q7/swe-bench-202605@sha256:443a3534dab64283e5a9dedf3b7ac8867ed7d5dabcde39bc39c77ab5a909176a",
+ "agent_image_digest_check": "matches-pin",
+ "missing_files": [],
+ "complete": true
+}

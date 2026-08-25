@@ -1,0 +1,95 @@
+{
+ "study": "dsh-case-study-01",
+ "task": "cattrs-partial-structuring-recovery",
+ "conditions": [
+  "D",
+  "M",
+  "T"
+ ],
+ "repetitions": 3,
+ "total_sessions": 9,
+ "seed": 20260825,
+ "blocking": "one block per repetition; condition order shuffled within block",
+ "block_orders": [
+  [
+   "T",
+   "M",
+   "D"
+  ],
+  [
+   "M",
+   "D",
+   "T"
+  ],
+  [
+   "D",
+   "T",
+   "M"
+  ]
+ ],
+ "sessions": [
+  {
+   "session_id": "cs01-b1-s1-T",
+   "block": 1,
+   "slot": 1,
+   "condition": "T",
+   "task": "cattrs-partial-structuring-recovery"
+  },
+  {
+   "session_id": "cs01-b1-s2-M",
+   "block": 1,
+   "slot": 2,
+   "condition": "M",
+   "task": "cattrs-partial-structuring-recovery"
+  },
+  {
+   "session_id": "cs01-b1-s3-D",
+   "block": 1,
+   "slot": 3,
+   "condition": "D",
+   "task": "cattrs-partial-structuring-recovery"
+  },
+  {
+   "session_id": "cs01-b2-s1-M",
+   "block": 2,
+   "slot": 1,
+   "condition": "M",
+   "task": "cattrs-partial-structuring-recovery"
+  },
+  {
+   "session_id": "cs01-b2-s2-D",
+   "block": 2,
+   "slot": 2,
+   "condition": "D",
+   "task": "cattrs-partial-structuring-recovery"
+  },
+  {
+   "session_id": "cs01-b2-s3-T",
+   "block": 2,
+   "slot": 3,
+   "condition": "T",
+   "task": "cattrs-partial-structuring-recovery"
+  },
+  {
+   "session_id": "cs01-b3-s1-D",
+   "block": 3,
+   "slot": 1,
+   "condition": "D",
+   "task": "cattrs-partial-structuring-recovery"
+  },
+  {
+   "session_id": "cs01-b3-s2-T",
+   "block": 3,
+   "slot": 2,
+   "condition": "T",
+   "task": "cattrs-partial-structuring-recovery"
+  },
+  {
+   "session_id": "cs01-b3-s3-M",
+   "block": 3,
+   "slot": 3,
+   "condition": "M",
+   "task": "cattrs-partial-structuring-recovery"
+  }
+ ]
+}

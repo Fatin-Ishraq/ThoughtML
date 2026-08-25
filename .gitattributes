@@ -19,3 +19,19 @@ web/index.html eol=lf
 # this pins the inputs so the two agree by construction rather than by repair.
 examples/**/*.thml eol=lf
 crates/thoughtml/tests/snapshots/*.json eol=lf
+
+# The DSH case-study artifacts are hashed byte-for-byte by
+# `study/dsh/case-study-01/make_manifest.py`, and the manifest is the freeze
+# record the collection runner checks before it will spend a model call. Left to
+# the platform, a Windows checkout gives them CRLF, every hash drifts, and the
+# manifest reads as violated when nothing actually changed. The shell scripts
+# matter more than that: a CRLF shebang makes Linux look for `/bin/bash\r` and
+# the verifier dies with "required file not found" only at grading time, after a
+# full session has been spent. Pin them to LF.
+study/dsh/case-study-01/** eol=lf
+study/dsh/pier_agent/** eol=lf
+study/dsh/task-selection/**.py eol=lf
+study/dsh/task-selection/**.md eol=lf
+study/dsh/task-selection/**.json eol=lf
+study/dsh/plugins/*.js eol=lf
+integrations/dsh/src/*.js eol=lf
