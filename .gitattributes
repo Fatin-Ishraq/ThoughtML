@@ -30,8 +30,7 @@ crates/thoughtml/tests/snapshots/*.json eol=lf
 # full session has been spent. Pin them to LF.
 study/dsh/case-study-01/** eol=lf
 study/dsh/pier_agent/** eol=lf
-study/dsh/task-selection/**.py eol=lf
-study/dsh/task-selection/**.md eol=lf
-study/dsh/task-selection/**.json eol=lf
+study/dsh/task-selection/** eol=lf
+study/dsh/task-selection/data/*.gz binary
 study/dsh/plugins/*.js eol=lf
 integrations/dsh/src/*.js eol=lf

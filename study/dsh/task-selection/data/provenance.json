@@ -23,12 +23,12 @@
  },
  "files": {
   "README.md": {
-   "sha256": "5a739540e3b7f05d26d903a5ecb84a6bb141bc205231b4ee1cef237e9940ab45",
-   "bytes": 13696
+   "sha256": "c6ace13cc2ccfbe43f4f2363ec8c99a85b00e8d16b278c211ed961b3e8aceddf",
+   "bytes": 13459
   },
   "build_task_index.py": {
-   "sha256": "eb4f84495ac68ace90dfc4c7ce53b3ed2b6c2e6056c042afb351649f53088b70",
-   "bytes": 4061
+   "sha256": "7bf1ce4248542961d9f681ccab009b22cd962b0e954e92f7af70de401ad36e60",
+   "bytes": 4147
   },
   "collect_trials.py": {
    "sha256": "dfbaaa143307e91784b1c53d010ae8426a98f550473c421d0c2258f0e6219742",
@@ -39,16 +39,16 @@
    "bytes": 4891
   },
   "write_provenance.py": {
-   "sha256": "9b92a2cdda95eb0d12f53c9618300e61205beed8a5d4d444720aa6333065a977",
-   "bytes": 2352
+   "sha256": "bed38c1fea92685adfc107c7b42b66494320cc48fd56a80137bf0613c22163ee",
+   "bytes": 2439
   },
   "data/deepswe-v1.1-image-sizes.json": {
-   "sha256": "607cd016f05669cc23fd1492686b76cda7bff0660a4b71962efb529748bb2418",
-   "bytes": 10734
+   "sha256": "9c0d131af970feeb90173ec9a631e7caf8b830e6aaebadcd178a1e1d16269794",
+   "bytes": 10281
   },
   "data/deepswe-v1.1-task-index.json": {
-   "sha256": "10fc53ce00d1de78688831e00283a9035be313ba27de3945978165d28d215500",
-   "bytes": 128457
+   "sha256": "10b5f9c95d60f66bd7cfa87ed960989650116562893e68344ef5eb9396f9f401",
+   "bytes": 124162
   },
   "data/deepswe-v1.1-trials.jsonl.gz": {
    "sha256": "2c8f4d97b22e480cc922a35fa2b198b809a112197a50a67e8de9a9c487fbd2de",

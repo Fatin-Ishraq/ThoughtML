@@ -59,7 +59,8 @@ def main():
         "files": files,
     }
 
-    with open(DEST, "w", encoding="utf-8") as f:
+    # newline="\n" so the record is byte-identical on Windows and Linux.
+    with open(DEST, "w", encoding="utf-8", newline="\n") as f:
         json.dump(prov, f, indent=1)
     print("wrote", DEST, "covering", len(files), "files")
 

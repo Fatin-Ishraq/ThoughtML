@@ -62,7 +62,9 @@ def main():
     text = json.dumps(sched, indent=1)
 
     if args.write:
-        with open(DEST, "w", encoding="utf-8") as f:
+        # newline="\n" so the freeze record is byte-identical on Windows and
+        # Linux; make_manifest.py hashes these bytes.
+        with open(DEST, "w", encoding="utf-8", newline="\n") as f:
             f.write(text + "\n")
         print("wrote", DEST)
     elif args.check:

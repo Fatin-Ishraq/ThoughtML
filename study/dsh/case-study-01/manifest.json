@@ -23,12 +23,12 @@
    "bytes": 15449
   },
   "study/dsh/case-study-01/schedule.json": {
-   "sha256": "08b46f7752b4988823dcfd961b1d0cbad95404c3e5c4e897287f83e75d664482",
-   "bytes": 1763
+   "sha256": "fad92b44e3d0b74470d94a4d88fad8168e41a6349ab702b839b61e1b4fc964f8",
+   "bytes": 1668
   },
   "study/dsh/case-study-01/make_schedule.py": {
-   "sha256": "95a1653cbb1c834f2aa9500cea3d26b2a8efe12fb75de46d958c07147e8ecd5c",
-   "bytes": 2248
+   "sha256": "383c6cdfe5a53a31792f15e3385eb5cf7f480412cbc5ddcaa3006493171c665b",
+   "bytes": 2393
   },
   "study/dsh/case-study-01/run_case_study.py": {
    "sha256": "83212450f5c034b4df12f8e31d19ec144f8f70d4c312abc7177499f2517eb020",
@@ -39,16 +39,16 @@
    "bytes": 18099
   },
   "study/dsh/task-selection/README.md": {
-   "sha256": "5a739540e3b7f05d26d903a5ecb84a6bb141bc205231b4ee1cef237e9940ab45",
-   "bytes": 13696
+   "sha256": "c6ace13cc2ccfbe43f4f2363ec8c99a85b00e8d16b278c211ed961b3e8aceddf",
+   "bytes": 13459
   },
   "study/dsh/task-selection/select_candidate.py": {
    "sha256": "30ac86c367c5801ddcff66f4942164d0607350e52501601011d1840462fd1caf",
    "bytes": 4891
   },
   "study/dsh/task-selection/data/provenance.json": {
-   "sha256": "309db4848e0b52540e72a2fc676df2b811609b536f229f1ef4a71e3903f0dbfd",
-   "bytes": 2089
+   "sha256": "6e2ee7f2eae5ece255fe42a53cc58b35038978fd55a2dfc7012cf51e92ab981b",
+   "bytes": 2032
   }
  },
  "adapter": {

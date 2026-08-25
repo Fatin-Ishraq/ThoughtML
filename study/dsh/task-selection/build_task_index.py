@@ -108,7 +108,8 @@ def main():
 
     out.sort(key=lambda t: t["task"])
     dest = os.path.join(DATA, "deepswe-v1.1-task-index.json")
-    with open(dest, "w", encoding="utf-8") as f:
+    # newline="\n" so the index is byte-identical on Windows and Linux.
+    with open(dest, "w", encoding="utf-8", newline="\n") as f:
         json.dump(out, f, indent=1)
     print("tasks indexed", len(out), "->", dest)
 
