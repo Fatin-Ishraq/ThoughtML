@@ -6,8 +6,8 @@ as a claim that exposing state necessarily improves an agent.
 
 The package provides two plugins:
 
-- `src/index.js`: matched reasoning-state context and `read`, `commit`, and
-  `inspect` tools for either ThoughtML or Markdown;
+- `src/index.js`: matched reasoning-state context and six bounded tools for
+  either ThoughtML or Markdown;
 - `src/metrics.js`: a separate trajectory-metrics collector that does not
   change the agent prompt or tools.
 
@@ -45,6 +45,23 @@ item, relation, and checker-conflict counts. Passing validation establishes
 internal structural validity; it does not establish that recorded beliefs are
 true or complete.
 
+The tool surface is:
+
+| Tool | Purpose |
+|---|---|
+| `reasoning_state_read` | Read the complete current state and revision. |
+| `reasoning_state_commit` | Validate and atomically replace the current state. |
+| `reasoning_state_inspect` | Inspect validation, counts, revision history, and paths. |
+| `reasoning_state_diff` | Compare immutable revisions: semantic beliefs for ThoughtML, fixed sections for Markdown. |
+| `reasoning_state_explain` | Explain one ThoughtML node, or read one matched Markdown section. |
+| `reasoning_state_analyze` | Run bounded ThoughtML compute/audit lenses, or matched Markdown structure analysis. |
+
+`diff`, `explain`, and `analyze` accept revision numbers, never arbitrary file
+paths. Their outputs are bounded. ThoughtML analysis reports mechanical readings
+of authored structure—conflicts, derived confidence, grounded status,
+sensitivity, formulas, and decision values—not truth judgments or recommended
+actions.
+
 ## DSH configuration
 
 The current study pin is DSH `0.1.1-rc.2`, Node.js `^22.19.0 || >=24`, and
@@ -63,6 +80,7 @@ Use absolute file URLs and paths in a DSH patch:
         strict: true
         maxStateBytes: 65536
         maxContextChars: 12000
+        maxAnalysisChars: 12000
         historyLimit: 50
         recoveryGuidance: true
     - id: study-metrics
@@ -74,10 +92,12 @@ Use absolute file URLs and paths in a DSH patch:
 ```
 
 The Markdown and ThoughtML conditions use the same plugin, guidance, context
-timing, limits, and three tool names. Only `format`, the document syntax, and
-the ThoughtML checker differ. The no-state baseline omits the reasoning-state
-plugin entirely. The plugin registers ordinary DSH extension points; it does
-not fork or replace the agent loop.
+timing, limits, and six tool names. Their read/commit/inspect lifecycle is
+matched. The three analysis tools expose the capability available in each
+representation: graph-semantic operations for ThoughtML and fixed-section
+operations for Markdown. The no-state baseline omits the reasoning-state plugin
+entirely. The plugin registers ordinary DSH extension points; it does not fork
+or replace the agent loop.
 
 After a non-state tool failure, the plugin injects a concise checkpoint notice
 before a blind retry. It does not force a particular action and does not inject
@@ -102,7 +122,7 @@ Directly measured fields include:
 | `recoveryEpisodesStarted` | First failed non-state tool in an open episode. |
 | `recoveryEpisodesCompleted` | A later successful non-state tool closes the episode. |
 | `recoveryToolDistances` | Tool-call distance from the opening failure to that success. |
-| `state*` fields | Reads, inspections, commit attempts/outcomes, revision, bytes, validity, and post-failure checkpoints. |
+| `state*` fields | Reads, inspections, diffs, explanations, analyses, commit attempts/outcomes, revision, bytes, validity, and post-failure checkpoints. |
 
 Task success and official environment-action counts must still come from the
 benchmark grader and the frozen action-accounting rules. The collector does not
@@ -125,8 +145,10 @@ pnpm test
 ```
 
 The package tests cover both formats, strict validation, rejected commits,
-revision history, restart/resume, bounded context, visible-file repair, pointer
-integrity, recovery notices, structured rendering, and aggregate-metric privacy.
+revision history, restart/resume, bounded context and analysis, semantic/section
+diffs, focused explanation, compute/audit summaries, visible-file repair,
+pointer integrity, recovery notices, structured rendering, and aggregate-metric
+privacy.
 
 The repository-level deterministic DSH lifecycle check is separate:
 

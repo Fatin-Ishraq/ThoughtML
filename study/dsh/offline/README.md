@@ -23,11 +23,13 @@ written to `offline/results/summary.json`.
 
 The runner also verifies that every assembled request uses only the local
 `thoughtml-study-mock/deterministic-v1` route; that baseline receives no state;
-that M and T receive the correct revision in DSH's dynamic context; and that
-their matched `commit/read/inspect` sequence preserves valid revision history.
-It asserts one failure, one completed recovery, and one post-failure state
-checkpoint in M and T. Aggregate metrics are written separately from the raw
-ignored trajectory.
+that M and T receive the correct revision in DSH's dynamic context and all six
+matched state-tool names; and that their deterministic `commit/read/inspect`
+exercise preserves valid revision history. The newer `diff`, `explain`, and
+`analyze` behavior is covered by package tests rather than adding model-like
+steps to this frozen lifecycle sequence. It asserts one failure, one completed
+recovery, and one post-failure state checkpoint in M and T. Aggregate metrics
+are written separately from the raw ignored trajectory.
 
 Run from `study/dsh`:
 

@@ -113,6 +113,24 @@ function diagnosticsFromProcess(result) {
   }
 }
 
+function runThoughtML(options, args, operation) {
+  const result = spawnSync(
+    options.thoughtmlBinary,
+    args,
+    {
+      encoding: 'utf8',
+      windowsHide: true,
+      timeout: options.validationTimeoutMs,
+    },
+  )
+  if (result.error || result.status !== 0) {
+    const rawDetail = result.stderr?.trim() || result.stdout?.trim() || result.error?.message || 'unknown error'
+    const detail = String(rawDetail).slice(0, 2000)
+    throw new Error(`ThoughtML ${operation} failed: ${detail}`)
+  }
+  return result.stdout.trim()
+}
+
 function validateThoughtML(path, options) {
   const result = spawnSync(
     options.thoughtmlBinary,
@@ -209,6 +227,186 @@ function inspectMarkdown(path) {
   return { itemCount, relationCount: 0, conflictCount: 0 }
 }
 
+function thoughtMLDiff(beforePath, afterPath, options) {
+  return runThoughtML(options, ['diff', beforePath, afterPath], 'diff')
+}
+
+function thoughtMLExplain(path, target, options) {
+  return runThoughtML(options, ['explain', path, target], 'explain')
+}
+
+function limited(values, limit) {
+  return {
+    total: values.length,
+    returned: Math.min(values.length, limit),
+    truncated: values.length > limit,
+    items: values.slice(0, limit),
+  }
+}
+
+function analyzeThoughtML(path, options) {
+  const output = runThoughtML(options, ['--compact', '--compute', path], 'analysis')
+  let model
+  try {
+    model = JSON.parse(output)
+  } catch {
+    throw new Error('ThoughtML analysis returned invalid JSON')
+  }
+
+  const objects = Array.isArray(model.objects) ? model.objects : []
+  const links = objects.filter((object) => object.type === 'link')
+  const items = objects.filter((object) => object.type !== 'link')
+  const conflicts = Array.isArray(model.audit?.conflicts) ? model.audit.conflicts : []
+  const conciseConflicts = conflicts.map((conflict) => ({
+    kind: conflict.kind,
+    severity: conflict.severity,
+    subjects: Array.isArray(conflict.subjects) ? conflict.subjects.slice(0, 8) : [],
+    message: String(conflict.message ?? '').slice(0, 400),
+  }))
+  const derivedNodes = objects
+    .filter((object) => object.derived_confidence !== undefined || object.argument_status !== undefined)
+    .map((object) => ({
+      id: object.id,
+      type: object.type,
+      kind: object.kind ?? null,
+      relation: object.relation ?? null,
+      derivedConfidence: object.derived_confidence ?? null,
+      argumentStatus: object.argument_status ?? null,
+      supersededBy: object.superseded_by ?? null,
+    }))
+  const loadBearingRelations = links
+    .filter((link) => typeof link.leverage === 'number')
+    .map((link) => ({
+      id: link.id,
+      from: link.from,
+      relation: link.relation,
+      to: link.to,
+      leverage: link.leverage,
+    }))
+    .sort((left, right) => Math.abs(right.leverage) - Math.abs(left.leverage))
+  const computedQuantities = objects
+    .filter((object) => object.computed_quantity)
+    .map((object) => ({ id: object.id, ...object.computed_quantity }))
+  const expectedValues = objects
+    .filter((object) => object.expected_value)
+    .map((object) => ({
+      id: object.id,
+      value: object.expected_value.value,
+      unit: object.expected_value.unit,
+      dimension: object.expected_value.dimension,
+      probabilityMass: object.expected_value.probability_mass,
+      downside: object.expected_value.downside,
+    }))
+  const decisions = objects
+    .filter((object) => object.decision)
+    .map((object) => ({
+      id: object.id,
+      ranked: Array.isArray(object.decision.ranked)
+        ? object.decision.ranked.slice(0, 8).map((entry) => ({
+          option: entry.option,
+          value: entry.value,
+          unit: entry.unit,
+          downside: entry.downside,
+        }))
+        : [],
+    }))
+
+  return {
+    mode: 'thoughtml-compute',
+    objectCount: objects.length,
+    itemCount: items.length,
+    relationCount: links.length,
+    stanceCount: objects.filter((object) => object.type === 'stance').length,
+    conflictCount: conflicts.length,
+    conflicts: limited(conciseConflicts, 20),
+    derivedNodes: limited(derivedNodes, 30),
+    loadBearingRelations: limited(loadBearingRelations, 20),
+    computedQuantities: limited(computedQuantities, 15),
+    expectedValues: limited(expectedValues, 15),
+    decisions: limited(decisions, 10),
+    limitations: [
+      'Computed confidence, status, sensitivity, and expected values are mechanical readings of authored structure, not truth judgments.',
+      'Lists are bounded; total, returned, and truncated report omitted entries.',
+    ],
+  }
+}
+
+function markdownSections(path) {
+  const content = readFileSync(path, 'utf8')
+  const lines = content.split(/\r?\n/)
+  const sections = []
+  for (const heading of MARKDOWN_HEADINGS) {
+    const start = lines.findIndex((line) => line.trim() === heading)
+    if (start < 0) {
+      sections.push({ heading, content: '', present: false })
+      continue
+    }
+    let end = lines.length
+    for (let index = start + 1; index < lines.length; index += 1) {
+      if (/^#{1,6}\s+/.test(lines[index].trim())) {
+        end = index
+        break
+      }
+    }
+    sections.push({
+      heading,
+      content: lines.slice(start + 1, end).join('\n').trim(),
+      present: true,
+    })
+  }
+  return sections
+}
+
+function markdownDiff(beforePath, afterPath) {
+  const before = new Map(markdownSections(beforePath).map((section) => [section.heading, section]))
+  const after = new Map(markdownSections(afterPath).map((section) => [section.heading, section]))
+  const changed = MARKDOWN_HEADINGS.filter((heading) => before.get(heading)?.content !== after.get(heading)?.content)
+  const unchanged = MARKDOWN_HEADINGS.filter((heading) => !changed.includes(heading))
+  return [
+    'matched Markdown section diff',
+    `changed (${changed.length}): ${changed.length ? changed.join(', ') : 'none'}`,
+    `unchanged (${unchanged.length}): ${unchanged.length ? unchanged.join(', ') : 'none'}`,
+  ].join('\n')
+}
+
+function markdownExplain(path, target) {
+  const normalized = String(target).replace(/^#{1,6}\s*/, '').trim().toLowerCase()
+  const section = markdownSections(path).find(({ heading }) => (
+    heading.replace(/^#{1,6}\s*/, '').trim().toLowerCase() === normalized
+  ))
+  if (!section?.present) throw new Error(`Markdown state section not found: ${target}`)
+  return `${section.heading}\n\n${section.content || '(empty section)'}`
+}
+
+function analyzeMarkdown(path) {
+  const sections = markdownSections(path)
+  const itemCount = sections.reduce((total, section) => (
+    total + section.content.split(/\r?\n/).filter((line) => line.trim()).length
+  ), 0)
+  return {
+    mode: 'matched-markdown-structure',
+    objectCount: itemCount,
+    itemCount,
+    relationCount: 0,
+    stanceCount: 0,
+    conflictCount: 0,
+    sections: sections.map((section) => ({
+      heading: section.heading,
+      present: section.present,
+      nonEmptyLineCount: section.content.split(/\r?\n/).filter((line) => line.trim()).length,
+    })),
+    conflicts: limited([], 20),
+    derivedNodes: limited([], 30),
+    loadBearingRelations: limited([], 20),
+    computedQuantities: limited([], 15),
+    expectedValues: limited([], 15),
+    decisions: limited([], 10),
+    limitations: [
+      'Markdown analysis checks matched section structure only; it cannot compute graph relations, confidence, argument status, sensitivity, or decisions.',
+    ],
+  }
+}
+
 export function createFormatAdapter(format, options = {}) {
   if (!SUPPORTED_FORMATS.includes(format)) {
     throw new Error(`unsupported reasoning-state format: ${JSON.stringify(format)}`)
@@ -229,6 +427,9 @@ export function createFormatAdapter(format, options = {}) {
       initialContent: INITIAL_THOUGHTML,
       validate(path) { return validateThoughtML(path, normalized) },
       inspect(path) { return inspectThoughtML(path, normalized) },
+      diff(beforePath, afterPath) { return thoughtMLDiff(beforePath, afterPath, normalized) },
+      explain(path, target) { return thoughtMLExplain(path, target, normalized) },
+      analyze(path) { return analyzeThoughtML(path, normalized) },
     })
   }
   return Object.freeze({
@@ -237,5 +438,8 @@ export function createFormatAdapter(format, options = {}) {
     initialContent: INITIAL_MARKDOWN,
     validate: validateMarkdown,
     inspect: inspectMarkdown,
+    diff: markdownDiff,
+    explain: markdownExplain,
+    analyze: analyzeMarkdown,
   })
 }

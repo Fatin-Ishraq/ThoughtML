@@ -96,7 +96,14 @@ function assertRequestShape(condition, step, options) {
   const system = options.system ?? ''
   const toolNames = (options.tools ?? []).map((tool) => tool.name)
   const serializedMessages = JSON.stringify(options.messages)
-  const stateTools = ['reasoning_state_read', 'reasoning_state_commit', 'reasoning_state_inspect']
+  const stateTools = [
+    'reasoning_state_read',
+    'reasoning_state_commit',
+    'reasoning_state_inspect',
+    'reasoning_state_diff',
+    'reasoning_state_explain',
+    'reasoning_state_analyze',
+  ]
   if (!toolNames.includes('offline_operation')) throw new Error('offline_operation was not supplied to the mock model')
   if (condition === 'D') {
     if (system.includes('Persistent reasoning state (')) throw new Error('baseline unexpectedly received reasoning state')

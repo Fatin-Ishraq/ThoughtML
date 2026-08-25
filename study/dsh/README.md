@@ -73,3 +73,10 @@ revision. Its compact, non-study record is
 `diagnostics/plugin-flash-smoke-result.json`; raw artifacts remain ignored. The
 call revealed separate cache-read and reasoning-token fields, which were then
 added to the collector and retested.
+
+On 2026-08-25, still before pilot collection, plugin version `0.2.0` added
+revision-safe `diff`, focused `explain`, and bounded `analyze` tools. Markdown
+and ThoughtML receive the same six tool names; their format-specific behavior is
+declared in the study amendment. Eleven package tests and the zero-network D/M/T
+DSH lifecycle pass. No real-model call has tested version `0.2.0`; the earlier
+Flash smoke remains evidence for version `0.1.0` only.

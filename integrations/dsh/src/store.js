@@ -63,12 +63,16 @@ export class SessionStateStore {
     this.stateRoot = options.stateRoot ? resolve(options.stateRoot) : null
     this.maxStateBytes = options.maxStateBytes ?? 64 * 1024
     this.maxContextChars = options.maxContextChars ?? 12000
+    this.maxAnalysisChars = options.maxAnalysisChars ?? 12000
     this.historyLimit = options.historyLimit ?? 50
     if (!Number.isSafeInteger(this.maxStateBytes) || this.maxStateBytes <= 0) {
       throw new Error('maxStateBytes must be a positive safe integer')
     }
     if (!Number.isSafeInteger(this.maxContextChars) || this.maxContextChars <= 0) {
       throw new Error('maxContextChars must be a positive safe integer')
+    }
+    if (!Number.isSafeInteger(this.maxAnalysisChars) || this.maxAnalysisChars <= 0) {
+      throw new Error('maxAnalysisChars must be a positive safe integer')
     }
     if (!Number.isSafeInteger(this.historyLimit) || this.historyLimit <= 0) {
       throw new Error('historyLimit must be a positive safe integer')
@@ -244,6 +248,76 @@ export class SessionStateStore {
     }
   }
 
+  diff(agent, { fromRevision, toRevision }) {
+    this.#requireRevision(fromRevision, 'fromRevision')
+    this.#requireRevision(toRevision, 'toRevision')
+    const paths = this.paths(agent)
+    const current = this.ensure(agent)
+    const before = this.#readRevision(agent, paths, current, fromRevision)
+    const after = this.#readRevision(agent, paths, current, toRevision)
+    const bounded = this.#boundedText(this.adapter.diff(before.stateFile, after.stateFile))
+    return {
+      format: this.format,
+      fromRevision,
+      toRevision,
+      fromSha256: before.sha256,
+      toSha256: after.sha256,
+      output: bounded.output,
+      truncated: bounded.truncated,
+    }
+  }
+
+  explain(agent, { target, revision }) {
+    if (typeof target !== 'string' || target.trim().length === 0 || target.length > 200) {
+      throw new Error('target must be a non-empty string of at most 200 characters')
+    }
+    const paths = this.paths(agent)
+    const current = this.ensure(agent)
+    const selectedRevision = revision ?? current.revision
+    this.#requireRevision(selectedRevision, 'revision')
+    const snapshot = this.#readRevision(agent, paths, current, selectedRevision)
+    const bounded = this.#boundedText(this.adapter.explain(snapshot.stateFile, target.trim()))
+    return {
+      format: this.format,
+      revision: selectedRevision,
+      sha256: snapshot.sha256,
+      target: target.trim(),
+      output: bounded.output,
+      truncated: bounded.truncated,
+    }
+  }
+
+  analyze(agent, { revision } = {}) {
+    const paths = this.paths(agent)
+    const current = this.ensure(agent)
+    const selectedRevision = revision ?? current.revision
+    this.#requireRevision(selectedRevision, 'revision')
+    const snapshot = this.#readRevision(agent, paths, current, selectedRevision)
+    const analysis = this.adapter.analyze(snapshot.stateFile)
+    const serialized = JSON.stringify(analysis)
+    const boundedAnalysis = serialized.length <= this.maxAnalysisChars
+      ? analysis
+      : {
+        mode: analysis.mode,
+        objectCount: analysis.objectCount,
+        itemCount: analysis.itemCount,
+        relationCount: analysis.relationCount,
+        stanceCount: analysis.stanceCount,
+        conflictCount: analysis.conflictCount,
+        outputReduced: true,
+        limitations: [
+          ...(Array.isArray(analysis.limitations) ? analysis.limitations : []),
+          `Detailed analysis exceeded the ${this.maxAnalysisChars}-character tool-output limit and was reduced to counts.`,
+        ],
+      }
+    return {
+      format: this.format,
+      revision: selectedRevision,
+      sha256: snapshot.sha256,
+      analysis: boundedAnalysis,
+    }
+  }
+
   context(agent) {
     const snapshot = this.ensure(agent)
     const header = `Persistent reasoning state (${this.format}, revision ${snapshot.revision}, sha256 ${snapshot.sha256.slice(0, 12)}):`
@@ -313,6 +387,64 @@ export class SessionStateStore {
     if (sha256(content) !== current.sha256) throw new Error('current state hash mismatch')
     if (Buffer.byteLength(content, 'utf8') !== current.bytes) throw new Error('current state byte count mismatch')
     return { ...current, content, stateFile }
+  }
+
+  #requireRevision(revision, name) {
+    if (!Number.isSafeInteger(revision) || revision < 0) {
+      throw new Error(`${name} must be a non-negative safe integer`)
+    }
+  }
+
+  #readRevision(agent, paths, current, revision) {
+    if (revision > current.revision) {
+      throw new Error(`reasoning-state revision ${revision} does not exist; current is ${current.revision}`)
+    }
+    let entryId = current.entryId
+    const seen = new Set()
+    while (entryId && !seen.has(entryId)) {
+      seen.add(entryId)
+      if (seen.size > 10000) throw new Error('reasoning-state revision history exceeds the safe traversal limit')
+      const entryDir = resolve(paths.historyDir, entryId)
+      assertWithin(paths.historyDir, entryDir)
+      const commitPath = resolve(entryDir, 'commit.json')
+      if (!existsSync(commitPath)) throw new Error(`reasoning-state revision metadata is missing: ${entryId}`)
+      const commit = parseJson(commitPath)
+      if (commit.schemaVersion !== CURRENT_SCHEMA_VERSION
+        || commit.sessionId !== String(agent.id)
+        || commit.format !== this.format
+        || commit.entryId !== entryId
+        || !Number.isSafeInteger(commit.revision)
+        || commit.revision < 0
+        || typeof commit.sha256 !== 'string'
+        || !Number.isSafeInteger(commit.bytes)
+        || commit.bytes < 0) {
+        throw new Error(`invalid reasoning-state revision metadata: ${entryId}`)
+      }
+      if (commit.revision === revision) {
+        const stateFile = resolve(entryDir, `state.${this.adapter.extension}`)
+        assertWithin(paths.historyDir, stateFile)
+        if (!existsSync(stateFile)) throw new Error(`reasoning-state revision ${revision} content is missing`)
+        const content = readFileSync(stateFile, 'utf8')
+        if (sha256(content) !== commit.sha256) throw new Error(`reasoning-state revision ${revision} hash mismatch`)
+        if (Buffer.byteLength(content, 'utf8') !== commit.bytes) {
+          throw new Error(`reasoning-state revision ${revision} byte count mismatch`)
+        }
+        return { ...commit, content, stateFile }
+      }
+      if (commit.revision < revision) break
+      entryId = commit.previousEntryId
+    }
+    throw new Error(`reasoning-state revision ${revision} was not found`)
+  }
+
+  #boundedText(value) {
+    const text = String(value)
+    if (text.length <= this.maxAnalysisChars) return { output: text, truncated: false }
+    const suffix = `\n\n[output truncated at ${this.maxAnalysisChars} characters]`
+    return {
+      output: `${text.slice(0, Math.max(0, this.maxAnalysisChars - suffix.length))}${suffix}`,
+      truncated: true,
+    }
   }
 
   #materialize(paths, current) {

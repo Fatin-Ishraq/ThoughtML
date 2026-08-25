@@ -37,6 +37,9 @@ test('plugin registers matched structured tools, persistent context, and guidanc
   const readTool = registered.tools.find((tool) => tool.name === 'reasoning_state_read')
   const commitTool = registered.tools.find((tool) => tool.name === 'reasoning_state_commit')
   const inspectTool = registered.tools.find((tool) => tool.name === 'reasoning_state_inspect')
+  const diffTool = registered.tools.find((tool) => tool.name === 'reasoning_state_diff')
+  const explainTool = registered.tools.find((tool) => tool.name === 'reasoning_state_explain')
+  const analyzeTool = registered.tools.find((tool) => tool.name === 'reasoning_state_analyze')
   const execution = { agent }
   const before = await readTool.execute({}, execution)
   const afterCommit = await commitTool.execute({
@@ -49,8 +52,17 @@ test('plugin registers matched structured tools, persistent context, and guidanc
   assert.equal(inspection.revision, 1)
   assert.deepEqual(inspection.history.map((entry) => entry.revision), [1, 0])
   assert.equal(JSON.parse(inspectTool.output.render({}, inspection)[0].text).revision, 1)
+  const difference = await diffTool.execute({ fromRevision: 0, toRevision: 1 }, execution)
+  assert.match(difference.output, /Markdown section diff/)
+  const explanation = await explainTool.execute({ target: 'Uncertainty' }, execution)
+  assert.match(explanation.output, /## Uncertainty/)
+  const analysis = await analyzeTool.execute({}, execution)
+  assert.equal(analysis.analysis.mode, 'matched-markdown-structure')
   assert.equal(commitTool.isConcurrencySafe({}), false)
   assert.equal(readTool.isConcurrencySafe({}), true)
+  assert.equal(diffTool.isConcurrencySafe({ fromRevision: 0, toRevision: 1 }), true)
+  assert.equal(explainTool.isConcurrencySafe({ target: 'Uncertainty' }), true)
+  assert.equal(analyzeTool.isConcurrencySafe({}), true)
 })
 
 test('failed non-state tools inject recovery guidance but state-tool failures do not', (t) => {
@@ -64,6 +76,8 @@ test('failed non-state tools inject recovery guidance but state-tool failures do
   assert.equal(notices.length, 1)
   assert.match(JSON.stringify(notices[0]), /Before repeating the same action/)
   handler({ name: 'reasoning_state_commit', agent }, { isError: true })
+  assert.equal(notices.length, 1)
+  handler({ name: 'reasoning_state_analyze', agent }, { isError: true })
   assert.equal(notices.length, 1)
   handler({ name: 'shell', agent }, { isError: false })
   assert.equal(notices.length, 1)

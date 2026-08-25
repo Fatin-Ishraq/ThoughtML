@@ -43,6 +43,9 @@ function blankSession(sessionId) {
     stateCommitRejections: 0,
     stateNoopCommits: 0,
     stateInspections: 0,
+    stateDiffs: 0,
+    stateExplanations: 0,
+    stateAnalyses: 0,
     stateCheckpointsAfterFailure: 0,
     latestStateRevision: 0,
     latestStateBytes: 0,
@@ -150,6 +153,9 @@ export class StudyMetricsCollector {
 
     if (exec.name === 'reasoning_state_read') metrics.stateReads += 1
     if (exec.name === 'reasoning_state_inspect') metrics.stateInspections += 1
+    if (exec.name === 'reasoning_state_diff') metrics.stateDiffs += 1
+    if (exec.name === 'reasoning_state_explain') metrics.stateExplanations += 1
+    if (exec.name === 'reasoning_state_analyze') metrics.stateAnalyses += 1
     if (exec.name === 'reasoning_state_commit') {
       metrics.stateCommitAttempts += 1
       const value = result.isError ? null : result.value

@@ -1,6 +1,6 @@
 {
   "name": "@thoughtml/dsh-plugin",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "packageManager": "pnpm@11.19.0",
   "description": "Persistent, auditable ThoughtML reasoning state for DeepSeek Harness agents",
   "type": "module",

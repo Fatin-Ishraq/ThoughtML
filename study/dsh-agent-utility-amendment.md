@@ -1,10 +1,12 @@
 # DSH agent-utility study amendment
 
 **Author:** Fatin Ishraq
-**Draft version:** 0.2
+**Draft version:** 0.3
 **Date drafted:** 2026-08-24
 **Status:** Pre-pilot development amendment. One credential-only session and one
 plugin-compatibility smoke session exist and are excluded from all study outcomes.
+On 2026-08-25, before pilot collection, the plugin surface was expanded from
+three to six matched tool names; this document records that treatment change.
 
 ## 0. Relationship to the original study
 
@@ -131,15 +133,20 @@ state artifacts must represent the same semantic categories:
 - current plan and next intended action; and
 - uncertainty where the agent expresses it.
 
-Both conditions use the same structured interface: read the complete current
-state, atomically validate and commit a complete replacement against an expected
-revision, and inspect validation plus bounded revision history. Invalid, stale,
+Both conditions use the same six tool names: read the complete current state;
+atomically validate and commit a complete replacement against an expected
+revision; inspect validation plus bounded history; diff two immutable revisions;
+explain one focused state element; and run bounded analysis. Invalid, stale,
 oversized, and unchanged candidates do not replace the last valid revision.
-Condition T uses the released ThoughtML strict checker and exposes its structural
-counts. Condition M checks the same required semantic sections and receives the
-same context timing, tool names, size/context budgets, checkpoint instruction,
-revision semantics, and recovery notice. It receives no hidden semantic
-reasoning advantage.
+
+Condition T uses the released ThoughtML strict checker. Its diff is semantic,
+its explanation targets a graph node, and its analysis exposes the released
+compute/audit lenses. Condition M checks the same required semantic sections;
+its diff identifies changed sections, its explanation returns one section, and
+its analysis reports section structure. This difference is an explicit part of
+the T-minus-M system bundle—not a hidden advantage or a syntax-only contrast.
+Both conditions retain the same context timing, tool names, size/context/output
+budgets, checkpoint instruction, revision semantics, and recovery notice.
 
 The agent is instructed to checkpoint state at the same moments in M and T:
 
@@ -193,7 +200,7 @@ a failure-aware time-to-success analysis is preferred for the complete set.
 ### Secondary mechanical outcomes
 
 - input, cached-input, output, reasoning-output, and total tokens;
-- state-specific tokens and state read/write/check calls;
+- state-specific tokens and state read/commit/inspect/diff/explain/analyze calls;
 - model-facing tool calls and primitive shell/filesystem/test actions;
 - test invocations and distinct failing test signatures;
 - wall-clock duration and timeout reason;
@@ -324,12 +331,14 @@ questions:
    `PLUGIN_READY`, using provider `deepseek-official` and model
    `deepseek-v4-flash`; both are excluded from study outcomes; and
 4. the external plugin in `../integrations/dsh` supplies persistent bounded
-   context, matched structured tools, strict validation, immutable revision
-   history, recovery guidance, observable files, and separate metrics without
-   changing the DSH agent loop. Its source is included on the research branch
-   but is not yet merged into `main` or released as a standalone package.
+   context, six matched tool names, strict validation, immutable revision
+   history, bounded revision diff/explain/analyze operations, recovery guidance,
+   observable files, and separate metrics without changing the DSH agent loop.
+   Its source is included on the research branch but is not yet merged into
+   `main` or released as a standalone package.
 
-Package tests pass for both formats. A zero-network deterministic run also
+Eleven package tests pass for both formats, including the three added operations
+and output bounds. A zero-network deterministic run also
 passes inside the pinned DSH loop for D, M, and T: it observes one controlled
 tool failure and recovery; M and T commit revision 1, preserve revision 0,
 receive refreshed state context, and record a post-failure checkpoint. These are

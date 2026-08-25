@@ -9,6 +9,9 @@ export const STATE_TOOL_NAMES = Object.freeze([
   'reasoning_state_read',
   'reasoning_state_commit',
   'reasoning_state_inspect',
+  'reasoning_state_diff',
+  'reasoning_state_explain',
+  'reasoning_state_analyze',
 ])
 
 export const REASONING_STATE_GUIDANCE = `Maintain a concise persistent reasoning-state ledger for this task.
@@ -16,7 +19,9 @@ export const REASONING_STATE_GUIDANCE = `Maintain a concise persistent reasoning
 - Treat it as an auditable task-state record, not hidden chain-of-thought: record goals, evidence and provenance, current hypotheses, superseded beliefs, actions and observed results, unresolved issues, the next action, and stated uncertainty.
 - Read the supplied state before consequential decisions. Commit after establishing the initial goal and plan and before the first modifying action; after a failure changes the plan; when evidence revises a hypothesis or the goal; and before the final answer.
 - Use reasoning_state_commit with the revision returned by reasoning_state_read or the supplied context. A stale or invalid commit is rejected without replacing the last valid state.
-- Use reasoning_state_inspect when validation, history, structural counts, or the visible state-file path matter. Keep the ledger bounded and remove clutter without erasing meaningful supersession or provenance.`
+- Use reasoning_state_inspect when validation, history, structural counts, or the visible state-file path matter.
+- Use reasoning_state_diff to identify belief changes between immutable revisions, reasoning_state_explain for a focused node or matched Markdown section, and reasoning_state_analyze only when structural conflicts, confidence, sensitivity, or decisions could change the next action.
+- Computed analysis is a mechanical reading of the authored state, not a truth judgment. Keep the ledger bounded and remove clutter without erasing meaningful supersession or provenance.`
 
 const diagnosticSchema = {
   type: 'object',
@@ -100,6 +105,44 @@ const inspectSchema = {
     },
     history: { type: 'array', items: historyEntrySchema, required: true },
     historyTruncated: { type: 'boolean', required: true },
+  },
+  additionalProperties: false,
+}
+
+const diffSchema = {
+  type: 'object',
+  properties: {
+    format: { type: 'string', enum: ['thoughtml', 'markdown'], required: true },
+    fromRevision: { type: 'integer', required: true },
+    toRevision: { type: 'integer', required: true },
+    fromSha256: { type: 'string', required: true },
+    toSha256: { type: 'string', required: true },
+    output: { type: 'string', required: true },
+    truncated: { type: 'boolean', required: true },
+  },
+  additionalProperties: false,
+}
+
+const explainSchema = {
+  type: 'object',
+  properties: {
+    format: { type: 'string', enum: ['thoughtml', 'markdown'], required: true },
+    revision: { type: 'integer', required: true },
+    sha256: { type: 'string', required: true },
+    target: { type: 'string', required: true },
+    output: { type: 'string', required: true },
+    truncated: { type: 'boolean', required: true },
+  },
+  additionalProperties: false,
+}
+
+const analyzeSchema = {
+  type: 'object',
+  properties: {
+    format: { type: 'string', enum: ['thoughtml', 'markdown'], required: true },
+    revision: { type: 'integer', required: true },
+    sha256: { type: 'string', required: true },
+    analysis: { type: 'object', required: true, additionalProperties: true },
   },
   additionalProperties: false,
 }
@@ -192,6 +235,65 @@ export function apply(ctx, config = {}) {
     isConcurrencySafe: () => true,
     async execute(_args, exec) {
       return store.inspect(requireAgent(exec))
+    },
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'reasoning_state_diff',
+    description: 'Compare two immutable reasoning-state revisions. ThoughtML returns a semantic belief diff; the matched Markdown control reports changed fixed sections.',
+    parameters: {
+      fromRevision: {
+        type: 'integer',
+        required: true,
+        description: 'Earlier revision number from reasoning_state_inspect.',
+      },
+      toRevision: {
+        type: 'integer',
+        required: true,
+        description: 'Later revision number from reasoning_state_inspect.',
+      },
+    },
+    output: { schema: diffSchema, render: asText },
+    isConcurrencySafe: () => true,
+    async execute(args, exec) {
+      return store.diff(requireAgent(exec), args)
+    },
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'reasoning_state_explain',
+    description: 'Explain one ThoughtML node using the computed graph, or read one fixed section in the matched Markdown control. Defaults to the current revision.',
+    parameters: {
+      target: {
+        type: 'string',
+        required: true,
+        description: 'ThoughtML node ID, or Markdown section heading without hash marks.',
+      },
+      revision: {
+        type: 'integer',
+        description: 'Optional immutable revision number; defaults to the current revision.',
+      },
+    },
+    output: { schema: explainSchema, render: asText },
+    isConcurrencySafe: () => true,
+    async execute(args, exec) {
+      return store.explain(requireAgent(exec), args)
+    },
+  }))
+
+  ctx.tools.register(defineTool({
+    name: 'reasoning_state_analyze',
+    description: 'Run bounded structural analysis on one reasoning-state revision. ThoughtML computes audit, confidence, argument status, sensitivity, formulas, and decisions; Markdown reports matched section structure.',
+    parameters: {
+      revision: {
+        type: 'integer',
+        description: 'Optional immutable revision number; defaults to the current revision.',
+      },
+    },
+    output: { schema: analyzeSchema, render: asText },
+    isConcurrencySafe: () => true,
+    async execute(args, exec) {
+      return store.analyze(requireAgent(exec), args)
     },
   }))
 

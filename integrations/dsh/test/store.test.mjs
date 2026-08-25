@@ -55,6 +55,35 @@ for (const format of ['thoughtml', 'markdown']) {
     assert.deepEqual(inspection.history.map((entry) => entry.revision), [1, 0])
     assert.equal(inspection.historyTruncated, false)
     assert.ok(inspection.analysis.itemCount > 0)
+
+    const difference = resumedStore.diff(agent, { fromRevision: 0, toRevision: 1 })
+    assert.equal(difference.fromRevision, 0)
+    assert.equal(difference.toRevision, 1)
+    assert.equal(difference.truncated, false)
+    assert.match(difference.output, format === 'thoughtml' ? /belief diff/ : /Markdown section diff/)
+
+    const explanation = resumedStore.explain(agent, {
+      target: format === 'thoughtml' ? 'current-goal' : 'Evidence',
+      revision: 1,
+    })
+    assert.equal(explanation.revision, 1)
+    assert.match(explanation.output, format === 'thoughtml' ? /current-goal/ : /## Evidence/)
+
+    const computed = resumedStore.analyze(agent, { revision: 1 })
+    assert.equal(computed.revision, 1)
+    assert.equal(computed.analysis.mode, format === 'thoughtml' ? 'thoughtml-compute' : 'matched-markdown-structure')
+    assert.ok(computed.analysis.itemCount > 0)
+    if (format === 'thoughtml') {
+      assert.ok(computed.analysis.derivedNodes.total > 0)
+      assert.ok(computed.analysis.loadBearingRelations.total > 0)
+    } else {
+      assert.equal(computed.analysis.sections.length, MARKDOWN_HEADINGS.length)
+    }
+
+    assert.throws(
+      () => resumedStore.diff(agent, { fromRevision: 99, toRevision: 1 }),
+      /revision 99 does not exist/,
+    )
   })
 }
 
@@ -115,6 +144,22 @@ test('context injection is bounded and directs the agent to the read tool', (t) 
   assert.match(context, /above the 80-character injection limit/)
   assert.match(context, /reasoning_state_read/)
   assert.ok(context.length < 300)
+})
+
+test('analysis and semantic text output are bounded', (t) => {
+  const root = temporaryDirectory(t)
+  const agent = fakeAgent('bounded-analysis', root)
+  const store = new SessionStateStore(storeOptions(root, 'markdown', { maxAnalysisChars: 120 }))
+  const initial = store.read(agent)
+  const revised = revisedContent('markdown')
+  store.commit(agent, { content: revised, expectedRevision: 0, reason: 'Create a changed revision.' })
+  const difference = store.diff(agent, { fromRevision: 0, toRevision: 1 })
+  assert.equal(difference.truncated, true)
+  assert.ok(difference.output.length <= 120)
+  const analysis = store.analyze(agent)
+  assert.equal(analysis.analysis.outputReduced, true)
+  assert.match(analysis.analysis.limitations.at(-1), /120-character tool-output limit/)
+  assert.equal(initial.revision, 0)
 })
 
 test('Markdown control requires the same fixed state sections', (t) => {

@@ -43,6 +43,18 @@ test('metrics record route, usage, repetition, recovery, and state behavior with
       validation: { valid: true },
     },
   })
+  collector.observeToolResult(exec('reasoning_state_diff', { fromRevision: 0, toRevision: 1 }, 'state-2'), {
+    isError: false,
+    value: { fromRevision: 0, toRevision: 1 },
+  })
+  collector.observeToolResult(exec('reasoning_state_explain', { target: 'current-goal' }, 'state-3'), {
+    isError: false,
+    value: { revision: 1 },
+  })
+  collector.observeToolResult(exec('reasoning_state_analyze', {}, 'state-4'), {
+    isError: false,
+    value: { revision: 1 },
+  })
   collector.observeToolResult(exec('shell', { command: 'recovered-action' }, 'recovery-1'), {
     isError: false,
     value: { ok: true },
@@ -60,14 +72,17 @@ test('metrics record route, usage, repetition, recovery, and state behavior with
   assert.equal(metrics.cacheReadTokens, 67)
   assert.equal(metrics.outputTokens, 45)
   assert.equal(metrics.reasoningTokens, 23)
-  assert.equal(metrics.toolCalls, 4)
+  assert.equal(metrics.toolCalls, 7)
   assert.equal(metrics.failedToolCalls, 2)
   assert.equal(metrics.repeatedActions, 1)
   assert.equal(metrics.repeatedFailedActions, 1)
   assert.equal(metrics.recoveryEpisodesStarted, 1)
   assert.equal(metrics.recoveryEpisodesCompleted, 1)
-  assert.deepEqual(metrics.recoveryToolDistances, [3])
+  assert.deepEqual(metrics.recoveryToolDistances, [6])
   assert.equal(metrics.stateCommits, 1)
+  assert.equal(metrics.stateDiffs, 1)
+  assert.equal(metrics.stateExplanations, 1)
+  assert.equal(metrics.stateAnalyses, 1)
   assert.equal(metrics.stateCheckpointsAfterFailure, 1)
   assert.equal(metrics.latestStateRevision, 1)
   assert.equal(metrics.unresolvedRecoveryEpisode, false)

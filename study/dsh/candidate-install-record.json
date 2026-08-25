@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "classification": "pre-pilot-engineering-record",
-  "updated_at_utc": "2026-08-24T18:04:12.7186980Z",
+  "updated_at_utc": "2026-08-24T19:01:42.5753900Z",
   "study_collection_started": false,
   "development_sessions": 2,
   "development_model_requests": 5,
@@ -17,6 +17,7 @@
     "dsh_registry_integrity": "sha512-UP1UIh6q3Gme/yXRn/QL2P8IsVlv8Shpg22TRJIZPsCRWLm4CBiA1MUvXmJAfsOEETBMLAl+xWPtFw6ICsN3wg==",
     "observed_dsh_master_commit": "b150a551b8d465e31e418e1b2eaf5e79bbb7d28e",
     "thoughtml": "0.5.0",
+    "plugin": "@thoughtml/dsh-plugin@0.2.0",
     "provider": "deepseek-official",
     "model": "deepseek-v4-flash",
     "telemetry_mode": "DISABLED"
@@ -32,35 +33,39 @@
     },
     "integrations/dsh/package.json": {
       "bytes": 1202,
-      "sha256": "6fbf83dd0f5ea76666b53d4b0f6ba6cb8cfa13aecb2f52c3f132b4f061a09790"
+      "sha256": "586481bc346d74d03b857572c78da16181cd4d7ed94e6c0ed2bb6d84c8c568ef"
     },
     "integrations/dsh/pnpm-lock.yaml": {
       "bytes": 21569,
       "sha256": "436682739c880d39dc45c2cee514c4c4ea3ec6c15e40703bdc430f15eba365c4"
     },
     "integrations/dsh/src/formats.js": {
-      "bytes": 6519,
-      "sha256": "1cdb58e2f2482e7eb711f054a3971729c12ffc298b03efd8f05644847d2ccb9a"
+      "bytes": 13984,
+      "sha256": "1d4bb3b8bc0b53f02e236cbfc2b7dfa204b85afe09e587ce86ddb65b5b6ec807"
     },
     "integrations/dsh/src/store.js": {
-      "bytes": 13022,
-      "sha256": "2b1d489062be789666f1e110adc826d1686ada6076794cae6d0c3d8c378c3e0f"
+      "bytes": 18554,
+      "sha256": "4f0d90a456b05758b6674f6a725c7f7228b8bc6679b8c9020f20cd37b5ba09fd"
     },
     "integrations/dsh/src/index.js": {
-      "bytes": 8073,
-      "sha256": "17d8b6a60c6736c0ffcc87f66c9e029a8ff96deb1958997cace308a490be9f73"
+      "bytes": 11968,
+      "sha256": "c203ebf2fc249e680e431081a7c805a05caf00dbbeba5ea1760be68f8869f1ba"
     },
     "integrations/dsh/src/metrics.js": {
-      "bytes": 7569,
-      "sha256": "2d091081cd18374dd3d25562fbc13a6cfddf763dfbc9d3f15a5035a02e4c94d4"
+      "bytes": 7862,
+      "sha256": "a821af3d091bbdba1e711128eb02ce783c3519f5b12a72a93ea65c4773f6317d"
     },
     "study/dsh/offline/run-mock.mjs": {
       "bytes": 13318,
       "sha256": "224dd820d3835e0a202052d8d63e4493856efe9fefb2ab8bf460a0af8b5b0071"
     },
     "study/dsh/offline/results/summary.json": {
-      "bytes": 10240,
-      "sha256": "572662c6ede86d8a352b1993af740cf1674f3d0217f6eb2fe11a04fb54e146a4"
+      "bytes": 10495,
+      "sha256": "a324b7a4a32936a6878ba153bd643ee70651f39203a239214810583e80e03d43"
+    },
+    "study/dsh/plugins/mock-llm.js": {
+      "bytes": 7521,
+      "sha256": "2b8ac113a88a58f76daf8d50a0f7cb5758a9fd9d6b8313e340ae82bdbbece3f9"
     },
     "study/dsh/diagnostics/flash-key-check-result.json": {
       "bytes": 542,
@@ -75,8 +80,8 @@
     "lifecycle_scripts_enabled": false,
     "frozen_offline_install": "passed",
     "package_syntax_files": 9,
-    "package_tests": 10,
-    "package_tests_passed": 10,
+    "package_tests": 11,
+    "package_tests_passed": 11,
     "package_dry_run": "passed",
     "deterministic_dsh_conditions": [
       "D",
@@ -88,9 +93,19 @@
     "markdown_revision_history_verified": true,
     "thoughtml_revision_history_verified": true,
     "thoughtml_strict_validation": "passed_zero_diagnostics",
+    "matched_state_tool_names": [
+      "reasoning_state_read",
+      "reasoning_state_commit",
+      "reasoning_state_inspect",
+      "reasoning_state_diff",
+      "reasoning_state_explain",
+      "reasoning_state_analyze"
+    ],
+    "bounded_revision_diff_explain_analyze": "passed_both_formats",
     "flash_credential_route": "passed",
     "flash_plugin_read_commit_inspect": "passed",
     "flash_plugin_final_response": "PLUGIN_READY",
+    "plugin_v0_2_real_model_smoke": "not_run",
     "raw_logs_tracked": false,
     "credential_recorded": false,
     "native_coding_tools": "not_yet_tested",
