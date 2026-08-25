@@ -1,0 +1,454 @@
+{
+ "abs-module-cache-flags": {
+  "compressed_bytes": 839606281,
+  "error": null
+ },
+ "abs-stepped-slices": {
+  "compressed_bytes": 839606281,
+  "error": null
+ },
+ "actionlint-action-pinning-lint": {
+  "compressed_bytes": 778516131,
+  "error": null
+ },
+ "adaptix-name-mapping-aliases": {
+  "compressed_bytes": 788210390,
+  "error": null
+ },
+ "aiomonitor-task-snapshots-diff": {
+  "compressed_bytes": 815643745,
+  "error": null
+ },
+ "anko-default-function-arguments": {
+  "compressed_bytes": 769437731,
+  "error": null
+ },
+ "anko-typed-variable-bindings": {
+  "compressed_bytes": 785931047,
+  "error": null
+ },
+ "arcane-drift-detection-baselines": {
+  "compressed_bytes": 2149575268,
+  "error": null
+ },
+ "arktype-json-schema-refs-dependencies": {
+  "compressed_bytes": 1052825340,
+  "error": null
+ },
+ "awilix-async-container-initialization": {
+  "compressed_bytes": 819273434,
+  "error": null
+ },
+ "bandit-incremental-cache-control": {
+  "compressed_bytes": 776343776,
+  "error": null
+ },
+ "bandit-interprocedural-taint-checks": {
+  "compressed_bytes": 775099533,
+  "error": null
+ },
+ "bandit-structured-nosec-directives": {
+  "compressed_bytes": 780372124,
+  "error": null
+ },
+ "boa-hierarchical-evaluation-cancellation": {
+  "compressed_bytes": 2144176677,
+  "error": null
+ },
+ "cattrs-partial-structuring-recovery": {
+  "compressed_bytes": 760533976,
+  "error": null
+ },
+ "clack-async-autocomplete-options": {
+  "compressed_bytes": 853800060,
+  "error": null
+ },
+ "claude-code-by-agents-recursive-delegation": {
+  "compressed_bytes": 960086494,
+  "error": null
+ },
+ "cliffy-config-file-parsing": {
+  "compressed_bytes": 835983308,
+  "error": null
+ },
+ "csstree-shorthand-expansion-compression": {
+  "compressed_bytes": 781948578,
+  "error": null
+ },
+ "dasel-html-document-format": {
+  "compressed_bytes": 825094985,
+  "error": null
+ },
+ "dateutil-rfc5545-timezone-interop": {
+  "compressed_bytes": 768053605,
+  "error": null
+ },
+ "drizzle-orm-window-function-builders": {
+  "compressed_bytes": 1200951363,
+  "error": null
+ },
+ "dynamodb-toolbox-conditional-attribute-requirements": {
+  "compressed_bytes": 896965411,
+  "error": null
+ },
+ "dynamodb-toolbox-lazy-recursive-schemas": {
+  "compressed_bytes": 896965411,
+  "error": null
+ },
+ "effect-sse-httpapi-streaming": {
+  "compressed_bytes": 1168585378,
+  "error": null
+ },
+ "eicrud-keyset-pagination-cursor": {
+  "compressed_bytes": 1187066181,
+  "error": null
+ },
+ "etree-xml-diff-patch": {
+  "compressed_bytes": 766864040,
+  "error": null
+ },
+ "expr-try-catch-errors": {
+  "compressed_bytes": 781096590,
+  "error": null
+ },
+ "fastapi-deprecation-response-headers": {
+  "compressed_bytes": 839741458,
+  "error": null
+ },
+ "fastapi-implicit-head-options": {
+  "compressed_bytes": 839537206,
+  "error": null
+ },
+ "fd-deterministic-multi-key-sorting": {
+  "compressed_bytes": 1013312119,
+  "error": null
+ },
+ "geo-shapeindex-serialization": {
+  "compressed_bytes": 769269310,
+  "error": null
+ },
+ "go-critic-doc-link-checker": {
+  "compressed_bytes": 776908363,
+  "error": null
+ },
+ "go-genai-streamed-function-args": {
+  "compressed_bytes": 805865748,
+  "error": null
+ },
+ "go-git-worktree-merge-conflicts": {
+  "compressed_bytes": 922324569,
+  "error": null
+ },
+ "goreleaser-retry-publish-auditing": {
+  "compressed_bytes": 2547822746,
+  "error": null
+ },
+ "gql-incremental-graphql-delivery": {
+  "compressed_bytes": 805265846,
+  "error": null
+ },
+ "happy-dom-abort-pending-body-reads": {
+  "compressed_bytes": 958351515,
+  "error": null
+ },
+ "happy-dom-deterministic-intersectionobserver": {
+  "compressed_bytes": 958466921,
+  "error": null
+ },
+ "helm-array-merge-strategies": {
+  "compressed_bytes": 1111969913,
+  "error": null
+ },
+ "helm-unified-manifest-stream": {
+  "compressed_bytes": 1099690693,
+  "error": null
+ },
+ "httpx-deterministic-cookie-store": {
+  "compressed_bytes": 899031086,
+  "error": null
+ },
+ "httpx-multipart-response-parsing": {
+  "compressed_bytes": 899031086,
+  "error": null
+ },
+ "httpx-streaming-json-iteration": {
+  "compressed_bytes": 899031086,
+  "error": null
+ },
+ "igel-persist-feature-schema": {
+  "compressed_bytes": 1037645750,
+  "error": null
+ },
+ "ink-grid-box-layout": {
+  "compressed_bytes": 892009975,
+  "error": null
+ },
+ "ipython-session-bundle-replay": {
+  "compressed_bytes": 852416609,
+  "error": null
+ },
+ "katex-multicolumn-array-spans": {
+  "compressed_bytes": 1022492235,
+  "error": null
+ },
+ "kcp-go-multiplexed-kcp-streams": {
+  "compressed_bytes": 781072236,
+  "error": null
+ },
+ "kea-atomic-signal-selectors": {
+  "compressed_bytes": 818797830,
+  "error": null
+ },
+ "kgateway-consistent-hash-policy": {
+  "compressed_bytes": 1754419829,
+  "error": null
+ },
+ "kombu-single-active-consumer-priority": {
+  "compressed_bytes": 841140948,
+  "error": null
+ },
+ "kombu-virtual-queue-dead-lettering": {
+  "compressed_bytes": 841138084,
+  "error": null
+ },
+ "koota-composite-trait-aspects": {
+  "compressed_bytes": 882299292,
+  "error": null
+ },
+ "koota-deferred-mutation-buffer": {
+  "compressed_bytes": 881967232,
+  "error": null
+ },
+ "koota-entity-snapshot-rollback": {
+  "compressed_bytes": 882297032,
+  "error": null
+ },
+ "koota-pair-relation-tracking": {
+  "compressed_bytes": 882299292,
+  "error": null
+ },
+ "koota-query-predicates": {
+  "compressed_bytes": 882299292,
+  "error": null
+ },
+ "kysely-window-grouping-helpers": {
+  "compressed_bytes": 1004025003,
+  "error": null
+ },
+ "langchain-request-coalescing": {
+  "compressed_bytes": 1261228743,
+  "error": null
+ },
+ "mashumaro-flattened-dataclass-fields": {
+  "compressed_bytes": 755769995,
+  "error": null
+ },
+ "meriyah-explicit-resource-declarations": {
+  "compressed_bytes": 918795055,
+  "error": null
+ },
+ "mnamer-daemon-watch-lifecycle": {
+  "compressed_bytes": 768275124,
+  "error": null
+ },
+ "mobly-grouped-test-barriers": {
+  "compressed_bytes": 757488450,
+  "error": null
+ },
+ "narwhals-rolling-window-suite": {
+  "compressed_bytes": 1210328624,
+  "error": null
+ },
+ "numba-stencil-boundary-modes": {
+  "compressed_bytes": 1085038558,
+  "error": null
+ },
+ "obsidian-linter-auto-table-of-contents": {
+  "compressed_bytes": 838451224,
+  "error": null
+ },
+ "obsidian-linter-link-format-conversion": {
+  "compressed_bytes": 838434920,
+  "error": null
+ },
+ "obsidian-linter-scoped-ignore-markers": {
+  "compressed_bytes": 838451404,
+  "error": null
+ },
+ "ofetch-per-origin-circuit-breaker": {
+  "compressed_bytes": 826144390,
+  "error": null
+ },
+ "onedump-dump-encryption-pipeline": {
+  "compressed_bytes": 1000835455,
+  "error": null
+ },
+ "opa-rego-rule-profiling": {
+  "compressed_bytes": 2092627585,
+  "error": null
+ },
+ "opa-template-string-reconstruction": {
+  "compressed_bytes": 2092630934,
+  "error": null
+ },
+ "optique-conditional-option-dependencies": {
+  "compressed_bytes": 819182025,
+  "error": null
+ },
+ "oxvg-structural-selector-preservation": {
+  "compressed_bytes": 1034725833,
+  "error": null
+ },
+ "participle-grammar-conflict-analysis": {
+  "compressed_bytes": 767767425,
+  "error": null
+ },
+ "pebble-durability-wait-apis": {
+  "compressed_bytes": 963433205,
+  "error": null
+ },
+ "pest-character-class-coalescing": {
+  "compressed_bytes": 1128959023,
+  "error": null
+ },
+ "prometheus-transactional-reload-status": {
+  "compressed_bytes": 1805375600,
+  "error": null
+ },
+ "prometheus-typed-label-sorting": {
+  "compressed_bytes": 1638024477,
+  "error": null
+ },
+ "psd-tools-blend-range-api": {
+  "compressed_bytes": 945042339,
+  "error": null
+ },
+ "pwntools-tube-multiplexing": {
+  "compressed_bytes": 811123324,
+  "error": null
+ },
+ "python-statemachine-state-data-scoping": {
+  "compressed_bytes": 809639899,
+  "error": null
+ },
+ "query-persist-restored-query-state": {
+  "compressed_bytes": 1578505911,
+  "error": null
+ },
+ "quill-shared-toolbar-focus": {
+  "compressed_bytes": 1611732744,
+  "error": null
+ },
+ "returns-validated-error-accumulation": {
+  "compressed_bytes": 762080479,
+  "error": null
+ },
+ "scc-bounded-memory-spilling": {
+  "compressed_bytes": 805862916,
+  "error": null
+ },
+ "scriggo-method-declarations": {
+  "compressed_bytes": 786986153,
+  "error": null
+ },
+ "skrub-duration-encoding": {
+  "compressed_bytes": 1274499917,
+  "error": null
+ },
+ "sql-formatter-bigquery-pipe-formatting": {
+  "compressed_bytes": 886253571,
+  "error": null
+ },
+ "sqlfmt-create-table-ddl-formatting": {
+  "compressed_bytes": 760656716,
+  "error": null
+ },
+ "sqlite-utils-safe-import-checkpoints": {
+  "compressed_bytes": 759909745,
+  "error": null
+ },
+ "superjson-error-stack-serialization": {
+  "compressed_bytes": 881808809,
+  "error": null
+ },
+ "task-task-graph-export": {
+  "compressed_bytes": 1215220543,
+  "error": null
+ },
+ "tengo-callable-instance-isolation": {
+  "compressed_bytes": 767827921,
+  "error": null
+ },
+ "tengo-destructuring-bindings": {
+  "compressed_bytes": 767827921,
+  "error": null
+ },
+ "termenv-preserve-ansi-resets": {
+  "compressed_bytes": 774099010,
+  "error": null
+ },
+ "testem-bail-on-test-failure": {
+  "compressed_bytes": 846269776,
+  "error": null
+ },
+ "testem-per-launcher-reports": {
+  "compressed_bytes": 845616080,
+  "error": null
+ },
+ "textual-kitty-key-phases": {
+  "compressed_bytes": 1022312835,
+  "error": null
+ },
+ "textual-richlog-follow-state": {
+  "compressed_bytes": 874007932,
+  "error": null
+ },
+ "tomlkit-toml-table-converters": {
+  "compressed_bytes": 838087746,
+  "error": null
+ },
+ "true-myth-iterable-collection-combinators": {
+  "compressed_bytes": 867427760,
+  "error": null
+ },
+ "ts-pattern-match-each": {
+  "compressed_bytes": 836434399,
+  "error": null
+ },
+ "updo-policy-alerting": {
+  "compressed_bytes": 819120861,
+  "error": null
+ },
+ "valibot-recursive-schema-composition": {
+  "compressed_bytes": 982450218,
+  "error": null
+ },
+ "vitest-duration-sharding": {
+  "compressed_bytes": 1037365889,
+  "error": null
+ },
+ "vulture-persistent-analysis-cache": {
+  "compressed_bytes": 813971822,
+  "error": null
+ },
+ "wasmi-trap-coredumps": {
+  "compressed_bytes": 1120995415,
+  "error": null
+ },
+ "wazero-multi-module-snapshots": {
+  "compressed_bytes": 811061004,
+  "error": null
+ },
+ "yaegi-go-embed-directives": {
+  "compressed_bytes": 801285145,
+  "error": null
+ },
+ "yjs-map-conflict-detection": {
+  "compressed_bytes": 833036921,
+  "error": null
+ },
+ "ytt-jsonpath-query-api": {
+  "compressed_bytes": 894197867,
+  "error": null
+ }
+}

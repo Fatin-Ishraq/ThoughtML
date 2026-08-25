@@ -1,0 +1,58 @@
+{
+ "record": "DeepSWE v1.1 task-selection inputs for the DSH agent-utility case study",
+ "collected_on": "2026-08-25",
+ "no_model_calls": true,
+ "benchmark": {
+  "name": "DeepSWE",
+  "version": "v1.1",
+  "tasks": 113,
+  "site": "https://deepswe.datacurve.ai/",
+  "task_repo": "https://github.com/datacurve-ai/deep-swe",
+  "task_repo_commit": "435ee89ec2f2e2289f33b0da4f992f0b7b7266b9",
+  "task_repo_commit_date": "2026-08-06T13:01:53-07:00",
+  "task_repo_license": "Apache-2.0",
+  "runner": "https://github.com/datacurve-ai/pier",
+  "published_harness": "mini-swe-agent on Modal"
+ },
+ "trials": {
+  "rows": 28010,
+  "scope": "all published v1.1 trials for all 113 tasks",
+  "source": "server-rendered payload of https://deepswe.datacurve.ai/data/v1.1/tasks/<task-id>",
+  "trials_per_task_model_config": 4,
+  "validation": "deepseek-v4-flash reproduces the published leaderboard score: 241/452 = 53.3% pass@1 (site reports 53% +/- 4%)"
+ },
+ "files": {
+  "README.md": {
+   "sha256": "5a739540e3b7f05d26d903a5ecb84a6bb141bc205231b4ee1cef237e9940ab45",
+   "bytes": 13696
+  },
+  "build_task_index.py": {
+   "sha256": "eb4f84495ac68ace90dfc4c7ce53b3ed2b6c2e6056c042afb351649f53088b70",
+   "bytes": 4061
+  },
+  "collect_trials.py": {
+   "sha256": "dfbaaa143307e91784b1c53d010ae8426a98f550473c421d0c2258f0e6219742",
+   "bytes": 5214
+  },
+  "select_candidate.py": {
+   "sha256": "30ac86c367c5801ddcff66f4942164d0607350e52501601011d1840462fd1caf",
+   "bytes": 4891
+  },
+  "write_provenance.py": {
+   "sha256": "9b92a2cdda95eb0d12f53c9618300e61205beed8a5d4d444720aa6333065a977",
+   "bytes": 2352
+  },
+  "data/deepswe-v1.1-image-sizes.json": {
+   "sha256": "607cd016f05669cc23fd1492686b76cda7bff0660a4b71962efb529748bb2418",
+   "bytes": 10734
+  },
+  "data/deepswe-v1.1-task-index.json": {
+   "sha256": "10fc53ce00d1de78688831e00283a9035be313ba27de3945978165d28d215500",
+   "bytes": 128457
+  },
+  "data/deepswe-v1.1-trials.jsonl.gz": {
+   "sha256": "2c8f4d97b22e480cc922a35fa2b198b809a112197a50a67e8de9a9c487fbd2de",
+   "bytes": 2576767
+  }
+ }
+}
