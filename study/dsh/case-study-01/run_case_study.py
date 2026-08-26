@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import subprocess
 import sys
 import time
@@ -35,6 +36,12 @@ DEFAULTS = {
 
 
 STUDY_MODEL = "deepseek-official/deepseek-v4-flash"
+# One session needs room for the agent image's unique layers on top of the
+# pinned base (~1 GiB), the build cache (a few GiB), and the verifier image
+# build. With reclaim_images() running after every session that peak does not
+# accumulate, so ~10 GiB is enough headroom. The 2026-08-26 failure happened
+# with twelve stale 4.6 GiB images present, not because the host was small.
+MIN_FREE_GIB = 10.0
 
 
 def preflight(cfg: dict) -> list[str]:
@@ -90,6 +97,16 @@ def preflight(cfg: dict) -> list[str]:
         if data.get("agent_image_digest_check") == "MISMATCH":
             problems.append("local image does not match the pinned digest")
 
+    # A verifier image build needs headroom. Sessions are worthless if grading
+    # cannot run, and the failure is silent, so refuse to start when tight.
+    if free_gib() < MIN_FREE_GIB:
+        problems.append(
+            "only %.1f GiB free; need at least %.0f GiB of headroom for the "
+            "verifier image build (a short host produces sessions that run to "
+            "completion and then cannot be graded)"
+            % (free_gib(), MIN_FREE_GIB)
+        )
+
     schedule = HERE / "schedule.json"
     if not schedule.is_file():
         problems.append("schedule.json missing")
@@ -121,9 +138,68 @@ def build_command(cfg: dict, session: dict) -> list[str]:
         "-q",
     ]
     if session["condition"] == "T":
-        cmd[cmd.index("--ak") + 2 : cmd.index("--ak") + 2] = []
         cmd += ["--ak", "thoughtml_binary=%s" % cfg["thoughtml"]]
     return cmd
+
+
+# The pinned task image is expensive to re-pull (~6 minutes) and must survive
+# reclamation; everything Pier builds per trial must not.
+PROTECTED_IMAGE_PREFIXES = ("public.ecr.aws/", "node:")
+
+
+def reclaim_images(verbose: bool = True) -> None:
+    """Remove per-trial images and build cache between sessions.
+
+    Pier builds an agent image (~4.6 GB tagged) and an egress-proxy image per
+    trial, plus a verifier image. `docker image prune` does not touch these
+    because they are tagged, so across nine sessions they accumulate until the
+    host runs short and the *verifier* image build fails. Observed 2026-08-26:
+    a session whose agent completed and whose patch was collected produced no
+    reward at all, surfacing only as "No reward file found" with an empty
+    verifier stdout. That is a silent, late failure — the session is spent
+    before anything looks wrong — so reclamation runs after every session
+    rather than at the end.
+    """
+    listed = subprocess.run(
+        ["docker", "images", "--format", "{{.Repository}}:{{.Tag}}"],
+        capture_output=True, text=True,
+    )
+    if listed.returncode != 0:
+        print("    (could not list docker images; skipping reclamation)")
+        return
+
+    doomed = [
+        line.strip()
+        for line in listed.stdout.splitlines()
+        if line.strip()
+        and not line.startswith(PROTECTED_IMAGE_PREFIXES)
+        and "<none>" not in line
+        and not line.startswith("hello-world")
+    ]
+    for image in doomed:
+        subprocess.run(["docker", "rmi", "-f", image],
+                       capture_output=True, text=True)
+    subprocess.run(["docker", "builder", "prune", "-af"],
+                   capture_output=True, text=True)
+    if verbose:
+        print("    reclaimed %d per-trial image(s) and the build cache" % len(doomed))
+
+
+def free_gib() -> float:
+    """Free space on the disk that actually constrains the run.
+
+    Under WSL the Linux root is a sparse virtual disk and reports the host
+    volume's *apparent* size — 947 GiB free while the Windows volume backing it
+    had 11.9 GiB. Checking `/` would make the headroom guard useless, so prefer
+    the Windows mount when it is present.
+    """
+    for path in ("/mnt/c", "/"):
+        try:
+            usage = shutil.disk_usage(path)
+        except OSError:
+            continue
+        return usage.free / (1024 ** 3)
+    return float("inf")
 
 
 def main() -> int:
@@ -179,6 +255,8 @@ def main() -> int:
         with log.open("a", encoding="utf-8") as f:
             f.write(json.dumps(record) + "\n")
         print("    exit=%s  %.1fs" % (proc.returncode, elapsed), flush=True)
+        reclaim_images()
+        print("    %.1f GiB free" % free_gib(), flush=True)
 
     print("\ncollection complete; log at %s" % log)
     return 0
