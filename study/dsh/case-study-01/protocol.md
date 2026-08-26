@@ -113,6 +113,13 @@ Identical across D, M, and T unless the treatment itself requires the difference
 - identical task text, image digest, and initial container state;
 - identical coding, shell, filesystem, and testing tools;
 - identical network and sandbox policy;
+- **identical disabled harness plugins**: `web`, `web-search-deepseek`,
+  `tool-web`, `tool-todo`, `tool-goal`. Web search reaches DeepSWE's published
+  reference solution through the allowlisted model-API host even in a
+  `no-network` container; `todo_write` and the goal tool are DSH's own
+  persistent scratchpads and would leave condition `D` with state and give M and
+  T a competing mechanism. See the amendment §4.1 for the probe that found both;
+  `selftest.py` asserts all three conditions disable exactly the same set;
 - identical token, action, wall-time, and retry budgets;
 - identical termination rules and the official DeepSWE verifier;
 - identical usage-accounting and event-extraction code;

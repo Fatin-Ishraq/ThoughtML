@@ -35,4 +35,5 @@ study/dsh/pier_agent/** eol=lf
 study/dsh/task-selection/** eol=lf
 study/dsh/task-selection/data/*.gz binary
 study/dsh/plugins/*.js eol=lf
-integrations/dsh/src/*.js eol=lf
+integrations/dsh/** eol=lf
+integrations/dsh/pnpm-lock.yaml eol=lf

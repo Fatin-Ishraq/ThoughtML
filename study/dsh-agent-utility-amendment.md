@@ -7,6 +7,10 @@
 plugin-compatibility smoke session exist and are excluded from all study outcomes.
 On 2026-08-25, before pilot collection, the plugin surface was expanded from
 three to six matched tool names; this document records that treatment change.
+Later that day, again before any collection, plugin `0.3.0` restated the
+state-management guidance as an explicit requirement, and the harness
+configuration disabled DSH's web search and its built-in `todo`/`goal`
+scratchpads. Both changes are recorded in §4.1.
 
 ## 0. Relationship to the original study
 
@@ -156,6 +160,44 @@ its analysis reports section structure. This difference is an explicit part of
 the T-minus-M system bundle—not a hidden advantage or a syntax-only contrast.
 Both conditions retain the same context timing, tool names, size/context/output
 budgets, checkpoint instruction, revision semantics, and recovery notice.
+
+### 4.1 Pre-collection corrections, 2026-08-25
+
+A truncated condition-T probe on the frozen case-study task (30 steps, logged as
+a development call) exposed two problems that would have invalidated collection.
+Both fixes are applied identically to D, M and T, and both were made before any
+study session.
+
+**Disabled harness tools.** DSH's `web`, `web-search-deepseek`, `tool-web`,
+`tool-todo` and `tool-goal` plugins are disabled in every condition.
+
+- *Web search* resolves through the allowlisted model-API host, so it functions
+  even inside a `no-network` container. The probe and an earlier dry run both
+  used it to retrieve DeepSWE's published `solution/solution.patch` for the task.
+  With it enabled, every session would measure how well the model locates the
+  reference solution online rather than whether it can solve the task. Any result
+  produced with web search enabled is void; the 2026-08-25 dry run is therefore
+  development evidence about the pipeline only, not about agent capability.
+- *`todo_write` and the goal tool* are DSH's own persistent scratchpads. While
+  they are available, condition `D` is not a no-persistent-state baseline, and
+  the agent has an established alternative to the study's ledger. The probe
+  recorded zero uses of any state tool while the agent worked normally with the
+  built-ins. Removing them makes `D` a real baseline and makes the T-minus-M
+  contrast a comparison of state representations rather than of note-taking
+  habits.
+
+**Restated guidance (treatment change).** Plugin `0.3.0` rewrites
+`REASONING_STATE_GUIDANCE` from a descriptive passage into an explicit
+requirement with numbered checkpoints. The semantic content — what to record,
+when to checkpoint, how commits and revisions behave — is unchanged; only its
+force and ordering changed. The text remains a single shared constant, so M and T
+receive identical guidance and continue to differ only in representation. This is
+permitted by §8, which allows correcting instructions that are unusable in all
+conditions, and is recorded here rather than applied silently.
+
+Whether the ledger is now actually used is an empirical question that must be
+re-checked with a fresh probe before collection, and checkpoint compliance
+remains a measured outcome rather than an enforced one.
 
 The agent is instructed to checkpoint state at the same moments in M and T:
 

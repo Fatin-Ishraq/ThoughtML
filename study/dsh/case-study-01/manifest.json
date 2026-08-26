@@ -19,8 +19,8 @@
  },
  "protocol_and_selection": {
   "study/dsh/case-study-01/protocol.md": {
-   "sha256": "0a94723c8a2ea5df8053d2e9c67af53c097805e9fcfb69cf560be27be4e0d5af",
-   "bytes": 15449
+   "sha256": "60186847ccdb3db0c22d6e69ee78dd8a1b094df0ab0edb9cd156e53415f7fb13",
+   "bytes": 15979
   },
   "study/dsh/case-study-01/schedule.json": {
    "sha256": "fad92b44e3d0b74470d94a4d88fad8168e41a6349ab702b839b61e1b4fc964f8",
@@ -31,12 +31,12 @@
    "bytes": 2393
   },
   "study/dsh/case-study-01/run_case_study.py": {
-   "sha256": "83212450f5c034b4df12f8e31d19ec144f8f70d4c312abc7177499f2517eb020",
-   "bytes": 6431
+   "sha256": "ee42febf358c41ebeae70bd466698385d82f8e2bc213190026826b5f9b0af8b8",
+   "bytes": 7113
   },
   "study/dsh-agent-utility-amendment.md": {
-   "sha256": "22e3fa104c2b2d1878b6cbf420f202ac81f72a335d1d97fe98116e1da5d45b9c",
-   "bytes": 18678
+   "sha256": "dfc9ac92e115834f82c222a1f49b4f05078885ff556851d211ac42aa04c08aab",
+   "bytes": 21242
   },
   "study/dsh/task-selection/README.md": {
    "sha256": "c6ace13cc2ccfbe43f4f2363ec8c99a85b00e8d16b278c211ed961b3e8aceddf",
@@ -53,12 +53,12 @@
  },
  "adapter": {
   "study/dsh/pier_agent/dsh_agent.py": {
-   "sha256": "f59ce1e55cccf4b86bbbfb840022dae649feb5e879bab1efad807ade755c81cc",
-   "bytes": 22673
+   "sha256": "a6c32b0733147a2a767e6258be16dd487126f97b46778c2fc1ca171aacfc0cb7",
+   "bytes": 29129
   },
   "study/dsh/pier_agent/selftest.py": {
-   "sha256": "71caf26261883f4cd5df5c90379b3198d91c89281e9921ae59c538b02d49d7ec",
-   "bytes": 11013
+   "sha256": "8aa7fcab4771bc22ee30f5bddea853d63814b574a21e0dd0d6a499c8a6662662",
+   "bytes": 14322
   },
   "study/dsh/pier_agent/verify_extraction.py": {
    "sha256": "eaaa7e1564c5f8848d2970f52dc712b4cf7dd401b29dbda80fa52c494643c9ac",
@@ -67,8 +67,8 @@
  },
  "plugin": {
   "integrations/dsh/src/index.js": {
-   "sha256": "c203ebf2fc249e680e431081a7c805a05caf00dbbeba5ea1760be68f8869f1ba",
-   "bytes": 11968
+   "sha256": "f62533dad2070769e3886d033990313aefdd99abc709d3c2c1cf181a6e7ed0eb",
+   "bytes": 13449
   },
   "integrations/dsh/src/metrics.js": {
    "sha256": "a821af3d091bbdba1e711128eb02ce783c3519f5b12a72a93ea65c4773f6317d",
@@ -79,11 +79,11 @@
    "bytes": 18554
   },
   "integrations/dsh/src/formats.js": {
-   "sha256": "1d4bb3b8bc0b53f02e236cbfc2b7dfa204b85afe09e587ce86ddb65b5b6ec807",
-   "bytes": 13984
+   "sha256": "d604fce0277e724c116097835da0d5a6f32ae3dbefbdea22cabeafdc00196ea2",
+   "bytes": 15474
   },
   "integrations/dsh/package.json": {
-   "sha256": "586481bc346d74d03b857572c78da16181cd4d7ed94e6c0ed2bb6d84c8c568ef",
+   "sha256": "efd33c20761649c5d39470a4ed0502665af32e5e324bd618dd992fc5351e9d4e",
    "bytes": 1202
   },
   "study/dsh/plugins/event-logger.js": {
