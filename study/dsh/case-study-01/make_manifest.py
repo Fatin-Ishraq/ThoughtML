@@ -48,6 +48,11 @@ PROTOCOL_FILES = (
     "study/dsh/case-study-01/make_schedule.py",
     # The runner builds the exact pier commands, so its bytes can change a result.
     "study/dsh/case-study-01/run_case_study.py",
+    # The analysis generator decides what the reported numbers are, and the
+    # requirement list is frozen before collection so per-requirement scoring
+    # cannot be shaped by what agents happened to miss.
+    "study/dsh/case-study-01/analyze.py",
+    "study/dsh/case-study-01/requirements.md",
     "study/dsh-agent-utility-amendment.md",
     "study/dsh/task-selection/README.md",
     "study/dsh/task-selection/select_candidate.py",

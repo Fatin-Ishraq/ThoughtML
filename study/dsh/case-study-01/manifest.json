@@ -34,6 +34,14 @@
    "sha256": "ee42febf358c41ebeae70bd466698385d82f8e2bc213190026826b5f9b0af8b8",
    "bytes": 7113
   },
+  "study/dsh/case-study-01/analyze.py": {
+   "sha256": "08f5ae7362988d1df8ee192e6e660c76ba622ba0b9bf90838995d3d42a32a89f",
+   "bytes": 15777
+  },
+  "study/dsh/case-study-01/requirements.md": {
+   "sha256": "f7043367d3455e8e99e2abb46da565200f9d5f8ca6e1c604cbfe27c1b6688c67",
+   "bytes": 4922
+  },
   "study/dsh-agent-utility-amendment.md": {
    "sha256": "dfc9ac92e115834f82c222a1f49b4f05078885ff556851d211ac42aa04c08aab",
    "bytes": 21242
