@@ -197,6 +197,28 @@ def main() -> int:
         )
         check("%s has a verification command" % code, bool(spec.verification_command))
 
+    print("validity threats disabled (regression: probe 2026-08-25 found both)")
+    # Web search resolves via the allowlisted model-API host even in a
+    # no-network container, and DeepSWE publishes solution.patch publicly.
+    # todo_write and the goal tool are competing persistent scratchpads.
+    must_disable = ("web", "web-search-deepseek", "tool-web", "tool-todo", "tool-goal")
+    for code, patch in patches.items():
+        for plugin_id in must_disable:
+            block = "- id: %s\n  disabled: true" % plugin_id
+            check("%s disables %s" % (code, plugin_id), block in patch)
+    check(
+        "all three conditions disable exactly the same plugins",
+        len({
+            tuple(
+                line
+                for line in patch.splitlines()
+                if line.startswith("- id: ") or line.strip() == "disabled: true"
+            )
+            for patch in patches.values()
+        })
+        == 1,
+    )
+
     print("filtered egress (regression: smoke run 2026-08-25 failed here)")
     for code, agent in agents.items():
         blob = "\n".join(step.run for step in agent.install_spec().steps)
@@ -227,6 +249,60 @@ def main() -> int:
             check("missing credential fails loudly", True)
     finally:
         os.environ.pop("DEEPSEEK_API_KEY", None)
+
+    print("provider routing (study pin vs development runs)")
+    for agent in agents.values():
+        check(
+            "%s is recognised as the pinned study model" % agent.condition,
+            agent.is_study_model is True,
+        )
+    dev = DshAgent(
+        logs_dir=tmp / "logs-dev",
+        condition="T",
+        model_name="openrouter/some-vendor/some-model",
+        thoughtml_binary=str(fake_checker),
+        context_window=1048576,
+        max_tokens=32768,
+    )
+    check("a non-pinned model is flagged as development", dev.is_study_model is False)
+    check("development runs are labelled in the agent name",
+          dev.to_agent_info().name.endswith("-dev"))
+    check("study runs are not labelled -dev",
+          not agents["T"].to_agent_info().name.endswith("-dev"))
+    check(
+        "openrouter allowlists its own host and not deepseek",
+        dev.network_allowlist().domains == ["openrouter.ai"],
+        str(dev.network_allowlist().domains),
+    )
+    dev_patch = dev._render_patch()
+    check("openrouter route is declared on the pi-ai adapter",
+          "- id: llm-pi-ai" in dev_patch and "openrouter:" in dev_patch)
+    check("the development model is declared explicitly",
+          "- id: 'some-vendor/some-model'" in dev_patch)
+    check("declared model carries its context window",
+          "contextWindow: 1048576" in dev_patch)
+    check("the pinned study model needs no pi-ai route",
+          "- id: llm-pi-ai" not in patches["T"])
+    check(
+        "development runs disable the same validity threats",
+        all(("- id: %s\n  disabled: true" % p) in dev_patch for p in must_disable),
+    )
+    try:
+        DshAgent(logs_dir=tmp / "logs-bad", condition="D", model_name="nope/model")
+        check("unknown provider is rejected", False, "no error raised")
+    except ValueError:
+        check("unknown provider is rejected", True)
+
+    os.environ.pop("DEEPSEEK_API_KEY", None)
+    os.environ["OPENROUTER_API_KEY"] = "selftest-placeholder-not-a-real-key"
+    try:
+        env = dev.build_run_env()
+        check("openrouter run uses OPENROUTER_API_KEY",
+              env.get("OPENROUTER_API_KEY") == "selftest-placeholder-not-a-real-key")
+        check("openrouter run does not require a deepseek key",
+              "DEEPSEEK_API_KEY" not in env)
+    finally:
+        os.environ.pop("OPENROUTER_API_KEY", None)
 
     print("accounting")
     import json

@@ -34,9 +34,24 @@ DEFAULTS = {
 }
 
 
+STUDY_MODEL = "deepseek-official/deepseek-v4-flash"
+
+
 def preflight(cfg: dict) -> list[str]:
     """Checks that must pass before any study model call. See protocol.md §10."""
     problems = []
+
+    # protocol.md §5 pins the model, and §1/D-series require a dated amendment
+    # to change it. Development runs on another provider (e.g. a free
+    # OpenRouter route) are expected and useful, but they must never be
+    # collected as the nine sessions.
+    if cfg["model"] != STUDY_MODEL:
+        problems.append(
+            "model is %r but the protocol pins %r. Change it back, or amend the "
+            "protocol with a dated deviation first. Development runs on other "
+            "providers should be launched with pier directly, not through this "
+            "runner." % (cfg["model"], STUDY_MODEL)
+        )
 
     task = Path(cfg["task"])
     if not (task / "task.toml").is_file():

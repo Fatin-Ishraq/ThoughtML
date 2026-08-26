@@ -72,7 +72,45 @@ DEFAULT_DSH_VERSION = "0.1.1-rc.2"
 DEFAULT_NODE_MAJOR = "24"
 DEFAULT_MODEL = "deepseek-v4-flash"
 DEFAULT_PROVIDER = "deepseek-official"
-DEEPSEEK_API_HOST = "api.deepseek.com"
+
+# The model protocol.md pins. Anything else is a development run: cheaper
+# iteration on the harness and the state guidance, never a study outcome.
+STUDY_PROVIDER = "deepseek-official"
+STUDY_MODEL = "deepseek-v4-flash"
+
+# How each provider route is credentialed, reached, and served.
+#
+# ``pi_ai_route`` names the route on DSH's generic multi-provider adapter
+# (@deepseek-ai/dsh-llm-pi-ai). ``None`` means the provider has its own built-in
+# plugin — deepseek-official is served by llm-deepseek — and needs no route
+# declaration. A provider whose model is newer than pi-ai's shipped catalog must
+# declare that model explicitly; see _render_patch.
+PROVIDER_PROFILES: dict[str, dict[str, Any]] = {
+    "deepseek-official": {
+        "credential_env": "DEEPSEEK_API_KEY",
+        "allowlist": ("api.deepseek.com",),
+        "pi_ai_route": None,
+    },
+    "openrouter": {
+        "credential_env": "OPENROUTER_API_KEY",
+        "allowlist": ("openrouter.ai",),
+        "pi_ai_route": "openrouter",
+        # Free routes share an upstream pool and return 429 with a Retry-After
+        # of a few seconds. pi-ai's default is five retries on a short backoff,
+        # which a busy pool outruns, so the route waits longer and longer. This
+        # only affects development runs: the pinned study provider has no
+        # retry_policy entry and keeps pi-ai's default.
+        "retry_policy": {
+            "mode": "normal",
+            "maxRetries": 8,
+            "backoff": {
+                "initialDelayMs": 2000,
+                "maxDelayMs": 30000,
+                "jitterRatio": 0.2,
+            },
+        },
+    },
+}
 
 
 class StateIsolationError(RuntimeError):
@@ -103,6 +141,8 @@ class DshAgent(BaseInstalledAgent):
         max_state_bytes: int = 65536,
         max_context_chars: int = 12000,
         history_limit: int = 50,
+        context_window: int | None = None,
+        max_tokens: int | None = None,
         **kwargs: Any,
     ):
         condition = str(condition).upper()
@@ -139,7 +179,29 @@ class DshAgent(BaseInstalledAgent):
                 "plugin source not found under %s" % self._plugin_src
             )
 
+        self._context_window = context_window
+        self._max_tokens = max_tokens
+
         super().__init__(logs_dir, **kwargs)
+
+        provider = self._parsed_model_provider or DEFAULT_PROVIDER
+        if provider not in PROVIDER_PROFILES:
+            raise ValueError(
+                "unknown provider %r. Known: %s. Pass the model as "
+                "'<provider>/<model>'; for OpenRouter the model id may itself "
+                "contain a slash, e.g. 'openrouter/vendor/model'."
+                % (provider, sorted(PROVIDER_PROFILES))
+            )
+        self.provider = provider
+        self.profile = PROVIDER_PROFILES[provider]
+
+        # Study runs are pinned by protocol.md §5. Everything else is a
+        # development run and is labelled as such in the agent identity and the
+        # metrics metadata, so a cheap iteration can never be quietly reported
+        # as a study outcome.
+        self.is_study_model = (
+            provider == STUDY_PROVIDER and self._parsed_model_name == STUDY_MODEL
+        )
 
     # ---------------------------------------------------------------- identity
 
@@ -155,15 +217,25 @@ class DshAgent(BaseInstalledAgent):
 
     def to_agent_info(self):
         info = super().to_agent_info()
+        # A development run is labelled in the recorded agent name, so it is
+        # visible in Pier's own result tables and cannot be mistaken later for
+        # one of the nine pinned sessions.
         info.name = "dsh-%s" % self.condition
+        if not self.is_study_model:
+            info.name += "-dev"
         return info
 
     # ----------------------------------------------------------------- network
 
     def network_allowlist(self) -> NetworkAllowlist:
-        """Only the model API. The task itself runs no-network."""
-        domains = {DEEPSEEK_API_HOST}
-        for key in ("DEEPSEEK_BASE_URL", "DSH_DEEPSEEK_BASE_URL"):
+        """Only the model API for the configured provider.
+
+        The task itself runs no-network. Keeping this to the single provider
+        host is what stops the agent reaching the open internet — notably
+        DeepSWE's published reference solutions on raw.githubusercontent.com.
+        """
+        domains = set(self.profile["allowlist"])
+        for key in ("DEEPSEEK_BASE_URL", "DSH_DEEPSEEK_BASE_URL", "OPENROUTER_BASE_URL"):
             value = self._get_env(key)
             if value:
                 from pier.agents.network import hostname_from_url
@@ -304,14 +376,76 @@ class DshAgent(BaseInstalledAgent):
 
     def _render_patch(self) -> str:
         """Render the DSH profile patch overlay for this condition."""
+        model = self._parsed_model_name or DEFAULT_MODEL
         lines: list[str] = [
             "# Generated by dsh_agent.py — do not edit by hand.",
             "- id: agent-default-model",
             "  config:",
-            "    provider: '%s'" % DEFAULT_PROVIDER,
-            "    model: '%s'" % (self._parsed_model_name or DEFAULT_MODEL),
+            "    provider: '%s'" % self.provider,
+            "    model: '%s'" % model,
             "- id: session-telemetry-otel",
             "  disabled: true",
+        ]
+
+        # Providers without a built-in DSH plugin are served by the generic
+        # multi-provider adapter. A model newer than pi-ai's shipped catalog is
+        # not resolvable by name alone — it fails with UNKNOWN_MODEL — so the
+        # route declares it explicitly. Declaring `models` replaces the catalog
+        # for that route, which also pins exactly what a run may address.
+        route = self.profile["pi_ai_route"]
+        if route:
+            lines += [
+                "- id: llm-pi-ai",
+                "  config:",
+                "    providers:",
+                "      %s:" % route,
+                "        apiKeyEnv: %s" % self.profile["credential_env"],
+                "        models:",
+                "          - id: '%s'" % model,
+            ]
+            if self._context_window:
+                lines.append("            contextWindow: %d" % self._context_window)
+            if self._max_tokens:
+                lines.append("            maxTokens: %d" % self._max_tokens)
+
+            retry = self.profile.get("retry_policy")
+            if retry:
+                lines += [
+                    "        retryPolicy:",
+                    "          mode: %s" % retry["mode"],
+                    "          maxRetries: %d" % retry["maxRetries"],
+                    "          backoff:",
+                    "            initialDelayMs: %d" % retry["backoff"]["initialDelayMs"],
+                    "            maxDelayMs: %d" % retry["backoff"]["maxDelayMs"],
+                    "            jitterRatio: %s" % retry["backoff"]["jitterRatio"],
+                ]
+
+        # Identical in D, M and T. Two distinct validity threats:
+        #
+        # Web search resolves through the allowlisted model-API host, so it works
+        # even in a no-network container. On 2026-08-25 a probe and a dry run
+        # both used it to retrieve
+        # raw.githubusercontent.com/datacurve-ai/deep-swe/.../solution/solution.patch
+        # — DeepSWE publishes the reference solution in its public repo. Left
+        # enabled, every session measures how well the model finds the answer
+        # online rather than whether it can solve the task.
+        #
+        # todo_write and the goal tool are DSH's own persistent scratchpads. They
+        # are competing state mechanisms: with them available the baseline is not
+        # "no persistent state", and the model reaches for the familiar built-in
+        # instead of the study's ledger. Removing them is what makes D a real
+        # baseline and makes T-minus-M a comparison of state *representations*
+        # rather than a race between two note-taking habits.
+        for plugin_id in (
+            "web",
+            "web-search-deepseek",
+            "tool-web",
+            "tool-todo",
+            "tool-goal",
+        ):
+            lines += ["- id: %s" % plugin_id, "  disabled: true"]
+
+        lines += [
             "- insert:",
             "    - id: study-event-logger",
             "      name: 'file://%s/event-logger.js'" % STUDY_PLUGIN_DIR,
@@ -404,18 +538,20 @@ class DshAgent(BaseInstalledAgent):
 
     def build_run_env(self) -> dict[str, str]:
         """Environment for the DSH process. Separated so it can be tested."""
-        api_key = self._get_env("DEEPSEEK_API_KEY")
+        credential_env = self.profile["credential_env"]
+        api_key = self._get_env(credential_env)
         if not api_key:
             raise ValueError(
-                "DEEPSEEK_API_KEY is not set. Provide it via --env-file or "
-                "agent.env; it is never written to a tracked file."
+                "%s is not set, and provider %r needs it. Provide it via "
+                "--env-file or agent.env; it is never written to a tracked file."
+                % (credential_env, self.provider)
             )
 
         env = self.build_process_env(
             {
                 "DSH_HOME": DSH_HOME,
                 "DSH_TELEMETRY_MODE": "DISABLED",
-                "DEEPSEEK_API_KEY": api_key,
+                credential_env: api_key,
                 "THOUGHTML_STUDY_CONDITION": self.condition,
                 # Required for the model call to survive Pier's filtered egress.
                 # Without it Node's fetch ignores HTTP_PROXY/HTTPS_PROXY and
@@ -521,6 +657,10 @@ class DshAgent(BaseInstalledAgent):
             "condition": self.condition,
             "state_format": CONDITION_FORMAT[self.condition],
             "dsh_version": self._dsh_version,
+            "provider": self.provider,
+            "model": self._parsed_model_name,
+            "is_study_model": self.is_study_model,
+            "run_class": "study" if self.is_study_model else "development",
             "reasoning_tokens": total("reasoningTokens"),
             "model_calls": total("modelCalls"),
             "tool_calls": total("toolCalls"),
