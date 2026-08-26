@@ -14,14 +14,40 @@ export const STATE_TOOL_NAMES = Object.freeze([
   'reasoning_state_analyze',
 ])
 
-export const REASONING_STATE_GUIDANCE = `Maintain a concise persistent reasoning-state ledger for this task.
+export const FORMAT_LABELS = Object.freeze({
+  thoughtml: 'ThoughtML',
+  markdown: 'Markdown',
+})
 
-- Treat it as an auditable task-state record, not hidden chain-of-thought: record goals, evidence and provenance, current hypotheses, superseded beliefs, actions and observed results, unresolved issues, the next action, and stated uncertainty.
-- Read the supplied state before consequential decisions. Commit after establishing the initial goal and plan and before the first modifying action; after a failure changes the plan; when evidence revises a hypothesis or the goal; and before the final answer.
-- Use reasoning_state_commit with the revision returned by reasoning_state_read or the supplied context. A stale or invalid commit is rejected without replacing the last valid state.
-- Use reasoning_state_inspect when validation, history, structural counts, or the visible state-file path matter.
-- Use reasoning_state_diff to identify belief changes between immutable revisions, reasoning_state_explain for a focused node or matched Markdown section, and reasoning_state_analyze only when structural conflicts, confidence, sensitivity, or decisions could change the next action.
-- Computed analysis is a mechanical reading of the authored state, not a truth judgment. Keep the ledger bounded and remove clutter without erasing meaningful supersession or provenance.`
+/**
+ * The state-management instruction, naming the ledger's format.
+ *
+ * The format name is the only thing that varies between conditions, matching
+ * the amendment's rule that M and T receive the same instruction except for
+ * format-specific syntax and validation guidance. Naming it is not decoration:
+ * a model told only to "maintain a ledger" has to infer what to write, and the
+ * tools accept exactly one format.
+ */
+export function reasoningStateGuidance(format) {
+  const label = FORMAT_LABELS[format] ?? FORMAT_LABELS.thoughtml
+  return REASONING_STATE_GUIDANCE.replaceAll('{FORMAT}', label)
+}
+
+export const REASONING_STATE_GUIDANCE = `You maintain a persistent reasoning-state ledger for this task, written in {FORMAT}. Write every commit as {FORMAT}; the state tools accept no other format and reject anything else. This is a required part of how you work, not an optional aid. It is the only task-state record you have: there is no todo list and no scratchpad besides this ledger.
+
+REQUIRED checkpoints. At each of these moments, commit the ledger before continuing:
+1. After you establish the goal and plan, and BEFORE your first modifying action (before the first edit, write, or command that changes the workspace).
+2. After a failed command, edit, build, or test that changes your plan.
+3. When evidence causes you to reject or revise a hypothesis, or changes the goal.
+4. Before your final answer.
+
+Read the ledger with reasoning_state_read before consequential decisions, and whenever you are unsure what you have already established or ruled out.
+
+What to record. Treat it as an auditable task-state record, not hidden chain-of-thought: the goal and constraints, evidence and where it came from, current hypotheses, beliefs you have superseded and why, actions and their observed results, unresolved questions or contradictions, your next intended action, and your uncertainty where you have any.
+
+How to commit. Pass the revision returned by reasoning_state_read or shown in the supplied context. A stale, invalid, oversized, or unchanged candidate is rejected and the last valid revision is kept, so read first if a commit is rejected. Keep the ledger bounded: prune clutter, but never erase a meaningful supersession or its provenance.
+
+Other operations. Use reasoning_state_inspect when validation, history, structural counts, or the visible state-file path matter. Use reasoning_state_diff to see what changed between immutable revisions, reasoning_state_explain for one focused element, and reasoning_state_analyze only when structural conflicts, confidence, sensitivity, or decisions could change your next action. Computed analysis is a mechanical reading of what you authored, not a judgement about whether it is true.`
 
 const diagnosticSchema = {
   type: 'object',
@@ -177,7 +203,7 @@ export function apply(ctx, config = {}) {
   ctx.systemPrompt.section({
     name: 'thoughtml:reasoning-state-guidance',
     order: 140,
-    text: REASONING_STATE_GUIDANCE,
+    text: reasoningStateGuidance(store.format),
   })
   ctx.systemPrompt.context({
     name: 'thoughtml:reasoning-state',

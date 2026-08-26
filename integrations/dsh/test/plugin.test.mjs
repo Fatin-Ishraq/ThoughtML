@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { apply, REASONING_STATE_GUIDANCE, STATE_TOOL_NAMES } from '../src/index.js'
+import { apply, reasoningStateGuidance, STATE_TOOL_NAMES } from '../src/index.js'
 import { fakeAgent, temporaryDirectory } from './helpers.mjs'
 
 function fakeContext() {
@@ -23,7 +23,7 @@ test('plugin registers matched structured tools, persistent context, and guidanc
   const { context, registered } = fakeContext()
   apply(context, { format: 'markdown', stateRoot: root })
   assert.equal(registered.sections.length, 1)
-  assert.equal(registered.sections[0].text, REASONING_STATE_GUIDANCE)
+  assert.equal(registered.sections[0].text, reasoningStateGuidance('markdown'))
   assert.equal(registered.contexts.length, 1)
   assert.deepEqual(registered.tools.map((tool) => tool.name), STATE_TOOL_NAMES)
   assert.equal(registered.listeners.has('agent/session-start'), true)
@@ -81,4 +81,50 @@ test('failed non-state tools inject recovery guidance but state-tool failures do
   assert.equal(notices.length, 1)
   handler({ name: 'shell', agent }, { isError: false })
   assert.equal(notices.length, 1)
+})
+
+test('guidance names the ledger format, so an agent is not left inferring what to write', async (t) => {
+  const root = temporaryDirectory(t)
+  for (const [format, label, other] of [
+    ['thoughtml', 'ThoughtML', 'Markdown'],
+    ['markdown', 'Markdown', 'ThoughtML'],
+  ]) {
+    const text = reasoningStateGuidance(format)
+    assert.ok(text.includes(label), `${format} guidance should name ${label}`)
+    assert.ok(!text.includes(other), `${format} guidance must not name ${other}`)
+    assert.ok(!text.includes('{FORMAT}'), 'placeholder must be substituted')
+
+    const { context, registered } = fakeContext()
+    apply(context, { format, stateRoot: `${root}/${format}` })
+    assert.equal(registered.sections[0].text, text)
+  }
+
+  // M and T must remain matched: identical apart from the format name.
+  const t1 = reasoningStateGuidance('thoughtml').replaceAll('ThoughtML', 'X')
+  const m1 = reasoningStateGuidance('markdown').replaceAll('Markdown', 'X')
+  assert.equal(t1, m1, 'conditions must differ only in the format name')
+})
+
+test('checker diagnostics missing a code do not make the tool fail its own output schema', async () => {
+  const { diagnosticsFromProcessForTest } = await import('../src/formats.js')
+  const shaped = diagnosticsFromProcessForTest({
+    status: 1,
+    stdout: JSON.stringify([
+      { severity: 'error', message: 'no code supplied' },
+      { code: 'REAL_CODE', severity: 'warning', message: 'has a code' },
+      { message: 'only a message' },
+      'a bare string',
+    ]),
+  })
+  assert.equal(shaped.length, 4)
+  for (const d of shaped) {
+    assert.equal(typeof d.code, 'string')
+    assert.ok(d.code.length > 0)
+    assert.equal(typeof d.severity, 'string')
+    assert.equal(typeof d.message, 'string')
+    assert.ok(d.message.length > 0)
+  }
+  assert.equal(shaped[1].code, 'REAL_CODE', 'a supplied code is preserved')
+  assert.equal(shaped[1].severity, 'warning', 'a supplied severity is preserved')
+  assert.equal(shaped[0].code, 'THOUGHTML_DIAGNOSTIC')
 })

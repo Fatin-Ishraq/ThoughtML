@@ -88,6 +88,32 @@ Establish the concrete task goal from the user's request.
 - Initial state; confidence is low until the request is analyzed.
 `
 
+// The checker's diagnostics are declared output of the state tools, and the
+// tool schema requires code, severity and message on every one. The checker
+// does not always supply a code, and an unnormalized diagnostic made the plugin
+// fail its own output schema: DSH rejected the whole tool result, so the agent
+// saw "returned invalid output" instead of the validation errors and had to
+// guess what was wrong with its ledger. That cost turns in condition T only —
+// the Markdown validator builds its diagnostics in code and always sets a code —
+// which is friction against ThoughtML unrelated to the representation itself.
+// Observed 2026-08-25: two of three commits rejected this way in one session.
+function normalizeDiagnostic(diagnostic) {
+  const source = (diagnostic && typeof diagnostic === 'object') ? diagnostic : {}
+  const text = typeof source.message === 'string' && source.message.trim()
+    ? source.message
+    : (typeof diagnostic === 'string' ? diagnostic : JSON.stringify(diagnostic))
+  return {
+    ...source,
+    code: typeof source.code === 'string' && source.code
+      ? source.code
+      : 'THOUGHTML_DIAGNOSTIC',
+    severity: typeof source.severity === 'string' && source.severity
+      ? source.severity
+      : 'error',
+    message: text,
+  }
+}
+
 function diagnosticsFromProcess(result) {
   if (result.error) {
     return [{
@@ -99,7 +125,7 @@ function diagnosticsFromProcess(result) {
   if (!result.stdout?.trim()) return []
   try {
     const parsed = JSON.parse(result.stdout)
-    return Array.isArray(parsed) ? parsed : [{
+    return Array.isArray(parsed) ? parsed.map(normalizeDiagnostic) : [{
       code: 'UNEXPECTED_THOUGHTML_OUTPUT',
       severity: 'error',
       message: 'ThoughtML diagnostics were not a JSON array.',
@@ -442,4 +468,9 @@ export function createFormatAdapter(format, options = {}) {
     explain: markdownExplain,
     analyze: analyzeMarkdown,
   })
+}
+
+// Exported for the regression test covering the code-less diagnostic defect.
+export function diagnosticsFromProcessForTest(result) {
+  return diagnosticsFromProcess(result)
 }
