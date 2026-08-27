@@ -1,0 +1,585 @@
+# the-thoughtml-study — the benchmark that measures whether AI agents can author
+# ThoughtML, recorded in ThoughtML.
+#
+# Sources: study/preregistration.md v2.6 and its twenty-one-entry deviation log,
+# study/protocol-issues.md P01-P11, the four snapshots under study/runs/analysis/,
+# study/exploratory/luna_handoff_v1/results/, study/dsh-agent-utility-amendment.md
+# v0.3, and study/dsh/case-study-01/.
+#
+# Undated on purpose. The study's own order is the order it is written in here —
+# design, redesign, what was collected, what the collection broke, what happened
+# next — and dates would only make that harder to follow than it already is.
+#
+# The study's own threat 11 is that the person measuring ThoughtML built it. This
+# document does not exempt itself. Every collected count is `measured`, every
+# prediction is `assumed`, and the two beliefs the record has already defeated
+# are left standing at the confidence they were actually held at. `--audit` finds
+# both. That is the point of writing it here.
+#
+#   thoughtml check study/the-study.thml --lint --strict
+#   thoughtml study/the-study.thml --audit
+#   thoughtml study/the-study.thml --compute
+#   thoughtml explain study/the-study.thml pilot-corpus-is-hard-enough
+#
+# One number carries no basis on purpose: the confidence on the open question of
+# whether persistent state changes agent behaviour is `?`, because nothing has
+# been collected and there is no footing to declare. `--strict-provenance` flags
+# it, correctly, and it stays.
+
+goal measure-the-bet
+  Test the first premise of ThoughtML's bet — that AI agents author reasoning
+  graphs well — and nothing further.
+
+question do-agents-author-well
+  Can models author traces that are structurally sound, self-critical and
+  mutually consistent, and does requiring a provenance basis make the confidence
+  they write down mean anything?
+  expects claim
+  about h1b-basis-recovers-calibration, h2-models-rarely-self-attack, h3-structural-agreement-is-low
+  status open
+
+author asks do-agents-author-well
+
+memory thirty-one-years-of-no-adoption
+  Dung-style argumentation is thirty-one years old with near-zero industry
+  adoption. One commonly cited reason is that no human will hand-author a
+  reasoning graph. The bet is that the hand-authoring constraint stopped binding
+  around 2024, which is a premise to measure rather than a result to assume.
+  source study/preregistration.md
+
+author remembers thirty-one-years-of-no-adoption
+
+claim null-result-is-publishable
+  A null or negative result remains publishable if the benchmark avoids ceiling
+  effects and the protocol is followed. The goal is an informative result, not a
+  favourable one.
+
+link thirty-one-years-of-no-adoption supports null-result-is-publishable
+  weight 0.6 estimated
+
+author accepts null-result-is-publishable
+  confidence 0.85 assumed
+
+# ---------------------------------------------------------------------------
+# The redesign: stop varying two things at once.
+
+claim vendor-panel-design
+  Compare four first-party vendor agent systems, one model inside each.
+  status superseded
+  note Versions 1.0 to 1.4. Kept because the redesign only means anything next to it.
+
+observation harness-model-confound
+  In the vendor-panel design the model and the harness varied together by
+  construction, so no difference between arms could be attributed to either one.
+  The study could disclose the confound and never remove it.
+
+link harness-model-confound opposes vendor-panel-design
+
+claim fixed-harness-design
+  Hold one harness fixed — Codex CLI 0.144.6, non-interactive, empty neutral
+  directory, tool calls forbidden and audited — and vary only the model inside it.
+
+link fixed-harness-design revises vendor-panel-design
+link fixed-harness-design enables clean-model-attribution
+
+outcome clean-model-attribution
+  Any difference between arms is attributable to the model, because nothing else
+  differs.
+
+author holds vendor-panel-design
+  confidence 0.7 assumed
+  note Filed as v1.0 with the confound disclosed in a limitations section.
+
+author revises vendor-panel-design
+  confidence 0.05 assumed
+  note A redesign, not an amendment. The unit of analysis, the arms and RQ5 all change.
+
+observation external-methodological-review
+  An external review found that the original H1 did not test its research
+  question, that there was no attribution control, and that the multiplicity
+  correction was being applied over hypotheses with no tests attached. All of it
+  was cheaper to fix before data than after.
+
+link external-methodological-review enables registered-design
+
+# ---------------------------------------------------------------------------
+# What the protocol registers. Naming the parts must not make the design look
+# better argued than it is, so this is `part-of`, not `supports`.
+
+claim registered-design
+  Six hundred and thirty-six registered model calls across five arms in one
+  fixed harness, plus one offline experiment that involves no model at all.
+
+action exp0-calibration
+  Thirty ground-truth tasks by two prompt conditions by five models. Does
+  requiring a measured, estimated or assumed label on every number change the
+  confidence a model states, and does it make that confidence discriminate?
+
+action exp1-authoring
+  Twelve reasoning tasks by five models by three samples, plus a deliberately
+  minimal generic-schema control, so that any finding can be attributed to the
+  models rather than to ThoughtML.
+  until will-rule-j-clear-kappa answered
+  blocked-by rule-j-unimplemented
+
+action exp5-effort-sweep
+  Twelve tasks by four reasoning-effort levels on one model. The only
+  manipulation in the study where nothing but inference-time compute varies.
+
+action exp2-mutation
+  Offline mutation testing of the checker itself: detection, restraint, and the
+  blind spots the falsification suite asserts on purpose. Zero model calls.
+
+action exp3-cold-session-utility
+  Does an agent spontaneously re-read a trace it wrote in an earlier session?
+  status abandoned
+  note Cut for cost. The study therefore makes no downstream-utility claim anywhere.
+
+part-of registered-design
+  exp0-calibration
+  exp1-authoring
+  exp5-effort-sweep
+  exp2-mutation
+  exp3-cold-session-utility
+
+claim primary-hypotheses
+  The four outcomes that carry a multiplicity correction and a decision rule
+  fixed before any data existed.
+
+claim h1a-basis-shifts-confidence
+  Requiring a provenance basis lowers the confidence a model states, on the same
+  tasks, paired within task.
+
+claim h1b-basis-recovers-calibration
+  Requiring a provenance basis makes that confidence discriminate correct
+  answers from incorrect ones.
+
+claim h2-models-rarely-self-attack
+  Attack share, over the three polarity-carrying relations, is below 0.10.
+
+claim h3-structural-agreement-is-low
+  Independent models given the same task converge on the conclusion but not on
+  the structure of the reasoning behind it.
+
+part-of primary-hypotheses
+  h1a-basis-shifts-confidence
+  h1b-basis-recovers-calibration
+  h2-models-rarely-self-attack
+  h3-structural-agreement-is-low
+
+author holds h2-models-rarely-self-attack
+  confidence 0.75 assumed
+  note Predicted below 0.10, with the null placed at 0.15, before any data existed.
+
+author doubts h1b-basis-recovers-calibration
+  confidence 0.3 assumed
+  note Registered estimation-first. Thirty tasks give roughly 29% power against the effect it targets.
+
+# ---------------------------------------------------------------------------
+# What was actually collected. All of it is probe or discarded-pilot data.
+
+scope openai-collection
+  source study/runs/analysis
+
+  observation cued-probe-clean
+    Twenty cued contamination probes, five per arm, deliberately shadowing
+    the topics of the public example corpus, so a model that had seen that
+    corpus had every opportunity to reveal it. All completed first time, none
+    used a tool, none was excluded, all were unparseable, and not one produced
+    an exposure hit.
+    quantity 20 call measured
+
+  observation v24-pilot-ceiling
+    The complete discarded sixty-run calibration pilot: 27 of 30 correct in the
+    basis-required condition and 30 of 30 in the free-form condition, against a
+    registered acceptance window of 15 to 24 correct with at least 6 wrong.
+    quantity 60 call measured
+
+  observation v26-pilot-ceiling
+    The replacement pilot on ten deliberately harder, individually reviewed,
+    pilot-only tasks: 9 of 10 correct and 10 of 10 correct, against a window of
+    5 to 8 with at least 2 wrong.
+    quantity 20 call measured
+
+  observation pilot-form-quality
+    Across both pilots the documents were nearly always well formed: parse rate
+    between 0.97 and 1.00, strict-clean between 0.90 and 1.00.
+
+  observation pilot-attack-share-zero
+    Mean attack share was 0.047 in the first pilot and 0.000 in the harder one.
+    In the harder round not one document recorded a single edge against its own
+    reasoning.
+
+  observation pilot-confidence-pinned
+    Mean stated confidence on the required final-answer node was 0.999, and the
+    were wrong answers to discriminate.
+    confidence AUROC ran from 0.39 to 0.46 — at or below chance wherever there
+
+  observation pilot-never-pooled
+    The stopping rule fixes all of this as development data. A discarded pilot is
+    completed in full, its gate is applied, and it is never pooled, extended, or
+    mined for individual favourable tasks.
+
+claim models-author-valid-form
+  Models produce documents the parser accepts and the strict checker passes.
+
+author infers no-gross-contamination from cued-probe-clean
+  confidence 0.7 estimated
+  note At five prompts per arm the probe detects gross exposure only; it cannot rule out subtler differential familiarity.
+
+link form-inference: pilot-form-quality supports models-author-valid-form
+link h2-inference: pilot-attack-share-zero supports h2-models-rarely-self-attack
+link h1b-inference: pilot-confidence-pinned opposes h1b-basis-recovers-calibration
+link pilot-never-pooled undercuts form-inference
+link pilot-never-pooled undercuts h2-inference
+link pilot-never-pooled undercuts h1b-inference
+
+action pool-the-pilots
+  Pool the discarded pilots with the registered results, to get a number out of
+  work already paid for.
+  status abandoned
+
+link pilot-never-pooled prevents pool-the-pilots
+
+author rejects pool-the-pilots
+  note Eighty completed calls that answer nothing registered. That is what the rule costs, and it is the price of the rule being worth anything.
+
+# ---------------------------------------------------------------------------
+# The ceiling, twice. This is where the mirror has something to say.
+
+claim v24-corpus-is-hard-enough
+  The thirty-task calibration corpus — six easy, twelve medium, twelve hard,
+  every answer key verified by a deterministic solver — is hard enough to keep a
+  frontier model off the ceiling.
+  status superseded
+
+link v24-pilot-ceiling opposes v24-corpus-is-hard-enough
+
+claim pilot-corpus-is-hard-enough
+  The ten replacement tasks are materially harder, and each condition will land
+  inside the five-to-eight window.
+
+link pilot-corpus-is-hard-enough revises v24-corpus-is-hard-enough
+link v26-pilot-ceiling opposes pilot-corpus-is-hard-enough
+
+author holds pilot-corpus-is-hard-enough
+  confidence 0.8 assumed
+  note Reviewed and approved all ten tasks unchanged before the freeze and before any response.
+
+operator noticed v26-pilot-ceiling
+  confidence 0.99 measured
+
+outcome ceiling-effect
+  A task set so easy that the measurement it was built for cannot be made on it.
+
+link v24-pilot-ceiling causes ceiling-effect
+link v26-pilot-ceiling causes ceiling-effect
+
+outcome exp0-blocked
+  Three hundred registered calls wait on a calibration corpus that does not
+  exist yet.
+
+link ceiling-effect causes exp0-blocked
+link exp0-calibration depends-on author-a-third-corpus
+
+observation tasks-authored-by-the-author
+  Both retired corpora were written by the person who needed them to be hard,
+  and both were reviewed for ambiguity rather than for difficulty.
+
+author suspects tasks-authored-by-the-author causes ceiling-effect as authorship-ceiling
+  confidence 0.55 estimated
+  note Difficulty is not a property an author can certify. It has to be measured on the model that will face it.
+
+observation published-difficulty
+  A published benchmark reports four trials per task per model, so the
+  difficulty of a task for the exact model under test is a measured property.
+  The task later selected sits at two passes out of four — the maximum-variance
+  interior point, which is neither ceiling nor floor.
+  quantity 4 trial measured
+
+link published-difficulty prevents ceiling-effect
+
+# ---------------------------------------------------------------------------
+# Six instrument defects, each found before it could reach a registered number.
+# An enumeration, so `part-of`: naming them must not raise the confidence of the
+# claim that they were caught in time.
+
+claim caught-before-it-counted
+  Six defects in the instrument were found by pre-data checks, development
+  pilots and dry runs, and each was corrected, disclosed, or retired before any
+  registered number depended on it.
+
+observation rule-s-scored-zero
+  A pre-data check compared a document against a structurally identical copy
+  with every node renamed. The id-equality matcher scored 0.00 node overlap and
+  left relation overlap undefined, so it measures naming convention, not
+  structure. Reported alone it would have produced the false finding that the
+  schema underdetermines the trace.
+
+observation enumeration-threshold-leak
+  The supports-as-a-list lint fired only at four or more supports, missing
+  three-item enumerations — the error the spec itself calls the mistake that
+  breaks the mirror. Retuning it on the public corpus made that corpus
+  inadmissible for measuring the same lint.
+
+observation lexical-grader-artifact
+  A frozen grader compared checkpoints as whitespace-stripped strings, so one
+  posterior written with labelled components, and the same posterior written
+  bare, counted as different answers. It scored a condition 55.3% when the
+  arithmetic was right.
+
+observation web-search-leak
+  A truncated probe retrieved the benchmark's own published solution patch
+  through the allowlisted model-API host, inside a container declared
+  no-network. Any session collected that way would have measured how well a
+  model can find the answer online.
+
+observation competing-scratchpads
+  The agent harness ships its own persistent todo and goal tools. While they are
+  available the no-state baseline is not a no-state baseline, and the ledger
+  contrast measures note-taking habit rather than representation.
+
+observation crlf-kills-the-verifier
+  A task repository cloned on Windows left the verifier script CRLF-terminated,
+  so its interpreter line pointed at a binary that does not exist. Grading died
+  with a file-not-found error and produced no reward file at all — after a full
+  session had already been spent earning one.
+
+part-of caught-before-it-counted
+  rule-s-scored-zero
+  enumeration-threshold-leak
+  lexical-grader-artifact
+  web-search-leak
+  competing-scratchpads
+  crlf-kills-the-verifier
+
+claim rule-s-is-the-primary-matcher
+  Node correspondence across documents is decided by normalized id equality.
+  status superseded
+
+link rule-s-scored-zero opposes rule-s-is-the-primary-matcher
+
+claim rule-j-is-the-primary-matcher
+  A temperature-zero model judge labels node correspondence, run three times per
+  pair with majority labels, and is admissible only if its agreement with two
+  human raters clears a kappa of 0.70. Below that, H3 is reported inconclusive
+  rather than rescued with a different rule.
+
+link rule-j-is-the-primary-matcher revises rule-s-is-the-primary-matcher
+
+observation rule-j-unimplemented
+  The judge still has no pinned model, endpoint, prompt, pairing rule or parsing
+  schema. Its directory is empty.
+
+question will-rule-j-clear-kappa
+  Does the judge agree with the human raters well enough to be admissible at all?
+  expects claim
+  status open
+
+link rule-j-unimplemented blocks exp1-authoring
+link rule-j-is-the-primary-matcher depends-on finish-rule-j
+
+# ---------------------------------------------------------------------------
+# The one exploratory head-to-head that has been run.
+
+scope luna-handoff
+  source study/exploratory/luna_handoff_v1
+
+  observation luna-both-perfect
+    Ten fresh ephemeral sessions, five per condition, carried a five-stage
+    Bayesian calculation forward through a mid-stream correction and a
+    counterfactual branch, each seeing only the previous session's raw ledger.
+    After the disclosed semantic regrade, both the ThoughtML ledger and the
+    matched Markdown ledger had every checkpoint correct.
+
+  observation luna-revision-links
+    The final ThoughtML ledger carried explicit machine-readable revision links
+    and kept the corrected main branch separate from the counterfactual. The
+    Markdown ledger separated the branches too, in prose.
+    quantity 5 link measured
+
+  observation luna-thoughtml-tokens
+    Total tokens spent by the ThoughtML pipeline.
+    quantity 88995 token measured
+
+  observation luna-markdown-tokens
+    Total tokens spent by the matched Markdown pipeline.
+    quantity 71416 token measured
+
+  observation luna-order-confound
+    ThoughtML ran first and Markdown second, so representation and temporal
+    order are confounded, and one task cannot establish the absence of an effect.
+
+claim luna-token-overhead
+  What the representation cost, in this one fixed-order example.
+  = luna-thoughtml-tokens - luna-markdown-tokens
+
+claim thoughtml-makes-the-model-more-accurate
+  Keeping the ledger in ThoughtML rather than in Markdown makes the model get
+  more of a dependent calculation right.
+
+link luna-null: luna-both-perfect opposes thoughtml-makes-the-model-more-accurate
+link luna-order-confound undercuts luna-null
+
+author doubts thoughtml-makes-the-model-more-accurate
+  confidence 0.2 assumed
+  note Classified in the result as no accuracy advantage. One task, and the order was not counterbalanced.
+
+claim thoughtml-costs-more-than-notes
+  The representation is not free. It cost about a quarter more total tokens than
+  matched Markdown on the same work.
+
+link luna-token-overhead supports thoughtml-costs-more-than-notes
+  weight 0.8 measured
+
+claim revision-history-is-machine-checkable
+  The defensible distinction is a revision history a machine can read — not
+  exclusive possession of the revision information itself.
+
+link luna-revision-links supports revision-history-is-machine-checkable
+  weight 0.8 estimated
+
+# ---------------------------------------------------------------------------
+# The pivot: from can a model write one, to does keeping one change anything.
+
+question does-state-change-behaviour
+  Does making a persistent reasoning record available during a long-horizon
+  coding task change what the agent does?
+  expects claim
+  about thoughtml-helps-a-coding-agent, matched-notes-are-enough
+  status open
+
+author asks does-state-change-behaviour
+  confidence ?
+  note Nothing has been collected. The honest value today is unknown, and the extension exists to make it knowable.
+
+claim thoughtml-helps-a-coding-agent
+  Persistent ThoughtML state improves the success, efficiency, recovery or
+  auditability of a coding agent beyond matched persistent notes.
+
+claim matched-notes-are-enough
+  Persistent notes help and the ThoughtML representation adds nothing on top of
+  them — the reading the interpretation matrix reserves for both ledgers
+  improving together over the bare baseline.
+
+link thoughtml-helps-a-coding-agent candidate-for does-state-change-behaviour
+link matched-notes-are-enough candidate-for does-state-change-behaviour
+
+claim three-matched-conditions
+  Same model, same task, same image digest, same budgets, same disabled harness
+  tools, same state root outside the graded repository. Only the persistent
+  state differs.
+
+action condition-d
+  No study-added state artifact and no state instruction.
+
+action condition-m
+  A persistent Markdown ledger with matched semantic sections.
+
+action condition-t
+  A persistent ThoughtML graph plus the released parser and checker.
+
+part-of three-matched-conditions
+  condition-d
+  condition-m
+  condition-t
+
+observation nine-sessions-cannot-decide
+  The chosen task sits at two passes of four for this model, the
+  maximum-variance point. With three runs per condition the binary success
+  outcome cannot separate a real effect from chance in either direction —
+  including the direction that says ThoughtML does not help.
+
+link nine-sessions-cannot-decide blocks does-state-change-behaviour
+
+# ---------------------------------------------------------------------------
+# What to collect next. The ranking below prices one axis only: registered calls
+# unlocked. The case study's real yield is instrument validation, which this
+# axis does not price and the protocol does not claim.
+
+decision next-measurement
+  What to collect next, given that Experiment 0 is blocked on a corpus and
+  Experiment 1 on a judge.
+  chosen-by author
+
+option author-a-third-corpus
+  Author a third calibration corpus from a validated difficulty recipe, verify
+  it deterministically, have it independently reviewed, and freeze it in a
+  disclosed amendment before any main call.
+
+option finish-rule-j
+  Pin the judge's model, endpoint, prompt, pairing rule and parsing schema, then
+  run the two-rater kappa validation that decides whether it is admissible.
+
+option collect-case-study-01
+  Nine sessions on one published benchmark task — three conditions, three
+  repetitions — frozen with a byte-sensitive manifest and not yet collected.
+
+link author-a-third-corpus option-of next-measurement
+link finish-rule-j option-of next-measurement
+link collect-case-study-01 option-of next-measurement
+
+outcome exp0-unblocked
+  Three hundred registered Experiment 0 calls become collectable.
+  quantity 300 call measured
+
+outcome exp1-unblocked
+  A hundred and eighty authoring calls and sixty control calls become
+  collectable.
+  quantity 240 call measured
+
+outcome shakedown-only
+  No registered call becomes collectable. What is bought is an end-to-end
+  integration check and measurement definitions that reproduce from raw events.
+  quantity 0 call measured
+
+link author-a-third-corpus leads-to exp0-unblocked
+  probability 0.6 estimated
+
+link finish-rule-j leads-to exp1-unblocked
+  probability 0.5 estimated
+
+link collect-case-study-01 leads-to shakedown-only
+  probability 0.95 estimated
+
+author considers finish-rule-j
+  confidence 0.5 estimated
+  note The kappa gate can fail, and a failed gate makes H3 inconclusive rather than wrong.
+
+author chooses collect-case-study-01
+  confidence 0.6 estimated
+  because nine-sessions-cannot-decide
+  note Chosen knowing it unlocks nothing registered. The honest headline for it is a shakedown, not a finding.
+
+# ---------------------------------------------------------------------------
+# The stake, and what is supposed to hold it.
+
+assumption author-has-a-stake
+  The person measuring ThoughtML designed it and wants a favourable result.
+  The protocol states this about itself, as threat 11.
+
+outcome outcome-selected-reporting
+  Choosing, after the fact, the analysis that makes the tool look good.
+
+link author-has-a-stake enables outcome-selected-reporting
+
+claim preregistration-constrains-the-stake
+  Numeric predictions filed before data, decision rules fixed in advance, a
+  matching rule fixed before the first pair, mechanical exclusion rules that
+  never cite quality, a named failure condition that would count against the
+  project, and an append-only deviation log now twenty-one entries long.
+
+link preregistration-constrains-the-stake prevents outcome-selected-reporting
+
+link caught-before-it-counted supports preregistration-constrains-the-stake
+  weight 0.7 estimated
+
+claim nothing-registered-has-been-collected
+  After a probe, two discarded pilots, one exploratory handoff and a frozen
+  nine-session case study, the number of registered model responses in this
+  study is zero.
+
+link nothing-registered-has-been-collected blocks measure-the-bet
+
+link nothing-registered-has-been-collected supports null-result-is-publishable
+  weight 0.3 estimated

@@ -125,8 +125,20 @@ which is exactly what has not been affordable.
 | [`dsh/pier_agent/`](dsh/pier_agent/) | the adapter running the harness under D/M/T, its ~60-check self-test, and an independent extraction verifier |
 | [`dsh/diagnostics/`](dsh/diagnostics/) | records of development-only model calls, excluded from results |
 | [`dsh-agent-utility-amendment.md`](dsh-agent-utility-amendment.md) | the parent design for the agent-utility extension |
-| [`exploratory/luna_handoff_v1/`](exploratory/luna_handoff_v1/) | an earlier exploratory handoff test, superseded |
+| [`research-map.thml`](research-map.thml) | the whole research programme written in ThoughtML — how the design got here, what was caught, what is still open |
 | [`data/`](data/) | checksummed archive of raw transcripts from the original study's discarded pilots |
+
+`research-map.thml` is the project describing itself in its own language. It
+passes its own checker with no errors and no warnings:
+
+```bash
+thoughtml check --strict study/research-map.thml   # clean
+thoughtml --html -o research-map.html study/research-map.thml
+```
+
+The second command renders a self-contained interactive view — no server, no
+build step. `--audit` on the same file reports where the structure disagrees
+with what the author claimed.
 
 ### Superseded, kept for the record
 
@@ -137,9 +149,17 @@ kept because deleting a filed pre-registration is bad practice, not because it
 describes current plans. Its §13 deviation log is the authoritative history of
 how the design changed.
 
-The same applies to `tasks/`, `payloads/`, `schemas/`, `runs/`, `rule-j/`,
-`mutation-corpus/`, and `scripts/benchmark.py` — machinery for v2.0, retained,
-not current.
+The executable machinery for v2.0 — `scripts/`, `runs/`, `tasks/`, `tests/`,
+`payloads/`, `schemas/`, `rule-j/`, `mutation-corpus/`, and the
+`exploratory/luna_handoff_v1/` handoff test — is not in this directory. It is
+preserved at the tag `prereg-v2.0-archive` and reachable with:
+
+```bash
+git checkout prereg-v2.0-archive -- study/scripts
+```
+
+It was moved out so that what remains here is one coherent research programme
+rather than two, one of which was never run. Nothing was discarded.
 
 ## 6. What the next step needs
 
