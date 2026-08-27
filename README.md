@@ -107,6 +107,25 @@ the answer.* It's to make reasoning legible enough that its flaws can't hide.
 > [`llms.txt`](crates/thoughtml/llms.txt)) and paste it into a system prompt. `thoughtml
 > guide` alone prints a one-screen tour; `thoughtml guide <topic>` looks up one section.
 
+## Is that claim tested?
+
+Partly — and the whole record is in this repo, including the parts that argue
+against it. [`study/`](study) holds a frozen, pre-registered experiment: real
+coding agents solve a benchmark task while maintaining a reasoning ledger, with
+the ThoughtML condition compared against a Markdown ledger and against none.
+
+In the development sessions published so far, models attempted to save a
+reasoning record 24 times; the checker refused 9 of those as structurally broken
+— and all 9 were repaired, 8 on the very next attempt. Models recorded abandoned
+designs unprompted, and one run that leaked the benchmark's reference solution is
+published as `dryrun-INVALID` rather than deleted. Every figure re-derives from
+the published evidence with one script, no trust required.
+
+What has *not* been shown: that keeping the ledger changes what an agent decides.
+That is what the frozen nine-session protocol exists to measure, and it has not
+been run. The [study README](study/README.md) says exactly what is known, what
+isn't, and why.
+
 ## The concepts
 
 - **Typed reasoning.** A focus is an `observation`, `claim`, `hypothesis`, `option`,
@@ -151,6 +170,8 @@ hat, so the browser, the CLI, and the exported file can never disagree.
 | **The book** | Tutorial, complete language reference, the mirror, and practical guides. | [`docs`](docs) · [live ↗](https://fatin-ishraq.github.io/ThoughtML/) |
 | **`llms.txt`** | The whole language in one file — embedded in the binary, so `thoughtml guide --full` prints it too. | [`llms.txt`](crates/thoughtml/llms.txt) |
 | **Example gallery** | 10 worked, strict-clean standalone documents plus a six-file Snake project — a concrete pour caught by its own evidence, a waterborne-outbreak investigation, two referees on one paper, a re-dated manuscript, a funding panel, an irrigation budget that computes itself, a wildfire evacuation call, and an import pair. | [`examples`](examples) |
+| **Agent integration** | A plugin that gives a coding agent a persistent reasoning ledger *while it works* — read/commit/diff/explain tools backed by the checker, so every saved record is validated before it lands. | [`integrations/dsh`](integrations/dsh) |
+| **The study** | The empirical side: a frozen, pre-registered experiment on whether a checkable reasoning ledger changes agent behaviour, with its evidence published and re-derivable. | [`study`](study) |
 
 ## Install & run
 
@@ -235,28 +256,16 @@ More in [Use cases ↗](https://fatin-ishraq.github.io/ThoughtML/guides/use-case
 cannot, instead of being silently dropped; a bare year on a date field is a date;
 the toolchain is tested on every platform it ships a binary for; and the mirror
 has been falsified — what it catches, and what it cannot see, are both written
-down. See [STABILITY.md](STABILITY.md) for what a future 1.0 would freeze.
+down.
 
-**v0.4.2 — follow-ups.** Closes a gap in 0.4.1's stream exposure check, stops
-`thoughtml fmt` deleting comments, and fixes a wrong-answer bug in evidence
-propagation found by the new continuous fuzzing.
+**Upgrading from 0.4.0 or earlier?** Do it — v0.4.1 was a security release fixing
+audited issues in the parser, the viewer, the `thoughtml stream` server, and the
+release pipeline, with no configuration workaround for most of them. Nothing in
+the language changed. Details are in the repository's security advisories.
 
-**v0.4.1 — security release.** Upgrade from 0.4.0 or earlier: a security audit found
-issues in the parser, the viewer, the `thoughtml stream` server, and the release
-pipeline, and there is no configuration workaround for most of them. Nothing in the
-language changed. Details are in [CHANGELOG.md](CHANGELOG.md) and the repository's
-security advisories.
-
-**v0.4.0 — connected reasoning.** ThoughtML now scales from one document to a living
-project: persistent multi-file authoring, authoritative file/line provenance, a unified
-graph with inline reasoning drill-down, computer-hosted live streams for long-running
-agents, and self-contained snapshots. Semantic node shapes and one universal Reasoning
-Card keep the playground, stream, and standalone viewer visually and behaviorally aligned.
-The core language remains compatible with v0.3.0. The full trail is in
-[CHANGELOG.md](CHANGELOG.md); the language and workflows are in the
-[book](https://fatin-ishraq.github.io/ThoughtML/). The surface may still move — hence 0.x,
-not 1.0. What 1.0 would freeze, and what it deliberately would not, is written
-down in [STABILITY.md](STABILITY.md).
+The surface may still move — hence 0.x, not 1.0. The full release trail is in
+[CHANGELOG.md](CHANGELOG.md); what a future 1.0 would freeze, and what it
+deliberately would not, is written down in [STABILITY.md](STABILITY.md).
 
 ## Contributing
 
