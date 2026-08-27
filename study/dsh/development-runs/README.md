@@ -40,9 +40,14 @@ counts.
 | `glm-5.2` | T | z-ai/glm-5.2:free | single probe |
 | `minimax-m3` | T | minimax/minimax-m3:free | single probe |
 | `laguna-s-2.1` | T | poolside/laguna-s-2.1:free | single probe |
-| `ox-alpha-probe` | T | stealth/ox-alpha | short probe |
-| `ox-alpha-full` | T | stealth/ox-alpha | full 102-step session |
-| `sweep-D`, `sweep-M`, `sweep-T` | D, M, T | stealth/ox-alpha | the one three-condition sweep |
+| `ox-alpha-probe` | T | stealth/ox-alpha † | short probe |
+| `ox-alpha-full` | T | stealth/ox-alpha † | full 102-step session |
+| `sweep-D`, `sweep-M`, `sweep-T` | D, M, T | stealth/ox-alpha † | the one three-condition sweep |
+
+† `stealth/ox-alpha` was an anonymous OpenRouter preview when these sessions ran.
+On 2026-08-26 Z.ai identified it as **GLM-5.3-Flash** (320B/18B MoE, MIT open
+weights). The extracted logs and `index.json` keep the route name recorded at run
+time; the directory names stay as they are for the same reason.
 
 ### Why one run is named INVALID
 

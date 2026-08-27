@@ -89,6 +89,12 @@ reads, 406k output), about **$0.90 total**. Most sessions ran on
 got one probe. Every session used an open-weight or free-tier route. No first-party
 OpenAI or Google model was used anywhere in this project.
 
+At the time these sessions ran, `stealth/ox-alpha` was an anonymous preview.
+On 2026-08-26 Z.ai identified it as **GLM-5.3-Flash** (320B-total / 18B-active
+MoE, MIT-licensed open weights). The run logs keep the route name they recorded
+at the time; this note, not the logs, carries the identification — so every
+model in this record is now a named, citable, open-weight model.
+
 **The checker caught real errors, and the model repaired them.** Across all
 sessions there were 24 attempts to save a reasoning record: 13 accepted, 9 refused
 by the checker as malformed, 2 lost to tool errors. Every one of the 9 refusals was
