@@ -10,9 +10,8 @@ ThoughtML agent-utility extension.
 | [`case-study-01/`](case-study-01/) | the frozen one-task D/M/T case study: protocol, schedule, manifest, runner |
 | [`task-selection/`](task-selection/) | how the task was chosen from DeepSWE v1.1, with the trial data and provenance |
 | [`pier_agent/`](pier_agent/) | the Pier adapter that runs DSH under the three conditions, plus its self-test |
-| [`plugins/`](plugins/) | study-side DSH plugins (event logger; the mock LLM/operation used offline only) |
+| [`plugins/`](plugins/) | the study-side DSH event logger |
 | [`diagnostics/`](diagnostics/) | compact records of development-only model calls, all excluded from results |
-| [`offline/`](offline/) | the zero-network deterministic D/M/T composition check |
 
 Start at [`case-study-01/README.md`](case-study-01/README.md).
 
@@ -24,12 +23,17 @@ Start at [`case-study-01/README.md`](case-study-01/README.md).
 - official repository `master` observed on 2026-08-24:
   `b150a551b8d465e31e418e1b2eaf5e79bbb7d28e`
 - source-declared runtime: Node.js `^22.19.0 || >=24.0.0`
-- `pnpm-lock.yaml` SHA-256:
-  `6077a26dcc77502cce252c371ff4bf87e4edce085aec9077897f7e0b92315867`
 
-The npm package and pnpm lockfile, rather than a moving branch, are the executable
-dependency pin. The repository commit is provenance until its exact relationship
-to the published tarball is independently established.
+The npm package and its registry integrity hash, rather than a moving branch, are
+the executable dependency pin. The repository commit is provenance until its exact
+relationship to the published tarball is independently established.
+
+**The pin that governs a study run is not this file.** `DEFAULT_DSH_VERSION` in
+[`pier_agent/dsh_agent.py`](pier_agent/dsh_agent.py) is what the adapter installs
+inside the container at build time, and that file is one of the nineteen hashed in
+[`case-study-01/manifest.json`](case-study-01/manifest.json). The version recorded
+here and the version in the frozen adapter must agree; if they ever disagree, the
+adapter is authoritative and the divergence is a protocol deviation.
 
 ## Safety boundary
 
@@ -73,7 +77,8 @@ per-step state context, and used the matched Markdown and ThoughtML
 0, and validated successfully. The separate collector recorded the failure,
 recovery, token/tool totals, and post-failure checkpoint. Every request was
 routed to the local mock adapter, no DeepSeek credential was present, and
-telemetry was disabled. See `offline/results/summary.json` for the compact
+telemetry was disabled. See the offline composition check recorded at the tag
+`prereg-v2.0-archive` for the compact
 result.
 
 This proves the instrumentation seam, not native coding-tool behavior, benchmark
@@ -82,8 +87,9 @@ the pilot.
 
 One later development-only Flash compatibility smoke also completed the
 production ThoughtML read/commit/inspect sequence and produced a strict-valid
-revision. Its compact, non-study record is
-`diagnostics/plugin-flash-smoke-result.json`; raw artifacts remain ignored. The
+revision. It is one of the calls itemised in
+[`diagnostics/dev-calls-2026-08-25.json`](diagnostics/dev-calls-2026-08-25.json);
+raw artifacts remain ignored. The
 call revealed separate cache-read and reasoning-token fields, which were then
 added to the collector and retested.
 

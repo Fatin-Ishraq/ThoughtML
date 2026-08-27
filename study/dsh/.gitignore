@@ -3,5 +3,4 @@ node_modules/
 .env
 *.tgz
 npm-debug.log*
-offline/runs/
 diagnostics/runs/

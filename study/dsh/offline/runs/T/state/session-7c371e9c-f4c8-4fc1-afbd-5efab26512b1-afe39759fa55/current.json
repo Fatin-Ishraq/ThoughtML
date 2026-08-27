@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "sessionId": "session-7c371e9c-f4c8-4fc1-afbd-5efab26512b1",
+  "format": "thoughtml",
+  "revision": 1,
+  "entryId": "000001-828aba444e5e-aef074da",
+  "previousEntryId": "000000-90c61e393b4d",
+  "sha256": "828aba444e5ee16ae0d9efdc31c013cf7902d678dad132ba2067196b07ae07a7",
+  "bytes": 1091,
+  "reason": "Checkpoint the first-attempt failure and revised recovery action.",
+  "committedAt": "2026-08-24T19:01:20.108Z"
+}

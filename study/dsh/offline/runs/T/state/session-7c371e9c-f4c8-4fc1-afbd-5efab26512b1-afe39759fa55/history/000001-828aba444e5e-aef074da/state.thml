@@ -1,0 +1,41 @@
+claim reasoning-state
+  Persistent reasoning state for this deterministic recovery check.
+
+observation first-attempt-failed
+  The first deterministic offline operation failed.
+
+claim current-goal
+  Verify that DSH records a deterministic failure, state checkpoint, and recovery without network access.
+
+claim recovery-hypothesis
+  The failure should be checkpointed before a revised second attempt.
+
+link first-attempt-failed supports recovery-hypothesis
+
+claim superseded-none
+  No belief has been superseded.
+
+action attempt-one-result
+  Attempt 1 failed; checkpoint, read, and inspect the persistent state.
+
+question native-coding-tools
+  Do native coding tools behave correctly outside this mock check?
+
+action next-action
+  Retry the deterministic operation with attempt 2.
+
+claim uncertainty
+  Uncertainty is low because the run is deterministic.
+
+part-of reasoning-state
+  first-attempt-failed
+  current-goal
+  recovery-hypothesis
+  superseded-none
+  attempt-one-result
+  native-coding-tools
+  next-action
+  uncertainty
+
+mock-agent holds recovery-hypothesis
+  confidence 1.0 measured
