@@ -1,5 +1,19 @@
 # Pre-registration: Measuring AI-Authored Reasoning Traces Across Models in a Fixed Agent Harness
 
+> **⚠ SUPERSEDED — this is not the experiment currently in progress.**
+>
+> This document designs a study of six models varying inside one fixed harness
+> (Codex CLI). **That collection was never run.** The active work is the
+> agent-utility extension: one task, three conditions (no ledger / Markdown ledger
+> / ThoughtML ledger), described in [`README.md`](README.md) and specified in
+> [`dsh/case-study-01/protocol.md`](dsh/case-study-01/protocol.md).
+>
+> This file is retained because a filed pre-registration should not be deleted.
+> Its §13 deviation log is the authoritative record of how the design changed, and
+> the machinery it refers to (`tasks/`, `payloads/`, `schemas/`, `runs/`,
+> `rule-j/`, `mutation-corpus/`, `scripts/benchmark.py`) is retained on the same
+> basis. **Start at [`README.md`](README.md).**
+
 **Author:** Fatin Ishraq
 **Protocol version:** 2.6
 **Date filed:** 2026-08-20 (v1.0) · amended 2026-08-20 (v1.1–v1.4) · redesigned 2026-08-20 (v2.0) · amended 2026-08-21 (v2.1–v2.5) · **post-pilot task-design amendment 2026-08-21 (v2.6)**
