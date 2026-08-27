@@ -126,7 +126,7 @@ which is exactly what has not been affordable.
 | [`dsh/diagnostics/`](dsh/diagnostics/) | records of development-only model calls, excluded from results |
 | [`dsh-agent-utility-amendment.md`](dsh-agent-utility-amendment.md) | the parent design for the agent-utility extension |
 | [`research-map.thml`](research-map.thml) | the whole research programme written in ThoughtML — how the design got here, what was caught, what is still open |
-| [`data/`](data/) | checksummed archive of raw transcripts from the original study's discarded pilots |
+| [`archive/`](archive/) | material from the superseded v2.0 design, including its raw pilot transcripts |
 
 `research-map.thml` is the project describing itself in its own language. It
 passes its own checker with no errors and no warnings:
@@ -139,6 +139,21 @@ thoughtml --html -o research-map.html study/research-map.thml
 The second command renders a self-contained interactive view — no server, no
 build step. `--audit` on the same file reports where the structure disagrees
 with what the author claimed.
+
+### Why the layout is what it is
+
+Nineteen files are hashed by SHA-256 in
+[`dsh/case-study-01/manifest.json`](dsh/case-study-01/manifest.json), the
+pre-collection freeze record. Their paths are the manifest's keys, and one of
+them — `dsh-agent-utility-amendment.md` — links to `preregistration.md` at its
+current location.
+
+So some paths here are deeper or flatter than a clean design would choose. That
+is deliberate. Moving a frozen file would break the manifest, and regenerating
+the manifest to tidy a filename would weaken the guarantee it exists to provide:
+that nothing which can change a result changed between the freeze and the run.
+A layout constrained by a freeze is the correct trade, and it is verifiable —
+`make_manifest.py` recomputes every hash and refuses to write if anything drifted.
 
 ### Superseded, kept for the record
 
