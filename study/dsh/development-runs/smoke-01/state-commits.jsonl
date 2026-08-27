@@ -1,0 +1,2 @@
+{"bytes": 1139, "committed": true, "condition": "M", "diagnostics": [], "observedAt": "2026-08-25T10:31:05.722Z", "reason": "Record the plan for the two-step diagnostic task as instructed.", "revision": 1, "valid": true}
+{"bytes": 1446, "committed": true, "condition": "T", "diagnostics": [], "observedAt": "2026-08-25T10:36:07.410Z", "reason": "Record the concrete plan for the two-step diagnostic task before executing it.", "revision": 1, "valid": true}

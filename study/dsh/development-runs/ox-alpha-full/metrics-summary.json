@@ -1,0 +1,76 @@
+{
+ "classification": "experiment-metrics",
+ "condition": "T",
+ "credentialPresent": false,
+ "format": "thoughtml",
+ "generatedAt": "2026-08-25T16:40:02.423Z",
+ "schemaVersion": 1,
+ "sessions": [
+  {
+   "cacheReadTokens": 8397504,
+   "eventCount": 61927,
+   "eventTypes": {
+    "agent/inbox/spliced": 8,
+    "approval/policy": 1,
+    "assistant/chunk": 61367,
+    "assistant/message": 102,
+    "llm/retry": 7,
+    "llm/retry-started": 7,
+    "permission/preset": 1,
+    "request/context": 1,
+    "request/header": 1,
+    "sandbox/mode": 1,
+    "session/title": 1,
+    "session/title-llm-request": 1,
+    "step/end": 102,
+    "step/start": 102,
+    "tool/call": 107,
+    "tool/result": 107,
+    "turn/end": 1,
+    "turn/start": 1,
+    "user/message": 9
+   },
+   "failedToolCalls": 3,
+   "inputTokens": 169605,
+   "latestStateBytes": 2355,
+   "latestStateRevision": 4,
+   "latestStateValid": true,
+   "modelCalls": 102,
+   "models": [
+    "stealth/ox-alpha"
+   ],
+   "outputTokens": 61416,
+   "providers": [
+    "openrouter"
+   ],
+   "reasoningTokens": 0,
+   "recoveryEpisodesCompleted": 3,
+   "recoveryEpisodesStarted": 3,
+   "recoveryToolDistances": [
+    1,
+    1,
+    1
+   ],
+   "repeatedActions": 0,
+   "repeatedFailedActions": 0,
+   "requestCount": 102,
+   "requestHeaderCount": 1,
+   "sessionId": "session-5eda576b-294c-4429-90a4-2d15fb67df9c",
+   "stateAnalyses": 0,
+   "stateCheckpointsAfterFailure": 0,
+   "stateCommitAttempts": 8,
+   "stateCommitRejections": 4,
+   "stateCommits": 4,
+   "stateDiffs": 0,
+   "stateExplanations": 0,
+   "stateInspections": 0,
+   "stateNoopCommits": 0,
+   "stateReads": 0,
+   "steps": 102,
+   "toolCalls": 107,
+   "turns": 1,
+   "unresolvedRecoveryEpisode": false
+  }
+ ],
+ "telemetryMode": "DISABLED"
+}

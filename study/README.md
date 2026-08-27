@@ -73,6 +73,16 @@ only observations that exist, and because omitting them would misrepresent what 
 known. No claim in this section survives into a paper without the registered
 collection.
 
+Every figure below is re-derivable from the published evidence. Nothing here has
+to be taken on trust:
+
+```bash
+python3 dsh/development-runs/verify_claims.py
+```
+
+That script reads only [`dsh/development-runs/`](dsh/development-runs/), recomputes
+each number, and exits non-zero if any of them stops reproducing.
+
 **Scale.** 17 sessions, 552 model calls, ~39.5M tokens (809k input, 38.3M cache
 reads, 406k output), about **$0.90 total**. Most sessions ran on
 `stealth/ox-alpha` via OpenRouter; `glm-5.2`, `minimax-m3` and `laguna-s-2.1` each
@@ -123,6 +133,7 @@ which is exactly what has not been affordable.
 | [`dsh/case-study-01/`](dsh/case-study-01/) | **the current experiment.** Protocol, seeded schedule, byte manifest, runner, frozen requirement checklist |
 | [`dsh/task-selection/`](dsh/task-selection/) | how the task was chosen from 113, with the 28,010-trial dataset and provenance |
 | [`dsh/pier_agent/`](dsh/pier_agent/) | the adapter running the harness under D/M/T, its ~60-check self-test, and an independent extraction verifier |
+| [`dsh/development-runs/`](dsh/development-runs/) | **the evidence for section 4.** 17 sessions: the ledgers models wrote, their metrics, and every accept/reject the checker returned |
 | [`dsh/diagnostics/`](dsh/diagnostics/) | records of development-only model calls, excluded from results |
 | [`dsh-agent-utility-amendment.md`](dsh-agent-utility-amendment.md) | the parent design for the agent-utility extension |
 | [`research-map.thml`](research-map.thml) | the whole research programme written in ThoughtML — how the design got here, what was caught, what is still open |

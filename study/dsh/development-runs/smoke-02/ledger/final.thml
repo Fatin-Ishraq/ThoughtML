@@ -1,0 +1,50 @@
+claim reasoning-state
+  Persistent reasoning state for this agent session.
+
+observation session-start
+  Persistent reasoning state was initialized for this agent session.
+
+claim current-goal
+  Complete the two-step diagnostic task:
+  1. Record the plan in persistent reasoning state and read it back to confirm storage.
+  2. Create /tmp/smoke.txt containing exactly the word READY.
+  Then reply with the single word READY.
+
+claim constraints
+  Do not modify anything in /app; do not run the test suite; do not make any git commit.
+
+claim current-hypothesis
+  The task is a smoke test of reasoning-state and filesystem write capabilities.
+
+claim superseded-none
+  No belief has been superseded.
+
+action plan-recorded
+  Plan recorded in revision 1 and read back in revision 2; storage confirmed (content matches exactly).
+
+action smoke-file-created
+  /tmp/smoke.txt created containing exactly READY (verified via cat; no trailing newline added).
+
+action task-complete
+  Both diagnostic steps completed; /app untouched, no tests run, no git commit made. Final reply: READY.
+
+question resolved-none
+  All task requirements verified; no unresolved questions remain.
+
+claim uncertainty
+  None; all steps confirmed.
+
+part-of reasoning-state
+  session-start
+  current-goal
+  constraints
+  current-hypothesis
+  superseded-none
+  plan-recorded
+  smoke-file-created
+  task-complete
+  resolved-none
+  uncertainty
+
+agent holds current-goal
+  confidence 1.0

@@ -1,0 +1,37 @@
+claim reasoning-state
+  Persistent reasoning state for this agent session.
+
+observation session-start
+  Persistent reasoning state was initialized for this agent session.
+
+claim current-goal
+  Implement `partial_structure` on cattrs' `BaseConverter` plus top-level export, returning a new `PartialResult` type; work on a new branch from main and commit everything. [COMPLETED]
+
+claim outcome
+  - Branch `partial-structure` (from main @ 6bc4708), single commit 34cbf0e "Add partial structuring with PartialResult"; working tree clean.
+  - src/cattrs/partial.py: frozen-slots generic PartialResult(value, is_complete, structured_fields, failed_fields, errors, error_map) + private converter/cl/data; refine() re-runs partial_structure with merged data (structured fields preserved; mappings merged recursively).
+  - BaseConverter.partial_structure: strips Annotated; routes TypedDicts/attrs/dataclasses to field-walk paths (non-generic only); everything else falls back to full structure(). Missing fields -> KeyError failures; default fallback; required-without-default or constructor failure -> value None; nested recursion per spec; collections atomic via normal hooks; init=False skipped; forbid_extra_keys checked before structuring (ForbiddenExtraKeysError in errors, value still produced, is_complete False); detailed_validation respected (AttributeValidationNote + ClassValidationError aggregation vs first raw error).
+  - Exports: cattrs.PartialResult and top-level cattrs.partial_structure.
+  - tests/test_partial.py: 96 tests green over BaseConverter/Converter x detailed_validation parametrizations; full suite 945 passed + 15 xfailed (3 preconf-ish files uncollectable offline due to missing optional deps immutables/msgspec).
+  - Docs: validation.md section, cattrs.rst module entry, HISTORY.md NEXT entry.
+
+action committed
+  All work committed on branch partial-structure as 34cbf0e; nothing left staged or unstaged.
+
+question unresolved-exact-outcome
+  Resolved and delivered.
+
+action next-action
+  None; task complete.
+
+claim uncertainty
+  Residual: ruff/black could not be run offline; style was manually enforced (line length, import order, blank-line rules). Functional behavior fully verified by tests.
+
+part-of reasoning-state
+  session-start
+  current-goal
+  outcome
+  committed
+  unresolved-exact-outcome
+  next-action
+  uncertainty

@@ -1,0 +1,45 @@
+claim reasoning-state
+  Persistent reasoning state for this agent session.
+
+observation session-start
+  Persistent reasoning state was initialized for this agent session.
+
+claim current-goal
+  Implement `partial_structure` on cattrs' `BaseConverter` plus top-level export, returning a new `PartialResult` type; work on a new branch from main and commit everything.
+
+claim requirements
+  - `PartialResult` fields: value, is_complete, structured_fields (frozenset), failed_fields (frozenset), errors (Exception or None), error_map (dict).
+  - Fields absent from input are failed, not structured.
+  - Failed fields with defaults fall back; required fields without defaults force value=None.
+  - Nested attrs/dataclass/TypedDict fields recurse; partial nested -> use partial value + parent field failed; no nested value -> normal field failure.
+  - Collections atomic. init=False excluded from both sets.
+  - forbid_extra_keys: extra keys -> is_complete False but value produced.
+  - Respect detailed_validation (ClassValidationError aggregation vs first raw error). Export PartialResult.
+
+claim progress
+  - Implementation complete and smoke-tested: partial.py (PartialResult + refine w/ recursive mapping merge), converters.py (partial_structure routing incl. Annotated strip, _as_mapping normalization for class paths only so non-class targets keep natural inputs, extra-keys checked before fields like gen hooks, notes + ClassValidationError aggregation), __init__.py exports (PartialResult, top-level partial_structure).
+  - tests/test_partial.py: 96 tests passing across BaseConverter/Converter x detailed_validation on/off (fixtures) covering all spec semantics.
+  - Full suite green: 945 passed, 15 xfailed (excluding tests/preconf + 3 files needing missing optional deps immutables/msgspec -- environment limitation, unrelated).
+  - Docs: validation.md "Partial Structuring" section added (verified outputs by running example); cattrs.rst gained cattrs.partial module entry; HISTORY.md NEXT entry added.
+  - Lint tools unavailable offline (pip/uv no network); manually enforced <=88 char lines, black-style collapsing (skip-magic-trailing-comma), isort case-sensitive member order, single blank line inside class bodies.
+
+action fixed-edit-corruption
+  A str_replace edit consumed a newline joining two lines in converters.py (line 894); detected via grep immediately and restored. Lesson applied: verify file integrity after each edit batch.
+
+question unresolved-exact-outcome
+  Resolved: see current-goal.
+
+action next-action
+  Final review of complete git diff; re-run full test suite once more; then git add + commit everything on branch partial-structure.
+
+claim uncertainty
+  Low residual uncertainty: behavior verified by 96 targeted tests + full suite. Remaining risk is style-tool divergence (ruff/black unavailable offline) - mitigated by manual checks.
+
+part-of reasoning-state
+  session-start
+  current-goal
+  requirements
+  progress
+  fixed-edit-corruption
+  next-action
+  uncertainty

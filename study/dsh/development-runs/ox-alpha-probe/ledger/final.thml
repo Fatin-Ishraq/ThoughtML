@@ -1,0 +1,43 @@
+claim reasoning-state
+  Persistent reasoning state for this agent session.
+
+observation session-start
+  Persistent reasoning state was initialized for this agent session.
+
+claim current-goal
+  Implement partial_structure on cattrs BaseConverter plus top-level export returning PartialResult with value, is_complete, structured_fields frozenset, failed_fields frozenset, errors exception or None, and error_map field to exception. Nested attrs dataclass TypedDict fields partially structured recursively, collections atomic, absent fields failed, defaults as fallback, missing required makes value None, refine fixes failed fields preserving structured ones, init=False excluded, forbid_extra_keys makes is_complete False but still produces a value, respect detailed_validation, export PartialResult. Work on a new branch from main and commit everything.
+
+claim current-hypothesis
+  Repo is cattrs at /app branch main clean at 6bc4708. Verified by reading source: BaseConverter.structure dispatches via _structure_func.dispatch(cl)(obj, cl); structure_attrs_fromdict uses field names as input keys and getattr alias fallback for ctor kwargs; _compat.adapted_fields normalizes dataclasses and attrs to attrs Attributes with default NOTHING meaning required and an init flag; Converter has public forbid_extra_keys while BaseConverter does not so use getattr converter forbid_extra_keys False; detailed_validation controls ClassValidationError grouping; gen/typeddicts provides _adapted_fields and _required_keys handling NotRequired on older Pythons; generics pattern is get_origin then adapted_fields then generate_mapping with TypeVar substitution via deep_copy_with; errors.py provides ClassValidationError(message, excs, cl) and ForbiddenExtraKeysError(message, cl, extra_fields).
+
+claim design-plan
+  New module src/cattrs/partial.py defines frozen PartialResult generic class with six public fields plus private eq=False slots converter, cl, input, values used by refine. refine filters incoming data to keys in failed_fields, merges over original input, reruns the algorithm passing preserved values so structured fields skip hooks. Algorithm partial_structure(converter, obj, cl, preserved): falls back to plain structure for non attrs dataclass typeddict targets or non-mapping input; typeddict fields via gen.typeddicts helpers with NotRequired omittable; attrs and dataclasses via adapted_fields plus generics mapping; skips init=False fields entirely; absent key is failed with KeyError in error_map using default fallback or omission for NotRequired, missing required forces value None; nested decision unwraps Annotated Final NewType Optional when value not None then recurses into attrs dataclass typeddict including generic aliases where complete becomes structured, partial value is used but parent field marked failed with nested errors in error_map, no value means normal failure; all other types atomic via get_structure_hook catching Exception; forbid_extra_keys adds ForbiddenExtraKeysError to errors with is_complete False while still producing value and extras kept out of error_map; constructor call wrapped so failure gives value None with unattributed error appended; errors wrapped in ClassValidationError when detailed_validation else first exception; is_complete true iff no failed fields no extra key error and value produced. converters.py gains BaseConverter.partial_structure delegating; __init__.py exports PartialResult and top-level partial_structure updating __all__; tests in tests/test_partial_structure.py cover every spec bullet; HISTORY.md entry plus docs section; run pytest and ruff then commit on new branch.
+
+claim superseded-none
+  No belief has been superseded.
+
+action session-initialized
+  Session state was initialized.
+
+question unresolved-exact-outcome
+  Resolved by current-goal; refine uses shallow replacement semantics for failed fields and rename overrides are out of scope.
+
+action next-action
+  Create branch, implement src/cattrs/partial.py, wire into converters.py and __init__.py, write tests, lint, commit.
+
+claim uncertainty
+  Refine shallow-replacement semantics chosen; rename and custom overrides not respected by design and will be documented.
+
+part-of reasoning-state
+  session-start
+  current-goal
+  current-hypothesis
+  design-plan
+  superseded-none
+  session-initialized
+  unresolved-exact-outcome
+  next-action
+  uncertainty
+
+agent holds current-goal
+  confidence 0.85 assumed

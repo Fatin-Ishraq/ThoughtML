@@ -1,0 +1,48 @@
+claim reasoning-state
+  Persistent reasoning state for this agent session.
+
+observation session-start
+  Persistent reasoning state was initialized for this agent session.
+
+claim current-goal
+  Implement `partial_structure` on cattrs' `BaseConverter` plus top-level export, returning a new `PartialResult` type; work on a new branch from main and commit everything.
+
+claim requirements
+  - `PartialResult` fields: value (partial object or None), is_complete, structured_fields (frozenset of field names structured from input), failed_fields (frozenset), errors (Exception or None), error_map (dict field name -> Exception).
+  - Fields absent from input count as failed, not structured.
+  - Failed fields with defaults fall back to defaults; required fields without defaults force value=None.
+  - Nested attrs/dataclass fields recurse: partially complete nested -> use its partial value AND mark parent field failed; no nested value possible -> normal field failure.
+  - Collection fields (List, Dict) are atomic: element failure fails whole field.
+  - `PartialResult.refine(data)` -> new PartialResult fixing failed fields with data, preserving structured fields.
+  - init=False fields excluded from structured_fields and failed_fields.
+  - forbid_extra_keys: extra keys => is_complete False but value still produced.
+  - Respect detailed_validation (aggregate errors into ClassValidationError w/ notes when on; first raw error when off).
+  - Support attrs classes, dataclasses, TypedDicts. Export PartialResult from cattrs.
+
+claim progress
+  - Branch `partial-structure` created from main (commit 6bc4708).
+  - src/cattrs/partial.py created: frozen-slots Generic PartialResult with public fields value/is_complete/structured_fields/failed_fields/errors/error_map + private converter/cl/data; refine() merges data for non-structured keys, re-runs partial_structure; raises ValueError if no converter attached.
+  - converters.py: imports added (NOTHING, adapted_fields, get_notrequired_base, error classes incl. AttributeValidationNote/ClassValidationError/ForbiddenExtraKeysError, typeddict helpers _adapted_fields/_required_keys aliased, PartialResult); BaseConverter.partial_structure implemented (Annotated strip, non-mapping input -> empty mapping + TypeError base_error, routing to typeddict/attrs/fallback paths); _partial_structure_fallback, _partial_structure_attrs, _partial_structure_typeddict methods added; module helpers _partially_structurable (plain non-generic attrs/dataclass/TypedDict only -> atomic otherwise) and _aggregate_errors (ClassValidationError when detailed else first error) added after _is_extended_factory.
+  - Error formats match gen hooks: note "Structuring class {cl.__qualname__} @ attribute {name}"; aggregate "While structuring {cl.__name__}".
+
+action fixed-bad-placeholder
+  First edit attempt of module helpers failed: old_string mismatch (docstring says "accept" not "take"); retried with exact text and succeeded. Also removed an accidentally committed placeholder line in attrs handle_failure (nonlocal fatal misuse) before it could break runtime.
+
+question unresolved-exact-outcome
+  Resolved: see current-goal and requirements.
+
+action next-action
+  Update cattrs/__init__.py exports; quick import smoke test; write tests/test_partial.py; run pytest subset; run ruff/black; update HISTORY.md + docs; commit.
+
+claim uncertainty
+  Design choices not pinned by spec (documented in code): error_map contains KeyError entries for absent fields; refine ignores new data for already-structured fields; generics/custom top-level hooks fall back to full-structure behavior. Confidence moderate-high. Not yet verified by running code.
+
+part-of reasoning-state
+  session-start
+  current-goal
+  requirements
+  progress
+  fixed-bad-placeholder
+  unresolved-exact-outcome
+  next-action
+  uncertainty

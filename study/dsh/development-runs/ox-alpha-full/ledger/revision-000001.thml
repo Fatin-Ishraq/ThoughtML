@@ -1,0 +1,51 @@
+claim reasoning-state
+  Persistent reasoning state for this agent session.
+
+observation session-start
+  Persistent reasoning state was initialized for this agent session.
+
+claim current-goal
+  Implement `partial_structure` on cattrs' `BaseConverter` plus top-level export, returning a new `PartialResult` type; work on a new branch from main and commit everything.
+
+claim requirements
+  - `PartialResult` fields: value (partial object or None), is_complete, structured_fields (frozenset of field names structured from input), failed_fields (frozenset), errors (Exception or None), error_map (dict field name -> Exception).
+  - Fields absent from input count as failed, not structured.
+  - Failed fields with defaults fall back to defaults; required fields without defaults force value=None.
+  - Nested attrs/dataclass fields recurse: partially complete nested -> use its partial value AND mark parent field failed; no nested value possible -> normal field failure.
+  - Collection fields (List, Dict) are atomic: element failure fails whole field.
+  - `PartialResult.refine(data)` -> new PartialResult fixing failed fields with data, preserving structured fields.
+  - init=False fields excluded from structured_fields and failed_fields.
+  - forbid_extra_keys: extra keys => is_complete False but value still produced.
+  - Respect detailed_validation (aggregate errors into ClassValidationError w/ notes when on; first raw error when off).
+  - Support attrs classes, dataclasses, TypedDicts. Export PartialResult from cattrs.
+
+claim current-hypothesis
+  Implementation plan (repo is cattrs @ main, Python 3.10+ required, attrs>=25.4):
+  1. New module src/cattrs/partial.py defining PartialResult (attrs @define frozen slots, Generic[T]); private fields converter/cl/data (eq=False, repr=False) power refine().
+  2. BaseConverter.partial_structure(obj, cl) in converters.py: strip Annotated; TypedDict -> typeddicts helpers (_adapted_fields/_required_keys from gen.typeddicts); attrs/dataclass (non-generic, has()) -> field walk using adapted_fields; everything else -> try full structure() and wrap result.
+  3. Field walk: skip init=False; input key = alias if converter.use_alias else name; constructor kwarg = attribute alias; absent -> KeyError failure (+default fallback, fatal if no default); nested complete -> structured; nested partial -> use partial value, parent failed; nested value None -> normal failure; other types atomic via _structure_attribute; detailed_validation attaches AttributeValidationNote and aggregates ClassValidationError; error_map entry for every failed field; is_complete = value is not None and no failed fields and no extra-key violation.
+  4. Non-mapping input -> graceful failure result (value None, all init fields failed).
+  5. Export PartialResult + partial_structure from cattrs/__init__.py (top-level partial_structure bound to global_converter).
+  6. tests/test_partial.py covering all semantics; HISTORY.md entry; docs section.
+
+action session-initialized
+  Session state was initialized.
+
+question unresolved-exact-outcome
+  Resolved: see current-goal and requirements.
+
+action next-action
+  Create branch, implement module + method + exports, write tests, run pytest/ruff/black, update HISTORY/docs, commit.
+
+claim uncertainty
+  Design choices not pinned by spec (documented in code): error_map contains KeyError entries for absent fields; refine ignores new data for already-structured fields; generics/custom top-level hooks fall back to full-structure behavior. Confidence moderate-high.
+
+part-of reasoning-state
+  session-start
+  current-goal
+  requirements
+  current-hypothesis
+  session-initialized
+  unresolved-exact-outcome
+  next-action
+  uncertainty

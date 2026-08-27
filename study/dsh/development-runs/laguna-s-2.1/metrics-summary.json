@@ -1,0 +1,69 @@
+{
+ "classification": "experiment-metrics",
+ "condition": "T",
+ "credentialPresent": false,
+ "format": "thoughtml",
+ "generatedAt": "2026-08-25T15:21:17.183Z",
+ "schemaVersion": 1,
+ "sessions": [
+  {
+   "cacheReadTokens": 0,
+   "eventCount": 49,
+   "eventTypes": {
+    "agent/inbox/spliced": 2,
+    "approval/policy": 1,
+    "assistant/chunk": 18,
+    "llm/retry": 8,
+    "llm/retry-started": 8,
+    "permission/preset": 1,
+    "request/context": 1,
+    "request/header": 1,
+    "sandbox/mode": 1,
+    "session/title": 1,
+    "session/title-llm-request": 1,
+    "step/end": 1,
+    "step/start": 1,
+    "turn/end": 1,
+    "turn/start": 1,
+    "user/message": 2
+   },
+   "failedToolCalls": 0,
+   "inputTokens": 0,
+   "latestStateBytes": 0,
+   "latestStateRevision": 0,
+   "latestStateValid": null,
+   "modelCalls": 0,
+   "models": [
+    "poolside/laguna-s-2.1:free"
+   ],
+   "outputTokens": 0,
+   "providers": [
+    "openrouter"
+   ],
+   "reasoningTokens": 0,
+   "recoveryEpisodesCompleted": 0,
+   "recoveryEpisodesStarted": 0,
+   "recoveryToolDistances": [],
+   "repeatedActions": 0,
+   "repeatedFailedActions": 0,
+   "requestCount": 0,
+   "requestHeaderCount": 1,
+   "sessionId": "session-4b688fe3-79de-48b6-bb2d-447a27296d84",
+   "stateAnalyses": 0,
+   "stateCheckpointsAfterFailure": 0,
+   "stateCommitAttempts": 0,
+   "stateCommitRejections": 0,
+   "stateCommits": 0,
+   "stateDiffs": 0,
+   "stateExplanations": 0,
+   "stateInspections": 0,
+   "stateNoopCommits": 0,
+   "stateReads": 0,
+   "steps": 1,
+   "toolCalls": 0,
+   "turns": 1,
+   "unresolvedRecoveryEpisode": false
+  }
+ ],
+ "telemetryMode": "DISABLED"
+}

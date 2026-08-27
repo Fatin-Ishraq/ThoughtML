@@ -1,0 +1,3 @@
+{"bytes": null, "committed": null, "condition": "T", "diagnostics": [], "observedAt": "2026-08-25T15:35:06.386Z", "reason": null, "revision": null, "valid": null}
+{"bytes": null, "committed": null, "condition": "T", "diagnostics": [], "observedAt": "2026-08-25T15:35:46.509Z", "reason": null, "revision": null, "valid": null}
+{"bytes": 4449, "committed": true, "condition": "T", "diagnostics": [], "observedAt": "2026-08-25T15:36:20.848Z", "reason": "Initial plan committed before first modifying action; bodies kept free of bullet lists and novel item types after two rejected attempts.", "revision": 1, "valid": true}

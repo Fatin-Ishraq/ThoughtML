@@ -1,0 +1,84 @@
+claim reasoning-state
+  Persistent reasoning state for this agent session.
+
+observation session-start
+  Persistent reasoning state was initialized for this agent session.
+
+claim current-goal
+  Implement `partial_structure` on cattrs' `BaseConverter` (plus top-level `cattrs.partial_structure`) returning a `PartialResult`; export `PartialResult`; support attrs classes, dataclasses, TypedDicts; recursive nesting; atomic collections; refine(); forbid_extra_keys and detailed_validation; exclude init=False fields. New branch from main; commit everything.
+
+claim requirements-from-request
+  PartialResult(value/is_complete/structured_fields/failed_fields/errors/error_map); absent fields failed; default fallback vs required-missing -> value None; recursive nested attrs/dataclass where partial nested values are kept but parent field marked failed and unproducible ones fail normally; atomic List/Dict; refine(data) fixing failed fields while preserving structured ones; init=False excluded from field sets; forbid_extra_keys -> incomplete but valued; detailed_validation respected; TypedDicts supported; PartialResult exported.
+
+claim codebase-evidence
+  cattrs repo at /app, main @ 6bc4708; generated hooks carry `.overrides`; detailed validation wraps errors in ClassValidationError with AttributeValidationNote notes ("Structuring class|typeddict {qualname} @ attribute {name}"); gen.typeddicts exposes _adapted_fields/_required_keys; _compat.adapted_fields normalizes attrs+dataclass fields; find_structure_handler resolves per-field hooks; Converter has use_alias/forbid_extra_keys.
+
+action explored-repository
+  Read converters.py, gen modules, errors.py, _compat.py, HISTORY.md, pyproject/Justfile before designing.
+
+claim design-decisions
+  New module src/cattrs/partials.py: frozen generic attrs PartialResult (private converter/cl/input eq=False) + core partial_structure(converter, obj, cl); overrides from get_structure_hook(cl).overrides (try/except -> {}); generics via generate_mapping/deep_copy_with; recursion when Annotated-stripped type has()/is_typeddict() and no struct_hook; missing fields -> KeyError + default fallback or value None; is_complete := zero collected entries AND value produced; extra keys -> unkeyed ForbiddenExtraKeysError in aggregate only; detailed_validation=True wraps with notes else first raw exception; instantiation failures null the value with an unkeyed error; non-mapping payloads fail all considered fields with a global ValueError; refine() deep-merges stored input with patch then re-runs.
+
+claim superseded-initial-hypothesis
+  Superseded session-start hypothesis "requirements unknown" once requirements-from-request was captured.
+
+question interpretation-choices
+  Resolved choices: non-detailed mode continues past first failure (raw first error reported, no notes); absent defaulted fields yield KeyError entries; nested TypedDicts recurse like attrs/dataclasses. See resolved-interpretations.
+
+claim uncertainty
+  Historical: interpretation risk around detailed_validation=False, absent-field errors, nested TypedDict recursion; later resolved (see resolved-interpretations).
+
+action implementation-performed
+  Created branch partial-structure from main. Added src/cattrs/partials.py per design-decisions; wired BaseConverter.partial_structure after structure() in converters.py; exported PartialResult and bound top-level partial_structure in cattrs/__init__.py with __all__ updates.
+
+action tests-added
+  tests/test_partial.py: 120 tests over converter fixture (BaseConverter/Converter x detailed_validation) and genconverter cases: complete/missing/invalid payloads; error aggregation + transform_error compatibility; raw errors without detailed validation; nested partial/complete/unproducible; atomic lists/dicts; refine (chained, nested deep-merge, non-mapping replace, TypeError on manual results); init=False; forbid_extra_keys; dataclasses; TypedDicts incl total=False/NotRequired/generic/nested; generics; aliases/use_alias/rename/omit overrides; non-mapping payload; atomic fallback types; validator failures; top-level API; result equality; kw_only.
+
+action docs-updated
+  HISTORY.md NEXT bullet; docs/validation.md "Partial Structuring" section with {doctest} examples executed verbatim; cattrs.partials automodule entry in docs/cattrs.rst.
+
+observation verification-results
+  test_partial.py: 120 passed. Targeted rerun incl. converter/baseconverter/dataclasses suites: 207 passed. Full existing suite minus preconf/cols/preconf-collections modules (missing optional deps bson/immutables/msgspec/yaml - pre-existing env limitation): 953 passed, 15 xfailed, exit 0. Long-line scan: converters.py had identical 3 pre-existing >88-char lines before/after. ruff/black unavailable offline; style manually aligned. Export sanity check passed (cattrs.PartialResult is cattrs.partials.PartialResult; both names in __all__).
+
+claim resolved-interpretations
+  interpretation-choices resolved as designed: non-detailed mode continues processing but reports first raw exception unwrapped without notes; absent defaulted fields produce KeyError entries while falling back to defaults; nested TypedDicts recurse exactly like attrs/dataclass fields; extra keys appear in aggregate errors but never in error_map; refine() deep-merges so nested partial payloads can be fixed key-by-key.
+
+claim superseded-uncertainty-minor
+  Revision-1 uncertainty superseded by resolved-interpretations; residual risk low and documented in docstrings/docs.
+
+observation unresolved-none
+  No open questions block completion.
+
+action next-action
+  Commit all changes on branch partial-structure with a descriptive message; verify clean tree; summarize for user.
+
+part-of reasoning-state
+  session-start
+  current-goal
+  requirements-from-request
+  codebase-evidence
+  explored-repository
+  design-decisions
+  superseded-initial-hypothesis
+  interpretation-choices
+  uncertainty
+  implementation-performed
+  tests-added
+  docs-updated
+  verification-results
+  resolved-interpretations
+  superseded-uncertainty-minor
+  unresolved-none
+  next-action
+
+agent holds current-goal
+  confidence 0.99
+
+agent holds design-decisions
+  confidence 0.9
+
+agent holds verification-results
+  confidence 0.95
+
+agent holds resolved-interpretations
+  confidence 0.85

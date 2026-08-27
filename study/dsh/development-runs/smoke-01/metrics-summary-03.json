@@ -1,0 +1,70 @@
+{
+ "classification": "experiment-metrics",
+ "condition": "M",
+ "credentialPresent": true,
+ "format": "markdown",
+ "generatedAt": "2026-08-25T10:31:12.906Z",
+ "schemaVersion": 1,
+ "sessions": [
+  {
+   "cacheReadTokens": 51584,
+   "eventCount": 977,
+   "eventTypes": {
+    "agent/inbox/spliced": 2,
+    "approval/policy": 1,
+    "assistant/chunk": 934,
+    "assistant/message": 6,
+    "permission/preset": 1,
+    "request/context": 1,
+    "request/header": 1,
+    "sandbox/mode": 1,
+    "session/title": 2,
+    "session/title-llm-request": 1,
+    "step/end": 6,
+    "step/start": 6,
+    "tool/call": 5,
+    "tool/result": 5,
+    "turn/end": 1,
+    "turn/start": 1,
+    "user/message": 3
+   },
+   "failedToolCalls": 0,
+   "inputTokens": 7594,
+   "latestStateBytes": 1139,
+   "latestStateRevision": 1,
+   "latestStateValid": true,
+   "modelCalls": 6,
+   "models": [
+    "deepseek-v4-flash"
+   ],
+   "outputTokens": 1074,
+   "providers": [
+    "deepseek-official"
+   ],
+   "reasoningTokens": 503,
+   "recoveryEpisodesCompleted": 0,
+   "recoveryEpisodesStarted": 0,
+   "recoveryToolDistances": [],
+   "repeatedActions": 0,
+   "repeatedFailedActions": 0,
+   "requestCount": 6,
+   "requestHeaderCount": 1,
+   "sessionId": "session-920861bc-4b10-457e-9f55-cf698a715ce1",
+   "stateAnalyses": 0,
+   "stateCheckpointsAfterFailure": 0,
+   "stateCommitAttempts": 1,
+   "stateCommitRejections": 0,
+   "stateCommits": 1,
+   "stateDiffs": 0,
+   "stateExplanations": 0,
+   "stateInspections": 0,
+   "stateNoopCommits": 0,
+   "stateReads": 2,
+   "steps": 6,
+   "toolCalls": 5,
+   "turns": 1,
+   "unresolvedRecoveryEpisode": false
+  }
+ ],
+ "telemetryMode": "DISABLED"
+}

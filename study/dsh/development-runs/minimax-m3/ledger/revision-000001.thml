@@ -1,0 +1,65 @@
+claim reasoning-state
+  Persistent reasoning state for the partial_structure implementation.
+
+observation session-start
+  Session state was initialized.
+
+claim current-goal
+  Add `partial_structure` to BaseConverter and top-level. Implement `PartialResult` with: value, is_complete, structured_fields (frozenset), failed_fields (frozenset), errors, error_map. `refine(data)` returns new PartialResult. Handle attrs/dataclass/TypedDict, nested recursive partial structuring, collections atomic, init=False excluded, forbid_extra_keys sets is_complete False but produces value, detailed_validation respected. Export PartialResult. Branch + commit.
+
+claim explored-code
+  - src/cattrs/converters.py: BaseConverter, Converter, GenConverter; structure_attrs_fromdict at 765, _structure_attribute at 743.
+  - src/cattrs/__init__.py: top-level exports including global_converter.
+  - src/cattrs/_compat.py: has, has_with_generic, is_typeddict, is_dataclass, adapted_fields, is_mapping, is_sequence, etc.
+  - src/cattrs/errors.py: BaseValidationError (ExceptionGroup), AttributeValidationNote, ClassValidationError, ForbiddenExtraKeysError, IterableValidationError.
+  - src/cattrs/gen/__init__.py: make_dict_structure_fn, make_dict_unstructure_fn. Detailed validation path uses ClassValidationError with AttributeValidationNote.
+  - src/cattrs/gen/typeddicts.py: make_dict_structure_fn for TypedDicts.
+  - src/cattrs/dispatch.py: MultiStrategyDispatch.
+
+claim design-decisions
+  1. Add `cattrs/partial.py` defining `PartialResult` and the internal `_partial_structure` function. Add `partial_structure` method to BaseConverter. Add top-level `partial_structure` using global_converter.
+  2. `PartialResult` is a frozen dataclass with private `_cl` and `_converter` set via object.__setattr__ for use by `refine`.
+  3. `PartialResult` ALSO stores the previous input dict via `_input_data` so `refine` can preserve previously structured values when value is None.
+  4. `_partial_structure` iterates over the class's fields. For each non-init=False field:
+     - If absent from input: mark as failed. If has default, don't add to error_map.
+     - If present and type is attrs/dataclass/typeddict: recursively partial_structure, use nested.value; nested.is_complete -> structured, else failed.
+     - If present and type is collection (list/dict/set/tuple/deque): structure atomically; any failure -> failed.
+     - Otherwise: use converter._structure_func.dispatch(type_).
+  5. TypedDicts: similar handling. If any required key fails, value is None.
+  6. forbid_extra_keys: extra keys make is_complete False but value is still produced.
+  7. refined_fields: maintain which fields have been refined to avoid retry loops.
+
+claim superseded-design-1
+  Earlier design stored structured values in value attribute only, losing info when value is None. New design adds _input_data attribute on PartialResult to retain original input dict.
+
+claim superseded-design-2
+  Earlier `_refine_partial` tried to extract values from prev.value, but value can be None. New design uses _input_data merged with new_data.
+
+claim current-issue
+  Initial `refine` test failed because `value=None` and the original input wasn't preserved. Need to add _input_data tracking.
+
+claim current-action
+  Update partial.py: add _input_data attribute to PartialResult (set via object.__setattr__); modify _partial_structure to set _input_data; update _refine_partial to use _input_data merged with new_data.
+
+claim progress
+  - Created branch partial_structure.
+  - Created src/cattrs/partial.py with PartialResult and helpers.
+  - Added partial_structure method to BaseConverter in converters.py.
+  - Exported PartialResult and partial_structure from src/cattrs/__init__.py.
+  - Updated src/cattr/__init__.py.
+  - Smoke tests: complete and incomplete attrs classes work.
+
+action next-action
+  Fix refine to handle the case where value is None by tracking _input_data on the PartialResult.
+
+part-of reasoning-state
+  session-start
+  current-goal
+  explored-code
+  design-decisions
+  superseded-design-1
+  superseded-design-2
+  current-issue
+  current-action
+  progress
+  next-action

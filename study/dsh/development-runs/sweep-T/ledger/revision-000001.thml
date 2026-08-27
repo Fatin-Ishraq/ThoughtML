@@ -1,0 +1,78 @@
+claim reasoning-state
+  Persistent reasoning state for this agent session.
+
+observation session-start
+  Persistent reasoning state was initialized for this agent session.
+
+claim current-goal
+  Implement `partial_structure` on cattrs' `BaseConverter` (plus top-level `cattrs.partial_structure`) returning a `PartialResult` with value/is_complete/structured_fields/failed_fields/error_map/errors; export `PartialResult`; handle attrs classes, dataclasses, TypedDicts; recursive nested handling; atomic collections; refine(); forbid_extra_keys and detailed_validation respected; exclude init=False fields. Work on a new branch from main and commit everything.
+
+claim requirements-from-request
+  - `BaseConverter.partial_structure(obj, cl) -> PartialResult[T]`; also top-level.
+  - PartialResult fields: value (partial object or None), is_complete, structured_fields (frozenset of field names structured from input), failed_fields (frozenset), errors (exception or None), error_map (field name -> Exception).
+  - Fields absent from input are failed, not structured.
+  - Failed fields with defaults fall back to defaults; required fields without defaults force value=None.
+  - Nested attrs/dataclass fields recurse: nested partially complete -> use nested.value but mark parent field failed; nested value impossible -> treat as normal field failure.
+  - List/Dict collection fields are atomic: any element failure fails the whole field.
+  - PartialResult.refine(data) -> new PartialResult fixing failed fields with new data while preserving structured fields.
+  - init=False fields excluded from structured_fields and failed_fields.
+  - forbid_extra_keys: extra keys make is_complete False but value still produced.
+  - Respect detailed_validation. Support attrs classes, dataclasses, TypedDicts. Export PartialResult.
+
+claim codebase-evidence
+  Repo is cattrs at /app, main @ 6bc4708, clean tree. Python 3.12.12; pytest/hypothesis/attrs installed; cattrs importable editable from src. BaseConverter.structure dispatches via _structure_func (converters.py:589); Converter has use_alias/forbid_extra_keys attrs (converters.py:1045-1095); generated hooks carry `.overrides` dict (gen/__init__.py and typeddicts gen set res.overrides=kwargs); detailed_validation wraps field errors in ClassValidationError('While structuring '+name, excs, cl) with AttributeValidationNote("Structuring class {qualname} @ attribute {name}", name, type), typeddict notes say "Structuring typeddict ..."; gen/typeddicts exposes reusable _adapted_fields(cls) and _required_keys(cls); _compat.adapted_fields normalizes attrs+dataclass fields with alias/init/default/type; find_structure_handler(a,t,converter,prefer) in gen/_shared resolves per-field hooks (may return None or raise); gen/_consts has neutral AttributeOverride; gen/_generics has generate_mapping; _generics.deep_copy_with resolves parameterized generics. No existing partial_structure/PartialResult anywhere.
+
+action explored-repository
+  Read converters.py, gen/__init__.py, gen/typeddicts.py, gen/_shared.py, gen/_consts.py, errors.py, _compat.py, fns.py, types.py, HISTORY.md, Justfile, pyproject.toml; confirmed lint tooling (ruff+black) and pytest workflow.
+
+claim design-decisions
+  - New module src/cattrs/partials.py: frozen generic attrs class PartialResult (public fields in spec order, private converter/cl/input with eq=False repr=False) plus core function partial_structure(converter, obj, cl). No runtime import of converters (TYPE_CHECKING only) to avoid cycles; converters.py imports it.
+  - Unified field specs: name (identity), input key (honoring override.rename/use_alias/aliases), ctor/output key (attrs alias or TD key), resolved type, has_default (attrs default or TD NotRequired), handler.
+  - Overrides fetched from converter.get_structure_hook(cl).overrides when available (try/except -> {}), so renames, struct_hooks and Annotated overrides apply.
+  - Generics supported via generate_mapping/deep_copy_with mirroring make_dict_structure_fn.
+  - Recurse when effective type (stripped of Annotated) is attrs/dataclass/TypedDict and no override.struct_hook; collections and all other types go through the normal handler atomically.
+  - Missing field -> KeyError recorded, field failed; if default exists fall back (kwarg omitted), else required -> value=None.
+  - is_complete := no collected errors at all AND value produced; extra keys (forbid_extra_keys) add ForbiddenExtraKeysError to aggregate errors only (not error_map), forcing incomplete while keeping value.
+  - detailed_validation=True: notes attached and ClassValidationError aggregate; False: no notes/wrapper, errors = first raw exception; processing continues either way to maximize partial value.
+  - Instantiation (validator) failure -> value=None, error appended unkeyed.
+  - Non-mapping input for a class target -> all considered fields failed, global ValueError, value None. Non-class targets fall back to normal structure (complete or failed result).
+  - refine(): deep-merge stored original input with data (nested mappings merge recursively so nested partials can be fixed), then re-run partial_structure with stored converter/cl.
+
+claim superseded-initial-hypothesis
+  Session-start hypothesis "requirements still need to be established" is superseded by requirements-from-request and interpretation choices recorded in design-decisions.
+
+question interpretation-choices
+  detailed_validation=False continues past first failure (raw first error reported) rather than aborting; absent defaulted fields yield KeyError entries in errors/error_map; nested TypedDicts recurse like attrs/dataclasses. Documented in docstrings/tests.
+
+action next-action
+  Create branch from main; write src/cattrs/partials.py; wire BaseConverter.partial_structure + top-level exports; add tests/test_partial.py; run pytest + ruff/black; update HISTORY.md and docs; commit.
+
+claim uncertainty
+  Interpretation risk concentrated in interpretation-choices; mitigated by matching generated-hook observable behavior wherever possible (note texts, wrapper messages, extra-keys handling).
+
+part-of reasoning-state
+  session-start
+  current-goal
+  requirements-from-request
+  codebase-evidence
+  explored-repository
+  design-decisions
+  superseded-initial-hypothesis
+  interpretation-choices
+  next-action
+  uncertainty
+
+agent holds current-goal
+  confidence 0.95
+
+agent holds requirements-from-request
+  confidence 0.95
+
+agent holds codebase-evidence
+  confidence 0.9
+
+agent holds design-decisions
+  confidence 0.85
+
+agent holds uncertainty
+  confidence 0.7

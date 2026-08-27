@@ -1,0 +1,39 @@
+claim reasoning-state
+  Persistent reasoning state for this agent session.
+
+observation session-start
+  Persistent reasoning state was initialized for this agent session.
+
+claim current-goal
+  Establish the concrete task goal from the user's request.
+
+claim current-hypothesis
+  The task requirements still need to be established.
+
+claim superseded-none
+  No belief has been superseded.
+
+action session-initialized
+  Session state was initialized.
+
+question unresolved-exact-outcome
+  What exact outcome does the user require?
+
+action next-action
+  Read the request and establish the concrete goal.
+
+claim uncertainty
+  Initial state; confidence is low until the request is analyzed.
+
+part-of reasoning-state
+  session-start
+  current-goal
+  current-hypothesis
+  superseded-none
+  session-initialized
+  unresolved-exact-outcome
+  next-action
+  uncertainty
+
+agent holds current-goal
+  confidence 0.5 assumed
