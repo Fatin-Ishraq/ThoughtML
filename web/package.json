@@ -28,7 +28,7 @@
     "@types/cytoscape": "^3.31.0",
     "@types/dagre": "^0.7.52",
     "typescript": "^7.0.2",
-    "vite": "^8.2.1",
+    "vite": "^8.2.2",
     "vite-plugin-singlefile": "^2.3.3"
   }
 }
